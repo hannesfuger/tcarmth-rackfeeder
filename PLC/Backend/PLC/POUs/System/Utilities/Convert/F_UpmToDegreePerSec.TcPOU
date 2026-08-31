@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_UpmToDegreePerSec" Id="{8d2b7a62-2cc4-4b6d-a5cf-e7f28b0000cf}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_UpmToDegreePerSec : LREAL
+VAR_INPUT
+	fValue : LREAL; // 1/min value
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[ F_UpmToDegreePerSec := fValue * 6; // 1/min -> °/s => x * 360/60]]></ST>
+    </Implementation>
+    <LineIds Name="F_UpmToDegreePerSec">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

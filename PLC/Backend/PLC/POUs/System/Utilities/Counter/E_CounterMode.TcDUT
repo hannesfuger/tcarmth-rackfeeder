@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_CounterMode" Id="{90d1d3e9-197a-46bb-a160-384e25c1a5c6}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_CounterMode :
+(
+	eCounterMode_none := 0,
+	eCounterMode_Ok_Up,
+	eCounterMode_Ok_Down,
+	eCounterMode_Nok_Up,
+	eCounterMode_Nok_Down,	
+	eCounterMode_Ok_Clear,
+	eCounterMode_Nok_Clear,
+	eCounterMode_SerialError_Clear,
+	eCounterMode_All_Clear	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="E_TestResult" Id="{b03b1556-f368-471c-8b38-b1081f3d2e36}">
+    <Declaration><![CDATA[/// Enumeration of all possible test case states
+TYPE E_TestResult :
+(
+	/// Test result not set
+	eTestResult_none := 0,
+	/// Test result ok
+	eTestResult_ok,
+	/// Test result not ok
+	eTestResult_nok
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

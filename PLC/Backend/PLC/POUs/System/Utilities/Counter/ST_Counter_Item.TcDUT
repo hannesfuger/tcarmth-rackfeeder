@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Counter_Item" Id="{5562d773-4d95-41ab-8d20-1c3698139ed1}">
+    <Declaration><![CDATA[TYPE ST_Counter_Item :
+STRUCT
+	stIndex						: ST_Text;
+	stGroup						: ST_Text;
+	stName						: ST_Text;
+	nValueOk					: DINT;	
+	nValueNok					: DINT;
+	nValueTotal					: DINT;
+	nValueSerialError			: DINT;
+	nValueOkLevel1				: DINT;
+	eReactionOkLevel1			: E_CounterReaction;
+	nValueOkLevel2				: DINT;
+	eReactionOkLevel2			: E_CounterReaction;
+	nValueNokLevel1				: DINT;
+	eReactionNokLevel1			: E_CounterReaction;
+	nValueNokLevel2				: DINT;
+	eReactionNokLevel2			: E_CounterReaction;
+	nValueTotalLevel1			: DINT;
+	eReactionTotalLevel1		: E_CounterReaction;
+	nValueTotalLevel2			: DINT;
+	eReactionTotalLevel2		: E_CounterReaction;	
+	eUserLevel					: E_User_Level;
+	eDataType					: E_DataType;
+                                  
+	eCurrentReactionOkLevel1	: E_CounterReaction;
+	eCurrentReactionOkLevel2	: E_CounterReaction;
+	eCurrentReactionNokLevel1	: E_CounterReaction;	
+	eCurrentReactionNokLevel2	: E_CounterReaction;
+	eCurrentReactionTotalLevel1	: E_CounterReaction;
+	eCurrentReactionTotalLevel2	: E_CounterReaction;	
+	                              
+	eCurrentCounterState		: E_CounterReaction;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

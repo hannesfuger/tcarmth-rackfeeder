@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_Door" Id="{bbb1acd8-2e3d-4471-ad73-4e04c672e7a3}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE E_Door :
+(
+	eDoor_none := 0,
+	
+	eDoor_nMaxIdx	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

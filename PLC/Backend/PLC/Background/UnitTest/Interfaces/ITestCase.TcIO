@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <Itf Name="ITestCase" Id="{b0830c4b-fa25-44f0-b09d-ce15c361524a}">
+    <Declaration><![CDATA[INTERFACE ITestCase
+]]></Declaration>
+    <Method Name="Reset" Id="{f60c2826-376a-4e5d-a953-98c2990972f8}">
+      <Declaration><![CDATA[{attribute 'object_name' := 'Reset'}
+METHOD Reset
+]]></Declaration>
+    </Method>
+    <Method Name="Run" Id="{13f64850-e28e-4cfc-b66a-6d682c10323a}">
+      <Declaration><![CDATA[{attribute 'object_name' := 'Run'}
+METHOD Run : E_TestCaseState
+]]></Declaration>
+    </Method>
+    <Property Name="TestResult" Id="{98e41ba8-aa5d-4bea-82d2-ece06f80f37d}">
+      <Declaration><![CDATA[PROPERTY TestResult : E_TestResult
+]]></Declaration>
+      <Get Name="Get" Id="{c0c03f83-0b8f-462c-a8b1-734a4a3e9f36}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TestState" Id="{0338e49c-4cda-439d-a46e-61bb92ccf95a}">
+      <Declaration><![CDATA[PROPERTY TestState : E_TestCaseState
+]]></Declaration>
+      <Get Name="Get" Id="{35a8ae8d-70a5-46ca-9efc-aaf4406fb7e8}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

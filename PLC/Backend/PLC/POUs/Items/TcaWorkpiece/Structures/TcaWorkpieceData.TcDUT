@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaWorkpieceData" Id="{7ca366c4-6112-4745-8034-11405d12e349}">
+    <Declaration><![CDATA[TYPE TcaWorkpieceData : 
+STRUCT
+	Id : INT;	// <> 0 Workpiece Present 
+	Error : BOOL;
+	Exist : BOOL;
+	SerialNumber : STRING;
+	CurrentStatus : eTcaWorkpieceStatus;
+	InitialStatus : eTcaWorkpieceStatus;
+	RequestStatus : eTcaWorkpieceStatus;
+	//Shape : eTcaWorkpieceShape;
+	//Dimension : ST_Coordinate;
+	TimeStampChanged : DT;
+	Logging : WSTRING;	// Information in csv, xml or json Format
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

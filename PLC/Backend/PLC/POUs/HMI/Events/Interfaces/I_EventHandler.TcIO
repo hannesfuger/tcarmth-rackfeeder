@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="I_EventHandler" Id="{d2a6d73e-17ca-4a02-b581-edd4dfe8678f}">
+    <Declaration><![CDATA[INTERFACE I_EventHandler
+]]></Declaration>
+    <Folder Name="Fluent" Id="{a1e83cf0-aa7f-4686-922a-806794800add}">
+      <Folder Name="StringBuilder" Id="{9d24d7fd-1e12-4e73-807f-b245a8df036c}" />
+    </Folder>
+    <Folder Name="Properties" Id="{b1c7f7d4-0381-4d00-93c2-bb4b0f8d4ea3}" />
+    <Folder Name="SimpleMsg" Id="{2435df15-3716-4789-97ab-3048abf2ea07}" />
+    <Method Name="ArgAddDint" Id="{d1bd0886-4bf2-4eb3-943b-039650efcc87}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddDint : I_EventHandler
+VAR_INPUT
+	value : DINT;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgAddEventRef" Id="{d81e8417-a4c0-4e22-ba63-3ac1e3ba9482}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddEventRef : I_EventHandler
+VAR_INPUT
+	value : TcEventEntry;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgAddLreal" Id="{53afb458-d301-4fb3-9d6f-9b010de514dc}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddLreal : I_EventHandler
+VAR_INPUT
+	value : LREAL;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgAddString" Id="{309fcc1e-789a-4146-9d11-8761eeda9ffb}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : STRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgAddWString" Id="{09a11980-14ac-47df-a6ad-6ef6764db44a}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddWString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgClear" Id="{c85b961a-da0b-4e7b-89af-8d214b2dc459}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgClear : I_EventHandler]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppend" Id="{1daccd63-d80c-459a-8a38-f57dafb269de}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppend : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppendAny" Id="{4ec3003b-16d7-40d3-9bcd-71c947b9b307}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendAny : I_EventHandler
+VAR_INPUT
+	value : ANY;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppendAnyRaise" Id="{6defe4c1-72c5-4060-a4c5-108e576fadce}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendAnyRaise : HRESULT
+VAR_INPUT
+	value : ANY;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppendRaise" Id="{19655ddd-631e-4912-b46c-d2e3db61b6de}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendRaise : HRESULT
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppendS" Id="{24358b7e-bd49-4b77-bffd-b53efe9edf4d}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendS : I_EventHandler
+VAR_INPUT
+	value : T_MaxString := '';
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppendSet" Id="{b07e2c0a-7a81-49c2-bcbd-5f53dfc108ac}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendSet : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppendWs" Id="{ee015db0-966a-426c-9a8b-66fdac8e8458}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendWs : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbAppendWsRaise" Id="{5815f848-ba38-44c4-980d-45037bd786ba}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendWsRaise : HRESULT
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbInit" Id="{bffa067d-e64e-47af-acda-b7cae701e92a}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbInit : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbInitExternal" Id="{ea7dd344-cc71-41f3-a603-85d38978f972}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbInitExternal : I_EventHandler
+VAR_INPUT
+	sb	: I_StringBuilder;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSbInitWs" Id="{d65267cd-d126-488b-9261-e8a52ecf8f9f}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbInitWs : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSetDint" Id="{733c07ff-7607-4e50-a643-c7f417ab607e}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetDint : I_EventHandler
+VAR_INPUT
+	value : DINT;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSetEventRef" Id="{499ce2b7-0440-4df5-8420-9949bdf450f1}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetEventRef : I_EventHandler
+VAR_INPUT
+	value : TcEventEntry;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSetLreal" Id="{0b63582a-bee1-48c6-8b8f-48bfcf1d26d7}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetLreal : I_EventHandler
+VAR_INPUT
+	value : LREAL;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSetSb" Id="{614827d6-e3c7-4850-bc66-38a663d666bb}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetSb : I_EventHandler
+VAR_INPUT
+	sb 		: I_StringBuilder := 0; // optional external string builder, set to 0 to use internal
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSetSbRaise" Id="{97432dc7-9a38-4f11-ad6b-0c008ac22f39}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetSbRaise : HRESULT
+VAR_INPUT
+	sb	: I_StringBuilder := 0; // optional external string builder, set to 0 to use internal
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSetString" Id="{20816d46-9500-487a-afa6-e856cfb93add}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : STRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="ArgSetWString" Id="{8674d7a0-31b7-446d-8020-6a4c335dc3d7}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetWString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="CreateAlarm" Id="{d69dcd4e-4eed-4c85-b398-124de12603e4}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC CreateAlarm : I_EventHandler
+VAR_INPUT
+	stEventEntry      : TcEventEntry;
+    bWithConfirmation : BOOL := FALSE;
+    ipSourceInfo      : I_TcSourceInfo := NULL;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="ErrorActive" Id="{b198b4a3-2f32-4831-b650-f1a727d2f223}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ErrorActive : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a5ba4bc0-e13b-41c2-96d2-3a61840853b9}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="InfoActive" Id="{bb8fdadf-8a06-47a8-9dce-c5702591a41a}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY InfoActive : BOOL]]></Declaration>
+      <Get Name="Get" Id="{db5edaed-c652-45fb-8465-df4349196cdc}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Raise" Id="{7b6c17e7-7553-4cef-be3f-86a89d9b2a0c}">
+      <Declaration><![CDATA[METHOD PUBLIC Raise : HRESULT
+VAR_INPUT
+	nTimeStamp : ULINT := 0;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Reset" Id="{e79dc5aa-c6ab-443d-a3ca-ee58dc701342}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Select" Id="{6ebded59-5a25-4234-b2e0-63414d800b6e}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC Select : I_EventHandler
+VAR_INPUT
+	stEventEntry : TcEventEntry;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="Send" Id="{38945756-711e-4dc2-a85f-d010156f9975}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC Send : BOOL
+VAR_INPUT
+	stEventEntry      : TcEventEntry;
+    ipSourceInfo      : I_TcSourceInfo := NULL;
+    nTimeStamp        : ULINT := 0;
+    ipArguments       : I_TcArguments := NULL;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="SendJson" Id="{2886045f-d02a-49e4-9ed1-60c1159182ba}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC SendJson : BOOL
+VAR_INPUT
+	stEventEntry      : TcEventEntry;
+    ipSourceInfo      : I_TcSourceInfo := NULL;
+    nTimeStamp        : ULINT := 0;
+    ipArguments       : I_TcArguments := NULL;
+END_VAR
+VAR_IN_OUT CONSTANT
+    sJsonAttribute    : STRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="SendString" Id="{96dfdc76-ecf5-40b8-a960-4b1bd02066d2}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC SendString : BOOL
+VAR_IN_OUT CONSTANT
+	msg : STRING;	
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="SendStringJson" Id="{5f03dc92-708c-4d9f-90b5-63e833611ba2}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC SendStringJson : BOOL
+VAR_IN_OUT CONSTANT
+	msg				: STRING;
+	sJsonAttribute	: STRING;
+END_VAR]]></Declaration>
+    </Method>
+    <Property Name="WarningActive" Id="{40ff16de-b660-4f13-9127-972507733bed}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY WarningActive : BOOL]]></Declaration>
+      <Get Name="Get" Id="{04c25e29-1cce-4ec2-8c8a-a4879d1341a3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

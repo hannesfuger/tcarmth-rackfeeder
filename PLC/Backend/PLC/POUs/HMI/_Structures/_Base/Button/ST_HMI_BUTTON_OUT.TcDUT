@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_BUTTON_OUT" Id="{8fa4abcc-1f7b-4838-994e-73da2935cf61}">
+    <Declaration><![CDATA[TYPE ST_HMI_BUTTON_OUT :
+STRUCT
+	stName	: ST_Text;				// button text (e.g. for SW button)
+	stColor	: ST_HMI_COLOR_STRING;	// button color (e.g. for SW button)
+	bLed	: BOOL;					// LED (e.g. for HW button)
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

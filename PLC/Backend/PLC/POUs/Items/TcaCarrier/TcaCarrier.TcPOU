@@ -1,0 +1,658 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="TcaCarrier" Id="{cb4cb05c-8cc6-4c4e-b4d4-2bd8871ee7cb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK TcaCarrier //EXTENDS TcoCore.TcoComponent  
+VAR CONSTANT
+	MAX_WORKPIECEPLACES : INT := 127;
+END_VAR
+
+VAR PERSISTENT
+	_data : TcaCarrierData;
+	_config : TcaCarrierConfig;
+END_VAR
+
+VAR	
+	_WorkpiecesStatus : ARRAY[0..eTcaWorkpieceStatus.MAXSIZE] OF INT;
+	_PrimaryStatus : eTcaWorkpieceStatus;
+	_SecondaryStatus : eTcaWorkpieceStatus;
+	_AllFinished : BOOL;
+	_Unfinished : BOOL;
+		
+	_WorkpiecesCoordinate : ARRAY[0..TcaCarrier.MAX_WORKPIECEPLACES] OF ST_Coordinate;
+	
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[RefreshStatus();]]></ST>
+    </Implementation>
+    <Folder Name="Config" Id="{5b12d6a7-75e3-4cf0-aa63-45d3948de01c}" />
+    <Folder Name="Functions" Id="{e179f35a-15b1-4e1d-a2be-a3074b0e5c68}" />
+    <Folder Name="Operations" Id="{56bebb71-64cc-4645-900b-db953e179838}" />
+    <Folder Name="Properties" Id="{65638760-06ce-4b00-b632-cc3d44b13331}" />
+    <Method Name="ApplyConfig" Id="{ec2ab732-0b05-4cd8-9ee3-ccd0e42fc7dd}" FolderPath="Config\">
+      <Declaration><![CDATA[METHOD ApplyConfig
+VAR
+	tmpData				: TcaCarrierConfig;
+	
+	tmpOffset 			: REAL;
+	tmpOddRow			: INT;
+	tmpEvenRow			: INT;
+	tmpWorkpieceCount	: INT;
+	
+	tmpPos		 		: INT;
+	tmpLoc		 		: INT;		
+	tmpRow 				: INT;
+	//tmpLvl				: INT;
+	
+	nRowNumber			: INT;
+	nLocationNumber		: INT; 
+	
+	ni					: INT;
+	
+	tmpCoordinate 		: ST_Coordinate;		
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[tmpData := _config;
+
+//todo Error
+//_ConfigError
+
+
+CASE tmpData.Layout OF
+	eTcaCarrierLayout.Layout1 : 
+		tmpOffset := 0;
+		tmpOddRow := tmpData.PositionsInRow;
+	tmpEvenRow := tmpData.PositionsInRow;
+        tmpWorkpieceCount := tmpData.PositionsInRow*tmpData.PositionsInColumn;
+		
+    eTcaCarrierLayout.Layout2 :
+		tmpOffset := 0.5;
+		tmpOddRow := tmpData.PositionsInRow;
+		tmpEvenRow :=tmpData.PositionsInRow;
+        tmpWorkpieceCount := tmpData.PositionsInRow*tmpData.PositionsInColumn;
+		 
+    eTcaCarrierLayout.Layout3 :
+		 tmpOffset := -0.5;
+		 tmpOddRow := tmpData.PositionsInRow;
+         tmpEvenRow := tmpData.PositionsInRow;
+         tmpWorkpieceCount := tmpData.PositionsInRow*tmpData.PositionsInColumn;	
+		 
+	eTcaCarrierLayout.Layout4 :
+		 tmpOffset := -0.5;
+		 tmpOddRow := tmpData.PositionsInRow;
+         tmpEvenRow := tmpData.PositionsInRow + 1;
+         tmpWorkpieceCount := tmpData.PositionsInRow*tmpData.PositionsInColumn + tmpData.PositionsInColumn/2;
+		
+	eTcaCarrierLayout.Layout5 :
+		 tmpOffset := 0.5;
+		 tmpOddRow := tmpData.PositionsInRow;
+         tmpEvenRow := tmpData.PositionsInRow - 1;
+         tmpWorkpieceCount := tmpData.PositionsInRow*tmpData.PositionsInColumn - tmpData.PositionsInColumn/2 - 1;
+		 
+END_CASE
+
+
+MEMSET(ADR(_WorkpiecesCoordinate),0,SIZEOF(_WorkpiecesCoordinate));
+MEMSET(ADR(_data.WorkpiecesEnabled),0,SIZEOF(_data.WorkpiecesEnabled));
+//MEMSET(ADR(_data.WorkpiecesData),0,SIZEOF(_data.WorkpiecesData));
+
+
+FOR ni:= 0 TO tmpWorkpieceCount-1 DO
+	
+	// Bestimmen des Reihen und Spaltenndex und der x und y-Koordinate
+	tmpPos := ni MOD tmpWorkpieceCount;
+	tmpRow := tmpPos/(tmpOddRow + tmpEvenRow);	
+	tmpLoc := tmpPos MOD (tmpOddRow + tmpEvenRow);
+	
+	IF tmpLoc >= tmpOddRow THEN
+	    // gerade Reihe
+	    nRowNumber := tmpRow*2 + 1;
+	    nLocationNumber := tmpLoc - tmpOddRow;
+	    tmpCoordinate.fX := tmpData.ColumnDistance*(nLocationNumber + tmpOffset)+tmpData.CoordinateFirstWorkpiece.fX;
+	    tmpCoordinate.fY := tmpData.RowDistance*nRowNumber+tmpData.CoordinateFirstWorkpiece.fY;
+	ELSE
+	    // ungerade Reihe
+	    nRowNumber := tmpRow*2;
+	    nLocationNumber := tmpLoc;
+	    tmpCoordinate.fX := tmpData.ColumnDistance*nLocationNumber+tmpData.CoordinateFirstWorkpiece.fX;
+	    tmpCoordinate.fY := tmpData.RowDistance*nRowNumber+tmpData.CoordinateFirstWorkpiece.fY;
+	END_IF
+	
+	//tmpCoordinate.nOriginId := 0;
+		
+	_WorkpiecesCoordinate[ni] := tmpCoordinate;
+	_data.WorkpiecesEnabled[ni] := TRUE;
+	_data.Error := FALSE;
+
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="CarrierPresent" Id="{36d50e32-ece7-4c57-bccf-302133eb65fd}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierPresent : BOOL]]></Declaration>
+      <Get Name="Get" Id="{78a66744-7ff1-4533-bdc5-5b5f6db6cf90}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierPresent := _data.Enabled;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="ColumnDistance" Id="{061779de-a8a4-4f45-bbe5-36d216596b95}" FolderPath="Config\">
+      <Declaration><![CDATA[METHOD ColumnDistance : REFERENCE TO TcaCarrier
+VAR_INPUT
+	inDistance : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^._config.ColumnDistance:= inDistance;
+ColumnDistance REF= THIS^; ]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Config" Id="{ae5d0a72-84b8-4dea-99d2-02366a637a39}">
+      <Declaration><![CDATA[PROPERTY Config : REFERENCE TO TcaCarrierConfig]]></Declaration>
+      <Get Name="Get" Id="{76133c15-3e36-4d07-b1cf-662e3be2bd22}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Config REF= _config;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{9cc8f87d-9bb9-4d7c-9e60-49e3ad15075d}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_config := Config;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="CoordinateFirstWorkpiece" Id="{b9aec3d5-66bd-4a01-a556-8878c2af4d3e}" FolderPath="Config\">
+      <Declaration><![CDATA[METHOD CoordinateFirstWorkpiece : REFERENCE TO TcaCarrier
+VAR_INPUT
+	inCoordinate : ST_Coordinate;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^._config.CoordinateFirstWorkpiece:= inCoordinate;
+CoordinateFirstWorkpiece REF= THIS^; ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CoordinatesOf" Id="{fb9ca07f-d465-4155-b936-ffa9ed3dcdea}" FolderPath="Functions\">
+      <Declaration><![CDATA[METHOD CoordinatesOf : ST_Coordinate
+VAR_INPUT
+	WorkpiecePlace		: INT;
+END_VAR
+
+VAR
+	tmpData				: TcaCarrierConfig;
+	
+	tmpOffset 			: REAL;
+	tmpOddRow			: INT;
+	tmpEvenRow			: INT;
+	tmpWorkpieceCount	: INT;
+	
+	tmpPos		 		: INT;
+	tmpLoc		 		: INT;		
+	tmpRow 				: INT;
+	//tmpLvl				: INT;
+	
+	nRowNumber			: INT;
+	nLocationNumber		: INT; 
+	
+	tmpCoordinate 		: ST_Coordinate;		
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT _data.WorkpiecesEnabled[WorkpiecePlace] THEN
+	RETURN;
+END_IF	
+
+CoordinatesOf := _WorkpiecesCoordinate[WorkpiecePlace];]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CountEmptyPlaces" Id="{180bc4e3-ba20-47fb-92c1-8b8a99e6818d}" FolderPath="Functions\">
+      <Declaration><![CDATA[METHOD CountEmptyPlaces : INT
+
+VAR
+	tmp				: INT;
+	ni				: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CountEmptyPlaces := CountPlacesByStatus(eTcaWorkpieceStatus.undefined);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CountPlacesByStatus" Id="{d8fa782e-a592-4393-b541-142317da77e8}" FolderPath="Functions\">
+      <Declaration><![CDATA[METHOD CountPlacesByStatus : INT
+VAR_INPUT
+	Status			: eTcaWorkpieceStatus;
+END_VAR
+
+VAR
+	tmp				: INT;
+	ni				: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CountPlacesByStatus := 0;
+
+FOR ni := 0 TO MAX_WORKPIECEPLACES DO
+
+	IF NOT _data.WorkpiecesEnabled[ni] THEN
+		CONTINUE;
+	END_IF	
+	
+	IF _data.WorkpiecesData[ni].Error THEN
+		CONTINUE;
+	END_IF
+
+	IF _data.WorkpiecesData[ni].CurrentStatus = Status THEN
+			tmp := tmp + 1;
+	END_IF
+	
+END_FOR
+
+CountPlacesByStatus := tmp;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Data" Id="{14535b80-8544-4b5c-b46c-52fec6e6c4f6}">
+      <Declaration><![CDATA[PROPERTY Data : REFERENCE TO TcaCarrierData]]></Declaration>
+      <Get Name="Get" Id="{8f511891-98a7-4369-8bb4-605ff91c3d4e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Data REF= _data;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{aa75a2bf-7cf3-4270-b5c3-d04eef541fe9}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_data := Data;
+RefreshStatus();]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="EmptyCarrier" Id="{85f448f9-c36a-410e-97a9-55abbf900e50}" FolderPath="Operations\">
+      <Declaration><![CDATA[{attribute 'TcRpcEnable'}
+METHOD EmptyCarrier : TcaCarrierData
+VAR
+	_i			: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_data.Enabled := TRUE;
+	
+FOR _i := 0 TO MAX_WORKPIECEPLACES DO	
+	
+	IF NOT _data.WorkpiecesEnabled[_i] THEN
+		RETURN;
+	END_IF	
+
+	_data.WorkpiecesData[_i].Error := FALSE;
+	_data.WorkpiecesData[_i].Logging := "";	// TIMESTAMP WIT MESSAGE
+	_data.WorkpiecesData[_i].SerialNumber := '';
+	_data.WorkpiecesData[_i].CurrentStatus := eTcaWorkpieceStatus.undefined;	
+	_data.WorkpiecesData[_i].InitialStatus := _config.InitialStatus;
+	_data.WorkpiecesData[_i].RequestStatus := _config.RequestStatus;
+	
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FindPlace" Id="{6021ca1e-a1ef-4ea5-9e46-c898a3806339}" FolderPath="Functions\">
+      <Declaration><![CDATA[METHOD FindPlace : REFERENCE TO TcaWorkpieceData //-1..no Position found
+
+VAR_INPUT
+	Status		: eTcaWorkpieceStatus;
+END_VAR
+
+VAR
+	ni				: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FindPlace REF= 0;
+FOR ni := 0 TO MAX_WORKPIECEPLACES DO
+	
+	IF NOT _data.WorkpiecesEnabled[ni] THEN
+		CONTINUE;
+	END_IF	
+	
+	IF _data.WorkpiecesData[ni].Error THEN
+		CONTINUE;
+	END_IF	
+
+	IF _data.WorkpiecesData[ni].CurrentStatus = Status OR Status < eTcaWorkpieceStatus.undefined THEN	   
+		FindPlace REF= _data.WorkpiecesData[ni];		
+	END_IF	
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FinishCarrier" Id="{ecbb6cac-2de8-4011-a307-b011b9d38b1b}" FolderPath="Operations\">
+      <Declaration><![CDATA[{attribute 'TcRpcEnable'}
+METHOD FinishCarrier : TcaCarrierData
+VAR
+	_i			: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_data.Enabled := TRUE;
+	
+FOR _i := 0 TO MAX_WORKPIECEPLACES DO	
+	
+	IF NOT _data.WorkpiecesEnabled[_i] THEN
+		RETURN;
+	END_IF	
+
+	_data.WorkpiecesData[_i].Error := FALSE;
+	_data.WorkpiecesData[_i].Logging := "";	// TIMESTAMP WIT MESSAGE
+	_data.WorkpiecesData[_i].SerialNumber := '';
+	_data.WorkpiecesData[_i].CurrentStatus := config.RequestStatus;	
+	_data.WorkpiecesData[_i].InitialStatus := _config.InitialStatus;
+	_data.WorkpiecesData[_i].RequestStatus := _config.RequestStatus;
+	
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetPlaceReference" Id="{c781c58b-59de-49f8-ac75-8ffb97aab0ac}" FolderPath="Functions\">
+      <Declaration><![CDATA[METHOD GetPlaceReference : REFERENCE TO TcaWorkpieceData
+VAR_INPUT
+	IndexNr		: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF IndexNr < 0 OR IndexNr > MAX_WORKPIECEPLACES THEN
+	RETURN;
+END_IF
+
+GetPlaceReference REF= _data.WorkpiecesData[IndexNr];]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="HasAllWorkpiecesFinished" Id="{f3cd4d2d-9821-4afe-afa9-d96cba846df1}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC HasAllWorkpiecesFinished : BOOL]]></Declaration>
+      <Get Name="Get" Id="{6dfd1e5f-607b-4abc-ae13-95c5ae33e255}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HasAllWorkpiecesFinished := _AllFinished;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HasEmptyWorkpieceplaces" Id="{bf2bf1c4-6a8f-450c-af0e-0b9f2c5c5292}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC HasEmptyWorkpieceplaces : BOOL]]></Declaration>
+      <Get Name="Get" Id="{6723df39-99b7-49c7-acf5-10701f2cf923}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HasEmptyWorkpieceplaces := CountEmptyPlaces() > 0;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HasUnfinishedWorkpieces" Id="{d187455b-ce2a-4334-adca-3895756db297}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC HasUnfinishedWorkpieces : BOOL]]></Declaration>
+      <Get Name="Get" Id="{33da3bdd-9a38-464f-8adb-697c62b7700a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HasUnfinishedWorkpieces := _Unfinished;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HasWorkpiecesWithInitialStatus" Id="{a156b48d-6997-434a-adc7-c158b5cca195}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC HasWorkpiecesWithInitialStatus : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a132c049-f24b-4b5b-b1ee-81fc07c520f1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HasWorkpiecesWithInitialStatus := CountPlacesByStatus(_config.InitialStatus) > 0;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HasWorkpiecesWithRequestStatus" Id="{ef70317a-a9c0-4215-b0d7-146a71bdf25d}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC HasWorkpiecesWithRequestStatus : BOOL]]></Declaration>
+      <Get Name="Get" Id="{82cc0873-72a5-4604-98a6-1a3317b64a39}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HasWorkpiecesWithRequestStatus := CountPlacesByStatus(_config.RequestStatus) > 0;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="InitialCarrier" Id="{3b0c22c0-d494-4035-843c-f65b12875767}" FolderPath="Operations\">
+      <Declaration><![CDATA[{attribute 'TcRpcEnable'}
+METHOD InitialCarrier : TcaCarrierData
+VAR
+	_i			: INT;
+END_VAR
+
+VAR_INST
+	WorkpieceCtrl : TcaWorkpieceControl;//(This^);
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_data.Enabled := TRUE;
+
+FOR _i := 0 TO MAX_WORKPIECEPLACES DO	
+	
+	IF NOT _data.WorkpiecesEnabled[_i] THEN
+		RETURN;
+	END_IF	
+
+	_data.WorkpiecesData[_i].Id := _i+1;
+	_data.WorkpiecesData[_i].Error := FALSE;
+	_data.WorkpiecesData[_i].SerialNumber := '';
+	_data.WorkpiecesData[_i].CurrentStatus := _config.InitialStatus;	
+	_data.WorkpiecesData[_i].InitialStatus := _config.InitialStatus;
+	_data.WorkpiecesData[_i].RequestStatus := _config.RequestStatus;
+	
+	WorkpieceCtrl.SetReference(_data.WorkpiecesData[_i]);
+	WorkpieceCtrl.LogEntry('New Workpiece');
+	
+	
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="InitialStatus" Id="{bf6848df-442f-4b63-9f1d-fe6a13da345e}">
+      <Declaration><![CDATA[PROPERTY InitialStatus : eTcaWorkpieceStatus]]></Declaration>
+      <Get Name="Get" Id="{9da4bb88-8967-4f68-a769-9abfaf59e8ef}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[InitialStatus := _config.InitialStatus;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{013a6002-b5d6-4353-8b59-74a706e2aed7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_config.InitialStatus := InitialStatus;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Layout" Id="{3b05a680-4427-40f2-baf3-c7000d9bb89c}" FolderPath="Config\">
+      <Declaration><![CDATA[METHOD Layout : REFERENCE TO TcaCarrier
+VAR_INPUT
+	inLayout : eTcaCarrierLayout;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^._config.Layout:= inLayout;
+Layout REF= THIS^; ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="PositionsInColumn" Id="{7377dbc3-f6fd-42e2-8707-de70abea79c5}" FolderPath="Config\">
+      <Declaration><![CDATA[METHOD PositionsInColumn : REFERENCE TO TcaCarrier
+VAR_INPUT
+	inPositionsInColumn : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^._config.PositionsInColumn:= inPositionsInColumn;
+PositionsInColumn REF= THIS^; ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="PositionsInRow" Id="{1465c2a1-a580-4c76-a912-36bd2f7017f1}" FolderPath="Config\">
+      <Declaration><![CDATA[METHOD PositionsInRow : REFERENCE TO TcaCarrier
+VAR_INPUT
+	inPositionsInRow : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^._config.PositionsInRow:= inPositionsInRow;
+PositionsInRow REF= THIS^; ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="RefreshStatus" Id="{45b28ecb-4270-41ad-aa1b-7502953923ca}">
+      <Declaration><![CDATA[METHOD RefreshStatus : BOOL
+VAR
+	ni			: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMSET(ADR(_WorkpiecesStatus), 0, SIZEOF(_WorkpiecesStatus));
+
+_PrimaryStatus := eTcaWorkpieceStatus.undefined;
+_SecondaryStatus := eTcaWorkpieceStatus.undefined;
+_AllFinished := _data.Enabled;
+_UnFinished := FALSE;
+
+FOR ni := 0 TO MAX_WORKPIECEPLACES DO
+	
+	IF NOT _data.WorkpiecesEnabled[ni] THEN
+		CONTINUE;
+	END_IF
+	
+	IF _data.WorkpiecesData[ni].Exist AND
+	   NOT _data.WorkpiecesData[ni].Error AND
+       NOT _data.WorkpiecesData[ni].CurrentStatus <> _data.WorkpiecesData[ni].RequestStatus THEN
+		_AllFinished := FALSE;
+		_UnFinished := TRUE;
+	END_IF
+	
+	_WorkpiecesStatus[_data.WorkpiecesData[ni].CurrentStatus] := _WorkpiecesStatus[_data.WorkpiecesData[ni].CurrentStatus] + 1;
+	
+	IF _WorkpiecesStatus[_data.WorkpiecesData[ni].CurrentStatus] >= _WorkpiecesStatus[_PrimaryStatus] THEN
+		_SecondaryStatus := _PrimaryStatus;
+		_PrimaryStatus := _data.WorkpiecesData[ni].CurrentStatus;
+	END_IF
+
+END_FOR
+
+
+IF _PrimaryStatus = _SecondaryStatus THEN
+	_SecondaryStatus := eTcaWorkpieceStatus.undefined;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="RemoveCarrier" Id="{20d6473e-3eb8-41e6-97b2-e921cd6f2acd}" FolderPath="Operations\">
+      <Declaration><![CDATA[{attribute 'TcRpcEnable'}
+METHOD RemoveCarrier : TcaCarrierData
+VAR
+	_i			: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_data.Enabled := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="RequestStatus" Id="{a9d116ea-9b1e-4fa9-9bc2-641207b5540c}">
+      <Declaration><![CDATA[PROPERTY RequestStatus : eTcaWorkpieceStatus]]></Declaration>
+      <Get Name="Get" Id="{13d13370-6282-4360-bfec-38b264fb8263}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RequestStatus := _config.RequestStatus;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{ecc5f7c6-ef16-4cc4-bfe9-d4529123d750}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_config.RequestStatus := RequestStatus;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="RowDistance" Id="{d7fbb5a1-34c6-43ca-ad90-adfacf90b230}" FolderPath="Config\">
+      <Declaration><![CDATA[METHOD RowDistance : REFERENCE TO TcaCarrier
+VAR_INPUT
+	inDistance : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^._config.RowDistance:= inDistance;
+RowDistance REF= THIS^; ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetCarrier" Id="{d429a371-2930-4895-80ad-d74f04ff586d}" FolderPath="Operations\">
+      <Declaration><![CDATA[{attribute 'TcRpcEnable'}
+METHOD SetCarrier : TcaCarrierData
+VAR_INPUT
+	Data	: TcaCarrierData;
+	//Source	: E_Station;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_data := Data;
+_data.Enabled := TRUE;
+//_data.Source := Source;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="WorkpiecePlaces" Id="{4743c045-c7f1-4ea2-877a-78415e57eca8}">
+      <Declaration><![CDATA[PROPERTY WorkpiecePlaces : INT]]></Declaration>
+      <Get Name="Get" Id="{1b62398e-be48-4c80-8efa-d02ec467eb4d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CASE _config.Layout OF	
+	eTcaCarrierLayout.Layout1 : WorkpiecePlaces := _config.PositionsInRow*_config.PositionsInColumn;		
+    eTcaCarrierLayout.Layout2 : WorkpiecePlaces := _config.PositionsInRow*_config.PositionsInColumn;		 
+    eTcaCarrierLayout.Layout3 : WorkpiecePlaces := _config.PositionsInRow*_config.PositionsInColumn;		 
+	eTcaCarrierLayout.Layout4 : WorkpiecePlaces := _config.PositionsInRow*_config.PositionsInColumn + _config.PositionsInColumn/2;		
+	eTcaCarrierLayout.Layout5 : WorkpiecePlaces := _config.PositionsInRow*_config.PositionsInColumn - _config.PositionsInColumn/2;		
+	ELSE
+		 WorkpiecePlaces := 0;
+END_CASE]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="WorkpiecesStatusCount" Id="{b3d0a936-96fb-408f-9154-10b8988f6eec}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY WorkpiecesStatusCount : ARRAY[0..eTcaWorkpieceStatus.MAXSIZE] OF INT]]></Declaration>
+      <Get Name="Get" Id="{93b09739-55a5-469e-bf50-27b55ec5f164}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[WorkpiecesStatusCount := _WorkpiecesStatus;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

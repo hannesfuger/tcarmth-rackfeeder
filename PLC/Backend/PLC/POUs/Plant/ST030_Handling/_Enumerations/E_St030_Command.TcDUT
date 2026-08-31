@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_St030_Command" Id="{a3078753-c22f-489f-b6bb-d1fdcbe894fb}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE E_St030_Command :
+(
+	eSt030_Command_none := 0,
+	eSt030_Command_OvenA_Get,
+	eSt030_Command_OvenA_Put,
+	
+	eSt030_Command_OvenB_Get,
+	eSt030_Command_OvenB_Put,
+	
+	eSt030_Command_Storage_Get,
+	eSt030_Command_Storage_Put
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

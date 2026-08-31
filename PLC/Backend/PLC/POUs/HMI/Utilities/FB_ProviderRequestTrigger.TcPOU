@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ProviderRequestTrigger" Id="{3aa002da-3f0d-4406-82ce-321417eb5cf8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK INTERNAL FB_ProviderRequestTrigger
+VAR_INPUT
+	IProvider 				: ITF_HMI_PROVIDER;
+END_VAR
+VAR_OUTPUT
+	bManCtrlReq 			: BOOL;
+	bRecipeMgmtRequest 		: BOOL;
+	bSettingMgmtRequest 	: BOOL;
+	bUserMgmtRequest 		: BOOL;
+END_VAR
+VAR
+	fTrigManCtrlReq			: R_TRIG;
+	fTrigRecipeMgmtReq		: R_TRIG;
+	fTrigSettingsMgmtReq	: R_TRIG;
+	fTrigUserMgmtReq		: R_TRIG;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (IProvider = 0) THEN
+	RETURN;
+END_IF
+
+fTrigManCtrlReq(CLK := IProvider.RequestManualControl, Q => bManCtrlReq);
+fTrigRecipeMgmtReq(CLK := IProvider.RequestRecipeMgmt, Q => bRecipeMgmtRequest);
+fTrigSettingsMgmtReq(CLK := IProvider.RequestSettingMgmt, Q => bSettingMgmtRequest);
+fTrigUserMgmtReq(CLK := IProvider.RequestUserMgmt, Q => bUserMgmtRequest);]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ProviderRequestTrigger">
+      <LineId Id="227" Count="6" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

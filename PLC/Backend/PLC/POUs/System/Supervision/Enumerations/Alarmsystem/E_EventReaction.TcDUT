@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_EventReaction" Id="{553040c7-0eeb-48c9-a147-5daf2b6b606f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE E_EventReaction :
+(
+	Undefined 			:= 0,
+	NoReaction 			:= 1,
+	CycleStop			:= 11,
+	Stop 				:= 21,
+	Init				:= 31
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

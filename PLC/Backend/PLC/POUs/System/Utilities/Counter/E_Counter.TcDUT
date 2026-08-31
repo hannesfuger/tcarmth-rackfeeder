@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_Counter" Id="{cc4f2720-7780-44a8-a74e-f8a3ee2fa700}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE E_Counter :
+(
+	eCounter_General,	//Allgemein
+	//eCounter_Maintenance,	//Wartung
+	eCounter_Shift,		//Schicht Zaheler
+	//eCounter_Order,		//Auftrag Zaheler	
+	//eCounter_St001,		//Station 001
+	//eCounter_St002,		//Station 002
+	//eCounter_St003,		//Station 003
+	//eCounter_St004,		//Station 004
+	//eCounter_St005,		//Station 005
+	//eCounter_St006,		//Station 006
+	//eCounter_St007,		//Station 007
+	//eCounter_St008,		//Station 008
+	//eCounter_St009,		//Station 009
+	//eCounter_St010,		//Station 010
+	//eCounter_St011,		//Station 011
+	//eCounter_St012,		//Station 012
+	//eCounter_St013,		//Station 013
+	//eCounter_St014,		//Station 014
+	//eCounter_St015,		//Station 015
+	//eCounter_St016,		//Station 016
+	//eCounter_St017,		//Station 017
+	//eCounter_St018,		//Station 018
+	//eCounter_St100,		//Station 100
+	
+	eCounter_Max
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

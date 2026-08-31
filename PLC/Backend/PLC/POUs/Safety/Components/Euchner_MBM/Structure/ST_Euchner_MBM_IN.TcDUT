@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MBM_IN" Id="{747cd860-66f1-4ec8-b0e0-e178e7279de1}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MBM_IN :
+STRUCT
+	///BM_D_RUN | Diagnose Runmode
+	bBM_D_RUN: BOOL;
+	///BM_E_ML1 | Fehlermeldebit Strang 1
+	bBM_E_ML1: BOOL;
+	///BM_E_ML2 | Fehlermeldebit Strang 2
+	bBM_E_ML2: BOOL;
+	///BM_E_SYS | Fehlermeldebit Gesamtsystem
+	bBM_E_SYS: BOOL;
+	///Fehlermeldebit allgemeiner Modulfehler
+	bBM_E_G: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,1871 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_St030_Handling" Id="{47eeec44-f861-4b73-ae69-8ae87ae9dbd4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_St030_Handling EXTENDS FB_StationBase
+VAR_INPUT
+END_VAR
+VAR	
+	// IO ref
+	stIO			: REFERENCE TO ST_St030_IO;
+	
+	// station components
+	fbAxisX 		: FB_AxisDriver;
+	fbAxisY 		: FB_AxisDriver;
+	fbAxisZ 		: FB_AxisDriver;
+	
+	// actor UIs, access to: iStatus, fPosition, iVisibleState, ..
+	fbAxisXUi		: FB_Axis_Ui;
+	fbAxisYUi		: FB_Axis_Ui;
+	fbAxisZUi		: FB_Axis_Ui;
+	
+	// instance var's
+	bStationDeaktiv	: BOOL;
+	
+	eEmptyChk		: E_St030_EmptySlotChk;
+	sqSearch		: FB_SequenceHelperSb;
+	fPosSearchCorr	: LREAL;
+	SearchTrig		: ARRAY[0..1, 0..1] OF ST_XZ_Point; // S1/S2 - Trig 1/2
+	fThreshMesMin	: LREAL := 320;
+	fThreshMesMax	: LREAL := 350;
+END_VAR
+VAR PERSISTENT
+	HgPosBackup		: ST_3DPoint;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[/// 
+/// Station 030 function block - Handling
+/// 
+]]></ST>
+    </Implementation>
+    <Folder Name="DynSetMonObj" Id="{c8123d6f-3419-4c60-a26c-3cbacf953c97}" />
+    <Folder Name="Hsk" Id="{3f8cb9f7-2fa3-4f7f-8a43-e7bdc6c31644}" />
+    <Folder Name="Internal" Id="{795c7aad-6694-432d-b235-4dbc782ae5d8}" />
+    <Folder Name="Properties" Id="{e6ec2e0f-d3b3-468f-9eda-5c419fe926cf}" />
+    <Method Name="GetPosOvRp" Id="{dbaf51e9-b5b2-488e-a09b-5bf476c0d348}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PRIVATE GetPosOvRp : LREAL
+VAR_INPUT
+	iOven,					// oven 1/2 (A/B)
+	iRp		: INT;			// ref point 1/2
+	sAxis	: STRING(1); 	// axis X/Y/Z
+END_VAR
+VAR
+	ovRp	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// get reference point value for specified oven, point and axis
+
+ovRp := (iOven * 10) + iRp;
+CASE ovRp OF
+	 11:
+		IF sAxis = 'X' THEN
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST010_OvenA].stDynStationSettings[E_St010_Settings.eSt010_Settings_XPosRp1].fValue;
+		ELSIF sAxis = 'Y' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST010_OvenA].stDynStationSettings[E_St010_Settings.eSt010_Settings_YPosRp1].fValue;
+		ELSIF sAxis = 'Z' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST010_OvenA].stDynStationSettings[E_St010_Settings.eSt010_Settings_ZPosRp1].fValue;
+		END_IF                                                                                      
+		                                                                                            
+	12:                                                                                             
+		IF sAxis = 'X' THEN                                                                         
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST010_OvenA].stDynStationSettings[E_St010_Settings.eSt010_Settings_XPosRp2].fValue;
+		ELSIF sAxis = 'Y' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST010_OvenA].stDynStationSettings[E_St010_Settings.eSt010_Settings_YPosRp2].fValue;
+		ELSIF sAxis = 'Z' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST010_OvenA].stDynStationSettings[E_St010_Settings.eSt010_Settings_ZPosRp2].fValue;
+		END_IF                                                                                      
+		                                                                                            
+	21:                                                                                             
+		IF sAxis = 'X' THEN                                                                         
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST020_OvenB].stDynStationSettings[E_St020_Settings.eSt020_Settings_XPosRp1].fValue;
+		ELSIF sAxis = 'Y' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST020_OvenB].stDynStationSettings[E_St020_Settings.eSt020_Settings_YPosRp1].fValue;
+		ELSIF sAxis = 'Z' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST020_OvenB].stDynStationSettings[E_St020_Settings.eSt020_Settings_ZPosRp1].fValue;
+		END_IF                                                                                      
+		                                                                                            
+	22:                                                                                             
+		IF sAxis = 'X' THEN                                                                         
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST020_OvenB].stDynStationSettings[E_St020_Settings.eSt020_Settings_XPosRp2].fValue;
+		ELSIF sAxis = 'Y' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST020_OvenB].stDynStationSettings[E_St020_Settings.eSt020_Settings_YPosRp2].fValue;
+		ELSIF sAxis = 'Z' THEN                                                                      
+			GetPosOvRp := stSettings.stStationSettings[E_Station.eStation_ST020_OvenB].stDynStationSettings[E_St020_Settings.eSt020_Settings_ZPosRp2].fValue;
+		END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="HgRefPosX" Id="{013fb36b-9e49-4940-8929-513723339a46}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY INTERNAL HgRefPosX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{228fd261-c092-4987-834a-093758ee167b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HgRefPosX := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_AxisRefPosX].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HgRefPosY" Id="{69948bb8-ac35-4780-8420-0b90fb9dc781}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY INTERNAL HgRefPosY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{329ba250-2136-431f-acc5-a9feb05f7fad}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HgRefPosY := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_AxisRefPosY].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HgRefPosZ" Id="{7e282708-b96e-4f78-97d4-7275ce261950}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY INTERNAL HgRefPosZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{e2c49f7f-3ae7-4f84-b890-77db5b334253}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HgRefPosZ := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_AxisRefPosZ].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HomeSpeedX" Id="{c86ca31e-e0ed-4ec3-9572-dda3eed7a196}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE HomeSpeedX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{ce03ee07-38ff-4d72-8439-dff00a7aac23}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HomeSpeedX := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_XHomeSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HomeSpeedY" Id="{87d6c4ff-0e8d-47d2-8a5a-295a20f0d62f}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE HomeSpeedY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{7a6942fe-ad43-4157-8a04-55259afb9181}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HomeSpeedY := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_YHomeSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HomeSpeedZ" Id="{e4969b0f-59d3-4d5d-82f2-098a74958d0b}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE HomeSpeedZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{68438b98-3db4-443e-b957-97af56955cbd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HomeSpeedZ := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_ZHomeSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsGetCmdActive" Id="{d7baa732-9b6b-4405-b92b-32f75edccf90}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE IsGetCmdActive : BOOL]]></Declaration>
+      <Get Name="Get" Id="{409551d6-5434-45d0-83b3-d0d0391fe7c8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsGetCmdActive := stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Get OR
+			stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenB_Get OR
+			stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_Storage_Get;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsGetCmdRequested" Id="{c61d6996-14d2-49cd-9734-faa330459293}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE IsGetCmdRequested : BOOL]]></Declaration>
+      <Get Name="Get" Id="{59d8f6f6-7311-461f-af20-3f0df7123b32}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsGetCmdRequested := stSt030IHandling.CommandRequest.Command = E_St030_Command.eSt030_Command_OvenA_Get OR
+			stSt030IHandling.CommandRequest.Command = E_St030_Command.eSt030_Command_OvenB_Get OR
+			stSt030IHandling.CommandRequest.Command = E_St030_Command.eSt030_Command_Storage_Get;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsOvenCmdA" Id="{40a29155-635b-4d4b-a53d-6fe5ca7ab576}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE IsOvenCmdA : BOOL]]></Declaration>
+      <Get Name="Get" Id="{af133d61-36b8-4e07-a28f-ee746e6524cd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsOvenCmdA := stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Get OR
+			stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Put;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="JogSpeedX" Id="{5bb21037-7f27-4acf-ad88-7683e802dd56}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE JogSpeedX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{963e2d22-a338-4f32-a0a6-de5102b68b14}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[JogSpeedX := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_XJogSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="JogSpeedY" Id="{90ee78f9-839f-44a8-8187-ecd3afaff383}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE JogSpeedY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{ccb286be-9feb-4e1a-9e8a-e182edbff49f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[JogSpeedY := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_YJogSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="JogSpeedZ" Id="{db669990-da95-4828-9aca-24a56cb66b30}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE JogSpeedZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{65174a7e-9e81-495b-938c-7ed8053bbff2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[JogSpeedZ := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_ZJogSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="M_CallObjects" Id="{fb0b4041-c168-4840-a7d3-bd6d36ee9782}">
+      <Declaration><![CDATA[METHOD PROTECTED M_CallObjects : BOOL
+VAR
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// axis + UI
+fbAxisX.TorqueLimit := 600;
+fbAxisX(
+	bEnable := SafetyOk AND NOT fbAxisXUi.stAxisManager.bDisable AND stSt050IMould.bEnableHG,
+	bEnablePos := fbAxisZ.PositionReachedWindow(PosHomeZ, 10) OR fbAxisXUi.stAxisManager.bDisableSoftLimits,
+	bEnableNeg := fbAxisZ.PositionReachedWindow(PosHomeZ, 10) OR fbAxisXUi.stAxisManager.bDisableSoftLimits
+);
+fbAxisXUi(
+	bInHome := bInHome,
+	fbAxis := fbAxisX,
+	fVelocity := JogSpeedX,
+	diSelectedObjectIndex := stHmiManualIn.diSelectedObjectIndex,
+	stHMIControlIn := stHmiManualIn.stManualAxis,
+	stHMIControlOut := stHmiManualOut.stManualAxis,
+	bJogP := stHmi.stIn.stSt030.bJogXP,
+	bJogN := stHmi.stIn.stSt030.bJogXN,
+	bEnableManual := EnableManual);
+
+// axis CH1 + UI
+fbAxisY.TorqueLimit := 600;
+fbAxisY(
+	bEnable := SafetyOk AND NOT fbAxisYUi.stAxisManager.bDisable AND stSt050IMould.bEnableHG,
+	bEnablePos := TRUE,
+	bEnableNeg := TRUE,
+);
+fbAxisYUi(
+	bInHome := bInHome,
+	fbAxis := fbAxisY,
+	fVelocity := JogSpeedY,
+	diSelectedObjectIndex := stHmiManualIn.diSelectedObjectIndex,
+	stHMIControlIn := stHmiManualIn.stManualAxis,
+	stHMIControlOut := stHmiManualOut.stManualAxis,
+	bJogP := stHmi.stIn.stSt030.bJogYP,
+	bJogN := stHmi.stIn.stSt030.bJogYN,
+	bEnableManual := EnableManual);
+	
+// axis CH2 + UI
+fbAxisZ.TorqueLimit := 300;
+fbAxisZ(
+	bEnable := SafetyOk AND NOT fbAxisZUi.stAxisManager.bDisable AND stSt050IMould.bEnableHG,
+	bEnablePos := TRUE,
+	bEnableNeg := TRUE,
+);
+fbAxisZUi(
+	bInHome := bInHome,
+	fbAxis := fbAxisZ,
+	fVelocity := JogSpeedZ,
+	diSelectedObjectIndex := stHmiManualIn.diSelectedObjectIndex,
+	stHMIControlIn := stHmiManualIn.stManualAxis,
+	stHMIControlOut := stHmiManualOut.stManualAxis,
+	bJogP := stHmi.stIn.stSt030.bJogZP,
+	bJogN := stHmi.stIn.stSt030.bJogZN,
+	bEnableManual := EnableManual);
+	
+
+	
+// run pallet logic
+//Plant.stSt030IHandling.Pallet.Update();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_CheckHskRst" Id="{47479f39-4365-4980-bcba-37552d4e2456}" FolderPath="Hsk\">
+      <Declaration><![CDATA[METHOD PRIVATE M_CheckHskRst : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk all hand shake signals are reseted
+M_CheckHskRst := FALSE;
+
+// oven A
+IF stSt010IOvenA.bResponseOpn OR stSt010IOvenA.bResponseChkIndex OR stSt010IOvenA.bResponseIsEmptySlot THEN
+	sqAuto.Info.Set("warte auf Handshake reset Ofen A"); RETURN;
+ELSIF stSt010IOvenA.iConfirmPosition <> -1 THEN
+	sqAuto.Info.Set("warte auf Handshake Index-X reset Ofen A"); RETURN;
+	
+// oven B
+ELSIF stSt020IOvenB.bResponseOpn OR stSt020IOvenB.bResponseChkIndex OR stSt020IOvenB.bResponseIsEmptySlot THEN
+	sqAuto.Info.Set("warte auf Handshake reset Ofen B"); RETURN;
+ELSIF stSt020IOvenB.iConfirmPosition <> -1 THEN
+	sqAuto.Info.Set("warte auf Handshake Index-X reset Ofen B"); RETURN;
+	
+// storage
+ELSIF stSt040IStorage.bResponseOpn OR stSt040IStorage.bResponseChkIndex OR stSt040IStorage.bResponseEmptyAtIndex THEN
+	sqAuto.Info.Set("warte auf Handshake reset Storage"); RETURN;
+ELSIF stSt040IStorage.iConfirmPosition <> -1 THEN
+	sqAuto.Info.Set("warte auf Handshake Index reset Storage"); RETURN;
+	
+END_IF
+
+M_CheckHskRst := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynManual" Id="{f90ebe3f-5129-4e19-a7df-5b0a3a72de4c}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD INTERNAL M_DynManual : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitManual THEN
+	bInitManual := TRUE;
+	MEMSET(ADR(stHmiManualOut.stObjects), 0, SIZEOF(stHmiManualOut.stObjects)); // reset
+	
+	M_InitDynManualUi(fbAxisXUi);
+	M_InitDynManualUi(fbAxisYUi);
+	M_InitDynManualUi(fbAxisZUi);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynMonitoring" Id="{d4f0eb08-2220-4ffd-a49d-52dc27838bb3}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD PROTECTED M_DynMonitoring : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_DynMonitoring := SUPER^.M_DynMonitoring();
+
+// init
+IF NOT bInitMonitoring THEN
+	bInitMonitoring := TRUE;
+	MEMSET(ADR(stLocalMonitoring), 0, SIZEOF(stLocalMonitoring)); // reset
+	
+	M_InitDynMonitoringItem(0, 								// monitoring index 
+							"Achse X Position",				// name
+							Name, 							// group (station name)
+							E_DataType.eDataType_lreal, 	// data type							
+							stTextListGlobal.stText_mm);	// unit	
+
+	M_InitDynMonitoringItem(1, "Achse X Geschwindigkeit", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_mms);
+	M_InitDynMonitoringItem(2, "Achse X Drehmoment", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_percent);
+	
+	M_InitDynMonitoringItem(4, "Achse Y Position", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_mm);
+	M_InitDynMonitoringItem(5, "Achse Y Geschwindigkeit", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_mms);
+	M_InitDynMonitoringItem(6, "Achse Y Drehmoment", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_percent);
+	
+	M_InitDynMonitoringItem(8, "Achse Z Position", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_mm);
+	M_InitDynMonitoringItem(9, "Achse Z Geschwindigkeit", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_mms);
+	M_InitDynMonitoringItem(10, "Achse Z Drehmoment", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_percent);
+END_IF
+
+// live value mapping 
+
+// axis x
+stLocalMonitoring.astMonitoring[0].fValue := fbAxisX.Position;
+stLocalMonitoring.astMonitoring[1].fValue := fbAxisX.Velocity;
+stLocalMonitoring.astMonitoring[2].fValue := fbAxisX.Torque;
+
+// axis y
+stLocalMonitoring.astMonitoring[4].fValue := fbAxisY.Position;
+stLocalMonitoring.astMonitoring[5].fValue := fbAxisY.Velocity;
+stLocalMonitoring.astMonitoring[6].fValue := fbAxisY.Torque;
+
+// axis z
+stLocalMonitoring.astMonitoring[8].fValue := fbAxisZ.Position;
+stLocalMonitoring.astMonitoring[9].fValue := fbAxisZ.Velocity;
+stLocalMonitoring.astMonitoring[10].fValue := fbAxisZ.Torque;
+
+// hmi value mapping
+//HMI.stHmi.stOut.stSt030.Pallet := stSt030IHandling.Pallet.stPallet;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynSettings" Id="{146134ce-78b1-476b-ab52-dd760d1195c6}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD INTERNAL M_DynSettings : BOOL
+VAR
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init station settings
+IF NOT bInitSettings THEN
+	bInitSettings := TRUE;
+	stLocalSettingsBackup := stLocalSettings; // backup
+	MEMSET(ADR(stLocalSettings), 0, SIZEOF(stLocalSettings)); // reset
+	
+	stSt030IHandling.Pallet.Config := Services.stSettings.stCarrier;
+	stSt030IHandling.Pallet.InitialStatus := eTcaWorkpieceStatus.laserProcessDone;
+	stSt030IHandling.Pallet.RequestStatus := eTcaWorkpieceStatus.castingProcessDone;
+	stSt030IHandling.Pallet.ApplyConfig();
+	
+	
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_Station_Deaktiv,	// settings index
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_Station_Deaktiv),		// settings wsIndex
+		Name,																// group
+		stTextListGlobal.stText_DeactivateStation,							// name
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,			// unit & data type
+		0, 1, 3);															// min, max & user level
+    
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_Autohome,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_Autohome),
+		Name,
+		stTextListGlobal.stText_AutoHome,
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,
+		0, 1, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_XHomeSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_XHomeSpeed),
+		Name,
+		F_CreateDynTextDefault("Homegeschwindigkeit Servoachse X"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 50, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_XJogSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_XJogSpeed),
+		Name,
+		F_CreateDynTextDefault("Tippgeschwindigkeit Servoachse X"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 50, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_XWorkSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_XWorkSpeed),
+		Name,
+		F_CreateDynTextDefault("Automatik-Geschwindigkeit Servoachse X"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 500, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_YHomeSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_YHomeSpeed),
+		Name,
+		F_CreateDynTextDefault("Homegeschwindigkeit Servoachse Y"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 50, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_YJogSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_YJogSpeed),
+		Name,
+		F_CreateDynTextDefault("Tippgeschwindigkeit Servoachse Y"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 50, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_YWorkSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_YWorkSpeed),
+		Name,
+		F_CreateDynTextDefault("Automatik-Geschwindigkeit Servoachse Y"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 500, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_ZHomeSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_ZHomeSpeed),
+		Name,
+		F_CreateDynTextDefault("Homegeschwindigkeit Servoachse Z"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 50, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_ZJogSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_ZJogSpeed),
+		Name,
+		F_CreateDynTextDefault("Tippgeschwindigkeit Servoachse Z"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 50, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_ZWorkSpeed,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_ZWorkSpeed),
+		Name,
+		F_CreateDynTextDefault("Automatik-Geschwindigkeit Servoachse Z"),
+		stTextListGlobal.stText_mms, E_DataType.eDataType_lreal,
+		0, 500, 3);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_AxisRefPosX,	// ref pos
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_AxisRefPosX),
+		Name,
+		F_CreateDynTextDefault("Referenzposition Achse X Handling"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 1000, 6);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_AxisRefPosY,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_AxisRefPosY),
+		Name,
+		F_CreateDynTextDefault("Referenzposition Achse Y Handling"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 1000, 6);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_AxisRefPosZ,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_AxisRefPosZ),
+		Name,
+		F_CreateDynTextDefault("Referenzposition Achse Z Handling"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 1000, 6);
+		
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_XPosHome,	// home pos
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_XPosHome),
+		Name,
+		F_CreateDynTextDefault("Homeposition Servoachse X"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 5000, 3);
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_YPosHome,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_YPosHome),
+		Name,
+		F_CreateDynTextDefault("Homeposition Servoachse Y"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 3000, 3);
+	M_InitDynSettingsItem(E_St030_Settings.eSt030_Settings_ZPosHome,
+		TO_WSTRING(E_St030_Settings.eSt030_Settings_ZPosHome),
+		Name,
+		F_CreateDynTextDefault("Homeposition Servoachse Z"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 1000, 3);	
+
+		
+	// restore values
+	F_RestoreSettingValues(stLocalSettings.stDynStationSettings, stLocalSettingsBackup.stDynStationSettings);
+END_IF
+
+// map current settings values to shortcuts
+bStationDeaktiv := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_Station_Deaktiv].bValue;
+bAutoHome := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_Autohome].bValue;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Homing" Id="{cc641223-cbd2-49a6-b610-07aebb1382f5}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Homing
+VAR
+	stHomPrm : ST_AxisHomingParameter;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Homing sequence
+CASE sqHome.Step OF
+	
+	0:	
+		sqHome.Info.Set("Warte auf GRST Start");
+		IF RunStep AND NOT sqHome.InHome AND bRunHoming THEN
+			bBusy := TRUE;
+			sqAuto.Step := 0;
+			sqSearch.Step := 0;
+			sqHome.StartSequence()
+				  .Step := 10;
+		END_IF	
+
+	10:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv");
+		IF P_Safety.bMachineRequestStop THEN
+			sqHome.Info.Set("Anforderung Stop aktiv");
+		ELSIF NOT SafetyOk THEN
+			sqHome.Info.Set("Sicherheit nicht ok");
+			
+		ELSIF NOT fbAxisX.Operational THEN
+			sqHome.Info.Set("Antrieb X nicht bereit");
+		ELSIF fbAxisX.Moving THEN
+			fbAxisX.Halt();
+			sqHome.Info.Set("Antrieb X nicht gestoppt");
+			
+		ELSIF NOT fbAxisY.Operational THEN
+			sqHome.Info.Set("Antrieb Y nicht bereit");
+		ELSIF fbAxisY.Moving THEN
+			fbAxisY.Halt();
+			sqHome.Info.Set("Antrieb Y nicht gestoppt");
+			
+		ELSIF NOT fbAxisZ.Operational THEN
+			sqHome.Info.Set("Antrieb Z nicht bereit");
+		ELSIF fbAxisZ.Moving THEN
+			fbAxisZ.Halt();
+			sqHome.Info.Set("Antrieb Z nicht gestoppt");
+
+		ELSIF bRunHoming THEN
+			sqHome.Step := 20;
+		END_IF
+		
+	20:	// axis Z homing
+		sqHome.Info.Set("Prüfe Z-Achskalibrierung");
+		IF fbAxisZ.Homed THEN
+			sqHome.Step := 25;
+		ELSE
+			sqHome.Step := 21;
+		END_IF
+		
+	21: 
+		sqHome.Info.Set("Warte auf Referenzschalter");
+		IF stIO.stIn.bRefposZ THEN
+			sqHome.Step := 22;
+		ELSE
+			StationError.ArgSbAppendRaise('Referenzsignal Achse Z fehlt bei Referenzfahrt');
+			bRunHoming := FALSE;
+			sqHome.Step := 0;
+		END_IF
+		
+	22:
+		sqHome.Info.Set("Starte Z-Achskalibrierung");
+		IF RunStep THEN
+			stHomPrm.stOptions.SearchDirection := MC_Direction.MC_Negative_Direction;
+			stHomPrm.stOptions.SyncDirection := MC_Direction.MC_Positive_Direction;
+			stHomPrm.stOptions.SearchVelocity := 8;
+			stHomPrm.stOptions.SyncVelocity := 4;
+			stHomPrm.fPosition := HgRefPosZ;
+			fbAxisZ.HomeEx(stHomPrm);
+			sqHome.Step := 24;
+		END_IF
+		
+	24:
+		sqHome.Info.Set("Warte auf Z-Achskalibrierung fertig");
+		fbAxisZ.bCalibrationCam := stIO.stIn.bRefposZ;
+		IF fbAxisZ.Homed THEN
+			sqHome.Step := 25;	
+		END_IF
+		
+	25:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv Achse Z Homepos.");
+		fbAxisZ.MoveAbsExVel(PosHomeZ, HomeSpeedZ);
+		sqHome.Step := 26;
+		
+	26:
+		sqHome.Info.Set("Warte auf Achse Z in Homeposition");
+		IF fbAxisZ.TargetReached() THEN
+			sqHome.Step := 30;	
+		END_IF
+		
+	30:	// axis Y homing
+		sqHome.Info.Set("Prüfe Y-Achskalibrierung");
+		IF fbAxisY.Homed THEN
+			sqHome.Step := 40;
+		ELSE
+			sqHome.Step := 32;
+		END_IF
+		
+	32:
+		sqHome.Info.Set("Starte Y-Achskalibrierung");
+		IF RunStep THEN
+			stHomPrm.stOptions.SearchDirection := MC_Direction.MC_Negative_Direction;
+			stHomPrm.stOptions.SyncDirection := MC_Direction.MC_Positive_Direction;
+			stHomPrm.stOptions.SearchVelocity := 8;
+			stHomPrm.stOptions.SyncVelocity := 4;
+			stHomPrm.fPosition := HgRefPosY;
+			fbAxisY.HomeEx(stHomPrm);
+			sqHome.Step := 34;
+		END_IF
+		
+	34:
+		sqHome.Info.Set("Warte auf Y-Achskalibrierung fertig");
+		fbAxisY.bCalibrationCam := stIO.stIn.bRefposY;
+		IF fbAxisY.Homed THEN
+			sqHome.Step := 40;	
+		END_IF
+	
+	40:	// axis X homing
+		sqHome.Info.Set("Prüfe X-Achskalibrierung");
+		IF fbAxisX.Homed THEN
+			sqHome.Step := 50;
+		ELSE
+			sqHome.Step := 42;
+		END_IF
+		
+	42:
+		sqHome.Info.Set("Starte X-Achskalibrierung");
+		IF RunStep THEN
+			stHomPrm.stOptions.SearchDirection := MC_Direction.MC_Negative_Direction;
+			stHomPrm.stOptions.SyncDirection := MC_Direction.MC_Positive_Direction;
+			stHomPrm.stOptions.SearchVelocity := 8;
+			stHomPrm.stOptions.SyncVelocity := 4;
+			stHomPrm.fPosition := HgRefPosX;
+			fbAxisX.HomeEx(stHomPrm);
+			sqHome.Step := 44;
+		END_IF
+		
+	44:
+		sqHome.Info.Set("Warte auf X-Achskalibrierung fertig");
+		fbAxisX.bCalibrationCam := stIO.stIn.bRefposX;
+		IF fbAxisX.Homed THEN
+			sqHome.Step := 50;	
+		END_IF
+		
+	50:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv Achse Y Homepos.");
+		fbAxisY.MoveAbsExVel(PosHomeY, HomeSpeedY);
+		sqHome.Step := 55;
+
+	55:
+		sqHome.Info.Set("Warte auf Achse Y in Homeposition");
+		IF fbAxisY.TargetReached() THEN
+			sqHome.Step := 60;	
+		END_IF
+		
+	60:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv Achse X Homepos.");
+		fbAxisX.MoveAbsExVel(PosHomeX, HomeSpeedX);
+		sqHome.Step := 65;
+		
+	65:
+		sqHome.Info.Set("Warte auf Achse X in Homeposition");
+		IF fbAxisX.TargetReached() AND fbAxisY.TargetReached() AND fbAxisZ.TargetReached() THEN
+			M_RestActHgCmd();
+			sqHome.Step := 100;	
+		END_IF
+		
+	100:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv");
+		sqHome.Step := 1000;
+
+	//	homing done			
+	1000:
+		sqHome.Info.Set("Grundstellung erreicht");
+		IF sqHome.StepTime > T#1S THEN
+			bBusy:=FALSE;
+			sqHome.InHome := TRUE;
+			bStopped := TRUE;
+			bRunHoming := FALSE;
+			sqAuto.Step := 0;
+			sqHome.StopSequence()
+				  .Step := 0;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{61659db2-4b62-416d-9ebf-871290f4451e}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Init : IStation
+VAR_INPUT
+END_VAR
+VAR
+	Ist : IStation;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set up station
+StationNb := 30;
+Station := E_Station.eStation_ST030_Handling; // ID & name 1st!
+Name := F_CreateDynTextEx(1, "ST030_Handling", "ST030 Handling");
+
+Ist := SUPER^.M_Init()
+			 .InitEvents(TC_Events.ST030EventClass.InfoEvent,
+	  		       		 TC_Events.ST030EventClass.WarningEvent,
+	  				  	 TC_Events.ST030EventClass.ErrorEvent);
+
+// set up default IO references
+M_SetReferences(IO.st030_Handling_IO);
+
+// init components
+
+// Axis X
+fbAxisXUi.stBmk := F_CreateDynTextDefault("BMK=A03.ST30.M01-");
+fbAxisXUi.stUnit := F_CreateDynTextDefault("mm");
+fbAxisXUi.stAxisManager.bEnablePosSet := TRUE;
+fbAxisXUi.stAxisManager.bResetCalibrationVisible := TRUE;
+fbAxisXUi.stAxisManager.bSetCalibrationVisible := TRUE;
+fbAxisX.AxisId := TO_INT(E_Axis.eAxis_Handling_X);
+fbAxisX.Active := TRUE;
+fbAxisX.Name := F_CreateDynTextEx(1, "ServoHgX", "Servoachse X");
+fbAxisX.AxisType := E_AxisType.AX5xxx;
+//fbAxisX.DefaultParameter := F_GetDefaultMotionParameter(eMainState_setup);
+fbAxisX.SetAxisReference(NcIO.stAxis_ST030_AxisX, NcIO.stAxis_ST030_AxisX_IO.stIn, NCIO.stAxis_ST030_AxisX_IO.stOut);
+
+// Axis CH1
+fbAxisYUi.stBmk := F_CreateDynTextDefault("BMK=A03.ST30.M02-");
+fbAxisYUi.stUnit := F_CreateDynTextDefault("mm");
+fbAxisYUi.stAxisManager.bEnablePosSet := TRUE;
+fbAxisYUi.stAxisManager.bResetCalibrationVisible := TRUE;
+fbAxisYUi.stAxisManager.bSetCalibrationVisible := TRUE;
+fbAxisY.AxisId := TO_INT(E_Axis.eAxis_Handling_Y);
+fbAxisY.Active := TRUE;
+fbAxisY.Name := F_CreateDynTextEx(1, "ServoHgY", "Servoachse Y");
+fbAxisY.AxisType := E_AxisType.AX5xxx;
+//fbAxisY.DefaultParameter := F_GetDefaultMotionParameter(eMainState_setup);
+fbAxisY.SetAxisReference(NcIO.stAxis_ST030_AxisY, NcIO.stAxis_ST030_AxisY_IO.stIn, NCIO.stAxis_ST030_AxisY_IO.stOut);
+
+// Axis CH2
+fbAxisZUi.stBmk := F_CreateDynTextDefault("BMK=A03.ST30.M03-");
+fbAxisZUi.stUnit := F_CreateDynTextDefault("mm");
+fbAxisZUi.stAxisManager.bEnablePosSet := TRUE;
+fbAxisZUi.stAxisManager.bResetCalibrationVisible := TRUE;
+fbAxisZUi.stAxisManager.bSetCalibrationVisible := TRUE;
+fbAxisZ.AxisId := TO_INT(E_Axis.eAxis_Handling_Z);
+fbAxisZ.Active := TRUE;
+fbAxisZ.Name := F_CreateDynTextEx(1, "ServoHgZ", "Servoachse Z");
+fbAxisZ.AxisType := E_AxisType.AX5xxx;
+//fbAxisZ.DefaultParameter := F_GetDefaultMotionParameter(eMainState_setup);
+fbAxisZ.SetAxisReference(NcIO.stAxis_ST030_AxisZ, NcIO.stAxis_ST030_AxisZ_IO.stIn, NCIO.stAxis_ST030_AxisZ_IO.stOut);
+
+// register station in it's module
+eParent := fbModul001.M_RegisterStation(Ist);
+
+bInitSettings	:= FALSE;
+bInitMonitoring := FALSE;
+bInitManual  	:= FALSE;
+
+//aSClearText[EN] := 'Station init done.';
+M_Init := Ist;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Manual" Id="{696ac44c-875f-493f-b9bf-ccfafc9e4e19}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Manual
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// station must be stopped!			manual mode
+IF RunCycle OR NOT bStopped THEN //(OpMode <> E_OpMode.eOpMode_manual) THEN
+	RETURN;
+END_IF
+
+//IF stHmiInOut.stSt030.Command = E_HMI_PL_CMD.eHmiPlCmd_none AND_THEN 
+//   stHmiInOut.stSt030.WpCmd.Command <> E_HMI_WP_CMD.eHmiWpCmd_none THEN
+//	stHmiInOut.stSt030.Command := E_HMI_PL_CMD.eHmiPlCmd_performWtCmd;
+//END_IF
+//
+//IF stHmiInOut.stSt030.Command = E_HMI_PL_CMD.eHmiPlCmd_none THEN
+//	RETURN;
+//END_IF
+//
+//stSt030IHandling.Pallet.PerformHmiCmd(stHmiInOut.stSt030);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_OpModeChanged" Id="{e802a3bb-2066-476b-9c3e-817dd632fa98}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PROTECTED M_OpModeChanged : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*bBusy := FALSE;
+
+IF (eOpMode <> eOpMode_step AND eOpMode <> eOpMode_auto) THEN
+	sqAuto.Set(0);
+END_IF
+
+fbAxisX.Stop();
+fbAxisY.Stop();
+fbAxisZ.Stop();*)
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_RestActHgCmd" Id="{c78527fb-f2ea-4f51-97a1-1bcce03d06d6}" FolderPath="Hsk\">
+      <Declaration><![CDATA[METHOD PRIVATE M_RestActHgCmd : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// reset active HG command
+stSt030IHandling.ActiveCommand.Command := E_St030_Command.eSt030_Command_none;
+	stSt030IHandling.ActiveCommand.Position := 0;
+	
+stSt030IHandling.bReqestOvenA := 
+stSt030IHandling.bReqestOvenA_ChkIndex := 
+stSt030IHandling.bReqestOvenB := 
+stSt030IHandling.bReqestOvenB_ChkIndex := 
+stSt030IHandling.bReqestStorage :=
+stSt030IHandling.bReqestStorage_ChkIndex := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Run" Id="{96f3750b-fb89-4ba8-a7e9-040420680515}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Run : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check refs valid
+IF NOT __ISVALIDREF(stIO) THEN
+	RETURN;
+END_IF
+
+M_RUN := SUPER^.M_Run();
+
+M_DynSettings();
+M_DynManual();
+M_DynMonitoring();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Sequence" Id="{f8006e9a-d7cd-4012-bc45-5952bd479291}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Sequence
+VAR
+	wsCurJob : WSTRING; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// signal mapping (e.g.: enable)
+stSt030IHandling.bEnable := (sqAuto.Step >= 100 AND sqAuto.Step <= 500) OR
+									 bStationDeaktiv;
+stSt030IHandling.bEnableOvenAxis := fbAxisZ.PositionReachedWindow(PosHomeZ, 30);
+									 
+wsCurJob := TO_WSTRING(stSt030IHandling.ActiveCommand.Command);
+
+// automatic sequence
+CASE sqAuto.Step OF
+		
+	0:	sqAuto.Info.Set("Warte auf Auto Start");
+		IF RunCycle AND RunStep THEN
+			//sqAuto.Info.Set("Warte auf GRST");
+			//IF sqHome.InHome AND bInHome THEN
+				sqHome.InHome := FALSE;
+				sqAuto.Step := 5;
+			//ELSE
+			//	StationError.ArgSbAppendWsRaise(stTextlistGlobal.stText_station_not_in_hp);
+			//END_IF
+		END_IF
+		
+	5:	IF bStationDeaktiv THEN
+			sqAuto.Info.Set("Station deaktiv");
+		ELSE
+			sqAuto.Step := 10;
+		END_IF
+		
+	10:	sqAuto.Info.Set("Prüfe Startbedingungen");
+		IF NOT (fbAxisX.Operational AND fbAxisX.Homed) THEN
+			StationError.ArgSbAppendRaise('Bereitsignal Achse X fehlt');
+		ELSIF NOT (fbAxisY.Operational AND fbAxisY.Homed) THEN
+			StationError.ArgSbAppendRaise('Bereitsignal Achse Y fehlt');
+		ELSIF NOT (fbAxisZ.Operational AND fbAxisZ.Homed) THEN
+			StationError.ArgSbAppendRaise('Bereitsignal Achse Z fehlt');
+		ELSE
+			CycleStart();
+			sqAuto.SetStep(15);
+		END_IF
+		
+	15: sqAuto.Info.Set("Prüfe Job-Anforderung");
+		IF stSt030IHandling.CommandRequest.Command = E_St030_Command.eSt030_Command_none THEN
+			sqAuto.SetStep(20);	// home
+		ELSE
+			sqAuto.SetStep(100);
+		END_IF
+		
+	// hg to travel/home position
+	20: sqAuto.Info.Set("Grundstellungsfahrt aktiv Achse Z Homepos.");
+		fbAxisZ.MoveAbsExVel(PosHomeZ, WorkSpeedZ);
+		sqAuto.Step := 25;
+	
+	25: sqAuto.Info.Set("Warte auf Achse Z in Homeposition");
+		IF fbAxisZ.TargetReached() THEN
+			sqAuto.SetStep(30);	
+		END_IF
+		
+	30: sqAuto.Info.Set("Grundstellungsfahrt aktiv Achse Y Homepos.");
+		fbAxisY.MoveAbsExVel(PosHomeY, WorkSpeedY);
+		sqAuto.Step := 35;
+
+	35: sqAuto.Info.Set("Warte auf Achse Y in Homeposition");
+		IF fbAxisY.TargetReached() THEN
+			sqAuto.Step := 100;
+		END_IF
+		
+	// work
+	100: sqAuto.Info.Set("Automatik, warte auf Job");
+		M_RestActHgCmd();
+		IF NOT RunCycle THEN sqAuto.Step := 900; RETURN; END_IF
+		IF NOT M_CheckHskRst() THEN RETURN; END_IF
+		
+		IF IsGetCmdRequested AND stSt030IHandling.Pallet.CarrierPresent THEN
+			StationWarning.ArgSbAppendRaise('Palette bereits auf HG bei Abhol-Auftrag');
+			RETURN;
+		END_IF
+		
+		stSt030IHandling.ActiveCommand := stSt030IHandling.CommandRequest;
+		IF stSt030IHandling.ActiveCommand.Command <> E_St030_Command.eSt030_Command_none THEN
+			sqAuto.Step := 110;
+		END_IF
+		
+	// hg switch job
+	110: sqAuto.Info.Set("Automatik, Job: ")
+					.Append(TO_WSTRING(stSt030IHandling.ActiveCommand.Command));
+		CASE stSt030IHandling.ActiveCommand.Command OF
+			E_St030_Command.eSt030_Command_OvenA_Get,
+			E_St030_Command.eSt030_Command_OvenA_Put,			
+			E_St030_Command.eSt030_Command_OvenB_Get,
+			E_St030_Command.eSt030_Command_OvenB_Put: sqAuto.SetStep(300);
+			
+			E_St030_Command.eSt030_Command_Storage_Get,
+			E_St030_Command.eSt030_Command_Storage_Put: sqAuto.SetStep(500);
+		END_CASE
+		
+	// get/put oven A/B
+	300: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse X positionieren");
+		fbAxisX.MoveAbsExVel(PosWorkOvenX, WorkSpeedX);
+		sqAuto.Step := 305;
+		
+	305: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse X in Pos.");
+		IF fbAxisX.TargetReached() THEN
+			sqAuto.SetStep(310);
+		END_IF
+					
+	310: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Y positionieren");
+					
+		fbAxisY.MoveAbsExVel(SEL(IsGetCmdActive, PosWorkOvenY_OffsUp, PosWorkOvenY_OffsDn),
+							 WorkSpeedY);
+		sqAuto.Step := 315;
+		
+	315: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Y in Pos.");
+		IF fbAxisY.TargetReached() THEN
+			sqAuto.SetStep(320);
+		END_IF
+		
+	320: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Z positionieren");
+		fbAxisZ.MoveAbsExVel(PosHomeZ, WorkSpeedZ);
+		sqAuto.Step := 325;
+		
+	325: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		IF fbAxisZ.TargetReached() THEN
+			sqAuto.Step := 330;
+		END_IF
+					
+	330: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("prüfe Status: ");
+		IF IsOvenCmdA THEN
+			sqAuto.Info.Append("Index, ");
+			stSt030IHandling.bReqestOvenA_ChkIndex := TRUE;
+			IF NOT stSt010IOvenA.bResponseChkIndex THEN RETURN; END_IF
+			sqAuto.Info.Append("Position, ");
+			IF stSt010IOvenA.iConfirmPosition <> stSt030IHandling.ActiveCommand.Position THEN RETURN; END_IF
+			sqAuto.Info.Append("Pallet");
+			IF stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Put AND NOT stSt010IOvenA.bResponseIsEmptySlot THEN 
+				StationError.ArgSbAppendRaise('Ablage auf belegte Position!');
+				RETURN;
+			END_IF
+		ELSE
+			sqAuto.Info.Append("Index, ");
+			stSt030IHandling.bReqestOvenB_ChkIndex := TRUE;
+			IF NOT stSt020IOvenB.bResponseChkIndex THEN RETURN; END_IF
+			sqAuto.Info.Append("Position, ");
+			IF stSt020IOvenB.iConfirmPosition <> stSt030IHandling.ActiveCommand.Position THEN RETURN; END_IF
+			sqAuto.Info.Append("Pallet");
+			IF stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenB_Put AND NOT stSt020IOvenB.bResponseIsEmptySlot THEN
+	 			StationError.ArgSbAppendRaise('Ablage auf belegte Position!');
+				RETURN;
+			END_IF
+		END_IF
+		sqAuto.Step := 340;
+		
+	340: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Segment offen.");
+		IF IsOvenCmdA THEN
+			stSt030IHandling.bReqestOvenA := TRUE;
+			IF NOT stSt010IOvenA.bResponseOpn THEN RETURN; END_IF
+		ELSE
+			stSt030IHandling.bReqestOvenB := TRUE;
+			IF NOT stSt020IOvenB.bResponseOpn THEN RETURN; END_IF
+		END_IF
+		sqAuto.SetStep(350);
+		
+//ToDo: chk hier ev. X-Suchfahrt?
+	345: sqAuto.Info.Set(sqSearch.Info.ToWString());
+		IF sqAuto.Init THEN sqSearch.Step := 10; END_IF
+		IF sqSearch.Step = 0 THEN
+			sqAuto.SetStep(350);
+		END_IF
+		
+	350: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Z positionieren");
+		fbAxisZ.MoveAbsExVel(PosWorkOvenZ, WorkSpeedZ);
+		sqAuto.Step := 355;
+		
+	355: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		IF fbAxisZ.TargetReached() THEN
+			sqAuto.SetStep(360);
+		END_IF
+		
+	360: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Y positionieren");
+					
+		fbAxisY.MoveAbsExVel(SEL(IsGetCmdActive, PosWorkOvenY_OffsDn, PosWorkOvenY_OffsUp),
+							 WorkSpeedY);
+		sqAuto.Step := 365;
+		
+	365: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Y in Pos.");
+		IF fbAxisY.TargetReached() THEN
+			sqAuto.SetStep(SEL(IsGetCmdActive, 367, 366));
+		END_IF
+		
+	366: sqAuto.Info.Set("Übernehme Teiledaten Ofen -> HG");
+		IF IsOvenCmdA THEN
+			stSt030IHandling.Pallet.SetCarrier(
+				stSt010IOvenA.Trolley.GetCarrierAt(stSt010IOvenA.iConfirmPosition));
+				stSt030IHandling.Source := E_Station.eStation_ST010_OvenA;
+				
+			//TODO: Daten am Handling löschen
+			stSt010IOvenA.Trolley.RemoveCarrierAt(stSt010IOvenA.iConfirmPosition);
+				
+		ELSE
+			stSt030IHandling.Pallet.SetCarrier(
+				stSt020IOvenB.Trolley.GetCarrierAt(stSt020IOvenB.iConfirmPosition));
+				stSt030IHandling.Source := E_Station.eStation_ST020_OvenB;
+					
+			//TODO: Daten am Handling löschen		
+			stSt020IOvenB.Trolley.RemoveCarrierAt(stSt010IOvenA.iConfirmPosition);
+		END_IF	
+		sqAuto.Step := 368;
+		
+	367: sqAuto.Info.Set("Übernehme Teiledaten HG -> Ofen");
+		IF IsOvenCmdA THEN
+			stSt010IOvenA.Trolley.SetCarrierAt(stSt010IOvenA.iConfirmPosition,
+											  stSt030IHandling.Pallet.Data);
+		ELSE
+			stSt020IOvenB.Trolley.SetCarrierAt(stSt020IOvenB.iConfirmPosition,
+											  stSt030IHandling.Pallet.Data);
+		END_IF
+		//TODO: Daten am Handling löschen
+		stSt030IHandling.Pallet.RemoveCarrier();
+		stSt030IHandling.Source := E_Station.eStation_none;
+		sqAuto.Step := 368;
+		
+	368: sqAuto.Info.Set("Übernehme Teiledaten HG -> Ofen");
+		sqAuto.SetStep(370);
+		
+	370: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		fbAxisZ.MoveAbsExVel(PosHomeZ, WorkSpeedZ);
+		sqAuto.Step := 375;
+	
+	375: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		IF fbAxisZ.TargetReached() THEN
+			sqAuto.SetStep(380);
+		ELSIF fbAxisZ.TargetWindowReached(2) THEN
+			stSt030IHandling.bReqestOvenA := 
+			stSt030IHandling.bReqestOvenB := FALSE; // cls segment as soon as possible
+		END_IF
+		
+	380: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Segment geschlossen.");
+		IF IsOvenCmdA THEN
+			stSt030IHandling.bReqestOvenA := FALSE;
+			IF stSt010IOvenA.bResponseOpn THEN RETURN; END_IF
+		ELSE
+			stSt030IHandling.bReqestOvenB := FALSE;
+			IF stSt020IOvenB.bResponseOpn THEN RETURN; END_IF
+		END_IF
+		sqAuto.Step := 800; // step done
+			  
+		
+	// get/put storage
+	500: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse X positionieren");
+		fbAxisX.MoveAbsExVel(PosWorkStorageX, WorkSpeedX);
+		sqAuto.Step := 505;
+		
+	505: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse X in Pos.");
+		IF fbAxisX.TargetReached() THEN
+			sqAuto.SetStep(510);
+		END_IF
+					
+	510: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Y positionieren");
+					
+		fbAxisY.MoveAbsExVel(SEL(IsGetCmdActive, PosWorkStorageY_OffsUp, PosWorkStorageY_OffsDn),
+							 WorkSpeedY);
+		sqAuto.Step := 515;
+		
+	515: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Y in Pos.");
+		IF fbAxisY.TargetReached() THEN
+			sqAuto.SetStep(520);
+		END_IF
+		
+	520: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Z positionieren");
+		fbAxisZ.MoveAbsExVel(PosHomeZ, WorkSpeedZ);
+		sqAuto.Step := 525;
+		
+	525: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		IF fbAxisZ.TargetReached() THEN
+			sqAuto.Step := 530;
+		END_IF
+		
+	530: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("prüfe Status: Index, ");
+		stSt030IHandling.bReqestStorage_ChkIndex := TRUE;
+		IF NOT stSt040IStorage.bResponseChkIndex THEN RETURN; END_IF
+		sqAuto.Info.Append("Position, ");
+		IF stSt040IStorage.iConfirmPosition <> stSt030IHandling.ActiveCommand.Position THEN RETURN; END_IF
+		sqAuto.Info.Append("Pallet");
+		IF stSt040IStorage.bResponseEmptyAtIndex OR stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_Storage_Get THEN 
+			sqAuto.Step := 540;
+		END_IF		
+		
+	540: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Storage offen.");
+		stSt030IHandling.bReqestStorage := TRUE;
+		IF NOT stSt040IStorage.bResponseOpn THEN RETURN; END_IF
+		sqAuto.SetStep(550);
+		
+	550: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Z positionieren");
+		fbAxisZ.MoveAbsExVel(PosWorkStorageZ, WorkSpeedZ);
+		sqAuto.Step := 555;
+		
+	555: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		IF fbAxisZ.TargetReached() THEN
+			sqAuto.SetStep(560);
+		END_IF
+		
+	560: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("Achse Y positionieren");
+					
+		fbAxisY.MoveAbsExVel(SEL(IsGetCmdActive, PosWorkStorageY_OffsDn, PosWorkStorageY_OffsUp),
+							 WorkSpeedY);
+		sqAuto.Step := 565;
+		
+	565: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Y in Pos.");
+		IF fbAxisY.TargetReached() THEN
+			sqAuto.SetStep(SEL(IsGetCmdActive, 567, 566));
+		END_IF
+		
+	566: sqAuto.Info.Set("Übernehme Teiledaten Storage -> HG");
+		IF stSt030IHandling.ActiveCommand.Position = 1 THEN
+			stSt030IHandling.Pallet.SetCarrier(
+				stSt040IStorage.Pallet1.Data);
+			stSt030IHandling.Source := stSt040IStorage.Source1;
+			//TODO Storagedaten löschen	
+			stSt040IStorage.Pallet1.RemoveCarrier();
+			stSt040IStorage.Source1 := E_Station.eStation_none;
+		
+		ELSIF stSt030IHandling.ActiveCommand.Position = 2 THEN
+			stSt030IHandling.Pallet.SetCarrier(
+				stSt040IStorage.Pallet2.Data);
+			stSt030IHandling.Source := stSt040IStorage.Source2;
+			//TODO Storagedaten löschen	
+			stSt040IStorage.Pallet2.RemoveCarrier();
+			stSt040IStorage.Source2 := E_Station.eStation_none;
+		END_IF
+		
+		sqAuto.Step := 568;
+		
+	567: sqAuto.Info.Set("Übernehme Teiledaten HG -> Storage");
+		IF  stSt030IHandling.ActiveCommand.Position = 1 THEN
+			stSt040IStorage.Pallet1.SetCarrier(
+				stSt030IHandling.Pallet.Data);
+			stSt040IStorage.Source1 := stSt030IHandling.Source;
+		ELSIF stSt030IHandling.ActiveCommand.Position = 2 THEN
+			stSt040IStorage.Pallet2.SetCarrier(
+				stSt030IHandling.Pallet.Data);
+			stSt040IStorage.Source2 := stSt030IHandling.Source; 
+		END_IF
+		sqAuto.Step := 568;
+		
+	568: sqAuto.Info.Set("Übernehme Teiledaten");
+		sqAuto.SetStep(570);
+		
+	570: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		fbAxisZ.MoveAbsExVel(PosHomeZ, WorkSpeedZ);
+		sqAuto.Step := 575;
+	
+	575: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Achse Z in Pos.");
+		IF fbAxisZ.TargetReached() THEN
+			sqAuto.SetStep(580);
+		ELSIF fbAxisZ.TargetWindowReached(2) THEN
+			stSt030IHandling.bReqestStorage := FALSE; // cls stoarge as soon as possible
+		END_IF
+		
+	580: sqAuto.Info.Set("Job: ")
+					.Append(wsCurJob).Append(", ")
+					.Append("warte auf Storage geschlossen.");
+		stSt030IHandling.bReqestStorage := FALSE;
+		IF stSt040IStorage.bResponseOpn THEN RETURN; END_IF
+		sqAuto.Step := 800; // step done
+		
+	// job done
+	800: sqAuto.Info.Set("Job fertig, warte Handshake reset");
+		IF stSt030IHandling.CommandRequest.Command = E_St030_Command.eSt030_Command_none OR
+		   stSt030IHandling.CommandRequest.Command <> stSt030IHandling.ActiveCommand.Command THEN
+			sqAuto.SetStep(900);
+		END_IF
+		
+	// rdy	
+	900: sqAuto.Info.Set("Zyklus beendet");
+		CycleEnd();
+		sqAuto.Step := 0;
+
+	// error
+	1000: sqAuto.Info.Set("Error");
+		bStopped := TRUE;
+		sqHome.InHome := FALSE;
+		bRunHoming := FALSE;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SequenceSearch" Id="{dfc00729-5576-4802-a796-4e38cdac1427}">
+      <Declaration><![CDATA[METHOD INTERNAL M_SequenceSearch : ST_Text
+VAR_INST
+	rfTrigS1,
+	rfTrigS2 	: FB_RtrigFtrig;
+	fPos 		: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF sqSearch.Step < 10 THEN RETURN; END_IF
+rfTrigS1(bIn := MeasurementA >= fThreshMesMin AND MeasurementA <= fThreshMesMax);
+rfTrigS2(bIn := MeasurementB >= fThreshMesMin AND MeasurementB <= fThreshMesMax);
+sqSearch.EnableStep := RunStep;
+
+// search sequence
+CASE sqSearch.Step OF
+		
+	0:	sqSearch.Info.Set("Warte auf Start Suche");
+		
+	10:	sqSearch.Info.Set("Start Suche, Backup HG-Position");
+		fPosSearchCorr := 0;
+		eEmptyChk := E_St030_EmptySlotChk.eSt030_EmptySlotChk_none;
+		HgPosBackup.x := fbAxisX.Position;
+		HgPosBackup.y := fbAxisY.Position;
+		HgPosBackup.z := fbAxisZ.Position;
+		sqSearch.SetStep(20);
+		
+	// hg to start search position
+	20: sqSearch.Info.Set("Suche aktiv Achse Z");
+		fbAxisZ.MoveAbsExVel(PosHomeZ, WorkSpeedZ);
+		sqSearch.Step := 25;
+	
+	25: sqSearch.Info.Set("Warte auf Achse Z in Such-Pos. 1");
+		IF fbAxisZ.TargetReached() THEN
+			sqSearch.SetStep(30);	
+		END_IF
+		
+	30: sqSearch.Info.Set("Suche aktiv Achse X");
+		fbAxisX.MoveAbsExVel(PosWorkOvenX - 25, WorkSpeedX);
+		sqSearch.Step := 35;
+		
+	35: sqSearch.Info.Set("Warte auf Achse X in Such-Pos. 1");
+		IF fbAxisX.TargetReached() THEN
+			sqSearch.SetStep(40);
+		END_IF	
+		
+	40: sqSearch.Info.Set("Suche aktiv Achse Y");
+		fbAxisY.MoveAbsExVel(PosWorkOvenY_OffsDn, WorkSpeedY);
+		sqSearch.Step := 45;
+
+	45: sqSearch.Info.Set("Warte auf Achse Y in Such-Pos. 1");
+		IF fbAxisY.TargetReached() THEN
+			sqSearch.SetStep(50);
+		END_IF
+		
+	// chk sensor start condition, start search..
+	50: sqSearch.Info.Set("Check Startbedingungen Suchfahrt 1");
+		IF rfTrigS1.bIn THEN
+			StationError.ArgSbAppendRaise('Signal Sensor S1 steht noch an');
+		ELSIF rfTrigS2.bIn THEN
+			StationError.ArgSbAppendRaise('Signal Sensor S2 steht noch an');
+		ELSE
+			fbAxisX.MoveAbsExVel(PosWorkOvenX, HomeSpeedX);
+			MEMSET(ADR(SearchTrig), 0, SIZEOF(SearchTrig));
+			sqSearch.Step := 60;
+		END_IF
+	
+	60: sqSearch.Info.Set("Suchfahrt 1 aktiv (Achse X)");
+		IF rfTrigS1.bRq THEN 
+			SearchTrig[0, 0].X := fbAxisX.Position;
+			SearchTrig[0, 0].Z := MeasurementA;
+		END_IF
+		IF rfTrigS2.bRq THEN 
+			SearchTrig[1, 0].X := fbAxisX.Position;
+			SearchTrig[1, 0].Z := MeasurementB;
+		END_IF
+		IF SearchTrig[0, 0].X <> 0 AND SearchTrig[1, 0].X <> 0 THEN
+			sqSearch.SetStep(80);
+		ELSIF sqSearch.SeqTime > T#10S THEN
+			StationError.ArgSbAppendRaise('Timeout Suchfahrt 1');
+		END_IF
+		
+	80: sqSearch.Info.Set("Check Startbedingungen Suchfahrt 2");
+		IF NOT rfTrigS1.bIn THEN
+			StationError.ArgSbAppendRaise('Signal Sensor S1 fehlt');
+		ELSIF NOT rfTrigS2.bIn THEN
+			StationError.ArgSbAppendRaise('Signal Sensor S2 fehlt');
+		ELSE
+			fbAxisX.MoveAbsExVel(PosWorkOvenX + 25, HomeSpeedX);
+			sqSearch.Step := 90;
+		END_IF
+	
+	90: sqSearch.Info.Set("Suchfahrt 2 aktiv (Achse X)");
+		IF rfTrigS1.bFq THEN 
+			SearchTrig[0, 1].X := fbAxisX.Position;
+			SearchTrig[0, 1].Z := MeasurementA;
+		END_IF
+		IF rfTrigS2.bFq THEN 
+			SearchTrig[1, 1].X := fbAxisX.Position;
+			SearchTrig[1, 1].Z := MeasurementB;
+		END_IF
+		IF SearchTrig[0, 1].X <> 0 AND SearchTrig[1, 1].X <> 0 THEN
+			sqSearch.Step := 300;
+		ELSIF sqSearch.SeqTime > T#100S THEN
+			StationError.ArgSbAppendRaise('Timeout Suchfahrt 2');
+		END_IF
+		
+	100: sqSearch.Info.Set("Auswertung Suchfahrt..");
+		//IF ABS(SearchTrig[0, 0] - SearchTrig[0, 1]) > 2 THEN
+		//	INotiHdl.M_SetNotiDefaultErr(stTextlistGlobal.stText_NG_Stations, Name, F_CreateDynTextDefault("Trigger-Signale Sensor S1 unplausibel"), stEmptyText);
+		//ELSIF ABS(SearchTrig[1, 0] - SearchTrig[1, 1]) > 2 THEN
+		//	INotiHdl.M_SetNotiDefaultErr(stTextlistGlobal.stText_NG_Stations, Name, F_CreateDynTextDefault("Trigger-Signale Sensor S2 unplausibel"), stEmptyText);
+		//ELSE
+			//fPosSearchCorr := ((SearchTrig[0, 0] - SearchTrig[0, 1]) + (SearchTrig[1, 0] - SearchTrig[1, 1]))/2;
+			sqSearch.SetStep(200);
+		//END_IF
+	
+	// hg to chk empty slot position
+	200: sqSearch.Info.Set("Suche aktiv Achse X");
+		fbAxisX.MoveAbsExVel(PosWorkOvenX + 50, WorkSpeedX);
+		fbAxisY.MoveAbsExVel(PosWorkOvenY - 25, WorkSpeedY); //ToDo: chk pos!
+		sqSearch.Step := 205;
+		
+	205: sqSearch.Info.Set("Warte auf Achse X in Slot-Check-Pos.");
+		IF NOT fbAxisX.TargetReached() THEN RETURN; END_IF
+		sqSearch.Info.Set("Warte auf Achse Y in Slot-Check-Pos.");
+		IF NOT fbAxisY.TargetReached() THEN RETURN; END_IF
+		sqSearch.Step := 210;
+		
+	210: sqSearch.Info.Set("Suche aktiv Achse Y");
+		eEmptyChk := SEL(rfTrigS1.bIn, E_St030_EmptySlotChk.eSt030_EmptySlotChk_Empty, E_St030_EmptySlotChk.eSt030_EmptySlotChk_NotEmpty);
+		sqSearch.SetStep(300);		
+	
+	// hg to backup position
+	300: sqSearch.Info.Set("Wiederherstellung HG aktiv Achse Z");
+		fbAxisZ.MoveAbsExVel(HgPosBackup.z, WorkSpeedZ);
+		sqSearch.Step := 305;
+	
+	305: sqSearch.Info.Set("Warte auf Achse Z in Backupposition");
+		IF fbAxisZ.TargetReached() THEN
+			sqSearch.SetStep(310);	
+		END_IF
+		
+	310: sqSearch.Info.Set("Wiederherstellung aktiv Achse Y");
+		fbAxisY.MoveAbsExVel(HgPosBackup.y, WorkSpeedY);
+		sqSearch.Step := 315;
+
+	315: sqSearch.Info.Set("Warte auf Achse Y in Backupposition");
+		IF fbAxisY.TargetReached() THEN
+			sqSearch.SetStep(320);	
+		END_IF
+		
+	320: sqSearch.Info.Set("Wiederherstellung aktiv Achse X");
+		fbAxisX.MoveAbsExVel(HgPosBackup.x, WorkSpeedX);
+		sqSearch.Step := 325;
+		
+	325: sqSearch.Info.Set("Warte auf Achse X in Backupposition");
+		IF fbAxisX.TargetReached() AND fbAxisY.TargetReached() AND fbAxisZ.TargetReached() THEN
+			sqSearch.Step := 0;
+		END_IF
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetReferences" Id="{ec39714d-05b8-4f36-9b6c-7aedc533ab76}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD INTERNAL M_SetReferences : BOOL
+VAR_IN_OUT
+	stIoRef : ST_St030_IO;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stIO REF= stIoRef;
+M_SetReferences := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Supervision" Id="{b2d354a4-c778-435d-aafc-442574e0b819}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Supervision : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk stopped
+IF NOT bRunCycle OR P_Safety.bMachineRequestStop THEN
+	IF P_Safety.bMachineRequestStop THEN
+		fbAxisX.Stop();
+		fbAxisY.Stop();
+		fbAxisZ.Stop();
+	END_IF
+	IF sqAuto.StepTime > T#20S THEN
+		bStopped := TRUE;
+	END_IF
+END_IF
+
+// axis x
+IF fbAxisX.bError THEN
+	ReactToComponentError(fbAxisXUi, E_EventReaction.Stop);
+
+// y
+ELSIF fbAxisY.bError THEN
+	ReactToComponentError(fbAxisYUi, E_EventReaction.Stop);
+	
+// z
+ELSIF fbAxisZ.bError THEN
+	ReactToComponentError(fbAxisZUi, E_EventReaction.Stop);
+	
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="MeasurementA" Id="{899a57d8-b7d2-4ab2-b37e-332fc9929814}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY INTERNAL MeasurementA : LREAL]]></Declaration>
+      <Get Name="Get" Id="{2d832e32-38f1-4001-b5e9-cfa8fe6c8be1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MeasurementA := TO_LREAL(stIO.stIn.fMeasurementA)/1E3;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="MeasurementB" Id="{d417ea57-4b5e-4a8d-aab2-a6c4ab81b605}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY INTERNAL MeasurementB : LREAL]]></Declaration>
+      <Get Name="Get" Id="{0919dff0-601e-4d27-b77e-af0bad6398da}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MeasurementB := TO_LREAL(stIO.stIn.fMeasurementB)/1E3;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosHomeX" Id="{a508ceb9-26d3-430e-8f32-d11536d39d9c}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosHomeX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{e72d95ca-84e8-4bee-8a03-271cccfa1684}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosHomeX := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_XPosHome].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosHomeY" Id="{c040afa1-7271-4515-9567-fc9786f5038d}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosHomeY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{ebddc258-bf66-4bdd-8226-0d3bd95579d9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosHomeY := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_YPosHome].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosHomeZ" Id="{3c1f711e-e0bf-41a3-b292-568c8c405b89}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosHomeZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{e193009c-f7ea-4051-b37e-83945062e1e3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosHomeZ := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_ZPosHome].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkOvenX" Id="{9f659901-01f5-4b7b-b151-109d97cac3ce}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkOvenX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{ccc04400-0e8f-4563-abb2-2467e6d5ca27}">
+        <Declaration><![CDATA[VAR
+	iOven 		: INT;
+	fDeltaX, fDeltaY,
+	fRp1, fRp2,
+	fApprox,
+	fDevision 	: LREAL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[// set oven (A/B --> 1/2)
+iOven := 	SEL(stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Get OR
+				stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Put, 2, 1);
+				
+// calc x-approximation
+fRp1 := GetPosOvRp(iOven, 1, 'Y');
+fRp2 := GetPosOvRp(iOven, 2, 'Y');
+fDeltaY := fRp2 - fRp1;
+
+
+fRp1 := GetPosOvRp(iOven, 1, 'X');
+fRp2 := GetPosOvRp(iOven, 2, 'X');
+fDeltaX := fRp2 - fRp1;	
+
+IF ABS(fDeltaY) > fEpsilon THEN
+	fApprox := fDeltaX/fDeltaY * (PosWorkOvenY - fRp1);
+END_IF
+
+// ..IndexX = 1 => - Teilung, ..IndexX = 2 => + Teilung
+fDevision := P_Plant.TrolleyRackDivision * SEL(stSt030IHandling.ActiveCommand.Position = 1, -0.5, 0.5);
+
+PosWorkOvenX := SEL(iOven = 2, Plant.fbSt010OvenA.OvenMiddlePointX, Plant.fbSt020OvenB.OvenMiddlePointX) +
+				fDevision + fApprox;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkOvenY" Id="{eb1aff29-091e-498f-8354-d7d28fdc7304}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkOvenY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{a6de27b1-6255-4852-81d9-522287b76fcb}">
+        <Declaration><![CDATA[VAR
+	iOven 		: INT;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[// set oven (A/B --> 1/2)
+iOven := 	SEL(stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Get OR
+				stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Put, 2, 1);
+
+PosWorkOvenY := (P_Plant.TrolleyCarrierDistance * stSt030IHandling.ActiveCommand.Position) + 
+					P_Plant.TrolleyRackOriginY + 
+					SEL(iOven = 2, Plant.fbSt010OvenA.OvenOffsetY, Plant.fbSt020OvenB.OvenOffsetY);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkOvenY_OffsDn" Id="{4b6378aa-e35d-4a7b-93b1-349cea608b09}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkOvenY_OffsDn : LREAL]]></Declaration>
+      <Get Name="Get" Id="{fcf74f90-8309-4557-83f8-d038e67998fa}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosWorkOvenY_OffsDn := PosWorkOvenY - 15;// P_Plant.TrolleyOffsetDnY; //15]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkOvenY_OffsUp" Id="{1acab3be-38ac-4e25-81ea-667f157b41a9}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkOvenY_OffsUp : LREAL]]></Declaration>
+      <Get Name="Get" Id="{dae5c196-f7f8-46f5-b9d9-1e136146aa20}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosWorkOvenY_OffsUp := PosWorkOvenY + 20;//P_Plant.TrolleyOffsetUpY; //20]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkOvenZ" Id="{d7bbe515-2969-4c65-a278-23c6e0093de8}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkOvenZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{62f06c8c-c144-4e2d-b1f0-c798a13c9dc3}">
+        <Declaration><![CDATA[VAR
+	iOven 		: INT;
+	fDeltaZ, fDeltaY,
+	fRp1, fRp2,
+	fApprox		: LREAL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[// set oven (A/B --> 1/2)
+iOven := 	SEL(stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Get OR
+				stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_OvenA_Put, 2, 1);
+				
+// calc x-approximation
+fRp1 := GetPosOvRp(iOven, 1, 'Y');
+fRp2 := GetPosOvRp(iOven, 2, 'Y');
+fDeltaY := fRp2 - fRp1;
+
+fRp1 := GetPosOvRp(iOven, 1, 'Z');
+fRp2 := GetPosOvRp(iOven, 2, 'Z');
+fDeltaZ := fRp2 - fRp1;
+
+IF ABS(fDeltaY) > fEpsilon THEN
+	fApprox := fDeltaZ/fDeltaY * (PosWorkOvenY - fRp1);
+END_IF
+
+PosWorkOvenZ := SEL(iOven = 2, Plant.fbSt010OvenA.OvenPickUpDepthZ, Plant.fbSt020OvenB.OvenPickUpDepthZ)
+				+ fApprox;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkStorageX" Id="{1faf49d1-3739-4726-8c52-e3291d63f03e}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkStorageX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{363dabc9-9786-499d-89a8-8802df90f993}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosWorkStorageX := SEL(stSt030IHandling.ActiveCommand.Position = 2,
+						stSettings.stStationSettings[E_Station.eStation_ST040_Storage].stDynStationSettings[E_St040_Settings.eSt040_Settings_XPosStor1].fValue, 
+						stSettings.stStationSettings[E_Station.eStation_ST040_Storage].stDynStationSettings[E_St040_Settings.eSt040_Settings_XPosStor2].fValue);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkStorageY" Id="{07557be0-52ce-498a-90c3-8bbc0e8865de}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkStorageY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{cc87e0ba-9032-48f4-9bee-08012133487e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosWorkStorageY := SEL(stSt030IHandling.ActiveCommand.Position = 2,
+						stSettings.stStationSettings[E_Station.eStation_ST040_Storage].stDynStationSettings[E_St040_Settings.eSt040_Settings_YPosStor1].fValue,
+						stSettings.stStationSettings[E_Station.eStation_ST040_Storage].stDynStationSettings[E_St040_Settings.eSt040_Settings_YPosStor2].fValue);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkStorageY_OffsDn" Id="{c9535b5a-2935-4bf6-9673-32d41f1d3b44}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkStorageY_OffsDn : LREAL]]></Declaration>
+      <Get Name="Get" Id="{bc970958-499c-4c4b-8e14-7f4e60087ae9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosWorkStorageY_OffsDn := PosWorkStorageY - 15;//P_Plant.StorageOffsetDnY;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkStorageY_OffsUp" Id="{96d03c65-6220-4bf3-b0c9-6c9f23ca2691}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkStorageY_OffsUp : LREAL]]></Declaration>
+      <Get Name="Get" Id="{eb14d98c-a9ad-4f44-9d05-3c9ad96a1f2c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosWorkStorageY_OffsUp := PosWorkStorageY + 20;// P_Plant.StorageOffsetUpY;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosWorkStorageZ" Id="{8a5ca74f-2297-459a-848c-1e19b9972e51}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE PosWorkStorageZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{d1268fa1-56b5-4963-8216-bf21245e4a24}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PosWorkStorageZ := SEL(stSt030IHandling.ActiveCommand.Position = 2,
+						stSettings.stStationSettings[E_Station.eStation_ST040_Storage].stDynStationSettings[E_St040_Settings.eSt040_Settings_ZPosStor1].fValue,
+						stSettings.stStationSettings[E_Station.eStation_ST040_Storage].stDynStationSettings[E_St040_Settings.eSt040_Settings_ZPosStor2].fValue);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{10a8e846-9903-4149-8623-7023eb002a1c}" FolderPath="Internal\">
+      <Declaration><![CDATA[/// Reset station logic
+{attribute 'object_name' := 'Reset'}
+METHOD Reset
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// base logic run
+SUPER^.Reset();
+
+// reset objects
+
+IF fbAxisX.bError OR NOT RunCycle THEN
+	fbAxisX.Reset();
+END_IF
+IF fbAxisY.bError OR NOT RunCycle THEN
+	fbAxisY.Reset();
+END_IF
+IF fbAxisZ.bError OR NOT RunCycle THEN
+	fbAxisZ.Reset();
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="WorkSpeedX" Id="{1df14b95-1538-49c5-bf34-b993e4d59fbb}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE WorkSpeedX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{f2443e26-b78f-42d7-abfc-a0a6e9d05ad2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[WorkSpeedX := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_XWorkSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="WorkSpeedY" Id="{46264aa1-746f-474c-a66f-b05a329162a9}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE WorkSpeedY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{a3cdb163-7c95-4af3-8c64-0382e756a993}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[WorkSpeedY := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_YWorkSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="WorkSpeedZ" Id="{04011789-a00a-4e50-9400-e3b81673bf3b}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PRIVATE WorkSpeedZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{34edd3c5-4bc7-46a1-8637-7a774a98040e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[WorkSpeedZ := stLocalSettings.stDynStationSettings[E_St030_Settings.eSt030_Settings_ZWorkSpeed].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

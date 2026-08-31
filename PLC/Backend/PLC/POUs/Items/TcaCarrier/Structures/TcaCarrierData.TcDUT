@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaCarrierData" Id="{7f561e39-db64-406d-92fe-c6dddfbcdc12}">
+    <Declaration><![CDATA[TYPE TcaCarrierData :
+STRUCT	
+	Enabled : BOOL;
+	Id : INT;
+	//Source		: E_Station;
+	//Logging : WSTRING;	// Information in csv, xml or json Format
+	Error : BOOL;	
+
+	WorkpiecesEnabled : ARRAY[0..TcaCarrier.MAX_WORKPIECEPLACES] OF BOOL;
+	WorkpiecesData : ARRAY[0..TcaCarrier.MAX_WORKPIECEPLACES] OF TcaWorkpieceData;		
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

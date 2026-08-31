@@ -1,0 +1,9 @@
+<div id="ucButton" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="1024" data-tchmi-creator-viewport-height="768" data-tchmi-left-unit="%" data-tchmi-top-unit="%">
+
+<div id="TcHmi_Controls_Beckhoff_TcHmiButton" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text="%f%F_TranslateText(%pp%stButtonToHmi::stName%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-state-symbol="%pp%stButtonFromHmi::bClick%/pp%" data-tchmi-background-color="%f%F_ColorBinding(%pp%stButtonToHmi::stColor%/pp%)%/f%" data-tchmi-text-font-size-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+
+
+</div>
+
+</div>

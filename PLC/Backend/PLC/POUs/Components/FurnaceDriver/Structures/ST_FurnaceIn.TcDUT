@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_FurnaceIn" Id="{04680abf-8d3c-427c-b7ef-aa8f7bc16d69}">
+    <Declaration><![CDATA[{attribute 'pack_mode' := '0'}
+TYPE ST_FurnaceIn :
+STRUCT	
+	nTemperature				: INT;
+	bOverheat					: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

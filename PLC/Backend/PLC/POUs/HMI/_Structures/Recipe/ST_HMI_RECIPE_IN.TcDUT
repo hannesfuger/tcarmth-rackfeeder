@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_HMI_RECIPE_IN" Id="{89131635-1f86-4198-81f4-eb891215d08f}">
+    <Declaration><![CDATA[TYPE ST_HMI_RECIPE_IN :
+STRUCT
+	// Current Recipe Infos
+	bSaveCurrentRecipe				:BOOL;
+	
+	
+	// Recipe Management
+	
+	wsNewEditRecipeName				:WSTRING(255); // Read/Write
+	wsNewEditRecipeComment			:WSTRING(255); // Read/Write
+	wsNewEditRecipeProduct			:WSTRING(255); // Read/Write
+	bCreateNewRecipe				:BOOL;
+	bUpdateRecipe					:BOOL;
+	
+	nSelectedRecipe					:INT;
+	bRefreshRecipeList				:BOOL;
+	bLoadSelectedRecipe				:BOOL;
+	bDeleteSelectedRecipe			:BOOL;
+	wsCopyRecipeNewName				:WSTRING(255); // Read/Write
+	bCopySelectedRecipe				:BOOL;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

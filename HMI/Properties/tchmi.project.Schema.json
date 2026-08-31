@@ -1,0 +1,505 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "PLC1.ST_ButtonText": {
+      "$ref": "tchmi:server#/definitions/PLC1.ST_Text"
+    },
+    "PLC1.ST_Counter": {
+      "properties": {
+        "diOverallCounterNok": {
+          "$ref": "tchmi:general#/definitions/UDINT"
+        },
+        "diOverallCounterOk": {
+          "$ref": "tchmi:general#/definitions/UDINT"
+        }
+      },
+      "type": "object"
+    },
+    "PLC1.ST_Button": {
+      "properties": {
+        "bClick": {
+          "$ref": "tchmi:general#/definitions/BOOL"
+        },
+        "nColor": {
+          "$ref": "tchmi:general#/definitions/DINT"
+        },
+        "stName": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Text"
+        }
+      },
+      "type": "object"
+    },
+    "PLC1.ST_Tc3Hmi_Station_Base": {
+      "properties": {
+        "iStepchain": {
+          "$ref": "tchmi:general#/definitions/INT"
+        },
+        "stButton_CycleStop": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_Home": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_NavManual": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_NavMonitoring": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_NavParametre": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_OPM_Auto": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_OPM_Manual": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_OPM_Step": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_Reset": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_Start": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_Step": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stButton_Stop": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Button"
+        },
+        "stInfo1": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Text"
+        },
+        "stInfo2": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Text"
+        },
+        "stSitename": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Text"
+        },
+        "stState_Auto": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Text"
+        },
+        "stState_Home": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Text"
+        },
+        "stState_Station": {
+          "$ref": "tchmi:project#/definitions/PLC1.ST_Text"
+        }
+      },
+      "type": "object"
+    },
+    "PLC1.ST_Text": {
+      "properties": {
+        "nNameId": {
+          "$ref": "tchmi:general#/definitions/INT"
+        },
+        "wsName": {
+          "$ref": "tchmi:general#/definitions/STRING(80)"
+        },
+        "wsNameId": {
+          "$ref": "tchmi:general#/definitions/STRING(80)"
+        }
+      },
+      "type": "object"
+    },
+    "Base_HMI_Base_Functions_ucButton": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucButton.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Base_HMI_Base_Functions_ucButton"
+    },
+    "Base_HMI_Base_Functions_ucButtonExtColorlabel": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucButtonExtColorlabel.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Base_HMI_Base_Functions_ucButtonExtColorlabel"
+    },
+    "Base_HMI_Base_Functions_ucManualControlAxis": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucManualControlAxis.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Base_HMI_Base_Functions_ucManualControlAxis"
+    },
+    "Base_HMI_Base_Functions_ucManualControlCylinder": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucManualControlCylinder.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Base_HMI_Base_Functions_ucManualControlCylinder"
+    },
+    "Base_HMI_Base_Inputs_ucInputNumeric": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Inputs\\ucInputNumeric.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Base_HMI_Base_Inputs_ucInputNumeric"
+    },
+    "Base_HMI_Base_Settings_ucSettings": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Settings\\ucSettings.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Base_HMI_Base_Settings_ucSettings"
+    },
+    "Base_HMI_Base_Station_Station_MainPage": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Station\\Station_MainPage.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Base_HMI_Base_Station_Station_MainPage"
+    },
+    "ucButton": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucButton.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/ucButton"
+    },
+    "ucButtonExtColorlabel": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucButtonExtColorlabel.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/ucButtonExtColorlabel"
+    },
+    "Station_MainPage": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Station\\Station_MainPage.usercontrol.json",
+      "id": "tchmi:project#/definitions/Station_MainPage",
+      "type": "object"
+    },
+    "ucSettings": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Settings\\ucSettings.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucSettings",
+      "type": "object"
+    },
+    "ucSettings_0": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Objects\\ucManual.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/ucSettings_0"
+    },
+    "ucObjects": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Objects\\ucObjects.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucObjects",
+      "type": "object"
+    },
+    "ucManualControlAxis": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucManualControlAxis.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucManualControlAxis",
+      "type": "object"
+    },
+    "ucManual": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Manual\\ucManual.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucManual",
+      "type": "object"
+    },
+    "ucManualControlCylinder": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucManualControlCylinder.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucManualControlCylinder",
+      "type": "object"
+    },
+    "ucManualControlDrive": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucManualControlDrive.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucManualControlDrive",
+      "type": "object"
+    },
+    "ucManualControlDevice": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucManualControlDevice.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucManualControlDevice",
+      "type": "object"
+    },
+    "arrPageHistorie": {
+      "items": {
+        "$ref": "tchmi:framework#/definitions/ContentPath"
+      },
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "description": "Contains the last opened ContentPaths "
+    },
+    "ucMonitoring": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Monitoring\\ucMonitoring.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucMonitoring",
+      "type": "object"
+    },
+    "ucEmergencyStop": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucEmergencyStop.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucEmergencyStop",
+      "type": "object"
+    },
+    "ucDoor": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucDoor.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucDoor",
+      "type": "object"
+    },
+    "ucPopup": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucPopup.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucPopup",
+      "type": "object"
+    },
+    "Station_ManualPage": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Station\\Station_ManualPage.usercontrol.json",
+      "id": "tchmi:project#/definitions/Station_ManualPage",
+      "type": "object"
+    },
+    "Module_ManualPage": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Module\\Module_ManualPage.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Module_ManualPage"
+    },
+    "Module_MainPage": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Module\\Module_MainPage.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/Module_MainPage"
+    },
+    "UcDiskProfile": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Pages\\Stations\\Base\\UcDiskProfile.usercontrol.json",
+      "id": "tchmi:project#/definitions/UcDiskProfile",
+      "type": "object"
+    },
+    "ucSimpleBarChart": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Base_HMI\\Base\\Functions\\ucSimpleBarChart.usercontrol.json",
+      "id": "tchmi:project#/definitions/ucSimpleBarChart",
+      "type": "object"
+    },
+    "NumericInputEventArgs": {
+      "properties": {
+        "nMaxValue": {
+          "$ref": "tchmi:general#/definitions/Number"
+        },
+        "nMinValue": {
+          "$ref": "tchmi:general#/definitions/Number"
+        },
+        "sOldValue": {
+          "$ref": "tchmi:general#/definitions/String"
+        },
+        "sSenderControl": {
+          "$ref": "tchmi:general#/definitions/String"
+        }
+      },
+      "type": "object",
+      "id": "tchmi:project#/definitions/NumericInputEventArgs"
+    },
+    "UcWorkpieceCmd": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Pages\\Stations\\_Specific\\UcWorkpieceCmd.usercontrol.json",
+      "id": "tchmi:project#/definitions/UcWorkpieceCmd",
+      "type": "object"
+    },
+    "UcPalletCmd": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Pages\\Stations\\_Specific\\UcPalletCmd.usercontrol.json",
+      "id": "tchmi:project#/definitions/UcPalletCmd",
+      "type": "object"
+    },
+    "UcPalletCmd_-_Copy": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Pages\\Stations\\_Specific\\UcTrolleyCmd.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/UcPalletCmd_-_Copy"
+    },
+    "UcTrolleyCmd": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "Pages\\Stations\\_Specific\\UcTrolleyCmd.usercontrol.json",
+      "id": "tchmi:project#/definitions/UcTrolleyCmd",
+      "type": "object"
+    },
+    "TcaCarrier": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaCarrier\\TcaCarrier.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/TcaCarrier"
+    },
+    "TcaCarrierConfig": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaCarrier\\TcaCarrierConfig.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/TcaCarrierConfig"
+    },
+    "TcaCarrierService": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaCarrier\\TcaCarrierService.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/TcaCarrierService"
+    },
+    "RackFeeder": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaRackFeeder\\RackFeeder.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/RackFeeder"
+    },
+    "StorageDock": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaRackFeeder\\StorageDock.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/StorageDock"
+    },
+    "TeachTrolleyDock": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaRackFeeder\\TeachTrolleyDock.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/TeachTrolleyDock"
+    },
+    "TcaTrolley": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaTrolley\\TcaTrolley.usercontrol.json",
+      "id": "tchmi:project#/definitions/TcaTrolley",
+      "type": "object"
+    },
+    "TcaTrolleyConfig": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaTrolley\\TcaTrolleyConfig.usercontrol.json",
+      "id": "tchmi:project#/definitions/TcaTrolleyConfig",
+      "type": "object"
+    },
+    "TcaTrolleyService": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaTrolley\\TcaTrolleyService.usercontrol.json",
+      "id": "tchmi:project#/definitions/TcaTrolleyService",
+      "type": "object"
+    },
+    "TcaWorkpieceIcon": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaWorkpiecePlace\\TcaWorkpieceIcon.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/TcaWorkpieceIcon"
+    },
+    "TcaWorkpiecePlace": {
+      "frameworkControlNamespace": "TcHmi.Controls.Beckhoff",
+      "frameworkControlType": "TcHmi.Controls.System.TcHmiUserControl",
+      "frameworkInstanceOf": "TcHmi.Controls.System.TcHmiControl",
+      "frameworkUserControlConfig": "TcaItems\\TcaWorkpiecePlace\\TcaWorkpiecePlace.usercontrol.json",
+      "type": "object",
+      "id": "tchmi:project#/definitions/TcaWorkpiecePlace"
+    },
+    "TcaWorkpieceStatusColor": {
+      "items": {
+        "$ref": "tchmi:framework#/definitions/Color"
+      },
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 7,
+      "id": "tchmi:project#/definitions/TcaWorkpieceStatusColor"
+    },
+    "Symbol_Of_ADS-PLC1.TcaTrolleyData": {
+      "allOf": [
+        {
+          "$ref": "tchmi:framework#/definitions/Symbol"
+        },
+        {
+          "frameworkSymbolSubType": {
+            "$ref": "tchmi:server#/definitions/ADS-PLC1.TcaTrolleyData"
+          }
+        }
+      ]
+    },
+    "Symbol_Of_ADS-PLC1.TcaCarrierData": {
+      "allOf": [
+        {
+          "$ref": "tchmi:framework#/definitions/Symbol"
+        },
+        {
+          "frameworkSymbolSubType": {
+            "$ref": "tchmi:server#/definitions/ADS-PLC1.TcaCarrierData"
+          }
+        }
+      ]
+    }
+  }
+}

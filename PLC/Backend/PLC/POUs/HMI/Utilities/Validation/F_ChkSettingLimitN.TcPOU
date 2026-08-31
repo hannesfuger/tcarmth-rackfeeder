@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_ChkSettingLimitN" Id="{b19b7468-a75c-495c-b140-b7b52985993e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ChkSettingLimitN : BOOL
+VAR_IN_OUT
+	nValue		: INT;
+	stSetting 	: ST_Data_Item;
+END_VAR
+VAR_OUTPUT
+	stInfo 		: ST_Text;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_ChkSettingLimitN := FALSE;
+
+IF (stSetting.eDataType = E_DataType.eDataType_int) AND nValue > stSetting.fValueMax THEN
+	stInfo.wsName := "input to high";
+	stInfo.wsNameId := "inputtohigh";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_int) AND nValue < stSetting.fValueMin THEN
+	stInfo.wsName := "input to low";
+	stInfo.wsNameId := "inputtolow";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_ms) AND nValue > stSetting.fValueMax THEN
+	stInfo.wsName := "input to high";
+	stInfo.wsNameId := "inputtohigh";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_ms) AND nValue < stSetting.fValueMin THEN
+	stInfo.wsName := "input to low";
+	stInfo.wsNameId := "inputtolow";
+	RETURN;
+END_IF
+
+F_ChkSettingLimitN := TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="F_ChkSettingLimitN">
+      <LineId Id="55" Count="1" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="130" Count="2" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="133" Count="1" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

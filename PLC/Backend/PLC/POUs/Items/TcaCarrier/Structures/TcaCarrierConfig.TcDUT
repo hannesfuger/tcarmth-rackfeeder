@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaCarrierConfig" Id="{4f9cbdb6-7fb3-4f1d-8d38-a2233b55f0a4}">
+    <Declaration><![CDATA[TYPE TcaCarrierConfig :
+STRUCT	
+	/// Geometry
+	Layout : eTcaCarrierLayout;		
+	Dimension : ST_Coordinate;
+	
+	PositionsInRow : INT;			// Numbers of Positions in first Row
+	RowDistance : REAL;		// Distance from one Row to the other
+	PositionsInColumn : INT;			// Numbers of Positions in one Column
+	ColumnDistance : REAL;		// Distance from one Column to the other
+	CoordinateFirstWorkpiece : ST_Coordinate;
+		
+	InitialStatus : eTcaWorkpieceStatus;
+	RequestStatus : eTcaWorkpieceStatus;	
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

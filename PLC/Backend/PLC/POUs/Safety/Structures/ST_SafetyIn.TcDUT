@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyIn" Id="{cfe20f80-0322-4523-b697-633e01274234}">
+    <Declaration><![CDATA[TYPE ST_SafetyIn :
+STRUCT
+	/// general safety info
+	nProjectCrc				: WORD;
+	nSerialNumber			: UDINT;
+	
+	/// EmergencyStop/Not-Halt von Safety
+	bSAFE_ES_Ok				: BOOL;
+	
+	/// Safe areas sum from safety
+	bSAFE_Areas_Ok			: BOOL;
+	
+	bSAFE_Area_Ok_ST10,
+	bSAFE_Area_Ok_ST20,
+	
+	bSAFE_ConfirmTimeout	: BOOL;
+	
+	bSAFE_EStop_State		: ARRAY[0..E_EmergencyStop.eEmergencyStop_nMaxIdx] OF BOOL;	(*	state of every emergency stop button	*)
+	
+	/// safety area OK from safety
+	bSAFE_AREA_Ok			: ARRAY[0..iSafety_Anzahl_Schutzbereiche] OF BOOL;
+	/// feeedback safety are switched off from safety
+	bSafetyAreaSwitchedOff	: ARRAY[0..iSafety_Anzahl_Schutzbereiche] OF BOOL;
+	
+	/// GATE OK von Safety
+	bSAFE_GATE_Ok			: ARRAY[0..E_Door.eDoor_nMaxIdx] OF BOOL;
+			
+	/// Zustimmeinrichtung von Safety
+	bCompressedAirOk		: BOOL;
+	
+	bSAFE_DRIVES_STO,
+	bSAFE_DRIVE_A_STO,
+	bSAFE_DRIVE_B_STO,
+	bSAFE_DRIVES_HG_STO		: BOOL;
+	
+	//------------------------------------------------------------------------------------------------------------
+	//user definged variables
+	
+	bSafe_OpMode_Off,
+	bSafe_OpMode_Manual,
+	bSafe_OpMode_Ruest,
+	bSafe_OpMode_Auto				: BOOL;
+	
+	bSafe_EL6900_WcState				: ARRAY[0..iSafety_Anzahl_EL69xx] OF BOOL; 	(* 	Eingang FB TwinSAFE WcState	*)
+	bSafe_FbError_Master				: ARRAY[0..iSafety_Anzahl_TwinSafeGruppen] OF BOOL; 	(* 	Eingang FB TwinSAFE Error -> Safety Master Klemme	*)
+	bSafe_ComError_Master				: ARRAY[0..iSafety_Anzahl_TwinSafeGruppen] OF BOOL; 	(* 	Eingang Com TwinSAFE Error -> Safety Master Klemme	*)
+	bSafe_OutError_Master				: ARRAY[0..iSafety_Anzahl_TwinSafeGruppen] OF BOOL; 	(* 	Eingang Out TwinSAFE Error -> Safety Master Klemme	*)
+	bSafe_OtherError_Master				: ARRAY[0..iSafety_Anzahl_TwinSafeGruppen] OF BOOL; 	(* 	Eingang OtherError TwinSAFE Error -> Safety Master Klemme	*)
+                                                                                
+	bSafe_AX5805_Error					: ARRAY[0..E_Axis.eAxis_MaxAxis] OF BOOL;	(*	AX5805 Status	*)	
+	bSafety_Aktor						: ARRAY[0..100] OF BOOL;		(*	From Safety Logic Aktor	*)
+		
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaEngelCastingCarrierOutput" Id="{7b1bc3f3-593e-4d34-818a-0f767e3ab64c}">
+    <Declaration><![CDATA[TYPE TcaEngelCastingCarrierOutput :	// ASMA SPS -> ENGEL SPS
+STRUCT
+	LifeCounter : UINT;
+	
+	// Status der Peripherie
+	Ready : BOOL;			// Bereit zum Entgegennehmen von Jobs
+	Busy : BOOL;			// Peripherie ist in Arbeit/ Bewegung
+	Error : BOOL;			// Peripherie hat Error
+	ErrorID : INT;			// ErrorID
+	
+	// Überwachung und Kontrolle der Ablageposition und des Handlings
+	PermitRoboterHandling : BOOL; 	// Bewegungen des Engel Roboters erlauben (freie Fahrt im gesamten Bewgungsbereich)(
+	PermitStorage_1 : BOOL;			// Zugriff auf Ablage 1 erlauben (aufnehmen und ablegen)
+	PermitStorage_2 : BOOL;			// Zugriff auf Ablage 1 erlauben (aufnehmen und ablegen)
+	                    	
+	// Allgemeine Sicherheit						
+	SafetyAreaRequest : BOOL; 	// Anforderung Schutztüre
+	SafetyDoorRelease : BOOL;	// freigabe zum öffnen der Schutztüre
+	
+	// Status der Jobs
+	JobStatusForStorage_1 : TcaEngelCastingCarrierJobStatus;	// Status des Jobs für Ablage 1
+	JobStatusForStorage_2 : TcaEngelCastingCarrierJobStatus;	// Status des Jobs für Ablage 2
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

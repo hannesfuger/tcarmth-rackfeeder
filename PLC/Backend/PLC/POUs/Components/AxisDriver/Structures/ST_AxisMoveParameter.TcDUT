@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <DUT Name="ST_AxisMoveParameter" Id="{efd6da09-c514-43b3-8a56-ef6118c7957d}">
+    <Declaration><![CDATA[/// General move parameter strucure
+TYPE ST_AxisMoveParameter :
+STRUCT
+	fVelocity: LREAL;
+	fAcceleration: LREAL;
+	fDeceleration: LREAL;
+	fJerk: LREAL;
+	fGap: LREAL;
+	eBufferMode: MC_BufferMode := MC_Aborting;
+	stOptions: ST_MoveOptions;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

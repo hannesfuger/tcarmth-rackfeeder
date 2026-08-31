@@ -1,0 +1,330 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SettingsHandling" Id="{93c5b23d-288e-4b3e-a7f1-914ee7af41d3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SettingsHandling
+VAR_INPUT
+	eUserLevel			: E_User_Level;
+END_VAR
+VAR_IN_OUT
+	stControlSettingIn	: ST_HMI_CONTROL_SETTING_ITEM_IN;
+	stControlSettingOut	: ST_HMI_CONTROL_SETTING_ITEM_OUT;
+	stSettings			: ARRAY[*] OF ST_Data_Item;
+	stSettingsView		: ARRAY[*] OF ST_Data_Item_String;
+	sChanges			: T_MaxString;
+END_VAR
+VAR
+	ii, nLb, nUb	: DINT;
+	rtSave			: R_TRIG;
+	nColIndex,
+	nRowIndex		: INT;
+	tofInfo			: TOF;
+	stInfo			: ST_Text;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nColIndex := TO_INT(stControlSettingIn.nSelectedColumIndex);
+nRowIndex := TO_INT(stControlSettingIn.nSelectedRowIndex);
+
+stControlSettingOut.stButtonSave.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF stControlSettingIn.stButtonSave.bClick THEN
+	stControlSettingOut.stButtonSave.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+END_IF
+
+stControlSettingOut.bVisible_Bool := FALSE;
+stControlSettingOut.bVisible_Float := FALSE;
+stControlSettingOut.bVisible_Number := FALSE;
+stControlSettingOut.bVisible_String := FALSE;
+stControlSettingOut.bVisible_UserLevel := FALSE;
+stControlSettingOut.bVisible_RecipeMode := FALSE;
+
+stControlSettingOut.nUserLevelUsers := (E_User_Level.eUser_Level_nMaxIdx);
+stControlSettingOut.aUserLevelUsers[E_User_Level.eUser_Level_none] := CONST.stTextListGlobal.stText_UserLevel00;
+stControlSettingOut.aUserLevelUsers[E_User_Level.eUser_Level_Operator] := CONST.stTextListGlobal.stText_UserLevel01;
+stControlSettingOut.aUserLevelUsers[E_User_Level.eUser_Level_Manager] := CONST.stTextListGlobal.stText_UserLevel02;
+stControlSettingOut.aUserLevelUsers[E_User_Level.eUser_Level_Maintenance] := CONST.stTextListGlobal.stText_UserLevel03;
+stControlSettingOut.aUserLevelUsers[E_User_Level.eUser_Level_Level4] := CONST.stTextListGlobal.stText_UserLevel04;
+stControlSettingOut.aUserLevelUsers[E_User_Level.eUser_Level_Admin] := CONST.stTextListGlobal.stText_UserLevel05;
+stControlSettingOut.aUserLevelUsers[E_User_Level.eUser_Level_Programmer] := CONST.stTextListGlobal.stText_UserLevel06;
+
+stControlSettingOut.nRecipeMode := (E_RecipeMode.eRecipeMode_Max);
+stControlSettingOut.aRecipeMode[E_RecipeMode.eRecipeMode_None] := CONST.stTextListGlobal.stText_Recipe_Mode_None;
+stControlSettingOut.aRecipeMode[E_RecipeMode.eRecipeMode_ToFrom] := CONST.stTextListGlobal.stText_Recipe_Mode_ToFrom;
+
+//clear settins view
+nLb := LOWER_BOUND(stSettingsView, 1);
+nUb := UPPER_BOUND(stSettingsView, 1);
+FOR ii := nLb TO nUb DO
+	MEMSET(ADR(stSettingsView[ii]),0,SIZEOF(stSettingsView[ii]));
+END_FOR
+
+nLb := MAX(nLb, LOWER_BOUND(stSettings, 1));
+nUb := MIN(nUb, UPPER_BOUND(stSettings, 1));
+FOR ii:= nLb TO nUb DO
+
+	IF (stSettings[ii].stName.wsName <> "") AND (stSettings[ii].stName.wsNameId <> "")  THEN
+		stSettingsView[ii].stName := stSettings[ii].stName;
+		stSettingsView[ii].stGroup := stSettings[ii].stGroup;
+		stSettingsView[ii].stUnit := stSettings[ii].stUnit;	
+		stSettingsView[ii].stValueMin.wsName := stSettingsView[ii].stValueMin.wsNameId := TO_WSTRING(LREAL_TO_FMTSTR(REAL_TO_LREAL(stSettings[ii].fValueMin), 3, FALSE));
+		stSettingsView[ii].stValueMax.wsName := stSettingsView[ii].stValueMax.wsNameId := TO_WSTRING(LREAL_TO_FMTSTR(REAL_TO_LREAL(stSettings[ii].fValueMax), 3, FALSE));	
+	END_IF
+
+	IF (stSettings[ii].stName.wsName = "") AND (stSettings[ii].stName.wsNameId = "")  THEN
+		stSettingsView[ii].stDataType.wsName := "";		
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_None THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="none";	
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_bool THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="bool";
+	ELSIF  stSettings[ii].eDataType = E_DataType.eDataType_int THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="int";
+	ELSIF  stSettings[ii].eDataType = E_DataType.eDataType_lreal THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="lreal";
+	ELSIF  stSettings[ii].eDataType = E_DataType.eDataType_time_ms THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="time_ms";
+	ELSIF  stSettings[ii].eDataType = E_DataType.eDataType_time_s THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="time_s";	
+	ELSIF  stSettings[ii].eDataType = E_DataType.eDataType_time_m THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="time_m";
+	ELSIF  stSettings[ii].eDataType = E_DataType.eDataType_time_h THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="time_h";	
+	ELSIF  stSettings[ii].eDataType = E_DataType.eDataType_wstring THEN
+		stSettingsView[ii].stDataType.wsName := stSettingsView[ii].stDataType.wsNameId :="wstring";
+	END_IF
+
+	IF (stSettings[ii].stName.wsName = "") AND (stSettings[ii].stName.wsNameId = "")  THEN
+		stSettingsView[ii].stRecipeMode.wsName := "";		
+	ELSIF stSettings[ii].eRecipeMode = E_RecipeMode.eRecipeMode_None THEN
+		stSettingsView[ii].stRecipeMode.wsName := stSettingsView[ii].stRecipeMode.wsNameId :="none";
+	ELSIF  stSettings[ii].eRecipeMode = E_RecipeMode.eRecipeMode_ToFrom THEN
+		stSettingsView[ii].stRecipeMode.wsName := stSettingsView[ii].stRecipeMode.wsNameId :="tofrom";
+	END_IF
+
+	IF (stSettings[ii].stName.wsName = "") AND (stSettings[ii].stName.wsNameId = "")  THEN
+		stSettingsView[ii].stUserLevel.wsName := "";		
+	ELSIF stSettings[ii].eUserLevel = E_User_Level.eUser_Level_none THEN
+		stSettingsView[ii].stUserLevel.wsName:= stSettingsView[ii].stUserLevel.wsNameId := "none";
+	ELSIF stSettings[ii].eUserLevel = E_User_Level.eUser_Level_Programmer THEN
+		stSettingsView[ii].stUserLevel.wsName:= stSettingsView[ii].stUserLevel.wsNameId := "programmer";		
+	ELSIF stSettings[ii].eUserLevel = E_User_Level.eUser_Level_Admin THEN
+		stSettingsView[ii].stUserLevel.wsName:= stSettingsView[ii].stUserLevel.wsNameId := "admin";
+	ELSIF  stSettings[ii].eUserLevel = E_User_Level.eUser_Level_Maintenance THEN
+		stSettingsView[ii].stUserLevel.wsName := stSettingsView[ii].stUserLevel.wsNameId := "maintenance";
+	ELSIF  stSettings[ii].eUserLevel = E_User_Level.eUser_Level_Manager THEN
+		stSettingsView[ii].stUserLevel.wsName := stSettingsView[ii].stUserLevel.wsNameId := "manager";
+	ELSIF  stSettings[ii].eUserLevel = E_User_Level.eUser_Level_Operator THEN
+		stSettingsView[ii].stUserLevel.wsName := stSettingsView[ii].stUserLevel.wsNameId := "operator";
+	ELSIF  stSettings[ii].eUserLevel = E_User_Level.eUser_Level_Level4 THEN
+		stSettingsView[ii].stUserLevel.wsName := stSettingsView[ii].stUserLevel.wsNameId := "level4";
+	END_IF
+
+	IF (stSettings[ii].stName.wsName = "") AND (stSettings[ii].stName.wsNameId = "")  THEN
+		stSettingsView[ii].stValue.wsName := "";		
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_bool THEN
+		IF stSettings[ii].bValue THEN
+			stSettingsView[ii].stValue.wsName := stSettingsView[ii].stValue.wsNameId :="true";
+		ELSE
+			stSettingsView[ii].stValue.wsName := stSettingsView[ii].stValue.wsNameId :="false";
+		END_IF
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_int THEN
+		stSettingsView[ii].stValue.wsName := TO_WSTRING(stSettings[ii].nValue);
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_lreal THEN
+		stSettingsView[ii].stValue.wsName := TO_WSTRING(LREAL_TO_FMTSTR(REAL_TO_LREAL(stSettings[ii].fValue), 3, FALSE));
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_wstring THEN
+		stSettingsView[ii].stValue.wsName := TO_WSTRING(stSettings[ii].sValue);
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_time_ms THEN
+		stSettingsView[ii].stValue.wsName := TO_WSTRING(TO_REAL(stSettings[ii].tValue));
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_time_s THEN
+		stSettingsView[ii].stValue.wsName := TO_WSTRING(TO_REAL(stSettings[ii].tValue) / 1000);	
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_time_m THEN
+		stSettingsView[ii].stValue.wsName := TO_WSTRING(TO_REAL(stSettings[ii].tValue) / 60000);	
+	ELSIF stSettings[ii].eDataType = E_DataType.eDataType_time_h THEN
+		stSettingsView[ii].stValue.wsName := TO_WSTRING(TO_REAL(stSettings[ii].tValue) / 360000);			
+	END_IF
+		
+END_FOR
+
+//monitoring for control
+CASE nColIndex OF
+
+	0: // group
+		IF (stSettings[nRowIndex].eDataType <> E_DataType.eDataType_None) THEN
+			stControlSettingOut.bVisible_String := TRUE;
+		END_IF
+		
+	1: // name only write by programmer
+		;
+		
+	2: // value
+		IF stSettings[nRowIndex].eDataType = E_DataType.eDataType_bool THEN
+			stControlSettingOut.bVisible_Bool := TRUE;
+		ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_int THEN
+			stControlSettingOut.bVisible_Number:= TRUE;
+		ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_lreal THEN
+			stControlSettingOut.bVisible_Float:= TRUE;
+		ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_wstring THEN
+			stControlSettingOut.bVisible_String:= TRUE;
+		ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_ms THEN
+			stControlSettingOut.bVisible_Number:= TRUE;
+		ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_s THEN
+			stControlSettingOut.bVisible_Float:= TRUE;
+		ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_m THEN
+			stControlSettingOut.bVisible_Float:= TRUE;
+		ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_h THEN
+			stControlSettingOut.bVisible_Float:= TRUE;			
+		ELSE
+			;
+		END_IF
+		
+	3: // min > user level programmer
+		stControlSettingOut.bVisible_Float := TRUE;	
+		
+	4: // max > user level programmer
+		stControlSettingOut.bVisible_Float := TRUE;	
+		
+	5: // unit only write by programmer
+		;		
+		
+	6: // unit user level programmer
+		IF (eUserLevel < E_User_Level.eUser_Level_Admin) THEN
+			tofInfo.IN :=	TRUE;
+			stInfo.wsName := "incorrect user level";
+			stInfo.wsNameId := "incorrectuserlevel";
+		ELSE
+			stControlSettingOut.bVisible_UserLevel := TRUE;	
+		END_IF	
+		
+	7: // type only write by programmer
+		;
+		
+	8: // recipe level manager
+		IF (eUserLevel < E_User_Level.eUser_Level_Manager) THEN
+			tofInfo.IN :=	TRUE;
+			stInfo.wsName := "incorrect user level";
+			stInfo.wsNameId := "incorrectuserlevel";
+		ELSE
+			stControlSettingOut.bVisible_RecipeMode := TRUE;	
+		END_IF	
+		
+END_CASE
+
+rtSave(CLK := stControlSettingIn.stButtonSave.bClick);
+IF rtSave.Q THEN
+	Services.bSettingsSaved := TRUE;
+	IF NOT F_ChkSettingUserLevel(eLevel := eUserLevel, stSetting := stSettings[nRowIndex], stInfo => stInfo) THEN
+		tofInfo.IN :=	TRUE;
+	ELSE
+		CASE nColIndex OF
+		
+			0: // group
+				IF (eUserLevel < E_User_Level.eUser_Level_Manager) 
+					OR (stSettings[nRowIndex].eUserLevel = E_User_Level.eUser_Level_Programmer AND (eUserLevel <> E_User_Level.eUser_Level_Programmer))
+				THEN
+					tofInfo.IN :=	TRUE;
+					stInfo.wsName := "incorrect user level";
+					stInfo.wsNameId := "incorrectuserlevel";
+				ELSE
+					stSettings[nRowIndex].stGroup.wsName := stSettings[nRowIndex].stGroup.wsNameId := stControlSettingIn.wsInputString;
+				END_IF
+				
+			1: // name only write by programmer
+				;
+				
+			2: // value
+
+				IF F_ChkSettingLimit(stControlSettingIn.nInputNumber, TO_LREAL(stControlSettingIn.fInputFloat), stSettings[nRowIndex], stInfo => stInfo) THEN
+					IF stSettings[nRowIndex].eDataType = E_DataType.eDataType_bool THEN
+						F_TrackSettingChangesB(stControlSettingIn.bInputBool, stSettings[nRowIndex], sChanges);
+					ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_int THEN
+						F_TrackSettingChangesI(stControlSettingIn.nInputNumber, stSettings[nRowIndex], sChanges);
+					ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_lreal THEN
+						F_TrackSettingChangesF(stControlSettingIn.fInputFloat, stSettings[nRowIndex], sChanges);
+					ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_wstring THEN
+						F_TrackSettingChangesWs(stControlSettingIn.wsInputString, stSettings[nRowIndex], sChanges);
+					ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_ms THEN
+						F_TrackSettingChangesT(TO_TIME(stControlSettingIn.nInputNumber), stSettings[nRowIndex], sChanges);
+					ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_s THEN
+						F_TrackSettingChangesT(TO_TIME((stControlSettingIn.fInputFloat) * 1000), stSettings[nRowIndex], sChanges);
+					ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_m THEN
+						F_TrackSettingChangesT(TO_TIME((stControlSettingIn.fInputFloat) * 60000), stSettings[nRowIndex], sChanges);
+					ELSIF stSettings[nRowIndex].eDataType = E_DataType.eDataType_time_h THEN
+						F_TrackSettingChangesT(TO_TIME((stControlSettingIn.fInputFloat) * 360000), stSettings[nRowIndex], sChanges);
+					END_IF
+				ELSE
+					tofInfo.IN := TRUE;
+				END_IF
+				
+			3: // min > user level admin
+				IF (eUserLevel < E_User_Level.eUser_Level_Admin) 
+					OR ((stSettings[nRowIndex].eUserLevel = E_User_Level.eUser_Level_Programmer) AND (eUserLevel <> E_User_Level.eUser_Level_Programmer))
+				THEN
+					tofInfo.IN :=	TRUE;
+					stInfo.wsName := "incorrect user level";
+					stInfo.wsNameId := "incorrectuserlevel";
+				ELSE
+					stSettings[nRowIndex].fValueMin := stControlSettingIn.fInputFloat;
+				END_IF
+				
+			4: // max > user level admin
+				IF (eUserLevel < E_User_Level.eUser_Level_Admin) 
+					OR ((stSettings[nRowIndex].eUserLevel = E_User_Level.eUser_Level_Programmer) AND (eUserLevel <> E_User_Level.eUser_Level_Programmer))
+				THEN
+					tofInfo.IN :=	TRUE;
+					stInfo.wsName := "incorrect user level";
+					stInfo.wsNameId := "incorrectuserlevel";
+				ELSE
+					stSettings[nRowIndex].fValueMax := stControlSettingIn.fInputFloat;
+				END_IF
+				
+			5: // unit only write by programmer
+				;
+					
+			6: // user level admin
+				IF (eUserLevel < E_User_Level.eUser_Level_Admin) 
+					OR ((stSettings[nRowIndex].eUserLevel = E_User_Level.eUser_Level_Programmer) AND (eUserLevel <> E_User_Level.eUser_Level_Programmer))
+				THEN
+					tofInfo.IN :=	TRUE;
+					stInfo.wsName := "incorrect user level";
+					stInfo.wsNameId := "incorrectuserlevel";
+				ELSE
+					IF (stControlSettingIn.eUserLevel = E_User_Level.eUser_Level_Programmer) AND (eUserLevel < E_User_Level.eUser_Level_Programmer) THEN
+						tofInfo.IN :=	TRUE;
+						stInfo.wsName := "incorrect user level";
+						stInfo.wsNameId := "incorrectuserlevel";						
+					ELSE
+						stSettings[nRowIndex].eUserLevel := stControlSettingIn.eUserLevel;
+					END_IF	
+				END_IF
+				
+			7: // type only write by programmer
+				;
+				
+			8: // recipe level manager
+				IF (eUserLevel < E_User_Level.eUser_Level_Manager) 
+					OR ((stSettings[nRowIndex].eUserLevel = E_User_Level.eUser_Level_Programmer) AND (eUserLevel <> E_User_Level.eUser_Level_Programmer))
+				THEN
+					tofInfo.IN :=	TRUE;
+					stInfo.wsName := "incorrect user level";
+					stInfo.wsNameId := "incorrectuserlevel";
+				ELSE
+					stSettings[nRowIndex].eRecipeMode := stControlSettingIn.eRecipeMode;
+				END_IF 				
+		END_CASE
+	END_IF
+END_IF
+
+tofInfo.PT := T#2S;
+tofInfo();
+tofInfo.IN := FALSE;
+		
+stControlSettingOut.bVisibleInfo := tofInfo.Q;
+stControlSettingOut.stInfo := stInfo;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SettingsHandling">
+      <LineId Id="3064" Count="185" />
+      <LineId Id="3252" Count="0" />
+      <LineId Id="3379" Count="0" />
+      <LineId Id="3253" Count="106" />
+      <LineId Id="371" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

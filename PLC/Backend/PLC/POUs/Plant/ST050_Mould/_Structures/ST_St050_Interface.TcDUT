@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St050_Interface" Id="{3641f86c-0794-4cfb-945a-2c52cb57d0a6}">
+    <Declaration><![CDATA[TYPE ST_St050_Interface :
+STRUCT
+	bEnableHG	: BOOL; // enable handling
+	
+	bReqS1Empty,
+	bReqS2Empty,
+	bReqS1Unfinished,
+	bReqS2Unfinished,
+	bReqS1NoCarrier,
+	bReqS2NoCarrier	: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

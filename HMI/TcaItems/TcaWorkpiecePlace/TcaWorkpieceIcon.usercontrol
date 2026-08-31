@@ -1,0 +1,53 @@
+<div id="TcaWorkpieceIcon" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="500" data-tchmi-creator-viewport-height="500">
+    <div id="TcaWorkpieceIcon_svg" data-tchmi-type="TcHmi.Controls.System.TcHmiHtmlHost" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%">
+        <svg width="100%" height="100%" viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg">
+            <style>
+                .circle-hover {
+                    transition: stroke-width 0.2s, stroke 0.2s;
+                }
+
+                .circle-glow {
+                    stroke: white;
+                    stroke-width: 2;
+                    filter: drop-shadow(0 0 12px white);
+                }
+            </style>
+            <g id="WorkpieceIcon" style="cursor:pointer;">
+                <circle id="circle" cx="0" cy="0" r="20" fill="rgba(236, 236, 236, 1)" class="circle-hover"></circle>
+                <circle id="inner" cx="0" cy="0" r="16" fill="none" stroke="white" stroke-width="2"></circle>
+                <text id="text" x="0" y="4" text-anchor="middle" font-size="12" fill="white">1</text>
+            </g>
+
+        </svg>
+    
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onAttached",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaWorkpieceIconRefresh",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiHtmlHost",
+            "symbolExpression": "%ctrl%TcaWorkpieceIcon_svg%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+
+
+</div>

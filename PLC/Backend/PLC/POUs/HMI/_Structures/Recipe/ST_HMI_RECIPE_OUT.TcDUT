@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_HMI_RECIPE_OUT" Id="{38dabcf1-3e39-4789-978c-acdeb2200154}">
+    <Declaration><![CDATA[TYPE ST_HMI_RECIPE_OUT :
+STRUCT
+	// Current Recipe Infos
+	
+	wsActiveRecipe					: WSTRING(255); // Read/Write
+	wsActiveRecipeComment			: WSTRING(255); // Read/Write
+	wsActiveRecipeProduct			: WSTRING(255); // Read/Write
+	wsActiveRecipeSavedInfo			: WSTRING(80);
+	bEnableSaveCurrentRecipe		: BOOL;
+	                                  
+	                                  
+	// Recipe Management              
+	bEnableCreateNewRecipe			: BOOL;
+	bEnableUpdateRecipe				: BOOL;
+                                      
+	aRecipeList						: ARRAY[0..iMaxIdxRecipe] OF WSTRING(255);
+	nMaxEntryRecipeList				: INT;
+	bEnableLoadRecipe				: BOOL;
+	bEnableDeleteRecipe				: BOOL;
+	bEnableCopyRecipe				: BOOL;
+                                      
+	stStatusText					: ST_Text;
+	stStatusColor					: ST_HMI_COLOR_STRING;
+	bStatusTextVisible				: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

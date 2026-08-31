@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St010_Interface" Id="{2aba1b69-5d4d-4ea4-8e94-2a231e866278}">
+    <Declaration><![CDATA[TYPE ST_St010_Interface :
+STRUCT
+	bEnableSequence,	// enable to main module
+	
+	bResponseChkIndex,
+	bResponseIsEmptySlot,
+	bResponseOpn	: BOOL;	// handshake response segment open
+	iConfirmPosition	: INT;	// handshake confirm segment open @ x,y index
+	
+	Trolley			: TcaTrolley;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

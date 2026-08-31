@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MODULES_INFO" Id="{2c501df4-e7cd-47e7-99d5-aea79e6ff34c}">
+    <Declaration><![CDATA[// info struct for all modules
+TYPE ST_MODULES_INFO EXTENDS ST_MODULE_STATIONS_INFO :
+STRUCT
+	astModuleStationsInfo	: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_MODULE_STATIONS_INFO;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

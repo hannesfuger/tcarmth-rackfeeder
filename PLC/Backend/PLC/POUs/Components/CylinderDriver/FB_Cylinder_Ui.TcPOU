@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Cylinder_Ui" Id="{a51a1ebb-16ff-47d4-b8ee-582c5b150466}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC FB_Cylinder_Ui EXTENDS FB_ManualUiBase
+VAR_INPUT
+	// Handbetrieb nach GRST
+	bManual_HP				: BOOL;
+	/// Handbetrieb nach AST
+	bManual_WP				: BOOL;
+	// Enable Mp
+	bEnable_Mp				: BOOL;
+END_VAR
+VAR_IN_OUT
+	// cylinder reference
+	fbCylinder				: FB_CylinderEx;
+	// hmi control IN
+	stHMIControlIn			: ST_HMI_MANUAL_CYLINDER_IN;
+	// hmi control IN
+	stHMIControlOut			: ST_HMI_MANUAL_CYLINDER_OUT;	
+END_VAR
+VAR_OUTPUT
+	diColorSelectedItem: UDINT;
+	/// 0=Undefiniert
+	/// 1=Fehler
+	/// 2=In GRST (eingefahren)
+	/// 3=In AST (ausgefahren) 
+	iState: INT;
+	diColorState	: UDINT;
+	sState			: STRING;
+	stState			: ST_Text;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[stName.wsName := TO_WSTRING(fbCylinder.sName);
+fbCylinder.diObjectIndex := diObjectIndex;
+fbCylinder.diSelectedObjectIndex := diSelectedObjectIndex;
+fbCylinder.bEnableManual := bEnableManual;
+fbCylinder.bManual_HP := stHMIControlIn.stButtonHp.bClick OR ((diObjectIndex = diSelectedObjectIndex) AND stHMIControlIn.stButtonHp.bClick) ;
+fbCylinder.bManual_WP := stHMIControlIn.stButtonWp.bClick OR ((diObjectIndex = diSelectedObjectIndex) AND stHMIControlIn.stButtonWp.bClick);
+
+IF ((diObjectIndex = diSelectedObjectIndex) AND stHMIControlIn.stButtonMp.bClick) AND ((fbCylinder.eValveType = E_ValveType.eValvetype_5_3_lock) OR (fbCylinder.eValveType = E_ValveType.eValvetype_5_3_unlock)) THEN
+	fbCylinder.ClearOuts();
+END_IF
+
+IF (diObjectIndex = diSelectedObjectIndex)AND (diObjectIndex <> 0) AND bEnableManual  THEN
+	bManualActive := TRUE;
+	stHMIControlOut.bVisible := TRUE;
+	stHMIControlOut.stButtonHp.stName := CONST.stTextListGlobal.stText_Hp;
+	stHMIControlOut.stButtonMp.stName := CONST.stTextListGlobal.stText_Mp;
+	stHMIControlOut.stButtonWp.stName := CONST.stTextListGlobal.stText_Wp;
+	stHMIControlOut.stObjectName.wsName := stHMIControlOut.stObjectName.wsNameId := TO_WSTRING(fbCylinder.sName);
+	stHMIControlOut.stButtonHp.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonWp.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.bMpVisible := bEnable_Mp;
+	stHMIControlOut.stButtonMp.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);	
+	
+	IF fbCylinder.bIn_HP THEN
+		stHMIControlOut.stButtonHp.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	ELSIF fbCylinder.bIn_WP THEN
+		stHMIControlOut.stButtonWp.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF
+ELSIF bManualActive THEN
+	bManualActive := FALSE;
+	stHMIControlOut.bVisible := FALSE;
+END_IF
+
+iState := fbCylinder.iStatus;
+
+CASE iState OF 
+	1:
+		sState:=fbCylinder.sErrText;
+		diColorState:= STATICS.stColor.Red;
+		stState.wsName := "error";
+		stState.wsNameId := "error";
+		stState.nNameId := 1;
+	2:
+		sState:= F_GetTranslatedTxtLib('Zylinder in HP', eLanguage);
+		diColorState:= STATICS.stColor.Green;
+		stState.wsName := "hp";
+		stState.wsNameId := "inhomepos";
+		stState.nNameId := 2;		
+	3:
+		sState:=F_GetTranslatedTxtLib('Zylinder in WP', eLanguage);
+		diColorState:= STATICS.stColor.Green;
+		stState.wsName := "wp";
+		stState.wsNameId := "wp";
+		stState.nNameId := 3;
+ELSE
+	sState:=F_GetTranslatedTxtLib(' Undefiniert ' , eLanguage);	
+	diColorState:= STATICS.stColor.Orange;
+	stState.wsName := "undifined";
+	stState.wsNameId := "undifined";
+	stState.nNameId := 0;	
+END_CASE
+
+
+IF (diObjectIndex=diSelectedObjectIndex) THEN
+	diColorSelectedItem:=STATICS.stColor.LimeGreen;
+ELSE
+	diColorSelectedItem:=STATICS.stColor.Gray;	
+END_IF
+
+A_StateMapping();
+]]></ST>
+    </Implementation>
+    <Action Name="A_StateMapping" Id="{f4205179-c03e-4c4f-8738-91f96f78c922}">
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(stStateObject) THEN
+	RETURN;
+END_IF
+
+// state mapping
+stStateObject.stState := stState;
+stStateObject.nIndexColor := diColorSelectedItem;
+//stStateObject.stValue.wsName := "HP/WP";]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Control_Hp" Id="{16763003-3a78-422c-8526-096a6859e534}">
+      <Declaration><![CDATA[METHOD Control_Hp : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bEnableManual THEN
+	bManual_HP:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Control_Wp" Id="{7cbc908c-89f4-430b-a634-e23c886113e8}">
+      <Declaration><![CDATA[METHOD Control_Wp : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bEnableManual THEN
+	bManual_WP:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Cylinder_Ui">
+      <LineId Id="1318" Count="0" />
+      <LineId Id="1105" Count="8" />
+      <LineId Id="1222" Count="0" />
+      <LineId Id="1114" Count="0" />
+      <LineId Id="1269" Count="0" />
+      <LineId Id="1115" Count="14" />
+      <LineId Id="1266" Count="2" />
+      <LineId Id="1130" Count="2" />
+      <LineId Id="1137" Count="35" />
+      <LineId Id="146" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Cylinder_Ui.A_StateMapping">
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Cylinder_Ui.Control_Hp">
+      <LineId Id="4" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_Cylinder_Ui.Control_Wp">
+      <LineId Id="5" Count="1" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

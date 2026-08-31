@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_Axis" Id="{f3e61a47-7cd4-43bb-9700-dece2cccc9e1}">
+    <Declaration><![CDATA[/// Enumeration of all axis drives.
+TYPE E_Axis :
+(
+	eAxis_none := 0,
+	// UnitTest axis
+	
+	// oven B CH
+	eAxis_OvenB_CH1,
+	eAxis_OvenB_CH2,
+	
+	// handling
+	eAxis_Handling_X,
+	eAxis_Handling_Y,
+	eAxis_Handling_Z,
+	
+	// oven B A
+	eAxis_OvenB,
+	eAxis_OvenA,
+	
+	// oven A CH
+	eAxis_OvenA_CH1,
+	eAxis_OvenA_CH2,
+
+	// storage
+	eAxis_Storage1,
+	eAxis_Storage2,
+	
+	eAxis_MaxAxis
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

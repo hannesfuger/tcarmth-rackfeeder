@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="P_UnitTest" Id="{5c5772d5-1f71-4e7f-878e-a1a5d7973b22}" SpecialFunc="None">
+    <Declaration><![CDATA[/// unit test program
+PROGRAM P_UnitTest
+VAR
+	/// UnitTest VARs
+	bInitDone			: BOOL;
+	bRunTest			: BOOL := TRUE;
+	bDone				: BOOL;
+	bTestOk				: BOOL;
+	ii					: INT;
+	iStep				: INT;
+	sLastError			: T_MaxString;
+	IItem				: ITestCase;
+	aTestItems			: ARRAY[0..iMaxIdxUnitTest] OF POINTER TO FB_TestCaseBase;
+	/// test case instances
+	fbTestFileLog		: FB_TestCase01FileLog;
+	fbTestSystemInfo	: FB_TestCase02SystemInfo;
+	fbTestStation		: FB_TestCase03Station;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// Unit test program
+///
+/// TP www.rmth.at 2014
+/// 
+/// HOW TO
+///		..run all tests:
+/// 		simply set the bRunTest flag (overall test result --> bTestOk)
+///
+/// 	...add a test case:
+///			1. copy a FB_TestCase... FB and rename it
+///			2. implement test logic in Run method
+///			3. add the instance in this Initialize method --> ready!
+///	 
+
+// call init action
+IF NOT bInitDone THEN
+	Initialize();
+	RETURN;
+END_IF
+
+// call unit tests
+CASE iStep OF
+	0: 	// wait for start
+		IF bRunTest THEN
+			ii := 0;
+			bDone := FALSE;
+			bTestOk := TRUE;
+			bRunTest := FALSE;
+			sLastError := sEmpty;
+			iStep := 10;	
+		END_IF
+		
+	10:	// get next test case
+		IF ii > iMaxIdxUnitTest THEN
+			bDone := TRUE;
+			iStep := 0;
+		ELSIF aTestItems[ii] <> 0 THEN
+			IItem := aTestItems[ii]^;
+			iStep := 20;
+		ELSE
+			iStep := 50; 	// next test
+		END_IF
+
+	20:	// reset test item
+		IItem.Reset();			
+		IF IItem.TestState <> E_TestCaseState.eTestCaseState_ready OR IItem.TestResult <> E_TestResult.eTestResult_none THEN
+			sLastError := Concat6('Test reset failed, test case index: ', INT_TO_STRING(ii), ' TestState: ', INT_TO_STRING(IItem.TestState), ' TestResult: ', INT_TO_STRING(IItem.TestResult));
+			bTestOk := FALSE;
+			iStep := 50; 	// next test 
+		ELSE
+			iStep := 30; 	// run test
+		END_IF
+
+	30:	// run test item
+		IItem.Run();
+		IF IItem.TestState <> E_TestCaseState.eTestCaseState_running THEN
+			bTestOk := bTestOk AND IItem.TestState = E_TestCaseState.eTestCaseState_finished AND IItem.TestResult = E_TestResult.eTestResult_ok;
+			IF IItem.TestState <> E_TestCaseState.eTestCaseState_finished OR IItem.TestResult <> E_TestResult.eTestResult_ok THEN
+				sLastError := Concat6('Test failed, test case index: ', INT_TO_STRING(ii), ' TestState: ', INT_TO_STRING(IItem.TestState), ' TestResult: ', INT_TO_STRING(IItem.TestResult));
+			END_IF
+			iStep := 50; 	// next test
+		END_IF
+		
+	50:	// next test item
+		ii := ii + 1;
+		iStep := 10;
+END_CASE]]></ST>
+    </Implementation>
+    <Action Name="Initialize" Id="{0cfa24d4-91f2-4170-aa40-82486b00fa99}">
+      <Implementation>
+        <ST><![CDATA[// set interface array instances
+aTestItems[ii] := ADR(fbTestFileLog);		ii := ii + 1;
+aTestItems[ii] := ADR(fbTestSystemInfo); 	ii := ii + 1;
+aTestItems[ii] := ADR(fbTestStation); 		ii := ii + 1;
+
+//aTestItems[ii] := ADR(fbTestpid..);	ii := ii + 1;
+
+bInitDone := TRUE;]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="P_UnitTest">
+      <LineId Id="108" Count="66" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="P_UnitTest.Initialize">
+      <LineId Id="2" Count="6" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

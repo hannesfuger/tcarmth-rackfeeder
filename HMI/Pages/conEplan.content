@@ -1,0 +1,7 @@
+<div id="conEplan" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-width-unit="%" data-tchmi-height-unit="%">
+
+<div id="TcHmiPdfViewer" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiPdfViewer" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%">
+
+</div>
+
+</div>

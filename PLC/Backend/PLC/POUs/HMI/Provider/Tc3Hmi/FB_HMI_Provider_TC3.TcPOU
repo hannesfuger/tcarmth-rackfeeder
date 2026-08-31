@@ -1,0 +1,527 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_HMI_Provider_TC3" Id="{836e141b-a066-4f0e-9bc2-7781bf259c31}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_HMI_Provider_TC3 EXTENDS FB_HMI_PROVIDER_BASE
+VAR_OUTPUT
+END_VAR
+VAR
+	ILog	: I_Logger;
+	stIn	: REFERENCE TO ST_FromTc3Hmi;
+	stOut	: REFERENCE TO ST_ToTc3Hmi;
+
+	fbCounter			: FB_CounterHandling;
+	
+	nPopupToken			: INT;
+	bResetToken			: BOOL;
+	tonResetToken		: TON;
+	
+	stInMain_Mirror		: ST_HMI_BASE_CONTROL_IN;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Internal" Id="{f201b223-3f8e-49e7-9b66-ad300a907129}" />
+    <Folder Name="Popup" Id="{84ffd6a9-3ca3-46e0-bcf4-5ba7d493e3db}" />
+    <Folder Name="ProjectSpecific" Id="{1cf73b23-7640-4977-a944-d0777493cc62}" />
+    <Method Name="M_Counter" Id="{d861ca0b-f083-4d76-bc86-90629ace4a62}">
+      <Declaration><![CDATA[METHOD M_Counter : BOOL
+VAR_INPUT
+END_VAR
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// counter handling
+fbCounter(eUserLevel := HMI.eUserLevel, stControlCounterIn := stIn.stControlCounter, stControlCounterOut := stOut.stControlCounter, stCounter := HMI.stCounter, stCounterView := stOut.stCounter);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_HmiToPlc" Id="{37424035-f23c-46fd-b31e-e511b9484f31}">
+      <Declaration><![CDATA[METHOD PRIVATE M_HmiToPlc : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// map specific in
+M_SpecificIn();
+M_HmiToPlc := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{c07d4bad-1ccc-4813-be21-5757930cee7f}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	ii		: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//aSClearText[EN] := 'Initialize TC3 HMI';
+
+// set up defaults
+eProvider := E_HMI_PROVIDER.eHmiProvider_TC3HMI;
+ILog := SERVICES.ILog;
+M_SetReferences(HMI.stHmiTc3.stOut, HMI.stHmiTc3.stIn);
+
+// recipe, settings and user management done only by this provider
+bRequestRecipeMgmt := TRUE;
+bRequestSettingMgmt := TRUE;
+bRequestUserMgmt := TRUE;
+
+FOR ii := 0 TO 30 DO
+	stOut.stSetupPlant[ii].stGet.wsName := stOut.stSetupPlant[ii].stGet.wsNameId := "0";
+	stOut.stSetupPlant[ii].stSet.wsName := stOut.stSetupPlant[ii].stSet.wsNameId := "0";
+	stOut.stSetupPlant[ii].stState.wsName := stOut.stSetupPlant[ii].stState.wsNameId := "0";
+END_FOR
+
+M_SpecificInit();
+
+//aSClearText[EN] := 'HMI init done.';
+M_Init := SUPER^.M_Init();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PlcToHmi" Id="{d28a57fd-5088-46a3-8a40-39b60bd7bc82}">
+      <Declaration><![CDATA[METHOD PRIVATE M_PlcToHmi : BOOL
+VAR
+	ii, nn, nnn	: DINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// map HMI provider interface out to TC3 hmi (mapping of common out not needed anymore, due to reference type!)
+//stTc3HmiOut.stCommon := stItfHmiOut.stCommon;
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+// system time and date
+stOut.stHeader.sDateAndTime := LEFT (Statics.sTimeString, 19);
+
+//language
+stOut.stHeader.nLanguageList := 2;
+stOut.stHeader.aLanguageList[0] := CONST.stTextListGlobal.stText_EN;
+stOut.stHeader.aLanguageList[1] := CONST.stTextListGlobal.stText_DE;
+stOut.stHeader.aLanguageList[2] := CONST.stTextListGlobal.stText_BE;
+
+stOut.stHeader.stMessageBox1 := CONST.stTextListGlobal.stText_AllOk;
+stOut.stHeader.stMessageBox2 := CONST.stTextListGlobal.stText_notextempty;
+stOut.stHeader.stMessageBox3 := CONST.stTextListGlobal.stText_notextempty;
+
+stOut.stHeader.stMessageBox1Color.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stOut.stHeader.stMessageBox2Color.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stOut.stHeader.stMessageBox3Color.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+// default buttons
+
+//set button language
+stOut.stControlCounter.stButtonSave.stName := stTextListGlobal.stText_Save;
+
+//--------------------------------------------------------------------------------------------------------------
+// safety - ES
+// safety - ES dynamic (loop)
+//stOut.stEmergencyStop[0].nState := SEL(P_Safety.arrEmergencyStopState[E_EmergencyStop.eEmergencyStop_A1], 0, 1);
+//stOut.stEmergencyStop[1].nState := SEL(P_Safety.arrEmergencyStopState[E_EmergencyStop.eEmergencyStop_M1P1], 0, 1);
+//stOut.stEmergencyStop[2].nState := SEL(P_Safety.arrEmergencyStopState[E_EmergencyStop.eEmergencyStop_M1P2], 0, 1);
+
+// doors
+//stOut.stDoor[0].stStateColor.color := F_ColorToStringHexColor(P_Safety.fbDoor[1].iDoorStateCol);
+
+M_SpecificOut();
+M_PlcToHmi := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Popup" Id="{4535c10a-fd4b-4f4f-93af-6d169a5feca8}" FolderPath="Popup\">
+      <Declaration><![CDATA[METHOD PRIVATE M_Popup : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[tonResetToken.IN := bResetToken;
+tonResetToken.PT := T#1S;
+tonResetToken();
+IF tonResetToken.Q THEN
+	bResetToken := FALSE;
+	M_PopupReset();
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PopupCheck" Id="{542dd2da-dd40-40c9-b4e0-bce7bbe67755}" FolderPath="Popup\">
+      <Declaration><![CDATA[METHOD PUBLIC M_PopupCheck : BOOL
+VAR_INPUT
+	nToken		: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_PopupCheck := (nPopupToken = 0) or (nPopupToken = nToken);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PopupReset" Id="{bdb7b7c5-ac2f-4f52-92ff-03e4ce81d64f}" FolderPath="Popup\">
+      <Declaration><![CDATA[METHOD PUBLIC M_PopupReset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[nPopupToken := 0;
+stOut.stPopup.bVisible := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PopupSet" Id="{e7659773-6f45-42ac-ba75-c20524d37a93}" FolderPath="Popup\">
+      <Declaration><![CDATA[METHOD PUBLIC M_PopupSet : INT
+VAR_INPUT
+	nToken			: int;
+	stText			: ST_TEXT;
+	stNameButton01	: ST_Text;
+	stNameButton02	: ST_Text;
+	stNameButton03	: ST_Text;
+	stNameButton04	: ST_Text;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_PopupSet := 0;
+nPopupToken := nToken;
+stOut.stPopup.bVisible := TRUE;
+stOut.stPopup.stText := stText;
+stOut.stPopup.bButton01:= FALSE;
+stOut.stPopup.bButton02:= FALSE;
+stOut.stPopup.bButton03:= FALSE;
+stOut.stPopup.bButton04:= FALSE;
+IF stNameButton01.wsNameId <>"" THEN
+	stOut.stPopup.bButton01:= TRUE;
+	stOut.stPopup.stButton01.stName := stNameButton01;
+END_IF
+IF stNameButton02.wsNameId <>"" THEN
+	stOut.stPopup.bButton02:= TRUE;
+	stOut.stPopup.stButton02.stName := stNameButton02;
+END_IF
+IF stNameButton03.wsNameId <>"" THEN
+	stOut.stPopup.bButton03:= TRUE;
+	stOut.stPopup.stButton03.stName := stNameButton03;
+END_IF
+IF stNameButton04.wsNameId <>"" THEN
+	stOut.stPopup.bButton04:= TRUE;
+	stOut.stPopup.stButton04.stName := stNameButton04;
+END_IF
+IF  HMI.stHmiTc3.stIn.stPopup.stButton01.bClick THEN
+	bResetToken	:= true;
+	M_PopupSet := 1;
+ELSIF HMI.stHmiTc3.stIn.stPopup.stButton02.bClick THEN
+	bResetToken	:= TRUE;
+	M_PopupSet := 2;	
+ELSIF HMI.stHmiTc3.stIn.stPopup.stButton03.bClick THEN
+	bResetToken	:= TRUE;
+	M_PopupSet := 3;	
+ELSIF HMI.stHmiTc3.stIn.stPopup.stButton04.bClick THEN
+	bResetToken	:= TRUE;
+	M_PopupSet := 4;		
+END_IF
+IF M_PopupSet <> 0 THEN
+	stOut.stPopup.bVisible := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{a7dc6071-1ee5-46a0-9915-4b919ad2444b}">
+      <Declaration><![CDATA[/// reset
+METHOD M_Reset : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_Reset := SUPER^.M_Reset();
+
+M_PopupReset();
+
+bRequestManualControl := FALSE;
+// recipe, settings and user management done only by this provider
+//bRequestRecipeMgmt := FALSE;
+//bRequestSettingMgmt := FALSE;
+//bRequestUserMgmt := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Run" Id="{41e4862b-eb73-4b6f-8aac-d6a037a8f3ac}">
+      <Declaration><![CDATA[METHOD M_Run : BOOL
+VAR_INST
+	tofCleanScreen		: TOF;
+	arrModuleManMir	: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_HMI_BASE_MODULE_MANUAL_IN;
+	arrStationManMir	: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_HMI_BASE_STATION_MANUAL_IN;
+END_VAR
+VAR
+	ii : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT SUPER^.M_Run() THEN
+	RETURN;
+END_IF
+
+// chk control request, e.g.: watch for changes --> stIn.arrStStation[xx].stManual...
+// modules
+FOR ii := 0 TO E_Module.eModule_nMaxIdx DO
+	IF P_Plant.aIModule[ii] = 0 THEN CONTINUE; END_IF
+	
+	IF (MEMCMP(ADR(arrModuleManMir[ii]), ADR(stIn.arrStModule[ii].stManual), SIZEOF(arrModuleManMir[ii])) <> 0) THEN
+		bRequestManualControl := TRUE; // request manual control on any change in .stManual. ...
+	END_IF
+	MEMCPY(ADR(arrModuleManMir[ii]), ADR(stIn.arrStModule[ii].stManual), SIZEOF(arrModuleManMir[ii]));
+END_FOR
+FOR ii := 0 TO E_Station.eStation_nMaxIdx DO	
+	IF P_Plant.aIStaton[ii] = 0 THEN CONTINUE; END_IF
+	
+	IF (MEMCMP(ADR(arrStationManMir[ii]), ADR(stIn.arrStStation[ii].stManual), SIZEOF(arrStationManMir[ii])) <> 0) THEN
+		bRequestManualControl := TRUE; // request manual control on any change in .stManual. ...
+	END_IF
+	MEMCPY(ADR(arrStationManMir[ii]), ADR(stIn.arrStStation[ii].stManual), SIZEOF(arrStationManMir[ii]));
+END_FOR
+
+// recipe, settings and user management done only by this provider
+bRequestRecipeMgmt := TRUE;
+bRequestSettingMgmt := TRUE;
+bRequestUserMgmt := TRUE;
+
+tofCleanScreen(IN := stHmi.stIn.stSpecial.stButton_CleanScreen.bClick, PT := T#1M, Q => bMute);
+
+M_HmiToPlc(); 
+M_Counter();
+M_PlcToHmi();
+
+M_Run := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetReferences" Id="{5e7e33ce-c0c5-4400-8bfa-1ab1eaa84945}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD M_SetReferences : BOOL
+VAR_IN_OUT
+	stToTc3Hmi		: ST_ToTc3Hmi;
+	stFromTc3Hmi	: ST_FromTc3Hmi;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_SetReferences := SUPER^.M_SetReferencesBase(stFromTc3Hmi, stToTc3Hmi);
+stOut REF= stToTc3Hmi;
+stIn REF= stFromTc3Hmi;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SpecificIn" Id="{6bf1315d-9de2-42f3-9b47-322c81e04232}" FolderPath="ProjectSpecific\">
+      <Declaration><![CDATA[METHOD INTERNAL M_SpecificIn : BOOL
+VAR_INPUT
+END_VAR
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// stations]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SpecificInit" Id="{bdde9759-a04d-4cbf-acdf-b85a5284be5e}" FolderPath="ProjectSpecific\">
+      <Declaration><![CDATA[METHOD INTERNAL M_SpecificInit : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	nn : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init project specific HMI provider stuff here
+
+(* stTc3HmiOut.stSetupPlant[1].stStation := stTextListGlobal.stText_ST005_NameId;
+stTc3HmiOut.stSetupPlant[1].stName := stTextListGlobal.stText_Drehwerkzeug;
+stTc3HmiOut.stSetupPlant[2].stStation := stTextListGlobal.stText_ST005_NameId;
+stTc3HmiOut.stSetupPlant[2].stName := stTextListGlobal.stText_Kontaktwerkzeug1;
+stTc3HmiOut.stSetupPlant[3].stStation := stTextListGlobal.stText_ST005_NameId;
+stTc3HmiOut.stSetupPlant[3].stName := stTextListGlobal.stText_Kontaktwerkzeug2; *)
+
+
+nn:=1;
+stOut.stEmergencyStop[nn].stName := stTextListGlobal.stText_Emergencystop_A1P1;
+stOut.stEmergencyStop[nn].stItem.wsName := stOut.stEmergencyStop[nn].stItem.wsNameId := "++A1+P1-6S2";
+nn:=nn+1;
+stOut.stEmergencyStop[nn].stName := stTextListGlobal.stText_Emergencystop_M1P1;
+stOut.stEmergencyStop[nn].stItem.wsName := stOut.stEmergencyStop[nn].stItem.wsNameId := "++M1+P1-2S1";
+nn:=nn+1;
+stOut.stEmergencyStop[nn].stName := stTextListGlobal.stText_Emergencystop_M1P2;
+stOut.stEmergencyStop[nn].stItem.wsName := stOut.stEmergencyStop[nn].stItem.wsNameId := "++M1+P2-2S1";
+
+
+nn:=1;
+stOut.stDoor[nn].stName := stTextListGlobal.stText_Modul1_Schott1;
+stOut.stDoor[nn].stItem.wsName := stOut.stDoor[nn].stItem.wsNameId := "++M1+PSEN_001-2S2";
+nn:=nn+1;
+stOut.stDoor[nn].stName := stTextListGlobal.stText_Modul1_Door1;
+stOut.stDoor[nn].stItem.wsName := stOut.stDoor[nn].stItem.wsNameId := "++M1+PSEN_002-2S2";
+nn:=nn+1;
+stOut.stDoor[nn].stName := stTextListGlobal.stText_Modul1_Door2;
+stOut.stDoor[nn].stItem.wsName := stOut.stDoor[nn].stItem.wsNameId := "++M1+PSEN_003-2S2";
+nn:=nn+1;
+stOut.stDoor[nn].stName := stTextListGlobal.stText_Modul1_Door3;
+stOut.stDoor[nn].stItem.wsName := stOut.stDoor[nn].stItem.wsNameId := "++M1+PSEN_004-2S2";
+nn:=nn+1;
+stOut.stDoor[nn].stName := stTextListGlobal.stText_Modul1_Door4;
+stOut.stDoor[nn].stItem.wsName := stOut.stDoor[nn].stItem.wsNameId := "++M1+PSEN_005-2S2";
+nn:=nn+1;
+stOut.stDoor[nn].stName := stTextListGlobal.stText_Modul1_Schott2;
+stOut.stDoor[nn].stItem.wsName := stOut.stDoor[nn].stItem.wsNameId := "++M1+E2-73BG7";
+
+// stations, e.g.:
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].astButton[1] := stItfHmiOut.stSt010.stButtonOvenAxx1;
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].stEingabeStatusColor := stItfHmiOut.stSt010.stOvenAStatusColor;
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].stEingabeStatus := stItfHmiOut.stSt010.stOvenAStatus;
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].astButton[2] := stItfHmiOut.stSt010.stButtonOvenAxx2;
+
+
+//aSClearText[EN] := 'HMI init done.';
+M_SpecificInit := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SpecificOut" Id="{279a2e2b-33c9-4282-83c6-d43c762a992f}" FolderPath="ProjectSpecific\">
+      <Declaration><![CDATA[METHOD INTERNAL M_SpecificOut : BOOL
+VAR_INPUT
+END_VAR
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//stOut.stConditionMonitoring.fVoltage_L1 := IO.stControlCabinetIO.stIn.stDevice_MonitoringVoltage400Vac.fL1_Voltage;
+//stOut.stConditionMonitoring.fVoltage_L2 := IO.stControlCabinetIO.stIn.stDevice_MonitoringVoltage400Vac.fL2_Voltage;
+//stOut.stConditionMonitoring.fVoltage_L3 := IO.stControlCabinetIO.stIn.stDevice_MonitoringVoltage400Vac.fL3_Voltage;
+//stOut.stConditionMonitoring.fVoltage_L1_L2 := IO.stControlCabinetIO.stIn.stDevice_MonitoringVoltage400Vac.fL1_L2Voltage;
+//stOut.stConditionMonitoring.fVoltage_L2_L3 := IO.stControlCabinetIO.stIn.stDevice_MonitoringVoltage400Vac.fL2_L3Voltage;
+//stOut.stConditionMonitoring.fVoltage_L3_L1 := IO.stControlCabinetIO.stIn.stDevice_MonitoringVoltage400Vac.fL3_L1Voltage;
+//stOut.stConditionMonitoring.fPowerFactor := IO.stControlCabinetIO.stIn.stDevice_MonitoringVoltage400Vac.fPowerQualityFactor;
+stOut.stConditionMonitoring.fCurrent_L1 := 0;
+stOut.stConditionMonitoring.fCurrent_L2 := 0;
+stOut.stConditionMonitoring.fCurrent_L3 := 0;
+
+// stations
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].astButton[1] := stItfHmiOut.stSt010.stButtonOvenAxx1;
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].stEingabeStatusColor := stItfHmiOut.stSt010.stOvenAStatusColor;
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].stEingabeStatus := stItfHmiOut.stSt010.stOvenAStatus;
+//stTc3HmiOut.astStation[E_Station.eStation_ST010_OvenA].astButton[2] := stItfHmiOut.stSt010.stButtonOvenAxx2;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="RefsValid" Id="{0056816f-71eb-4b3f-9087-b3e4cb454bac}" FolderPath="Internal\">
+      <Declaration><![CDATA[PROPERTY RefsValid : bool]]></Declaration>
+      <Get Name="Get" Id="{c0a17f07-129d-46ca-8a41-2fd45a5c2c3f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RefsValid := SUPER^.RefsValid AND_THEN
+			 __ISVALIDREF (stOut) AND_THEN
+			 __ISVALIDREF (stIn);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_HMI_Provider_TC3">
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_Counter">
+      <LineId Id="178" Count="1" />
+      <LineId Id="63" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_HmiToPlc">
+      <LineId Id="50" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="38" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_Init">
+      <LineId Id="6" Count="0" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="330" Count="0" />
+      <LineId Id="324" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="337" Count="1" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="336" Count="0" />
+      <LineId Id="157" Count="4" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="332" Count="0" />
+      <LineId Id="355" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_PlcToHmi">
+      <LineId Id="518" Count="5" />
+      <LineId Id="653" Count="4" />
+      <LineId Id="652" Count="0" />
+      <LineId Id="568" Count="7" />
+      <LineId Id="628" Count="17" />
+      <LineId Id="376" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_Popup">
+      <LineId Id="20" Count="5" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_PopupCheck">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_PopupReset">
+      <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_PopupSet">
+      <LineId Id="66" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="67" Count="22" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="96" Count="3" />
+      <LineId Id="45" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_Reset">
+      <LineId Id="104" Count="1" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="96" Count="2" />
+      <LineId Id="90" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_Run">
+      <LineId Id="75" Count="1" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="132" Count="2" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="144" Count="2" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="2" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="60" Count="4" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="65" Count="2" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="77" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_SetReferences">
+      <LineId Id="11" Count="0" />
+      <LineId Id="19" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_SpecificIn">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_SpecificInit">
+      <LineId Id="348" Count="47" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.M_SpecificOut">
+      <LineId Id="355" Count="8" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="364" Count="0" />
+      <LineId Id="348" Count="0" />
+      <LineId Id="351" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_Provider_TC3.RefsValid.Get">
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

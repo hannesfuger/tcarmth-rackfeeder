@@ -1,0 +1,966 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="P_Plant" Id="{865ed7b7-2f90-4264-9297-540b9e5cb01c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_Plant
+VAR_INPUT	
+	/// - stations, modules and components -
+	aIStaton			: ARRAY[0..E_Station.eStation_nMaxIdx] OF IStation;
+	aIModule			: ARRAY[0..E_Module.eModule_nMaxIdx] OF IModule;
+	aIComponent			: ARRAY[0..E_Component.eComponent_nMaxIdx] OF ITFComponent;
+END_VAR
+VAR
+	bInitSettingPlant		: BOOL;
+	bInitSettingProduct		: BOOL;
+	bInitSettingProduction	: BOOL;
+	
+	// plant empty... 
+	bPlantEmptyActiv	: BOOL;
+	bPlantEmpty			: BOOL;
+	// logger, notification handler
+	ILog				: I_Logger;
+	IEvent				: I_EventHandler;
+	
+	/// private var's
+	ii					: INT;
+	b1stShot			: BOOL;
+	tonDelay			: TON;
+	
+	/// clear text info
+	aSClearText			: ARRAY[0..eLanguage_maxIdx] OF T_MaxString;
+	bInitCounter		: BOOL;
+	
+	stSettingsPlantBackup		: ARRAY[0..E_PlantSettings.ePlantSetting_nMaxIdx] OF ST_Data_Item;
+	stSettingsProductBackup		: ARRAY[0..E_ProductSettings.eProductSettings_nMaxIdx] OF ST_Data_Item;
+	stSettingsProductionBackup	: ARRAY[0..E_ProductionSettings.eProductionSettings_nMaxIdx] OF ST_Data_Item;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// Plant
+///
+
+// run 
+aSClearText[EN] := 'Manage settings for plant, product and production';
+M_SettingsPlant();
+M_SettingsProduct();
+M_SettingsProduction();
+
+aSClearText[EN] := 'Calling modules...';
+FOR ii := 0 TO E_Module.eModule_nMaxIdx DO
+	IF aIModule[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	aIModule[ii].EmergencyStopOk := P_Safety.EmergencyStopOk;
+	aIModule[ii].M_Run(); // station run is called by its module
+END_FOR
+
+aSClearText[EN] := 'Calling stations, collect infos...';
+b1stShot := TRUE;
+FOR ii := 0 TO E_Station.eStation_nMaxIdx DO
+	IF aIStaton[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	F_AND_REF_EX(stGlobalModuleInfo.bStation_All_Auto, aIStaton[ii].OpMode = E_OpMode.eOpMode_auto, b1stShot);
+	F_OR_REF_EX(stGlobalModuleInfo.bStation_Any_Step, aIStaton[ii].OpMode = E_OpMode.eOpMode_step, b1stShot);
+	F_OR_REF_EX(stGlobalModuleInfo.bStation_Any_Manual, aIStaton[ii].OpMode = E_OpMode.eOpMode_manual, b1stShot);
+	
+	F_OR_REF_EX(stGlobalModuleInfo.bStation_Any_Error, aIStaton[ii].State = E_ComponentState.eComponentState_error, b1stShot);
+	F_OR_REF_EX(stGlobalModuleInfo.bStation_Any_Warning, aIStaton[ii].State = E_ComponentState.eComponentState_warning, b1stShot);
+	F_OR_REF_EX(stGlobalModuleInfo.bStation_Any_Info, aIStaton[ii].State = E_ComponentState.eComponentState_info, b1stShot);
+	
+	F_AND_REF_EX(stGlobalModuleInfo.bStation_All_Started, (aIStaton[ii].OpMode = E_OpMode.eOpMode_auto OR aIStaton[ii].OpMode = E_OpMode.eOpMode_step) AND aIStaton[ii].RunCycle, b1stShot);
+	F_AND_REF_EX(stGlobalModuleInfo.bStation_All_Stopped, aIStaton[ii].Stopped, b1stShot);
+	F_AND_REF_EX(stGlobalModuleInfo.bStation_All_InHome, aIStaton[ii].InHome, b1stShot);
+	F_OR_REF_EX(stGlobalModuleInfo.bStation_Any_Homing, aIStaton[ii].Homing, b1stShot);
+	
+	b1stShot := FALSE;
+END_FOR
+
+aSClearText[EN] := 'Calling stations, plant components...';
+FOR ii := 0 TO E_Component.eComponent_nMaxIdx DO
+	IF aIComponent[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	aIComponent[ii].Run();
+END_FOR
+
+aSClearText[EN] := 'Calling counter, check reset...';
+IF HMI.stHmi.stIn.stMain.stButton_Reset.bClick THEN
+	M_Reset();
+END_IF
+
+M_Counter();
+
+IF bPlantEmptyActiv THEN
+	IEvent.Select(Tc_Events.PlantEventClass.InfoEvent)
+		  .ArgSetWString(CONST.stTextListGlobal.stText_emptymodeactive.wsName)
+		  .Raise();
+END_IF]]></ST>
+    </Implementation>
+    <Folder Name="ProductSetting" Id="{23c323ea-90fc-48b9-b3d6-112ae450ee8b}" />
+    <Folder Name="Properties" Id="{19fcce78-8b71-4aff-bf06-10fea35bd0d9}" />
+    <Property Name="CarrierColumnDistance" Id="{d614c095-2942-447a-bb7e-6e747fcd0f52}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierColumnDistance : LREAL]]></Declaration>
+      <Get Name="Get" Id="{63bd9ca6-115e-4ad5-9a20-a62c9a6362fa}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierColumnDistance := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierColumnDistance].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierCoordinateFirstWorkpieceX" Id="{c0dc6dcd-2962-448a-be9f-b3a7717189fa}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierCoordinateFirstWorkpieceX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{49b16363-dc77-4aeb-aa78-133f4a8c0e5c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierCoordinateFirstWorkpieceX := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierCoordinateFirstWorkpieceX].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierCoordinateFirstWorkpieceY" Id="{dbcf1bce-36b7-40b4-b8a6-6da527a34e32}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierCoordinateFirstWorkpieceY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{213eaf75-7468-420b-8460-caaa35c7cb4a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierCoordinateFirstWorkpieceY := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierCoordinateFirstWorkpieceY].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierDimensionX" Id="{dffc587b-ddd6-4f20-bc9d-e52d0fce17cb}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierDimensionX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{b123b9b2-ab3c-453a-be19-90b3c885987f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierDimensionX := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierDimensionX].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierDimensionY" Id="{cf9419fe-23e3-4955-9c51-696ab5a6118c}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierDimensionY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{6070ea0d-230a-4b32-8efd-978fd3c3cada}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierDimensionY := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierDimensionY].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierInitialStatus" Id="{2ae210fe-4beb-4cb3-a9b9-b16033c482bd}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierInitialStatus : eTcaWorkpieceStatus]]></Declaration>
+      <Get Name="Get" Id="{ee2e7554-6614-400c-afed-0b02748188d2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierInitialStatus := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierInitialStatus].nValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierLayout" Id="{d3f64696-8718-4d08-8777-4517974a9459}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierLayout : INT]]></Declaration>
+      <Get Name="Get" Id="{78f177a3-903e-4a2d-81db-a6004501f7a9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierLayout := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierLayout].nValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierPositionsInColumn" Id="{064ec9c6-cccf-43ca-87aa-8ad2bcde7215}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierPositionsInColumn : INT]]></Declaration>
+      <Get Name="Get" Id="{2bbb56a1-6515-4d5b-ad37-548e12681a92}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierPositionsInColumn := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierPositionsInColumn].nValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierPositionsInRow" Id="{e97535ad-981a-442c-bb50-e4bc3be552e7}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierPositionsInRow : INT]]></Declaration>
+      <Get Name="Get" Id="{e88386ca-aa23-46fc-ab98-5333a66d9260}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierPositionsInRow := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierPositionsInRow].nValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierRequestStatus" Id="{85b9fb80-5234-4051-bcf7-4b685ec26b91}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierRequestStatus : eTcaWorkpieceStatus]]></Declaration>
+      <Get Name="Get" Id="{2b9f09c4-ffef-4b15-bec6-3e88dc7f3ba9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierRequestStatus := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierRequestStatus].nValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CarrierRowDistance" Id="{9b163953-0869-4826-bf6f-e8f7726cb893}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC CarrierRowDistance : LREAL]]></Declaration>
+      <Get Name="Get" Id="{18e8dd20-7310-428a-9614-dcef36611ac4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CarrierRowDistance := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_CarrierRowDistance].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HeatingPlateEnable" Id="{60bca0f0-cf57-41ee-8fc8-6f4c91f24d70}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[PROPERTY HeatingPlateEnable : BOOL]]></Declaration>
+      <Get Name="Get" Id="{829abe3a-b7ae-4c3a-ad6e-c3da17f90f64}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HeatingPlateEnable := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_HeatingPlateEnable].bValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HeatingPlateTemperature" Id="{5d9522bf-8692-4661-a4b8-f19b6b98a1ce}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[PROPERTY HeatingPlateTemperature : INT]]></Declaration>
+      <Get Name="Get" Id="{c415ddf1-c367-4888-b6dc-6cbd37a29f49}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HeatingPlateTemperature := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_HeatingPlateTemperatur].nValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="M_Counter" Id="{4738caff-80fd-476e-b77e-78d7fec25246}">
+      <Declaration><![CDATA[METHOD M_Counter : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//init counter
+IF NOT bInitCounter THEN
+	bInitCounter := TRUE;
+	
+	FOR ii := 0 TO CONST.iMaxIdxCounter DO
+		MEMSET(ADR(stCounter[ii].stGroup), 0, SIZEOF(stCounter[ii].stGroup));
+		MEMSET(ADR(stCounter[ii].stName), 0, SIZEOF(stCounter[ii].stName));
+		stCounter[ii].stGroup.wsNameId := stCounter[ii].stGroup.wsName := TO_WSTRING(ii);
+	END_FOR
+	
+	stCounter[E_Counter.eCounter_General].stName.wsName := "Zaehler | Gesamt";
+	//stCounter[E_Counter.eCounter_Maintenance].stName.wsName := "Zaehler | Wartung";
+	stCounter[E_Counter.eCounter_Shift].stName.wsName := "Zaehler | Schicht";
+	//stCounter[E_Counter.eCounter_Order].stName.wsName := "Zaehler | Auftrag";	
+	//stCounter[E_Counter.eCounter_St001].stName.wsName := "Zaehler | St001_Eingabe_Takte";
+
+	FOR ii := 0 TO CONST.iMaxIdxCounter DO
+		stCounter[ii].stName.wsNameId := stCounter[ii].stName.wsName;
+	END_FOR	
+END_IF
+
+
+FOR ii := 0 TO CONST.iMaxIdxCounter DO
+	IF (stCounter[ii].eCurrentReactionOkLevel1 = E_CounterReaction.eCounterReaction_Info) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.InfoEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 Ok');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionOkLevel2 = E_CounterReaction.eCounterReaction_Info) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.InfoEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 Ok');
+	END_IF
+	
+	IF (stCounter[ii].eCurrentReactionOkLevel1 = E_CounterReaction.eCounterReaction_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 Ok');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionOkLevel2 = E_CounterReaction.eCounterReaction_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 Ok');
+	END_IF
+
+	IF (stCounter[ii].eCurrentReactionOkLevel1 = E_CounterReaction.eCounterReaction_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 Ok');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionOkLevel2 = E_CounterReaction.eCounterReaction_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 Ok');
+	END_IF
+
+	
+	IF (stCounter[ii].eCurrentReactionNokLevel1 = E_CounterReaction.eCounterReaction_Info) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.InfoEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 NOk');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionNokLevel2 = E_CounterReaction.eCounterReaction_Info) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.InfoEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 NOk');
+	END_IF
+	
+	IF (stCounter[ii].eCurrentReactionNokLevel1 = E_CounterReaction.eCounterReaction_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 NOk');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionNokLevel2 = E_CounterReaction.eCounterReaction_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 NOk');
+	END_IF
+
+	IF (stCounter[ii].eCurrentReactionNokLevel1 = E_CounterReaction.eCounterReaction_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 NOk');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionNokLevel2 = E_CounterReaction.eCounterReaction_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 NOk');
+	END_IF
+	
+	
+	IF (stCounter[ii].eCurrentReactionTotalLevel1 = E_CounterReaction.eCounterReaction_Info) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.InfoEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 Total');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionTotalLevel2 = E_CounterReaction.eCounterReaction_Info) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.InfoEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 Total');
+	END_IF
+	
+	IF (stCounter[ii].eCurrentReactionTotalLevel1 = E_CounterReaction.eCounterReaction_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 Total');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionTotalLevel2 = E_CounterReaction.eCounterReaction_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 Total');
+	END_IF
+
+	IF (stCounter[ii].eCurrentReactionTotalLevel1 = E_CounterReaction.eCounterReaction_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 Total');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionTotalLevel2 = E_CounterReaction.eCounterReaction_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 Total');
+	END_IF
+
+
+	IF (stCounter[ii].eCurrentReactionNokLevel1 = E_CounterReaction.eCounterReaction_SerialFault_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 NOk Serienfehler');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionNokLevel2 = E_CounterReaction.eCounterReaction_SerialFault_Warning) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.WarningEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 NOk Serienfehler');
+	END_IF
+
+	IF (stCounter[ii].eCurrentReactionNokLevel1 = E_CounterReaction.eCounterReaction_SerialFault_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 1 NOk Serienfehler');
+	END_IF
+	IF (stCounter[ii].eCurrentReactionNokLevel2 = E_CounterReaction.eCounterReaction_SerialFault_Error) THEN
+		IEvent.Select(Tc_Events.PlantEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_NG_Counter.wsName)
+			  .ArgSbAppend(' | ')
+			  .ArgSbAppendWs(stCounter[ii].stName.wsName)
+			  .ArgSbAppendRaise(' | Level 2 NOk Serienfehler');
+	END_IF
+END_FOR	
+
+//reset counter
+
+//rtrigResetCounter.CLK:=HMI.stRmthVisu.stVisuToPlc.bResetCounter;
+//rtrigResetCounter();
+//
+//HMI.stRmthVisu.stVisuToPlc.iResetCounter:=LIMIT(1,HMI.stRmthVisu.stVisuToPlc.iResetCounter,(E_Counter.eCounter_Max-1));
+//
+//IF (HMI.stRmthVisu.stVisuToPlc.iResetCounter <=0) THEN
+//	;
+//ELSE
+//	IF rtrigResetCounter.Q  AND bUserLevel[1] THEN
+//		FOR ii:=2 TO (E_Counter.eCounter_Max-1) BY 1 DO 
+//			IF(HMI.stRmthVisu.stVisuToPlc.iResetCounter = 1) THEN
+//				F_Counter(E_CounterMode.eCounterMode_All_Clear,stCounter[ii]);	
+//			END_IF		
+//		END_FOR 
+//		IF (HMI.stRmthVisu.stVisuToPlc.iResetCounter <> 1) THEN
+//			F_Counter(E_CounterMode.eCounterMode_All_Clear,stCounter[LIMIT(2,HMI.stRmthVisu.stVisuToPlc.iResetCounter,(E_Counter.eCounter_Max-1))]);
+//		END_IF
+//	END_IF
+//	//shift counter
+//	IF HMI.stRmthVisu.stVisuToPlc.bResetShiftCounter  AND bUserLevel[E_User_Level.eUser_Level_Operator] THEN
+//		F_Counter(E_CounterMode.eCounterMode_All_Clear,stCounter[E_Counter.eCounter_Shift]);
+//	END_IF
+//	bShiftCounter_Min:=FALSE;
+//	bShiftCounter_Max:=FALSE;
+//	HMI.stRmthVisu.stPlcToVisu.iResetShiftCounterCol:=Col.LightGray;
+//	IF (stCounter[E_Counter.eCounter_Shift].fValue1 >= stCounter[E_Counter.eCounter_Shift].fValueMin) AND stCounter[E_Counter.eCounter_Shift].bYesNo THEN
+//		P_Hmi.SetNotificationPrio(E_Notification.eNotification_Counter_Info, F_TranslateAndConcat2Txts("Info | Schichtzähler", ""), E_Priority.ePriority_info);
+//		bShiftCounter_Min:=TRUE;
+//		HMI.stRmthVisu.stPlcToVisu.iResetShiftCounterCol:=Col.LightBlue;
+//	END_IF
+//	IF (stCounter[E_Counter.eCounter_Shift].fValue1 >= stCounter[E_Counter.eCounter_Shift].fValueMax) AND stCounter[E_Counter.eCounter_Shift].bYesNo THEN
+//		P_Hmi.SetNotificationPrio(E_Notification.eNotification_Counter_Warning, F_TranslateAndConcat2Txts("Warning | Schichtzähler", ""), E_Priority.ePriority_warning);
+//		bShiftCounter_Max:=TRUE;
+//		HMI.stRmthVisu.stPlcToVisu.iResetShiftCounterCol:=Col.Orange;
+//	END_IF
+//END_IF
+//	
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{397cde99-40f4-48fa-88b5-e393731dcab2}">
+      <Declaration><![CDATA[METHOD INTERNAL M_Init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init components stuff here...
+ILog := Services.ILog;
+IEvent := Services.fbEventHandler;
+
+bInitSettingPlant := FALSE;
+bInitSettingProduct := FALSE;
+bInitSettingProduction := FALSE;
+
+aSClearText[EN] := 'Plant init done.';
+M_Init := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_RegisterComponent" Id="{9d8354d3-c86d-4526-aed3-ae9fd87c6720}">
+      <Declaration><![CDATA[METHOD INTERNAL M_RegisterComponent : BOOL
+VAR_INPUT
+	IComponent : ITFComponent;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aIComponent[IComponent.ID] := IComponent;
+M_RegisterComponent := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_RegisterModule" Id="{9cd52e2d-c376-4bed-9ea8-914ae4074d16}">
+      <Declaration><![CDATA[METHOD INTERNAL M_RegisterModule : BOOL
+VAR_INPUT
+	IMod : IModule;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aIModule[IMod.Module] := IMod;
+M_RegisterModule := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_RegisterStation" Id="{cf7acc85-888c-4059-a81d-8216680aeac1}">
+      <Declaration><![CDATA[METHOD INTERNAL M_RegisterStation : BOOL
+VAR_INPUT
+	Ist : IStation;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aIStaton[ISt.Station] := ISt;
+M_RegisterStation := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{494d04a0-846f-4b8a-9555-c2a2d638da5a}">
+      <Declaration><![CDATA[/// resets all additional components
+METHOD M_Reset
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// reset all additional components
+
+//reset serial fault counter
+FOR ii := 0 TO CONST.iMaxIdxCounter DO
+	IF (stCounter[ii].eCurrentReactionNokLevel1 = E_CounterReaction.eCounterReaction_SerialFault_Warning) 
+		OR (stCounter[ii].eCurrentReactionNokLevel1 = E_CounterReaction.eCounterReaction_SerialFault_Error)
+		OR (stCounter[ii].eCurrentReactionNokLevel2 = E_CounterReaction.eCounterReaction_SerialFault_Warning) 
+		OR (stCounter[ii].eCurrentReactionNokLevel2 = E_CounterReaction.eCounterReaction_SerialFault_Error)  
+	THEN
+		F_Counter(E_CounterMode.eCounterMode_SerialError_Clear, stCounter[ii]);
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SettingsPlant" Id="{10161c05-8b40-4fa6-9c04-f097d93f7708}">
+      <Declaration><![CDATA[METHOD M_SettingsPlant : BOOL
+VAR_INPUT
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// plant settings
+IF NOT bInitSettingPlant THEN
+	bInitSettingPlant := TRUE;
+	stSettingsPlantBackup := stSettings.stPlant_Settings; // backup
+	MEMSET(ADR(stSettings.stPlant_Settings), 0, SIZEOF(stSettings.stPlant_Settings)); // reset
+	
+	F_InitDynDataItem(E_PlantSettings.ePlantSetting_RecipeName, 		// settings index
+		TO_WSTRING(E_PlantSettings.ePlantSetting_RecipeName),			// settings wsIndex
+		CONST.stEmptyText,												// group
+		stTextListGlobal.stText_RecipeName,								// name
+		stTextListGlobal.stText_name, E_DataType.eDataType_wstring,		// unit & data type
+		0, 0, 6,														// min, max & user level
+		E_RecipeMode.eRecipeMode_ToFrom,														
+		stSettings.stPlant_Settings);
+		
+	F_InitDynDataItem(E_PlantSettings.ePlantSetting_RecipeComment,
+		TO_WSTRING(E_PlantSettings.ePlantSetting_RecipeComment),
+		CONST.stEmptyText,
+		stTextListGlobal.stText_RecipeComment,
+		stTextListGlobal.stText_name, E_DataType.eDataType_wstring,
+		0, 0, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stPlant_Settings);
+		
+	F_InitDynDataItem(E_PlantSettings.ePlantSetting_PlantName,
+		TO_WSTRING(E_PlantSettings.ePlantSetting_PlantName),
+		CONST.stEmptyText,
+		stTextListGlobal.stText_PlantName,
+		stTextListGlobal.stText_name, E_DataType.eDataType_wstring,
+		0, 0, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stPlant_Settings);
+
+	F_InitDynDataItem(E_PlantSettings.ePlantSetting_PlantNumber,
+		TO_WSTRING(E_PlantSettings.ePlantSetting_PlantNumber),
+		CONST.stEmptyText,
+		stTextListGlobal.stText_PlantNumber,
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 100000, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stPlant_Settings);
+
+	F_RestoreSettingValues(stSettings.stPlant_Settings, stSettingsPlantBackup); // restore values
+END_IF
+
+// settings management
+//F_Settings_Management(stSettings.stPlant_Settings);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SettingsProduct" Id="{9bb898fe-26eb-40d8-9e72-b50327ba4da9}">
+      <Declaration><![CDATA[METHOD M_SettingsProduct : BOOL
+VAR_INPUT
+END_VAR
+	]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//init product settings
+IF NOT bInitSettingProduct THEN
+	bInitSettingProduct:=TRUE;
+	stSettingsProductBackup := stSettings.stProduct_Settings; // backup
+	MEMSET(ADR(stSettings.stProduct_Settings), 0, SIZEOF(stSettings.stProduct_Settings)); // reset
+
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_ProductNumber,	// settings index
+		TO_WSTRING(E_ProductSettings.eProductSettings_ProductNumber),	// settings wsIndex
+		F_CreateDynTextDefault("settingsproduct"),						// group
+		stTextListGlobal.stText_RecipeName,								// name
+		stTextListGlobal.stText_text, E_DataType.eDataType_wstring,		// unit & data type
+		0, 100000000, 6,												// min, max & user level
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_ProductName,
+		TO_WSTRING(E_ProductSettings.eProductSettings_ProductName),
+		F_CreateDynTextDefault("settingsproduct"),
+		F_CreateDynTextDefault("name"),
+		stTextListGlobal.stText_text, E_DataType.eDataType_wstring,
+		0, 0, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_ProductType,
+		TO_WSTRING(E_ProductSettings.eProductSettings_ProductType),
+		F_CreateDynTextDefault("settingsproduct"),
+		F_CreateDynTextDefault("type"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 10, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_TrolleyNumberOfCarriers,
+		TO_WSTRING(E_ProductSettings.eProductSettings_TrolleyNumberOfCarriers),
+		F_CreateDynTextDefault("settingsTrolley"),
+		F_CreateDynTextDefault("Palettenanzahl"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 50, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_TrolleyRackOriginX,
+		TO_WSTRING(E_ProductSettings.eProductSettings_TrolleyRackOriginX),
+		F_CreateDynTextDefault("settingsTrolley"),
+		F_CreateDynTextDefault("Origin_X"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 1000, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_TrolleyRackOriginY,
+		TO_WSTRING(E_ProductSettings.eProductSettings_TrolleyRackOriginY),
+		F_CreateDynTextDefault("settingsTrolley"),
+		F_CreateDynTextDefault("Origin_Y"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 2000, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_TrolleyRackDivision,
+		TO_WSTRING(E_ProductSettings.eProductSettings_TrolleyRackDivision),
+		F_CreateDynTextDefault("settingsTrolley"),
+		F_CreateDynTextDefault("Division"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 500, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_TrolleyCarrierDistance,
+		TO_WSTRING(E_ProductSettings.eProductSettings_TrolleyCarrierDistance),
+		F_CreateDynTextDefault("settingsTrolley"),
+		F_CreateDynTextDefault("CarrierDistance"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 200, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);				
+	
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierLayout,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierLayout),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("Layout"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 6, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierDimensionX,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierDimensionX),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("DimensionX"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 600, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);	
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierDimensionY,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierDimensionY),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("DimensionY"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 600, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);	
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierRowDistance,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierRowDistance),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("RowDistance"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 600, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);	
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierColumnDistance,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierColumnDistance),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("ColumnDistance"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 600, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);	
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierPositionsInRow,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierPositionsInRow),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("PositionsInRow"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 17, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierPositionsInColumn,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierPositionsInColumn),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("PositionsInColumn"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 17, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierCoordinateFirstWorkpieceX,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierCoordinateFirstWorkpieceX),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("CoordinateFirstWorkpieceX"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 600, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);	
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierCoordinateFirstWorkpieceY,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierCoordinateFirstWorkpieceY),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("CoordinateFirstWorkpieceY"),
+		stTextListGlobal.stText_mm, E_DataType.eDataType_lreal,
+		0, 600, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);	
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierRequestStatus,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierRequestStatus),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("RequestStatus"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 5, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_CarrierInitialStatus,
+		TO_WSTRING(E_ProductSettings.eProductSettings_CarrierInitialStatus),
+		F_CreateDynTextDefault("settingsCarrier"),
+		F_CreateDynTextDefault("InitialStatus"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 5, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_HeatingPlateEnable,
+		TO_WSTRING(E_ProductSettings.eProductSettings_HeatingPlateEnable),
+		F_CreateDynTextDefault("settingsHeatingPlate"),
+		F_CreateDynTextDefault("Enable"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_bool,
+		0, 5, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+	F_InitDynDataItem(E_ProductSettings.eProductSettings_HeatingPlateTemperatur,
+		TO_WSTRING(E_ProductSettings.eProductSettings_HeatingPlateTemperatur),
+		F_CreateDynTextDefault("settingsHeatingPlate"),
+		F_CreateDynTextDefault("Temperature"),
+		stTextListGlobal.stText_n, E_DataType.eDataType_int,
+		0, 5, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduct_Settings);		
+
+
+
+F_RestoreSettingValues(stSettings.stProduct_Settings, stSettingsProductBackup); // restore values
+END_IF
+
+// settings management
+F_Settings_Management(stSettings.stProduct_Settings);
+
+stSettings.stCarrier.ColumnDistance := CarrierColumnDistance;
+stSettings.stCarrier.CoordinateFirstWorkpiece.fX := CarrierCoordinateFirstWorkpieceX;
+stSettings.stCarrier.CoordinateFirstWorkpiece.fY := CarrierCoordinateFirstWorkpieceY;
+stSettings.stCarrier.Dimension.fX := CarrierDimensionX;
+stSettings.stCarrier.Dimension.fY := CarrierDimensionY;
+stSettings.stCarrier.InitialStatus := CarrierInitialStatus;
+stSettings.stCarrier.Layout := CarrierLayout;
+stSettings.stCarrier.PositionsInColumn := CarrierPositionsInColumn;
+stSettings.stCarrier.PositionsInRow := CarrierPositionsInRow;
+stSettings.stCarrier.RequestStatus := CarrierRequestStatus;
+stSettings.stCarrier.RowDistance := CarrierRowDistance;
+
+stSettings.stTrolley.CarrierConfig := stSettings.stCarrier;
+stSettings.stTrolley.CarrierDistance := TrolleyCarrierDistance;
+stSettings.stTrolley.NumberOfCarriers := TrolleyNumberOfCarriers;
+stSettings.stTrolley.RackDivision := TrolleyRackDivision;
+stSettings.stTrolley.RackOrigin.fX := TrolleyRackOriginX;
+stSettings.stTrolley.RackOrigin.fY := TrolleyRackOriginY;
+stSettings.stTrolley.RackOrigin.fZ := TrolleyRackOriginZ;
+
+
+
+
+
+
+
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SettingsProduction" Id="{82d4771d-d863-478d-a017-59ffd22755d4}">
+      <Declaration><![CDATA[METHOD M_SettingsProduction : BOOL
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init  production settings
+IF NOT bInitSettingProduction THEN
+	bInitSettingProduction := TRUE;
+	stSettingsProductionBackup := stSettings.stProduction_Settings; // backup
+	MEMSET(ADR(stSettings.stProduction_Settings), 0, SIZEOF(stSettings.stProduction_Settings));		// reset
+
+	F_InitDynDataItem(E_ProductionSettings.eProductionSettings_Override,	// settings index
+		TO_WSTRING(E_ProductionSettings.eProductionSettings_Override),		// settings wsIndex
+		F_CreateDynText("settingsproduction", 0),							// group
+		stTextListGlobal.stText_PlantSpeedOverride,							// name
+		stTextListGlobal.stText_percent, E_DataType.eDataType_int,			// unit & data type
+		0, 1500, 6,															// min, max & user level
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduction_Settings);
+		
+	F_InitDynDataItem(E_ProductionSettings.eProductionSettings_OrderNumber,
+		TO_WSTRING(E_ProductionSettings.eProductionSettings_OrderNumber),
+		F_CreateDynText("settingsproduction", 0),
+		stTextListGlobal.stText_OrderNumber,
+		stTextListGlobal.stText_text, E_DataType.eDataType_wstring,
+		0, 40, 6,
+		E_RecipeMode.eRecipeMode_ToFrom,
+		stSettings.stProduction_Settings);
+		
+	F_RestoreSettingValues(stSettings.stProduction_Settings, stSettingsProductionBackup); // restore values
+END_IF
+
+// settings management
+F_Settings_Management(stSettings.stProduction_Settings);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="TrolleyCarrierDistance" Id="{0c1f3ec4-9978-4ebf-a656-e6f9379c3de9}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC TrolleyCarrierDistance : LREAL]]></Declaration>
+      <Get Name="Get" Id="{a1d3362d-a8fc-4ed0-bde2-999abbef0fb5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TrolleyCarrierDistance := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_TrolleyCarrierDistance].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TrolleyNumberOfCarriers" Id="{0b5f0414-3ec7-4f89-829a-318e9c4a399a}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC TrolleyNumberOfCarriers : INT]]></Declaration>
+      <Get Name="Get" Id="{6f6593b3-0c12-4163-ae5b-1dd088e7bad4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TrolleyNumberOfCarriers := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_TrolleyNumberOfCarriers].nValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TrolleyRackDivision" Id="{afed1cc2-4e14-48f3-a86a-a1df982a3c83}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC TrolleyRackDivision : LREAL]]></Declaration>
+      <Get Name="Get" Id="{5fae1816-57b8-4131-9501-7431c2248294}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TrolleyRackDivision := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_TrolleyRackDivision].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TrolleyRackOriginX" Id="{4b05573b-d876-497a-8318-e30152128a8e}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC TrolleyRackOriginX : LREAL]]></Declaration>
+      <Get Name="Get" Id="{bd5c0166-a129-426d-a04d-67ff2a6e9315}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TrolleyRackOriginX := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_TrolleyRackOriginX].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TrolleyRackOriginY" Id="{12abf1fc-cd66-42ea-9357-5c2442287f31}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC TrolleyRackOriginY : LREAL]]></Declaration>
+      <Get Name="Get" Id="{9d32ce32-47af-451f-910a-6112c7b80aed}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TrolleyRackOriginY := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_TrolleyRackOriginY].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TrolleyRackOriginZ" Id="{fe7edd34-0535-4f85-a140-8c1e7d60bb58}" FolderPath="ProductSetting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC TrolleyRackOriginZ : LREAL]]></Declaration>
+      <Get Name="Get" Id="{27597750-c184-4dd9-a8ae-0315b4afbc3f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TrolleyRackOriginZ := stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_TrolleyRackOriginZ].fValue;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

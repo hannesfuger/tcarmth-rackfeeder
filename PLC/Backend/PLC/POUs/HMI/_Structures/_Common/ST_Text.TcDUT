@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Text" Id="{ad61dd65-539f-4b0e-9134-6ed7a9d2b378}">
+    <Declaration><![CDATA[TYPE ST_Text :
+STRUCT
+	nNameId		: INT;		//example simatic hmi
+	wsNameId	: WSTRING; 	//beckhoff tc3 hmi
+	wsName		: WSTRING;	//standard name only english
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MGB2_OUT" Id="{789a282e-4d29-44b2-a78f-a952d726ce06}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MGB2_OUT :
+STRUCT
+	///LM_O_CL | nicht sichere Ansteuerung der Zuhaltung
+	bLM_O_CL: BOOL;
+	///LM_ACK_ER | Quittierbit für Fehler Fluchtentriegelung
+	bLM_ACK_ER: BOOL;
+	///LM_ACK_G | Quittierbit für Fehler allgemein
+	bLM_ACK_G: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

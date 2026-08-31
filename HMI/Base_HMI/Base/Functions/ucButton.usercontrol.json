@@ -1,0 +1,39 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-stbuttontohmi",
+      "displayName": "stButtonToHmi",
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_Button_ToHmi",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stButtonToHmi",
+      "propertySetterName": "setStButtonToHmi",
+      "propertyGetterName": "getStButtonToHmi",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-stbuttonfromhmi",
+      "displayName": "stButtonFromHmi",
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_Button_FromHmi",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stButtonFromHmi",
+      "propertySetterName": "setStButtonFromHmi",
+      "propertyGetterName": "getStButtonFromHmi",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "../../../../TC3/Packages/Beckhoff.TwinCAT.HMI.Framework.12.742.5/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CheckRangeUnsigned" Id="{7f1e9e30-5378-47f3-bf83-c38447c18023}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Implicitly generated code : DO NOT EDIT
+/// Checks subrange value. If value is outside [lower,upper], it is set to the closer bound and reports the error.
+{attribute 'check_range_unsigned' := ''}
+{attribute 'no_check' := ''}
+FUNCTION CheckRangeUnsigned : UDINT
+VAR_INPUT
+	value: UDINT;
+	lower: UDINT;
+	upper: UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// align to bounds 
+CheckRangeUnsigned := MIN(upper, MAX(lower, value));
+
+// if value changed, report error
+IF CheckRangeUnsigned <> value THEN
+	Services.fbEventHandler.Select(TC_Events.CodeEventClass.ErrorEvent)
+						   .ArgSetString('range unsigned')
+						   .Raise();
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="CheckRangeUnsigned">
+      <LineId Id="3" Count="4" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_FindBackupItem" Id="{1d6b7091-391d-4308-b767-21bc271d12f9}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_FindBackupItem : REFERENCE TO ST_Data_Item
+VAR_IN_OUT
+	stItem		: ST_Data_Item;
+	astBackup	: ARRAY[*] OF ST_Data_Item;
+END_VAR
+VAR
+	xx, nLb, nUb	: INT;
+	stEmpty			: ST_Data_Item;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nLb := TO_INT(LOWER_BOUND(astBackup, 1));
+nUb := TO_INT(UPPER_BOUND(astBackup, 1));
+
+// try to find item by wsNameId (in order to support insert and delete items)
+IF stItem.stName.wsName <> CONST.wsEmpty THEN
+	FOR xx := nLb TO nUb DO
+		IF astBackup[xx].stIndex.wsNameId = stItem.stIndex.wsNameId THEN
+			F_FindBackupItem REF= astBackup[xx]; // found, return
+			RETURN;
+		END_IF
+	END_FOR
+END_IF
+
+// if not found, return item by index
+IF stItem.stIndex.nNameId >= nLb AND stItem.stIndex.nNameId <= nUb THEN
+	F_FindBackupItem REF= astBackup[stItem.stIndex.nNameId]; // found, return
+	RETURN;
+END_IF
+
+
+// not found at all
+F_FindBackupItem REF= stEmpty;]]></ST>
+    </Implementation>
+    <LineIds Name="F_FindBackupItem">
+      <LineId Id="14" Count="20" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

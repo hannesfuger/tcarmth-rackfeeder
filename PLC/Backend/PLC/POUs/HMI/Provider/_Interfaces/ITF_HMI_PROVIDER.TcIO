@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="ITF_HMI_PROVIDER" Id="{219cc275-7f64-4fdb-8aff-67e9a5fc7b6f}">
+    <Declaration><![CDATA[INTERFACE ITF_HMI_PROVIDER
+]]></Declaration>
+    <Folder Name="Methods" Id="{3f82c239-638b-4502-ae9f-245315d37f17}" />
+    <Folder Name="Properties" Id="{1672e975-d0d2-45d3-8ab7-86355377e7b8}" />
+    <Property Name="ItfHmiIn" Id="{4575fe8e-efbe-482b-9fb4-b4c12d920b08}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ItfHmiIn : REFERENCE TO ST_HMI_IN]]></Declaration>
+      <Get Name="Get" Id="{e06eb870-c282-4779-933b-b4837a6201f1}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="ItfHmiOut" Id="{e7c6f1f0-70e7-4eef-8290-7b630e8838b3}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ItfHmiOut : REFERENCE TO ST_HMI_OUT]]></Declaration>
+      <Get Name="Get" Id="{fc47e092-cec2-44d7-b28b-e1da85417b72}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="M_Reset" Id="{a79a26cf-e3c2-4b17-82fe-bb5169d8281b}" FolderPath="Methods\">
+      <Declaration><![CDATA[/// reset
+METHOD M_Reset : BOOL
+VAR
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_Run" Id="{3df8db0b-4176-4208-93c6-a86ea25db0d4}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD M_Run : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Mute" Id="{e5b62302-90be-42b3-8957-8fae2a73c7ea}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Mute : bool]]></Declaration>
+      <Get Name="Get" Id="{0e731040-0539-410e-ab66-257c065ea076}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Provider" Id="{86b7d6f5-f78e-4de8-8cee-a8d75d0db03b}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Provider : E_HMI_PROVIDER]]></Declaration>
+      <Get Name="Get" Id="{3415edfc-7c99-4031-b744-1a902bd98ecd}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RequestManualControl" Id="{d9f3abc9-ff81-47c4-b965-a983658d5c2b}" FolderPath="Properties\">
+      <Declaration><![CDATA[// HMI control request (Bedienhoheit)
+//	set ti true, on any control request from the HMI provider (e.g.: watch IN struct)
+//	reset will be done by HMI controller, on other provider request  
+{attribute 'monitoring' := 'call'}
+PROPERTY RequestManualControl : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f20bc6a8-baaf-4052-a6d8-974bba438fff}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{6fae0697-6b4c-48ef-a3de-29bf357dae20}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="RequestRecipeMgmt" Id="{92fdf764-9d13-47a7-bf09-372a42ba0bd7}" FolderPath="Properties\">
+      <Declaration><![CDATA[// HMI recipe control request (Bedienhoheit)  
+{attribute 'monitoring' := 'call'}
+PROPERTY RequestRecipeMgmt : BOOL]]></Declaration>
+      <Get Name="Get" Id="{9782190e-f1a4-4541-8562-7aadbf83759d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{853f15e3-8019-4e3c-809a-3c3b9ad0c384}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="RequestSettingMgmt" Id="{8871d424-3fa1-4e9b-9cb1-46ee1ff07e39}" FolderPath="Properties\">
+      <Declaration><![CDATA[// HMI settings control request (Bedienhoheit)  
+{attribute 'monitoring' := 'call'}
+PROPERTY RequestSettingMgmt : BOOL]]></Declaration>
+      <Get Name="Get" Id="{c4904e0f-eccd-4b11-a884-7c919ac9cb90}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{fd2e8bd7-6b35-411d-9b0d-95e534751b9f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="RequestUserMgmt" Id="{b606ec5d-7426-457d-8088-89da2a4e6156}" FolderPath="Properties\">
+      <Declaration><![CDATA[// HMI user management control request (Bedienhoheit)  
+{attribute 'monitoring' := 'call'}
+PROPERTY RequestUserMgmt : BOOL]]></Declaration>
+      <Get Name="Get" Id="{09c4a8cb-7aea-4559-a164-164679e0354f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{363db7a9-6c1e-4006-b5f9-2166500024b6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

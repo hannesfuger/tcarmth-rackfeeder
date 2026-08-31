@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="eTcaWorkpieceStatus" Id="{d29c626f-62d9-4d08-87c8-1233417dc64f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'to_string'}
+TYPE eTcaWorkpieceStatus :
+(
+	undefined := 0, //leer
+	noProcessDone, // grau
+	laserProcessDone, // blau
+	bondingAgentProcessDone, // orange
+	castingProcessDone, //  violett
+	finishProcessDone, //grün
+	
+
+	MAXSIZE
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

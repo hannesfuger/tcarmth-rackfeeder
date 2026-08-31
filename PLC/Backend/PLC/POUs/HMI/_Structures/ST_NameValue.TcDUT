@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_NameValue" Id="{666ee2f4-fb66-411f-8da6-a6ddabea0c86}">
+    <Declaration><![CDATA[TYPE ST_NameValue :
+STRUCT
+	sName 	: STRING(31);
+	sValue 	: STRING; 
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

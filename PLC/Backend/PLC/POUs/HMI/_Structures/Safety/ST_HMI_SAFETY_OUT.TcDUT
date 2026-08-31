@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_SAFETY_OUT" Id="{fb1b1409-ba00-4eea-95e3-ae160fd9965d}">
+    <Declaration><![CDATA[TYPE ST_HMI_SAFETY_OUT :
+STRUCT
+	// Safety Infos
+	
+	/// EmergencyStop/Not-Halt Status von Safety (TRUE = OK)
+	bSAFE_ES_Ok				: BOOL;
+	
+	/// State of every emergency stop button (TRUE = OK)
+	bSAFE_EStop_State		: ARRAY[0..E_EmergencyStop.eEmergencyStop_nMaxIdx] OF BOOL;
+	
+	/// Schutzbereich OK von Safety (TRUE = OK)
+	bSAFE_AREA_Ok			: ARRAY[0..iSafety_Anzahl_Schutzbereiche] OF BOOL;
+	bSAFE_AREA_Ok_Color		: ARRAY[0..iSafety_Anzahl_Schutzbereiche] OF ST_HMI_COLOR_STRING;
+	
+	/// GATE OK von Safety (TRUE = OK)
+	stSAFE_GATE_Ok_Color	: ARRAY[0..E_Door.eDoor_nMaxIdx] OF ST_HMI_COLOR_STRING;
+			
+	/// Zustimmeinrichtung von Safety (TRUE = OK)
+	bSAFE_CONFIRMDEVICE_OK	: BOOL;
+	
+	bLedResetSafety,
+	bLedResetAreaST10,
+	bLedResetAreaST33		: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,41 @@
+{
+  "parameters": [
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setStCmdTr",
+      "propertyGetterName": "getStCmdTr",
+      "refTo": "",
+      "name": "data-tchmi-stcmdtr",
+      "displayName": "stCmdTr",
+      "visible": true,
+      "type": "tchmi:server#/definitions/ADS-PLC1.ST_St010_HMI_IN_OUT",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "stCmdTr"
+    },
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setStTr",
+      "propertyGetterName": "getStTr",
+      "refTo": "",
+      "name": "data-tchmi-sttr",
+      "displayName": "stTr",
+      "visible": true,
+      "type": "tchmi:server#/definitions/ADS-PLC1.ST_Trolley",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "stTr"
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.133/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_ManualObjectControlMode" Id="{aa654f59-239f-429d-9cbc-8f06b5a01853}">
+    <Declaration><![CDATA[TYPE E_ManualObjectControlMode :
+(
+	eManualObjectControlMode_none := 0,
+	eManualObjectControlMode_cylinder := 1,
+	eManualObjectControlMode_device := 2,
+	eManualObjectControlMode_servo := 3
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

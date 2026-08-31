@@ -1,0 +1,38 @@
+Info:
+
+Seitenindexe:
+Main = 1
+
+Recipemanagment = 5
+
+Counter = 10
+
+Usermanagment = 15
+Usermanagment Editor = 16
+
+Message = 20
+Message History = 21
+
+Plant overview = 30
+
+Special = 40
+
+Systeminformation = 100
+
+Station 001 = 101
+Station 001 Settings = 111
+Station 001 Anzeigen = 121
+Station 001 Manual = 131
+
+Station 002 = 201
+Station 002 Settings = 211
+Station 002 Anzeigen = 221
+Station 002 Manual = 231
+
+Station 003 = 301
+
+...
+
+Station 010 = 1001
+
+...

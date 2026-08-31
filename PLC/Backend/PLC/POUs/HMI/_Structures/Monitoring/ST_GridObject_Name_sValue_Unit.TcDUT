@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <DUT Name="ST_GridObject_Name_sValue_Unit" Id="{6952254f-3d71-4ee2-9a99-11b67a53f049}">
+    <Declaration><![CDATA[TYPE ST_GridObject_Name_sValue_Unit :
+STRUCT
+	sGroup				:STRING;
+	sName				:STRING;
+	sValue				:STRING;
+	sValueMin			:STRING;
+	sValueMax			:STRING;
+	bYesNo				:BOOL;
+	sUnit				:STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

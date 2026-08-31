@@ -1,0 +1,173 @@
+<div id="storage_6" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="500" data-tchmi-creator-viewport-height="500">
+<div id="storage_Popup" data-tchmi-type="TcHmi.Controls.System.TcHmiPopup" data-tchmi-header-text="Workpiece" data-tchmi-modal="False" data-tchmi-left="50" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-right="50" data-tchmi-right-unit="%" data-tchmi-top="50" data-tchmi-bottom="50" data-tchmi-width="100" data-tchmi-height="100">
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-target-file" type="application/json">
+{
+  "path": "Workpiece.usercontrol"
+}
+</script>
+</div>
+<div id="storage_host" data-tchmi-type="TcHmi.Controls.System.TcHmiHtmlHost" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%">
+
+    <script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": false,
+        "symbolExpression": "%s%WpcState[10]%/s%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:general#/definitions/INT",
+          "value": null
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "JavaScript",
+        "active": false,
+        "sourceLines": [
+          "function svgClicked(event) {",
+          "if (event.target.tagName === 'circle' || event.target.tagName === 'CIRCLE') {",
+          "\t\t         ",
+          "\tTcHmi.Symbol.writeEx('%pp%intvar%/pp%', event.target.id, function(data) {",
+          "\t\t                     \t",
+          "\tvar workpieceIndex =  event.target.id;",
+          "    console.log(workpieceIndex);",
+          "    ",
+          "                                           ",
+          "    if (data.error === TcHmi.Errors.NONE) {        ",
+          "    const popup = TcHmi.Controls.get('storage_Popup');",
+          "    popup.open();",
+          "     ",
+          "    \tif (popup) {  ",
+          "    \tvar userControl = popup.__children[0];     ",
+          "    \t",
+          " \t\t\tif(userControl){",
+          "    \t\t    \t\t",
+          "     \t\tTcHmi.Binding.createEx2('%pp%intvar%/pp%', 'Index', userControl);",
+          " \t\t\t} ",
+          "    \t",
+          "     \t}                     ",
+          "         ",
+          "    } else {",
+          "    console.error('Fehler beim Schreiben:', data.error);",
+          "    }",
+          "                      ",
+          " \t});    ",
+          "                        ",
+          " }",
+          " }",
+          " ",
+          " svgClicked(event);"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      },
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.storageSelect",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiPopup",
+            "symbolExpression": "%ctrl%storage_Popup%/ctrl%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onAttached",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.FunctionJS1",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%storage_host%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%pp%row%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%pp%column%/pp%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%pp%row%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.FunctionJS1",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%storage_host%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/INT",
+            "symbolExpression": "%pp%row%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/INT",
+            "symbolExpression": "%pp%column%/pp%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%pp%column%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.FunctionJS1",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%storage_host%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/INT",
+            "symbolExpression": "%pp%row%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/INT",
+            "symbolExpression": "%pp%column%/pp%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+</div>

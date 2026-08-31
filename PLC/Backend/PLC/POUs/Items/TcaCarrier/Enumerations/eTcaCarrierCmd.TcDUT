@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="eTcaCarrierCmd" Id="{1e38e4ae-ea61-4cf0-bd3f-f87d1f3b8ecf}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE eTcaCarrierCmd :
+(
+	noCmd := 0,
+	emptyPlaces,
+	fillPlaces,
+	RestorePlaces,
+	ConfigCarrier
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

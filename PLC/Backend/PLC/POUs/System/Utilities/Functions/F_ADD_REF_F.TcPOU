@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_ADD_REF_F" Id="{52e63c61-d602-454e-98d8-f10302fc4063}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ADD_REF_F : BOOL
+VAR_IN_OUT
+	fValueRoot	: LREAL;
+END_VAR
+VAR_INPUT
+	fValue		: LREAL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fValueRoot := fValueRoot + fValue;]]></ST>
+    </Implementation>
+    <LineIds Name="F_ADD_REF_F">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

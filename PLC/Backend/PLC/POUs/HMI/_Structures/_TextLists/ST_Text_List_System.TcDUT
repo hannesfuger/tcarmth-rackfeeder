@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Text_List_System" Id="{0f12a233-9daa-4e0a-bc2a-b2193327bff6}">
+    <Declaration><![CDATA[TYPE ST_Text_List_System :
+STRUCT
+	stText_CycletimeExceeded				: ST_Text := (
+												wsNameId:= "CycletimeExceeded",
+												wsName:= "Zykluszeit Überschreitung");
+												
+	stText_CodeError					: ST_Text := (
+												wsNameId:= "CodeError",
+												wsName:= "Code Fehler");
+
+	// EtherCAT master
+	stText_EC_CommonError					: ST_Text := (
+												wsNameId:= "EC_CommonError",
+												wsName:= "Allg. EtherCAT Fehler");
+	stText_EC_LinkError						: ST_Text := (
+												wsNameId:= "EC_LinkError",
+												wsName:= "Link error");
+	stText_EC_IoLockedAfterLinkErr			: ST_Text := (
+												wsNameId:= "EC_IoLockedAfterLinkErr",
+												wsName:= "I/O locked after link error (I/O reset required)");
+	stText_EC_LinkErrRedAdapter				: ST_Text := (
+												wsNameId:= "EC_LinkErrRedAdapter",
+												wsName:= "Link error (redundancy adapter)");
+	stText_EC_MissingFrame					: ST_Text := (
+												wsNameId:= "EC_MissingFrame",
+												wsName:= "Missing one frame (redundancy mode)");
+	stText_EC_OutOfSendResources			: ST_Text := (
+												wsNameId:= "EC_OutOfSendResources",
+												wsName:= "Out of send resources (I/O reset required)");												
+	stText_EC_WatchdogTriggered				: ST_Text := (
+												wsNameId:= "EC_WatchdogTriggered",
+												wsName:= "Watchdog triggered");												
+	stText_EC_EthernetDrvNotFound			: ST_Text := (
+												wsNameId:= "EC_EthernetDrvNotFound",
+												wsName:= "Ethernet driver (miniport) not found");												
+	stText_EC_IO_resetActive				: ST_Text := (
+												wsNameId:= "EC_IO_resetActive",
+												wsName:= "I/O reset active");
+	stText_EC_AtLeastOneDeviceInit			: ST_Text := (
+												wsNameId:= "EC_AtLeastOneDeviceInit",
+												wsName:= "At least one device in INIT state");
+	stText_EC_AtLeastOneDevicePreOp			: ST_Text := (
+												wsNameId:= "EC_AtLeastOneDevicePreOp",
+												wsName:= "At least one device in PRE-OP state");
+	stText_EC_AtLeastOneDeviceSafeOp		: ST_Text := (
+												wsNameId:= "EC_AtLeastOneDeviceSafeOp",
+												wsName:= "At least one device in SAFE-OP state");
+	stText_EC_AtLeastOneDeviceError			: ST_Text := (
+												wsNameId:= "EC_AtLeastOneDeviceError",
+												wsName:= "At least one device indicates an error state");
+	stText_EC_DC_notInSync					: ST_Text := (
+												wsNameId:= "EC_DC_notInSync",
+												wsName:= "DC not in sync");
+	stText_SystemStartupReset				: ST_Text := (
+												wsNameId:= "SystemReStart_Reset",
+												wsName:= "System (re)start, press reset.");
+												
+	// EtherCAT device
+	stText_EC_OpState_Error					: ST_Text := (
+												wsNameId:= "EC_OpState_Error",
+												wsName:= "EC-Error(OpState)");
+	stText_EC_DeviceState_Init				: ST_Text := (
+												wsNameId:= "EC_DeviceState_Init",
+												wsName:= "EtherCAT Device State: INIT");
+	stText_EC_DeviceState_Preop				: ST_Text := (
+												wsNameId:= "EC_DeviceState_Preop",
+												wsName:= "EtherCAT Device State: Pre-Operational");
+	stText_EC_DeviceState_Bootstrap			: ST_Text := (
+												wsNameId:= "EC_DeviceState_Bootstrap",
+												wsName:= "EtherCAT Device State: Bootstrap");
+	stText_EC_DeviceState_Safeop			: ST_Text := (
+												wsNameId:= "EC_DeviceState_Safeop",
+												wsName:= "EtherCAT Device State: Safe-Operational");
+	stText_EC_DeviceState_Op				: ST_Text := (
+												wsNameId:= "EC_DeviceState_Op",
+												wsName:= "EtherCAT Device State: Operational");
+	stText_EC_DeviceState_Error				: ST_Text := (
+												wsNameId:= "EC_DeviceState_Error",
+												wsName:= "EtherCAT Device State: Error");
+	stText_EC_DeviceState_InvalidVprs		: ST_Text := (
+												wsNameId:= "EC_DeviceState_InvalidVprs",
+												wsName:= "EtherCAT Device State: Invalid VendorID, Productcode, revisionnumber or serialnumber");
+	stText_EC_DeviceState_InitCmdError		: ST_Text := (
+												wsNameId:= "EC_DeviceState_InitCmdError",
+												wsName:= "EtherCAT Device State: INIT command error");
+	stText_EC_DeviceState_Undefined			: ST_Text := (
+												wsNameId:= "EC_DeviceState_Undefined",
+												wsName:= "EtherCAT Device State: Undefined");
+												
+	// EtherCAT link state
+	stText_EC_LinkState_Ok					: ST_Text := (
+												wsNameId:= "EC_LinkState_Ok",
+												wsName:= "EtherCAT Link State: OK");
+	stText_EC_LinkState_NotPresent			: ST_Text := (
+												wsNameId:= "EC_LinkState_NotPresent",
+												wsName:= "EtherCAT Link State: no EtherCAT communication with slave");
+	stText_EC_LinkState_WithoutCom			: ST_Text := (
+												wsNameId:= "EC_LinkState_WithoutCom",
+												wsName:= "EtherCAT Link State: error on port X. Port has a link, but no communication");
+	stText_EC_LinkState_MissingLink			: ST_Text := (
+												wsNameId:= "EC_LinkState_MissingLink",
+												wsName:= "EtherCAT Link State: Missing link on port X");
+	stText_EC_LinkState_AdditionalLink		: ST_Text := (
+												wsNameId:= "EC_LinkState_AdditionalLink",
+												wsName:= "EtherCAT Link State: Additional link on port X");
+	stText_EC_LinkState_PortA				: ST_Text := (
+												wsNameId:= "EC_LinkState_PortA",
+												wsName:= "EtherCAT Link State: Error communication port A");
+	stText_EC_LinkState_PortB				: ST_Text := (
+												wsNameId:= "EC_LinkState_PortB",
+												wsName:= "EtherCAT Link State: Error communication port B");
+	stText_EC_LinkState_PortC				: ST_Text := (
+												wsNameId:= "EC_LinkState_PortC",
+												wsName:= "EtherCAT Link State: Error communication port C");
+	stText_EC_LinkState_PortD				: ST_Text := (
+												wsNameId:= "EC_LinkState_PortD",
+												wsName:= "EtherCAT Link State: Error communication port D");
+	stText_EC_LinkState_Undefined			: ST_Text := (
+												wsNameId:= "EC_LinkState_Undefined",
+												wsName:= "EtherCAT Link State: Undefined");
+
+	// ProfiNet device
+	stText_PN_Device_Error					: ST_Text := (
+												wsNameId:= "PN_Device_Error",
+												wsName:= "ProfiNet Device Status");
+
+	// IO-Link device
+	stText_IOL_Device_Error					: ST_Text := (
+												wsNameId:= "IOL_Device_Error",
+												wsName:= "IO-Link Device Status");
+												
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

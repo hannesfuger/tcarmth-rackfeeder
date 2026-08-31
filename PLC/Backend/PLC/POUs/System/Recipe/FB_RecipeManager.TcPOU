@@ -1,0 +1,865 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_RecipeManager" Id="{93db78be-35e1-4ba9-ba88-ea1db9e31a8e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_RecipeManager
+VAR_IN_OUT	
+	/// Recipe	            
+	stRecipe	: ST_Settings;
+	
+	/// Logger
+	nLogger		: I_Logger;
+	
+	/// PlcTag Browser
+	fbVar2File	: FB_Var2File;
+END_VAR
+VAR_INPUT
+	/// Directory of recipe files
+	sRecipePath					:T_MaxString := '/usr/local/var2file/data/';
+	
+	/// Allows to load a recipe (Machine is stopped)
+	bEnableLoadRecipe			:BOOL;
+END_VAR
+VAR_OUTPUT
+	/// Loading/Saving busy
+	bBusy						:BOOL;
+	bLoadingBusy				:BOOL;
+	stActiveRecipeName			:ST_Text;
+	/// Error
+	bError						:BOOL;
+	stErrorText					:ST_Text;
+END_VAR
+VAR
+	sFileExtension				:STRING := '.csv';
+	sObjectNameRecipe			:STRING(255) := 'Services.fbRecipeManager.stRecipeWork';
+	
+	bInit						:BOOL;
+	posSaveCurrent				:R_TRIG;
+	posNewRecipe				:R_TRIG;
+	posChangeRecipe				:R_TRIG;
+	posRefreshRecipeList		:R_TRIG;
+	posLoadRecipe				:R_TRIG;
+	posDeleteRecipe				:R_TRIG;
+	posCopyRecipe				:R_TRIG;
+
+	stRecipeWork				:ST_Settings;
+	
+	bErrorListRecipes			:BOOL;
+	bErrorLoadRecipe			:BOOL;
+	bErrorSaveRecipe			:BOOL;
+	bErrorCopyRecipe			:BOOL;
+
+	stWorkText					:ST_Text;
+	rtrigBusy					:R_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// show current recipe data
+HMI.stHmi.stOut.stCommon.stRecipe.wsActiveRecipe := stRecipe.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeName].sValue;
+HMI.stHmi.stOut.stCommon.stRecipe.wsActiveRecipeComment := stRecipe.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeComment].sValue;
+HMI.stHmi.stOut.stCommon.stRecipe.wsActiveRecipeProduct := stRecipe.stProduct_Settings[E_ProductSettings.eProductSettings_ProductNumber].sValue;
+
+stActiveRecipeName := F_CreateDynText(stRecipe.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeName].sValue,0);
+
+// Save current recipe
+posSaveCurrent(CLK := stHmi.stIn.stRecipe.bSaveCurrentRecipe);
+IF posSaveCurrent.Q AND NOT bBusy THEN
+	// copy current
+	stRecipeWork := stRecipe;
+	M_SaveRecipe(TRUE);
+END_IF
+
+// Update current
+posChangeRecipe(CLK := stHmi.stIn.stRecipe.bUpdateRecipe );
+IF posChangeRecipe.Q THEN
+	IF HMI.stHmi.stIn.stRecipe.wsNewEditRecipeName <> "" THEN
+		stRecipe.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeName].sValue := stHmi.stIn.stRecipe.wsNewEditRecipeName;		
+	END_IF
+	stRecipe.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeComment].sValue := stHmi.stIn.stRecipe.wsNewEditRecipeComment;		
+	stRecipe.stProduct_Settings[E_ProductSettings.eProductSettings_ProductNumber].sValue := stHmi.stIn.stRecipe.wsNewEditRecipeProduct;		
+END_IF
+
+// Save as new
+posNewRecipe(CLK := stHmi.stIn.stRecipe.bCreateNewRecipe );
+IF posNewRecipe.Q AND stHmi.stIn.stRecipe.wsNewEditRecipeName <> "" AND
+NOT bBusy THEN
+	// copy current
+	stRecipeWork := stRecipe;
+	// change
+	stRecipeWork.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeName].sValue := stHmi.stIn.stRecipe.wsNewEditRecipeName;		
+	stRecipeWork.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeComment].sValue := stHmi.stIn.stRecipe.wsNewEditRecipeComment;		
+	stRecipeWork.stProduct_Settings[E_ProductSettings.eProductSettings_ProductNumber].sValue := stHmi.stIn.stRecipe.wsNewEditRecipeProduct;		
+	M_SaveRecipe(TRUE);
+END_IF
+
+// refresh list of recipes
+posRefreshRecipeList(CLK := stHmi.stIn.stRecipe.bRefreshRecipeList OR NOT bInit);
+IF posRefreshRecipeList.Q THEN
+	M_ListRecipes(TRUE);
+END_IF
+
+
+// Load
+posLoadRecipe(CLK := stHmi.stIn.stRecipe.bLoadSelectedRecipe);
+IF posLoadRecipe.Q AND NOT bBusy THEN
+	IF stHmi.stIn.stRecipe.nSelectedRecipe >= 0 AND stHmi.stIn.stRecipe.nSelectedRecipe <= CONST.iMaxIdxRecipe AND_THEN 
+	HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe] <> "" THEN
+		M_LoadRecipe(TRUE, HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe]);
+	END_IF
+END_IF
+
+// delete
+posDeleteRecipe(CLK := stHmi.stIn.stRecipe.bDeleteSelectedRecipe);
+IF posDeleteRecipe.Q THEN
+	IF stHmi.stIn.stRecipe.nSelectedRecipe >= 0 AND stHmi.stIn.stRecipe.nSelectedRecipe <= CONST.iMaxIdxRecipe AND_THEN 
+	HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe] <> "" THEN
+		M_DeleteRecipe(TRUE, HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe]);
+	END_IF	
+END_IF
+
+// copy
+posCopyRecipe(CLK := stHmi.stIn.stRecipe.bCopySelectedRecipe);
+IF posCopyRecipe.Q AND NOT bBusy THEN
+	IF stHmi.stIn.stRecipe.nSelectedRecipe >= 0 AND stHmi.stIn.stRecipe.nSelectedRecipe <= CONST.iMaxIdxRecipe AND_THEN 
+	HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe] <> "" AND
+	stHmi.stIn.stRecipe.wsCopyRecipeNewName <> "" THEN
+		M_CopyRecipe(TRUE, 
+					HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe],
+					stHmi.stIn.stRecipe.wsCopyRecipeNewName);
+	END_IF		
+END_IF
+
+
+// calls
+M_SaveRecipe(FALSE);
+M_ListRecipes(FALSE);
+M_LoadRecipe(FALSE, "");
+M_DeleteRecipe(FALSE, "");
+M_CopyRecipe(FALSE, "", "");
+
+// Supervision
+M_Supervision();
+
+// show HMI Status fields
+rtrigBusy(CLK := bBusy);
+IF rtrigBusy.Q THEN
+	HMI.stHmi.stOut.stCommon.stRecipe.bStatusTextVisible := TRUE; // show immediately
+END_IF
+
+IF bError THEN
+	HMI.stHmi.stOut.stCommon.stRecipe.stStatusText := stErrorText;
+	HMI.stHmi.stOut.stCommon.stRecipe.stStatusColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	HMI.stHmi.stOut.stCommon.stRecipe.bStatusTextVisible := TRUE;
+	
+ELSIF bBusy THEN
+	HMI.stHmi.stOut.stCommon.stRecipe.stStatusText := stWorkText;
+	HMI.stHmi.stOut.stCommon.stRecipe.stStatusColor.color := F_ColorToStringHexColor(STATICS.stColor.Blue);
+	IF Statics.stPulse.bImpulse1000ms THEN
+		HMI.stHmi.stOut.stCommon.stRecipe.bStatusTextVisible := NOT HMI.stHmi.stOut.stCommon.stRecipe.bStatusTextVisible;	
+	END_IF
+
+ELSE
+	HMI.stHmi.stOut.stCommon.stRecipe.bStatusTextVisible := FALSE;
+	HMI.stHmi.stOut.stCommon.stRecipe.stStatusText := F_CreateDynText("",0);
+	
+END_IF
+
+
+// Enable HMI actions
+HMI.stHmi.stOut.stCommon.stRecipe.bEnableSaveCurrentRecipe := NOT bBusy AND HMI.stHmi.stOut.stCommon.stRecipe.wsActiveRecipe <> "";
+
+HMI.stHmi.stOut.stCommon.stRecipe.bEnableCreateNewRecipe := NOT bBusy AND stHmi.stIn.stRecipe.wsNewEditRecipeName <> "";
+HMI.stHmi.stOut.stCommon.stRecipe.bEnableUpdateRecipe := NOT bBusy AND stHmi.stIn.stRecipe.wsNewEditRecipeName <> "";
+
+// valid index?
+IF stHmi.stIn.stRecipe.nSelectedRecipe >= 0 AND stHmi.stIn.stRecipe.nSelectedRecipe <= CONST.iMaxIdxRecipe THEN
+	HMI.stHmi.stOut.stCommon.stRecipe.bEnableLoadRecipe := bEnableLoadRecipe AND
+																	NOT bBusy AND 
+																	HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe] <> "";
+	HMI.stHmi.stOut.stCommon.stRecipe.bEnableDeleteRecipe := NOT bBusy AND 
+																	(HMI.eUserLevel >= E_User_Level.eUser_Level_Maintenance) AND
+																	HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe] <> "" AND
+																	HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe] <> HMI.stHmi.stOut.stCommon.stRecipe.wsActiveRecipe;
+	HMI.stHmi.stOut.stCommon.stRecipe.bEnableCopyRecipe := NOT bBusy AND 
+																	HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[stHmi.stIn.stRecipe.nSelectedRecipe] <> "";	
+ELSE
+	HMI.stHmi.stOut.stCommon.stRecipe.bEnableLoadRecipe := FALSE;
+	HMI.stHmi.stOut.stCommon.stRecipe.bEnableDeleteRecipe := FALSE;
+	HMI.stHmi.stOut.stCommon.stRecipe.bEnableCopyRecipe := FALSE;	
+END_IF
+
+
+
+bInit := TRUE;
+]]></ST>
+    </Implementation>
+    <Method Name="M_CopyRecipe" Id="{27d30cc6-7461-44b9-91d9-4be6b42a996c}">
+      <Declaration><![CDATA[METHOD PRIVATE M_CopyRecipe : BOOL
+VAR_INPUT
+	bCopyRecipe				:BOOL;
+	wsRecipeName_From		:WSTRING(255);
+	wsRecipeName_To			:WSTRING(255);
+END_VAR
+VAR_INST
+	wsRecipeName_FromWork		:WSTRING(255);
+	wsRecipeName_ToWork			:WSTRING(255);
+	wsRecipeName_ToWork_noExt	:WSTRING(255); //Recipename without FileExtension
+	nStep				:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Reset error
+IF HMI.stHmi.stIn.stMain.stButton_Reset.bClick THEN
+	bErrorCopyRecipe := FALSE;
+END_IF
+
+IF nStep > 0 THEN
+	stWorkText := F_CreateDynText("Rezept wird kopiert...",0);
+END_IF
+
+CASE nStep OF
+	
+	0:
+		IF bCopyRecipe AND wsRecipeName_From <> "" AND
+		wsRecipeName_To <> "" AND NOT fbVar2File.bBusy THEN
+			wsRecipeName_FromWork := wsRecipeName_From;
+			wsRecipeName_ToWork := wsRecipeName_To;
+			wsRecipeName_ToWork_noExt := wsRecipeName_ToWork;
+			bErrorCopyRecipe := FALSE;
+			bBusy := TRUE;
+			nStep := 100;
+		END_IF
+		
+		
+		// LOAD
+
+		// load recipe over var2file to stRecipeWork and save it with a new name
+		// add sFileExtension ('.csv') to the filename
+	100:
+		wsRecipeName_FromWork := WCONCAT2x(wsRecipeName_FromWork, TO_WSTRING(sFileExtension));
+		wsRecipeName_ToWork := WCONCAT2x(wsRecipeName_ToWork, TO_WSTRING(sFileExtension));
+		// copy current for none recipe settings
+		stRecipeWork := stRecipe;
+		// Load to work
+		fbVar2File.M_LoadFromFileRecipe(sRecipePath, TO_STRING(wsRecipeName_FromWork));
+		nStep := 110;
+		
+	110:
+		IF fbVar2File.bBusy THEN
+			nStep := 120;	
+		END_IF
+		
+	120:
+		IF fbVar2File.bError THEN
+			bErrorCopyRecipe := TRUE;
+			nStep := 200;
+			
+		ELSIF fbVar2File.bDone THEN
+			nStep := 150;
+			
+		END_IF
+		
+		
+		// SAVE
+	150:	
+		stRecipeWork.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeName].sValue := wsRecipeName_ToWork_noExt;
+		// Trigger save action
+		fbVar2File.M_SaveToFileRecipe(sObjectNameRecipe,
+			sRecipePath, TO_STRING(wsRecipeName_ToWork) );
+		nStep := 160;
+		
+	160:
+		IF fbVar2File.bBusy THEN
+			nStep := 170;	
+		END_IF
+		
+	170:
+		IF fbVar2File.bError THEN
+			bErrorCopyRecipe := TRUE;
+			nStep := 200;
+			
+		ELSIF fbVar2File.bDone THEN
+			nStep := 200;
+			
+		END_IF
+			
+	200:
+		bBusy := FALSE;
+		nStep := 0;
+		M_ListRecipes(TRUE);
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DeleteRecipe" Id="{1a00892d-bf99-401b-a56f-49b5f280039b}">
+      <Declaration><![CDATA[METHOD PRIVATE M_DeleteRecipe : BOOL
+VAR_INPUT
+	bDeleteRecipe			:BOOL;
+	wsRecipeName			:WSTRING(255);
+END_VAR
+VAR_INST
+	wsRecipeNameWork		:WSTRING(255);
+	nStep					:INT;
+	fbDeleteFile			:FB_FileDelete;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+fbDeleteFile.sNetId := '';
+
+IF nStep > 0 THEN
+	stWorkText := F_CreateDynText("Rezept wird gelöscht...",0);
+END_IF
+
+CASE nStep OF
+	
+	0:
+		IF bDeleteRecipe AND wsRecipeName <> "" THEN
+			wsRecipeNameWork := wsRecipeName;
+			bBusy := TRUE;
+			nStep := 100;
+		END_IF
+		
+		
+		// delete recipe
+		// add sFileExtension ('.csv') to the filename
+	100:
+		fbDeleteFile.sPathName := CONCAT4(sRecipePath, sDirSeparator, TO_STRING(wsRecipeNameWork), sFileExtension);
+		fbDeleteFile(bExecute := FALSE);
+		fbDeleteFile(bExecute := TRUE);
+		IF fbDeleteFile.bBusy THEN
+			nStep := 110;
+		END_IF
+		
+	110:
+		fbDeleteFile(bExecute := FALSE);
+		IF NOT fbDeleteFile.bBusy THEN
+			nStep := 200;		
+		END_IF
+		
+		// finish
+	200:
+		bBusy := FALSE;
+		nStep := 0;
+		M_ListRecipes(TRUE);
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ListRecipes" Id="{418fe7c8-8363-4247-87fb-6b12bb883ba4}">
+      <Declaration><![CDATA[METHOD M_ListRecipes : BOOL
+VAR_INPUT
+	bRefreshRecipeList			:BOOL;
+END_VAR
+VAR_INST
+	nStepRefreshRecLst			:INT;
+	fbListFiles					:FB_EnumFindFileEntry;
+	nFileIdx					:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+fbListFiles.sNetId := '';
+fbListFiles.sPathName := CONCAT4(sRecipePath, sDirSeparator, '*', sFileExtension);
+
+HMI.stHmi.stOut.stCommon.stRecipe.nMaxEntryRecipeList := nFileIdx;
+
+// Reset error
+IF HMI.stHmi.stIn.stMain.stButton_Reset.bClick THEN
+	bErrorListRecipes := FALSE;
+END_IF
+
+CASE nStepRefreshRecLst OF
+	
+		// wait start
+	0:
+		fbListFiles( bExecute := FALSE );
+		IF bRefreshRecipeList THEN
+			FOR nFileIdx := 0 TO CONST.iMaxIdxRecipe DO
+				HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[nFileIdx] := "";
+			END_FOR
+			nFileIdx := 0;
+			bErrorListRecipes := FALSE;
+			fbListFiles.eCmd := E_EnumCmdType.eEnumCmd_First;	
+			nStepRefreshRecLst := 100;
+		END_IF
+		
+		// Read
+	100:
+		fbListFiles( bExecute := FALSE );
+		fbListFiles( bExecute := TRUE );
+		IF fbListFiles.bBusy THEN
+			nStepRefreshRecLst := 110;		
+		END_IF
+		
+		// get value
+	110:
+		fbListFiles( bExecute := FALSE );
+		IF NOT fbListFiles.bBusy THEN
+			IF NOT fbListFiles.bError THEN
+				IF NOT fbListFiles.bEOE AND nFileIdx <= CONST.iMaxIdxRecipe THEN
+					// save in array
+					HMI.stHmi.stOut.stCommon.stRecipe.aRecipeList[nFileIdx] := TO_WSTRING(F_Replace(fbListFiles.stFindFile.sFileName, sFileExtension, ''));
+                    fbListFiles.eCmd := eEnumCmd_Next; (* enum next entry *)
+					
+					nFileIdx := nFileIdx + 1;
+                    nStepRefreshRecLst := 100;
+					
+				ELSE
+					nStepRefreshRecLst := 0; // finish
+				END_IF
+			
+			ELSE
+				nStepRefreshRecLst := 0;
+				bErrorListRecipes := TRUE;
+			END_IF
+		END_IF
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_LoadRecipe" Id="{771682bc-3209-40b5-87ec-60d257c54a4d}">
+      <Declaration><![CDATA[METHOD PRIVATE M_LoadRecipe : BOOL
+VAR_INPUT
+	bLoadRecipe			:BOOL;
+	wsRecipeName		:WSTRING(255);
+END_VAR
+VAR_INST
+	wsRecipeNameWork		:WSTRING(255);
+	nStep					:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Reset error
+IF HMI.stHmi.stIn.stMain.stButton_Reset.bClick THEN
+	bErrorLoadRecipe := FALSE;
+END_IF
+
+IF nStep > 0 THEN
+	stWorkText := F_CreateDynText("Rezept wird geladen...",0);
+END_IF
+
+CASE nStep OF
+	
+	0:
+	
+		bLoadingBusy := FALSE;
+		IF bLoadRecipe AND wsRecipeName <> "" AND NOT fbVar2File.bBusy THEN
+			wsRecipeNameWork := wsRecipeName;
+			bBusy := TRUE;
+			bLoadingBusy := TRUE;
+			bErrorLoadRecipe := FALSE;
+			nStep := 100;
+		END_IF
+		
+		
+		// load recipe over var2file to stRecipeWork
+	100:
+		wsRecipeName := WCONCAT2x(wsRecipeNameWork, TO_WSTRING(sFileExtension));
+		// copy current for none recipe settings
+		stRecipeWork := stRecipe;
+		// Trigger load action
+		fbVar2File.M_LoadFromFileRecipe(sRecipePath, TO_STRING(wsRecipeName));
+		nStep := 110;
+		
+	110:
+		IF fbVar2File.bBusy THEN
+			nStep := 120;	
+		END_IF
+		
+	120:
+		IF fbVar2File.bError THEN
+			bErrorLoadRecipe := TRUE;
+			nStep := 200;
+			
+		ELSIF fbVar2File.bDone THEN
+			stRecipe := stRecipeWork; // Takeover recipe data
+			nStep := 200;
+			
+		END_IF
+				
+	200:
+		bBusy := FALSE;
+		nStep := 0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_LoadRecipeStart" Id="{02e8267b-1918-43c3-8ef9-8568db88fcb9}">
+      <Declaration><![CDATA[METHOD M_LoadRecipeStart : BOOL
+VAR_INPUT
+	wsRecipeName	: WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_LoadRecipe(TRUE, wsRecipeName);
+M_LoadRecipeStart := true;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SaveRecipe" Id="{8d83df8b-c0e4-43dd-a9f7-f0da76cffcd2}">
+      <Declaration><![CDATA[METHOD PRIVATE M_SaveRecipe : BOOL
+VAR_INPUT
+	bSaveRecipe			:BOOL;
+END_VAR
+VAR_INST
+	nStep				:INT;
+	wsRecipeName		:WSTRING(255);
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Reset error
+IF HMI.stHmi.stIn.stMain.stButton_Reset.bClick THEN
+	bErrorSaveRecipe := FALSE;
+END_IF
+
+IF nStep > 0 THEN
+	stWorkText := F_CreateDynText("Rezept wird gespeichert...",0);
+END_IF
+
+CASE nStep OF
+	
+	0:
+		wsRecipeName := stRecipeWork.stPlant_Settings[E_PlantSettings.ePlantSetting_RecipeName].sValue;
+		IF bSaveRecipe AND wsRecipeName <> "" AND NOT fbVar2File.bBusy THEN
+			bBusy := TRUE;
+			bErrorSaveRecipe := FALSE;
+			nStep := 100;
+		END_IF
+		
+		
+		// save recipe over var2file from stRecipeWork
+	100:
+		wsRecipeName := WCONCAT2x(wsRecipeName, TO_WSTRING(sFileExtension));
+		// Trigger save action
+		fbVar2File.M_SaveToFileRecipe(sObjectNameRecipe,
+			sRecipePath, TO_STRING(wsRecipeName) );
+		nStep := 110;
+		
+	110:
+		IF fbVar2File.bBusy THEN
+			nStep := 120;	
+		END_IF
+		
+	120:
+		IF fbVar2File.bError THEN
+			bErrorSaveRecipe := TRUE;
+			nStep := 200;
+			
+		ELSIF fbVar2File.bDone THEN
+			nStep := 200;
+			
+		END_IF
+		
+	200:
+		HMI.stHmi.stOut.stCommon.stRecipe.wsActiveRecipeSavedInfo := TO_WSTRING(Statics.sTimeString);
+		bBusy := FALSE;
+		nStep := 0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Supervision" Id="{3fc2dc18-26e5-4142-a5af-0904bf74e04e}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Supervision : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Error / Status
+
+bError := FALSE;
+stErrorText := CONST.stTextListGlobal.stText_notext;
+
+IF bErrorListRecipes THEN
+	bError := TRUE;
+	stErrorText := CONST.stTextListGlobal.stText_Recipe_ListError;
+	
+ELSIF bErrorLoadRecipe THEN
+	bError := TRUE;
+	stErrorText := fbVar2File.stErrorText;
+	
+ELSIF bErrorSaveRecipe THEN
+	bError := TRUE;
+	stErrorText := fbVar2File.stErrorText;
+
+ELSIF bErrorCopyRecipe THEN
+	bError := TRUE;
+	stErrorText := CONST.stTextListGlobal.stText_Recipe_CopyError;
+	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_RecipeManager">
+      <LineId Id="608" Count="0" />
+      <LineId Id="46" Count="3" />
+      <LineId Id="553" Count="1" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="51" Count="2" />
+      <LineId Id="309" Count="1" />
+      <LineId Id="56" Count="15" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="72" Count="19" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="92" Count="4" />
+      <LineId Id="98" Count="1" />
+      <LineId Id="144" Count="3" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="100" Count="2" />
+      <LineId Id="153" Count="1" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="157" Count="1" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="103" Count="6" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="425" Count="0" />
+      <LineId Id="495" Count="4" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="426" Count="2" />
+      <LineId Id="435" Count="1" />
+      <LineId Id="490" Count="0" />
+      <LineId Id="493" Count="0" />
+      <LineId Id="492" Count="0" />
+      <LineId Id="431" Count="0" />
+      <LineId Id="429" Count="0" />
+      <LineId Id="433" Count="0" />
+      <LineId Id="438" Count="0" />
+      <LineId Id="437" Count="0" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="114" Count="4" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="119" Count="5" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="125" Count="12" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RecipeManager.M_CopyRecipe">
+      <LineId Id="12" Count="0" />
+      <LineId Id="57" Count="2" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="142" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="20" Count="3" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="61" Count="1" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="68" Count="10" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="87" Count="10" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="99" Count="6" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RecipeManager.M_DeleteRecipe">
+      <LineId Id="44" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="74" Count="3" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="20" Count="4" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RecipeManager.M_ListRecipes">
+      <LineId Id="30" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="82" Count="3" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="62" Count="2" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="16" Count="2" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RecipeManager.M_LoadRecipe">
+      <LineId Id="12" Count="0" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="108" Count="3" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="20" Count="5" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="70" Count="6" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="77" Count="2" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="81" Count="2" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RecipeManager.M_LoadRecipeStart">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RecipeManager.M_SaveRecipe">
+      <LineId Id="75" Count="3" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="106" Count="3" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="21" Count="4" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="49" Count="1" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="81" Count="7" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RecipeManager.M_Supervision">
+      <LineId Id="6" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

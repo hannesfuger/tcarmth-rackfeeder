@@ -1,0 +1,81 @@
+{
+  "function": {
+    "name": "TcaTrolleyPopup",
+    "namespace": "TcHmi.Functions.TcHmiProject2",
+    "displayName": "TcaTrolleyPopup",
+    "description": "",
+    "waitMode": "Synchronous",
+    "category": "TcaTrolley",
+    "returnValue": {
+      "type": "tchmi:general#/definitions/String"
+    },
+    "visible": true,
+    "injectContextObject": false,
+    "arguments": [
+      {
+        "name": "popup",
+        "displayName": "popup",
+        "type": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+        "description": "This is an important Parameter which does... This text is used in a tooltip.",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "data",
+        "displayName": "data",
+        "type": "tchmi:project#/definitions/Symbol_Of_ADS-PLC1.TcaTrolleyData",
+        "description": "",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": true,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "popupdata",
+        "displayName": "popupdata",
+        "type": "tchmi:project#/definitions/Symbol_Of_ADS-PLC1.TcaCarrierData",
+        "description": "",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": true,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "command",
+        "displayName": "command",
+        "type": "tchmi:general#/definitions/String",
+        "description": "",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      }
+    ]
+  },
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.212/runtimes/native1.12-tchmi/Schema/FunctionDescription.Schema.json",
+  "apiVersion": 1,
+  "version": {
+    "full": "0.0.0.0",
+    "major": 0,
+    "minor": 0,
+    "revision": 0,
+    "build": 0
+  },
+  "dependencyFiles": [
+    {
+      "name": "TcaTrolleyPopup.js",
+      "type": "JavaScript",
+      "description": ""
+    }
+  ]
+}

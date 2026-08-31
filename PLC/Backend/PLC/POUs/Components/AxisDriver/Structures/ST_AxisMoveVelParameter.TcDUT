@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_AxisMoveVelParameter" Id="{06749762-b689-43ba-9602-b786e7cee0e4}">
+    <Declaration><![CDATA[/// Axis move velocity parameter strucure
+TYPE ST_AxisMoveVelParameter EXTENDS ST_AxisMoveParameter :
+STRUCT
+	eDirection: TC2_MC2.MC_Direction;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="P_SysSrv" Id="{8c1608a1-d92c-4e04-8894-2ae35e7a6f05}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_SysSrv
+VAR
+	wsClearText				: WSTRING(255);		// clear text for debug
+	
+	fbShutDownHmi			: NT_StartProcess;
+	fbStartAppEplan			: NT_StartProcess;
+	fbStartAppCalculator	: NT_StartProcess;
+	fbStartAppSetSystemTime	: NT_StartProcess;
+	
+	//    stSvcTime 		: TIMESTRUCT;
+	//    wMsMir 			: WORD;
+	//    fbNtSetTime 		: NT_SetLocalTime;
+	//    diCntTimeSync		: UDINT;
+	//    negSetTimeBusy	: F_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// services
+wsClearText := "Call fbEventHandler";
+Services.fbEventHandler();
+
+wsClearText := "Call fbRecipeManager";
+Services.fbRecipeManager(
+	stRecipe := Services.stSettings,
+	nLogger := Services.ILog,
+	bEnableLoadRecipe := stGlobalModuleInfo.bStation_All_Stopped, //stGlobalModuleInfo.bStation_All_InHome,
+	fbVar2File := Services.fbVar2File);
+
+wsClearText := "Call fbVar2File"; 
+Services.fbVar2File(stConfig := stConfig.stVar2FileConfig);
+
+// NT start process
+fbShutDownHmi(
+	NETID:= , 
+	PATHSTR:= 'C:\Windows\System32\cmd.exe /C taskkill /F /IM msedge.exe', //Taskkill /F /IM Chrome.exe', 
+	DIRNAME:= 'C:\Windows\System32' , 
+	COMNDLINE:= , 
+	START:= HMI.stHmi.stIn.stSpecial.stButton_CloseHmi.bClick, 
+	TMOUT:= , 
+	BUSY=> , 
+	ERR=> , 
+	ERRID=> );
+
+fbStartAppCalculator(
+	NETID:= , 
+	PATHSTR:= 'C:\Windows\system32\calc.exe',//'C:\Windows\system32\win32calc.exe', 
+	DIRNAME:= 'C:\Windows\system32',//'C:\Windows\system32', 
+	COMNDLINE:= , 
+	START:= HMI.stHmi.stIn.stSpecial.stButton_Calculator.bClick, 
+	TMOUT:= , 
+	BUSY=> , 
+	ERR=> , 
+	ERRID=> );
+
+fbStartAppEplan(
+	NETID:= , 
+	PATHSTR:= 'C:\Windows\System32\cmd.exe /C\Tc3Apps\EPlan.pdf',
+	DIRNAME:= 'C:\Windows\System32',
+	COMNDLINE:= , 
+	START:= HMI.stHmi.stIn.stSpecial.stButton_Eplan.bClick, 
+	TMOUT:= , 
+	BUSY=> , 
+	ERR=> , 
+	ERRID=> );	
+
+fbStartAppSetSystemTime(
+	NETID:= , 
+	PATHSTR:='C:\Windows\System32\cmd.exe /C timedate.cpl', 
+	DIRNAME:= 'C:\Windows\System32', 
+	COMNDLINE:= , 
+	START:= HMI.stHmi.stIn.stSpecial.stButton_SetSystemTime.bClick, 
+	TMOUT:= , 
+	BUSY=> , 
+	ERR=> , 
+	ERRID=> );
+
+//// set up system time
+//fbNtSetTime(
+//                NETID:= '',
+//                TIMESTR:= stSvcTime,
+//                START:= stSvcTime.wMilliseconds <> wMsMir,
+//                TMOUT:= ,
+//                BUSY=> ,
+//                ERR=> ,
+//                ERRID=> );
+
+//// rdy
+//negSetTimeBusy(CLK := fbNtSetTime.BUSY);
+//IF negSetTimeBusy.Q THEN
+//                wMsMir := stSvcTime.wMilliseconds;
+//                diCntTimeSync := diCntTimeSync + 1;
+//END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="P_SysSrv">
+      <LineId Id="246" Count="1" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="249" Count="71" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

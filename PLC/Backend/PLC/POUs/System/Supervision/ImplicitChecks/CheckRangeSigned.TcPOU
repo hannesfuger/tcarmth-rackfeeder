@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CheckRangeSigned" Id="{1881c390-9d66-43ae-bdfd-dc02a67f430e}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Implicitly generated code : DO NOT EDIT!!!
+/// Checks subrange value. If value is outside [lower,upper], it is set to the closer bound and reports the error.
+{attribute 'check_range_signed' := ''}
+{attribute 'no_check' := ''}
+FUNCTION CheckRangeSigned : DINT
+VAR_INPUT
+	value: DINT;
+	lower: DINT;
+	upper: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// align to bounds 
+CheckRangeSigned := MIN( upper, MAX( lower, value ));
+
+// if value changed, report error
+IF CheckRangeSigned <> value THEN
+	Services.fbEventHandler.Select(TC_Events.CodeEventClass.ErrorEvent)
+						   .ArgSetString('range signed')
+						   .Raise();
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="CheckRangeSigned">
+      <LineId Id="3" Count="4" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St040_HMI_IN_OUT" Id="{332c3c6f-8327-4568-b19f-dd71400f28d0}">
+    <Declaration><![CDATA[TYPE ST_St040_HMI_IN_OUT : //EXTENDS ST_HMI_PL_CMD :
+STRUCT
+	// pallet index on storage
+	Idx		: INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_CutInstancePath" Id="{063e07bb-5db6-4428-a76f-99ab182ae752}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_CutInstancePath : STRING(512)
+VAR_INPUT
+	sSrc			:STRING(512);
+END_VAR
+VAR
+	sDelimiter		:STRING(1) := '.';
+	iFnd			:UDINT;
+	sSubstr			:STRING(512);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// sSrc := 'TE_SP_Module_Demo.TE_SP_Module_Demo_PlcRt1.P_MachineSet.fbMa2.fbDemoSequence.fbLenzei550';
+
+iFnd := FIND2(ADR(sSrc), ADR(sDelimiter));
+IF (iFnd > 0) THEN
+	DELETE2(ADR(sSrc), ADR(sSubstr), SIZEOF(sSubstr), iFnd, 1);
+END_IF
+iFnd := FIND2(ADR(sSubstr), ADR(sDelimiter));
+IF (iFnd > 0) THEN
+	DELETE2(ADR(sSubstr), ADR(sSubstr), SIZEOF(sSubstr), iFnd, 1);
+END_IF
+
+F_CutInstancePath := sSubstr;]]></ST>
+    </Implementation>
+    <LineIds Name="F_CutInstancePath">
+      <LineId Id="13" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="14" Count="6" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

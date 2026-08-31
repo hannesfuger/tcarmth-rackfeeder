@@ -1,0 +1,414 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="P_Supervision" Id="{27b53e36-c41d-419b-b0d2-7542c866bd49}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Supervision function block - system watchdog
+PROGRAM INTERNAL P_Supervision
+VAR_IN_OUT
+	/// Safets IOs
+	stIO_Cabinet		: ST_ControlCabinetIO;
+		
+	/// Logger
+	nLogger				: I_Logger;
+END_VAR
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	bError				: BOOL;	
+	bWarning			: BOOL;
+	
+	bCycleStop			: BOOL;
+	bFastStop			: BOOL;
+END_VAR
+VAR
+	/// event handler
+	IEvent			: I_EventHandler;
+	
+	/// Hardware diag FB
+	fbDiagEtherCAT	: FB_DiagEtherCAT;
+	
+	/// private var's
+	aa									: INT;	
+	rTrigMachineStop_Cycle				: R_TRIG;
+	rTrigMachineStop_Fast				: R_TRIG;
+	tonRstStillstw						: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[/// 
+/// supervision function block of the project
+/// 
+
+// reset
+
+// run supervision (ES, Safety signals, IO-errors, etc.)
+
+// HW diagnostics
+M_EcSupervision();
+M_ControlCabinet_A01();
+
+// task cycle time exceeded
+IF Statics.stPlcSystemInfo.stPlcTaskSystemInfo.CycleTimeExceeded THEN
+	IEvent.Select(TC_Events.SystemEventClass.ErrorEvent)
+		  .ArgSetWString(stTextListGlobal.stText_System.stText_CycletimeExceeded.wsName)
+		  .Raise();	
+END_IF
+
+
+//-------------------------------------------------------------------------------------------------------------
+
+IF HMI.stHmi.stIn.stMain.stButton_Start.bClick AND NOT stGlobalModuleInfo.bStation_All_Auto AND P_Safety.OpMode_Auto THEN
+	IEvent.Select(TC_Events.SystemEventClass.InfoEvent)
+		  .ArgSetString('Start Auto nicht moeglich -> Station nicht in Betriebsart Auto')
+		  .Raise();
+END_IF
+
+
+//-------------------------------------------------------------------------------------------------------------
+
+IF HMI.stHmi.stIn.stMain.stButton_Start.bClick AND NOT P_Safety.OpMode_Auto THEN
+	IEvent.Select(TC_Events.SystemEventClass.InfoEvent)
+		  .ArgSetString('Start Auto nicht moeglich -> Schlüsselschalter nicht auf Auto')
+		  .Raise();
+END_IF
+
+
+//ToDo: stop / fast stop on alarm trigger
+//rTrigMachineStop_Cycle(CLK := Services.fbNotiHandler.stNotificationData.eAlarmStopMode = E_EventReaction.CycleStop, Q => bCycleStop);
+//rTrigMachineStop_Fast(CLK := Services.fbNotiHandler.stNotificationData.eAlarmStopMode = E_EventReaction.Stop, Q => bFastStop);]]></ST>
+    </Implementation>
+    <Folder Name="ControlCabinets" Id="{3b83c655-d8bd-4570-b761-65c2f46173a3}" />
+    <Folder Name="EtherCat" Id="{e6ad6cad-7361-43c9-ae82-fc5a632fa144}" />
+    <Folder Name="Properties" Id="{e6c31f63-b52a-4b3c-898a-95bec3af0620}" />
+    <Property Name="Error" Id="{3e5ee790-8a5a-4345-9130-0b2d747e0157}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// System error level
+{attribute 'monitoring' := 'call'}
+PROPERTY Error : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{85cc22c1-ab63-4cc1-b1c8-d9fd0fbdb774}">
+        <Declaration><![CDATA[INTERNAL
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Error := bError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="M_ControlCabinet_A01" Id="{f75c048d-9e5b-4543-8b0a-6132207d9d8b}" FolderPath="ControlCabinets\">
+      <Declaration><![CDATA[METHOD PRIVATE M_ControlCabinet_A01 : BOOL
+VAR_INPUT
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// EC-Error
+IF IO.stControlCabinetIO.stIn.IarrEcStates[E_EtherCatBox.eEtherCatBox_ControlCabinet] <> 8 THEN
+	IEvent.Select(TC_Events.EtherCatEventClass.ErrorEvent)
+		  .ArgSetString('EtherCatBox Control Cabinet | EC State Error')
+		  .Raise();
+ELSIF IO.stControlCabinetIO.stIn.IarrEcStates[E_EtherCatBox.eEtherCatBox_Oven_A] <> 8 THEN
+	IEvent.Select(TC_Events.EtherCatEventClass.ErrorEvent)
+		  .ArgSetString('EtherCatBox Oven A | EC State Error')
+		  .Raise();
+ELSIF IO.stControlCabinetIO.stIn.IarrEcStates[E_EtherCatBox.eEtherCatBox_Oven_B] <> 8 THEN
+	IEvent.Select(TC_Events.EtherCatEventClass.ErrorEvent)
+		  .ArgSetString('EtherCatBox Oven B | EC State Error')
+		  .Raise();
+ELSIF IO.stControlCabinetIO.stIn.IarrEcStates[E_EtherCatBox.eEtherCatBox_Storage] <> 8 THEN
+	IEvent.Select(TC_Events.EtherCatEventClass.ErrorEvent)
+		  .ArgSetString('EtherCatBox Storage | EC State Error')
+		  .Raise();
+END_IF
+			  
+(*	24V-Versorgung Netzgerät 1 Schutzschalter	
+ELSIF NOT IO.stControlCabinetIO.stIn.stA01.b24V_NetzSchutz1Ok THEN
+	IEvent.Select(TC_Events.HardwareEventClass.ErrorEvent)
+			  .ArgSetString('=A01.G10-1QA1 | 24V-Versorgung Netzgerät 1 Schutzschalter NOK')
+			  .Raise();
+END_IF
+*)]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_EcSupervision" Id="{a1825d9d-758b-4143-bce6-ae5a64f5cc86}" FolderPath="EtherCat\">
+      <Declaration><![CDATA[METHOD PRIVATE M_EcSupervision : BOOL
+VAR_INPUT
+END_VAR
+VAR_INST
+
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// automatic EC supervision
+fbDiagEtherCAT();
+
+(*
+//IarrEcState
+// Diag EC Boxes for fast reaction				
+IF (stIO_Cabinet.stIn.IarrEcStates[1] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("403",403),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+E2-57CO1 (CU1128)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[2] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("404",404),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+E2-57CO1 (CU1128-B)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[3] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("405",405),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+E2-57CO1 (CU1128-C)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[4] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("406",406),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+E2-62BC1 (EK1100)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[5] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("407",407),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++A1+P1-4A2 (EP2338-0002)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[6] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("0",0),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++A1+P1-5SI0 (EP1908)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[7] <> 8)  THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("408",408),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++A1+P1-6SI0 (EP1908)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[8] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("409",409),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++A1+P1-3A2 (EP2338-0002)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+
+IF (stIO_Cabinet.stIn.IarrEcStates[9] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("410",410),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+E1-46BC3 (EK1100)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[10] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("411",411),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+E1-38U1 (AX5206-0000-0213)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[11] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("412",412),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+E1-31U1 (Rtt)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[12] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("413",413),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+Festo_V1 (CPX-FB37)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+IF (stIO_Cabinet.stIn.IarrEcStates[13] <> 8) THEN
+	bError:=TRUE;
+	fbNotiHandler.M_SetNotificationEx(F_CreateDynText("414",414),
+									stTextListGlobal.stText_NG_Hardware, 
+									stTextListGlobal.stText_EtherCatBox_Error, "++M1+KeyenceSR_X100-30U1 (SR-EC1)", stTextListGlobal.stText_EtherCatBox_OP_Error, 
+									E_AlarmPriority.Error, E_NotificationMode.eNotificationMode_Reset);	
+END_IF
+*)]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{6c1e11de-3f73-4bf5-9c70-38c4750f8404}">
+      <Declaration><![CDATA[METHOD INTERNAL M_Init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SetReferences(Services.fbEventHandler);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{4862ee2f-425b-44b5-bbdb-f1e78a7f4da0}">
+      <Declaration><![CDATA[/// resets all notification flags and reset-needed state 
+METHOD M_Reset
+VAR
+	ii: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// reset error level
+nLogger.AddLog(Concat2x('Reset, Error: ', TO_STRING(bError)), 'Supervision', eLogLevel_info);
+bError := FALSE;
+bWarning := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetReferences" Id="{3b378dd0-c1c9-4636-9d61-e83ef672d4ac}">
+      <Declaration><![CDATA[/// Dependency injection method.
+{attribute 'object_name' := 'SetReferences'}
+METHOD INTERNAL SetReferences
+VAR_INPUT
+	/// event access provider
+	IEventHandler : I_EventHandler;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init components stuff here...
+IEvent := IEventHandler;
+fbDiagEtherCAT.SetReferences(IEvent);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="P_Supervision">
+      <LineId Id="832" Count="4" />
+      <LineId Id="841" Count="4" />
+      <LineId Id="929" Count="0" />
+      <LineId Id="847" Count="2" />
+      <LineId Id="930" Count="0" />
+      <LineId Id="932" Count="0" />
+      <LineId Id="853" Count="0" />
+      <LineId Id="855" Count="0" />
+      <LineId Id="900" Count="4" />
+      <LineId Id="935" Count="1" />
+      <LineId Id="934" Count="0" />
+      <LineId Id="909" Count="5" />
+      <LineId Id="938" Count="1" />
+      <LineId Id="918" Count="5" />
+      <LineId Id="702" Count="0" />
+    </LineIds>
+    <LineIds Name="P_Supervision.Error.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="P_Supervision.M_ControlCabinet_A01">
+      <LineId Id="785" Count="0" />
+      <LineId Id="560" Count="0" />
+      <LineId Id="818" Count="1" />
+      <LineId Id="817" Count="0" />
+      <LineId Id="792" Count="0" />
+      <LineId Id="815" Count="1" />
+      <LineId Id="814" Count="0" />
+      <LineId Id="798" Count="0" />
+      <LineId Id="812" Count="1" />
+      <LineId Id="811" Count="0" />
+      <LineId Id="804" Count="0" />
+      <LineId Id="809" Count="1" />
+      <LineId Id="803" Count="0" />
+      <LineId Id="791" Count="0" />
+      <LineId Id="825" Count="0" />
+      <LineId Id="561" Count="0" />
+      <LineId Id="563" Count="0" />
+      <LineId Id="826" Count="1" />
+      <LineId Id="567" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="790" Count="0" />
+    </LineIds>
+    <LineIds Name="P_Supervision.M_EcSupervision">
+      <LineId Id="374" Count="0" />
+      <LineId Id="377" Count="0" />
+      <LineId Id="373" Count="0" />
+      <LineId Id="386" Count="0" />
+      <LineId Id="364" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="246" Count="1" />
+      <LineId Id="387" Count="0" />
+      <LineId Id="962" Count="0" />
+      <LineId Id="388" Count="1" />
+      <LineId Id="249" Count="2" />
+      <LineId Id="453" Count="0" />
+      <LineId Id="963" Count="0" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="390" Count="0" />
+      <LineId Id="253" Count="2" />
+      <LineId Id="456" Count="0" />
+      <LineId Id="964" Count="0" />
+      <LineId Id="457" Count="0" />
+      <LineId Id="455" Count="0" />
+      <LineId Id="257" Count="2" />
+      <LineId Id="459" Count="0" />
+      <LineId Id="965" Count="0" />
+      <LineId Id="460" Count="0" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="261" Count="2" />
+      <LineId Id="462" Count="0" />
+      <LineId Id="966" Count="0" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="461" Count="0" />
+      <LineId Id="265" Count="2" />
+      <LineId Id="465" Count="0" />
+      <LineId Id="967" Count="0" />
+      <LineId Id="466" Count="0" />
+      <LineId Id="464" Count="0" />
+      <LineId Id="269" Count="2" />
+      <LineId Id="468" Count="0" />
+      <LineId Id="968" Count="0" />
+      <LineId Id="469" Count="0" />
+      <LineId Id="467" Count="0" />
+      <LineId Id="273" Count="2" />
+      <LineId Id="471" Count="0" />
+      <LineId Id="969" Count="0" />
+      <LineId Id="472" Count="0" />
+      <LineId Id="470" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="288" Count="2" />
+      <LineId Id="483" Count="0" />
+      <LineId Id="970" Count="0" />
+      <LineId Id="484" Count="0" />
+      <LineId Id="482" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="309" Count="1" />
+      <LineId Id="498" Count="0" />
+      <LineId Id="971" Count="0" />
+      <LineId Id="499" Count="0" />
+      <LineId Id="497" Count="0" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="950" Count="2" />
+      <LineId Id="972" Count="0" />
+      <LineId Id="953" Count="1" />
+      <LineId Id="949" Count="0" />
+      <LineId Id="418" Count="1" />
+      <LineId Id="522" Count="0" />
+      <LineId Id="973" Count="0" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="521" Count="0" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="427" Count="1" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="974" Count="0" />
+      <LineId Id="532" Count="0" />
+      <LineId Id="530" Count="0" />
+      <LineId Id="426" Count="0" />
+      <LineId Id="980" Count="0" />
+    </LineIds>
+    <LineIds Name="P_Supervision.M_Init">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="P_Supervision.M_Reset">
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="55" Count="0" />
+    </LineIds>
+    <LineIds Name="P_Supervision.SetReferences">
+      <LineId Id="11" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

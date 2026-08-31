@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_AlarmState" Id="{2be89e46-8ecc-4725-928f-6d04f4981dac}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+/// Enum for the Alarm states
+TYPE E_AlarmState :
+( 
+	/// Undefined, not init state
+	Undefined 	:= 0,
+	/// Alarm is inactive
+	Inactive 	:= 1,
+	/// Alarm is active (raised)
+	Active 		:= 2,
+	/// Alarm is ack
+	Ack 		:= 3	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

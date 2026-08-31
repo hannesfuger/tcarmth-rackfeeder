@@ -1,0 +1,181 @@
+<div id="conMainHeader" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%">
+
+<div id="TcHmiHeader_1" data-tchmi-type="TcHmi.Controls.BaseTemplate.TcHmiHeader" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%">
+<script data-tchmi-target-attribute="data-tchmi-header-items" type="application/json">
+[
+  {
+    "accessRights": [],
+    "altText": "Beckhoff",
+    "classList": [],
+    "image": "",
+    "itemAlign": "Left",
+    "itemType": "Image",
+    "minWidth": 128,
+    "minWidthUnit": "px",
+    "prefHeight": 95,
+    "prefHeightUnit": "px",
+    "prefWidth": 288,
+    "prefWidthUnit": "px",
+    "priority": "2",
+    "targetContent": "",
+    "targetRegion": ""
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "itemAlign": "Left",
+    "itemType": "Text",
+    "minWidth": 128,
+    "minWidthUnit": "px",
+    "prefHeight": 95,
+    "prefHeightUnit": "px",
+    "prefWidth": 288,
+    "prefWidthUnit": "px",
+    "priority": "1",
+    "targetContent": "",
+    "targetRegion": "",
+    "text": "Application Name"
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "filter": [
+      {
+        "path": "domain",
+        "comparator": "==",
+        "value": "TcHmiEventLogger"
+      },
+      {
+        "logic": "OR"
+      },
+      {
+        "path": "domain",
+        "comparator": "==",
+        "value": "TcHmiAlarm"
+      }
+    ],
+    "itemAlign": "Right",
+    "itemType": "EventLine",
+    "messageFormat": [
+      {
+        "name": "timeRaised"
+      },
+      {
+        "text": " | "
+      },
+      {
+        "name": "domain"
+      },
+      {
+        "text": " | "
+      },
+      {
+        "name": "text"
+      }
+    ],
+    "minWidth": 288,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 600,
+    "prefWidthUnit": "px",
+    "priority": "5",
+    "sorting": [
+      {
+        "name": "severity",
+        "order": "Descending"
+      },
+      {
+        "name": "timeRaised",
+        "order": "Descending"
+      }
+    ],
+    "targetContent": "%ctrl%Region_Main::TargetContent%/ctrl%",
+    "targetRegion": "%ctrl%conNotification%/ctrl%",
+    "textOverflow": "Ellipsis"
+  },
+  {
+    "accessRights": [],
+    "allowLogout": true,
+    "allowSwitchUser": false,
+    "classList": [],
+    "itemAlign": "Right",
+    "itemType": "UserManagement",
+    "minWidth": 176,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 288,
+    "prefWidthUnit": "px",
+    "priority": "3"
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "itemAlign": "Right",
+    "itemType": "LocalizationSelect",
+    "localizationMapping": [
+      {
+        "code": "de",
+        "text": "German"
+      },
+      {
+        "code": "de-DE",
+        "text": "German (Germany)"
+      },
+      {
+        "code": "en",
+        "text": "English"
+      },
+      {
+        "code": "en-US",
+        "text": "English (United States)"
+      }
+    ],
+    "minWidth": 160,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 560,
+    "prefWidthUnit": "px",
+    "priority": "3"
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "itemAlign": "Right",
+    "itemType": "Time",
+    "minWidth": 96,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 128,
+    "prefWidthUnit": "px",
+    "priority": "4",
+    "timeDisplayLayout": "TimeDateMultiLine"
+  },
+  {
+    "accessRights": [],
+    "adsRuntime": "PLC1",
+    "classList": [],
+    "iconWidth": 48,
+    "iconWidthUnit": "px",
+    "itemAlign": "Right",
+    "itemType": "AdsState",
+    "minWidth": 96,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 160,
+    "prefWidthUnit": "px",
+    "priority": "3",
+    "serverDomain": "ADS",
+    "serverInterval": 500,
+    "text": "PLC 1 State",
+    "textPosition": "Left"
+  }
+]
+</script>
+
+</div>
+</div>

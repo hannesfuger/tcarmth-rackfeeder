@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_Var2File_Config" Id="{df8dccac-2e96-4f03-be70-0734c17bf77b}">
+    <Declaration><![CDATA[TYPE ST_Var2File_Config :
+STRUCT
+	/// Path to Var2File exe
+	sAppExeFilePath		: STRING(255) := '/usr/local/var2file/';
+	
+	/// Var2File exe name
+	sAppExeFileName		: STRING(25) := 'Var2File.Core.App.dll';
+	
+	/// Filterset number for all variables
+	nFilterSetIDAllVars		: INT := 2;
+	
+	/// Default path for Var2File data 
+	sDefaultFileFolderPath	: STRING(255) := '/usr/local/var2file/data';
+	
+	/// NetId
+	sAmsNetId				: STRING := '';
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_AxisSetPosParameter" Id="{6983a8d2-7954-4ac5-968f-520977548653}">
+    <Declaration><![CDATA[/// Parameter set for set axis position
+TYPE ST_AxisSetPosParameter :
+STRUCT
+	/// Position to set
+	fPosition: LREAL;
+	/// RELATIVE=True, ABSOLUTE=False (Default)
+	bMode: BOOL;
+	/// Additional set position options
+	stOptions: ST_SetPositionOptions;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

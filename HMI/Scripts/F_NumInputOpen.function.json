@@ -1,0 +1,69 @@
+{
+  "function": {
+    "name": "F_NumInputOpen",
+    "namespace": "TcHmi.Functions.Pxxx_Name_HMI",
+    "displayName": "F_NumInputOpen",
+    "description": "open numpad and init NumericInputEvent arguments",
+    "waitMode": "Synchronous",
+    "category": "Rmth",
+    "returnValue": {
+      "type": "tchmi:general#/definitions/String"
+    },
+    "visible": true,
+    "injectContextObject": false,
+    "arguments": [
+      {
+        "name": "nMin",
+        "displayName": "nMin",
+        "type": "tchmi:general#/definitions/Number",
+        "description": "",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "nMax",
+        "displayName": "nMax",
+        "type": "tchmi:general#/definitions/Number",
+        "description": "",
+        "defaultValue": "",
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "sSenderControl",
+        "displayName": "sSenderControl",
+        "type": "tchmi:general#/definitions/String",
+        "description": "",
+        "defaultValue": "",
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      }
+    ]
+  },
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.760.44/runtimes/native1.12-tchmi/Schema/FunctionDescription.Schema.json",
+  "apiVersion": 1,
+  "version": {
+    "full": "0.0.0.0",
+    "major": 0,
+    "minor": 0,
+    "revision": 0,
+    "build": 0
+  },
+  "dependencyFiles": [
+    {
+      "name": "F_NumInputOpen.js",
+      "type": "JavaScript",
+      "description": ""
+    }
+  ]
+}

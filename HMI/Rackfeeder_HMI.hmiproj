@@ -1,0 +1,1143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Clean;Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.props" Condition="Exists('packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <AvailablePlatforms>TwinCAT HMI</AvailablePlatforms>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <HmiTitle>Please enter your Title...</HmiTitle>
+    <HmiVerboseLevel>2</HmiVerboseLevel>
+    <HmiVersion>1.0.0.0</HmiVersion>
+    <HmiCommunicationServerPort>3000</HmiCommunicationServerPort>
+    <HmiLogTcHmiServerMessages>false</HmiLogTcHmiServerMessages>
+    <HmiLogDesignerModeComMessages>false</HmiLogDesignerModeComMessages>
+    <HmiDefaultLanguage>de-DE</HmiDefaultLanguage>
+    <TargetFrameworkMoniker>native,Version=v1.12.0,Profile=tchmi</TargetFrameworkMoniker>
+    <TargetFramework>native1.12-tchmi</TargetFramework>
+    <AzureFunctionsVersion>v2</AzureFunctionsVersion>
+    <Name>Rackfeeder_HMI</Name>
+    <HmiCommunicationRouterPort>10105</HmiCommunicationRouterPort>
+    <HmiCommunicationServerAuthPort>13000</HmiCommunicationServerAuthPort>
+    <HmiInitial>1.12.742.5</HmiInitial>
+    <HmiRecent>14.3.617.1</HmiRecent>
+    <HmiServerNodeAdvancedView>True</HmiServerNodeAdvancedView>
+    <HmiCompanyName>RMTH GmbH</HmiCompanyName>
+    <TcHmiDirectory>$(registry:HKEY_CURRENT_USER\Software\Beckhoff\TwinCAT3\3.1@InstallDir)\..\Functions\TE2000-HMI-Engineering</TcHmiDirectory>
+    <TcHmiDirectory Condition="'$(TcHmiDirectory)'==''">$(registry:HKEY_LOCAL_MACHINE\Software\Beckhoff\TwinCAT3\3.1@InstallDir)\..\Functions\TE2000-HMI-Engineering</TcHmiDirectory>
+    <TcHmiDirectory Condition="'$(TcHmiDirectory)'==''">$(registry:HKEY_LOCAL_MACHINE\Software\Wow6432Node\Beckhoff\TwinCAT3\3.1@InstallDir)\..\Functions\TE2000-HMI-Engineering</TcHmiDirectory>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <HmiServerNodeAdvancedSettingsView>True</HmiServerNodeAdvancedSettingsView>
+    <TcHmi_Beckhoff_TwinCAT_HMI_Server_Engineering_IncludeInArchive>false</TcHmi_Beckhoff_TwinCAT_HMI_Server_Engineering_IncludeInArchive>
+    <HmiCommunicationServerPublicPort>3443</HmiCommunicationServerPublicPort>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TwinCATHmi_Tasks>$(TcHmiDirectory)\MSBuild\Beckhoff.TwinCAT.HMI.tasks</TwinCATHmi_Tasks>
+    <TwinCATHmi_Targets>$(TcHmiDirectory)\MSBuild\Beckhoff.TwinCAT.HMI.targets</TwinCATHmi_Targets>
+  </PropertyGroup>
+  <Import Project="$(TwinCATHmi_Tasks)" />
+  <Import Project="$(TwinCATHmi_Targets)" />
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>de5b461d-814c-4b4d-a6f6-c9a57365ab94</ProjectGuid>
+    <RootNamespace>TwinCAT3HmiProject</RootNamespace>
+    <AssemblyName>TwinCAT3HmiProject</AssemblyName>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">TwinCAT HMI</Platform>
+  </PropertyGroup>
+  <!-- Any CPU -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|TwinCAT HMI' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>TwinCAT HMI</PlatformTarget>
+    <DefaultNamespace>Pxxx_Name_HMI</DefaultNamespace>
+    <ServerParameters />
+    <HmiCommunicationServerPort>3003</HmiCommunicationServerPort>
+    <HmiCommunicationServerAuthPort>13002</HmiCommunicationServerAuthPort>
+    <HmiCommunicationRouterPort>10168</HmiCommunicationRouterPort>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|TwinCAT HMI' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>TwinCAT HMI</PlatformTarget>
+    <DefaultNamespace>Pxxx_Name_HMI</DefaultNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="'$(RestoreProjectStyle)' == 'PackageReference'" />
+  <PropertyGroup>
+    <PreBuildEventDependsOn />
+  </PropertyGroup>
+  <Target Name="PreBuildEvent" Condition="'$(PreBuildEvent)'!=''" DependsOnTargets="$(PreBuildEventDependsOn)">
+    <Exec WorkingDirectory="$(OutDir)" Command="$(PreBuildEvent)" />
+  </Target>
+  <PropertyGroup>
+    <PostBuildEventDependsOn />
+  </PropertyGroup>
+  <Target Name="PostBuildEvent" Condition="'$(PostBuildEvent)' != '' and ('$(RunPostBuildEvent)'=='Always' or '$(RunPostBuildEvent)'=='OnOutputUpdated')" DependsOnTargets="$(PostBuildEventDependsOn)">
+    <Exec WorkingDirectory="$(OutDir)" Command="$(PostBuildEvent)" />
+  </Target>
+  <Target Name="GetFrameworkPaths" />
+  <PropertyGroup>
+    <BuiltProjectOutputGroupDependsOn>
+      PreBuildEvent;
+      CoreBuild;
+      PostBuildEvent
+    </BuiltProjectOutputGroupDependsOn>
+    <CleanDependsOn>
+		BaseClean
+	</CleanDependsOn>
+  </PropertyGroup>
+  <Target Name="Build" DependsOnTargets="$(BuiltProjectOutputGroupDependsOn)" />
+  <PropertyGroup>
+    <TcHmi_ProjectDirectory Condition="'$(TcHmi_ProjectDirectory)' == ''">$(MSBuildProjectDirectory)</TcHmi_ProjectDirectory>
+    <TcHmi_ServerAddress Condition="'$(TcHmi_ServerAddress)' == ''">127.0.0.1</TcHmi_ServerAddress>
+    <TcHmi_ServerPort Condition="'$(TcHmi_ServerPort)' == ''">1010</TcHmi_ServerPort>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_TcHmiNodeJsMode>Global</_TcHmiNodeJsMode>
+    <_TcHmiNodeJsMode Condition="'$(_TcHmiNodeJsMode)' == ''">Global</_TcHmiNodeJsMode>
+    <_TcHmiNodePath Condition="'$(_TcHmiNodeJsMode)' == 'Global'">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Node.js@InstallPath)</_TcHmiNodePath>
+    <_TcHmiNodePath Condition="'$(_TcHmiNodeJsMode)' == 'Global' AND '$(_TcHmiNodePath)' == '' AND Exists('C:\Program Files\nodejs\')">C:\Program Files\nodejs\</_TcHmiNodePath>
+    <_TcHmiNodePath Condition="'$(_TcHmiNodeJsMode)' == 'Global' AND '$(_TcHmiNodePath)' == '' AND Exists('C:\Program Files (x86)\nodejs\')">C:\Program Files (x86)\nodejs\</_TcHmiNodePath>
+  </PropertyGroup>
+  <Target Name="ReTargetNodePath" Condition="'$(_TcHmiNodePath)' != ''" BeforeTargets="$(CompileDependsOn)">
+    <PropertyGroup>
+      <NodePath>$(_TcHmiNodePath)</NodePath>
+    </PropertyGroup>
+  </Target>
+  <Target Name="CoreBuild">
+    <TcHmiMSBuild.Publish.TcHmiBuild TaskAction="Clean" ProjectDirectory="$(TcHmi_ProjectDirectory)" OutputPath="$(OutputPath)" />
+    <TcHmiMSBuild.Publish.TcHmiBuild TaskAction="Build" ProjectDirectory="$(TcHmi_ProjectDirectory)" OutputPath="$(OutputPath)" ProjectFiles="@(Content)" VirtualMappings="$(TcHmi_VirtualMappings)" />
+    <TcHmiMSBuild.Publish.TcHmiGenerator TaskAction="EntryPage" ProjectDirectory="$(TcHmi_ProjectDirectory)" OutputPath="$(OutputPath)" TcHmiServerAddress="$(TcHmi_ServerAddress)" TcHmiServerPort="$(TcHmi_ServerPort)">
+      <Output TaskParameter="Result" PropertyName="TaskResult0" />
+    </TcHmiMSBuild.Publish.TcHmiGenerator>
+    <Message Text="Generating the Default.html within OutputPath('$(OutputPath)'): $(TaskResult0)" />
+  </Target>
+  <Target Name="ReBuild" DependsOnTargets="Clean; Build" />
+  <Target Name="Clean" DependsOnTargets="$(CleanDependsOn)" />
+  <ItemGroup>
+    <Folder Include="Base_HMI\Base" />
+    <Folder Include="Base_HMI\Base\Functions" />
+    <Folder Include="Base_HMI\Base\Header" />
+    <Folder Include="Base_HMI\Base\Footer" />
+    <Folder Include="Base_HMI\Base\Keyboards" />
+    <Folder Include="Base_HMI\Base\Inputs" />
+    <Folder Include="Base_HMI\Base\Manual" />
+    <Folder Include="Base_HMI\Base\Monitoring" />
+    <Folder Include="Base_HMI\Base\Module" />
+    <Folder Include="Base_HMI\Base\UserMgmt" />
+    <Folder Include="Base_HMI\Base\Notification" />
+    <Folder Include="Base_HMI\Base\Station" />
+    <Folder Include="Base_HMI\Base\Settings" />
+    <Folder Include="Fonts\" />
+    <Folder Include="Images" />
+    <Folder Include="Images\Manifest" />
+    <Folder Include="Images\shapes" />
+    <Folder Include="Images\Product" />
+    <Folder Include="Imports" />
+    <Folder Include="Imports\Images" />
+    <Folder Include="Imports\Videos" />
+    <Folder Include="KeyboardLayouts\" />
+    <Folder Include="Localization" />
+    <Folder Include="Base_HMI" />
+    <Folder Include="TcaItems" />
+    <Folder Include="Pages" />
+    <Folder Include="Pages\Main" />
+    <Folder Include="Pages\Counter" />
+    <Folder Include="Pages\Modules" />
+    <Folder Include="Pages\Modules\Module001" />
+    <Folder Include="Pages\AxisManager" />
+    <Folder Include="Pages\Settings" />
+    <Folder Include="Pages\Stations\_Specific" />
+    <Folder Include="Pages\Stations\Station050" />
+    <Folder Include="Pages\Stations\Station040" />
+    <Folder Include="Pages\Statistics" />
+    <Folder Include="Pages\PlantSetup" />
+    <Folder Include="Pages\Order" />
+    <Folder Include="Pages\Stations" />
+    <Folder Include="Pages\Stations\Station030" />
+    <Folder Include="Pages\Stations\Station020" />
+    <Folder Include="Pages\Stations\Station010" />
+    <Folder Include="Scripts\" />
+    <Folder Include="Server\TcHmiEcDiagnostics" />
+    <Folder Include="Server\TcHmiEventLogger\" />
+    <Folder Include="TcaItems\TcaCarrier" />
+    <Folder Include="TcaItems\TcaRackFeeder" />
+    <Folder Include="TcaItems\TcaTrolley" />
+    <Folder Include="TcaItems\TcaWorkpiecePlace" />
+    <Folder Include="Themes" />
+    <Folder Include="Themes\Base\" />
+    <Folder Include="Server">
+      <WorkingDirectory>Rackfeeder_HMI</WorkingDirectory>
+    </Folder>
+    <Folder Include="Properties" />
+    <Content Include=".eslintrc.json">
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="Base_HMI\Base\Footer\conMainFooter.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucButton.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucButton.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucButton.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucButtonExtColorlabel.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucButtonExtColorlabel.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucButtonExtColorlabel.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucDoor.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucDoor.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucDoor.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucEmergencyStop.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucEmergencyStop.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucEmergencyStop.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlAxis.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlAxis.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucManualControlAxis.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlDevice.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlDevice.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucManualControlDevice.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlDrive.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlDrive.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucManualControlDrive.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlCylinder.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucManualControlCylinder.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucManualControlCylinder.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucPopup.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucPopup.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucPopup.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucSimpleBarChart.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Functions\ucSimpleBarChart.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Functions\ucSimpleBarChart.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Header\conMainHeader.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Info.txt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Inputs\ucInputNumeric.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Inputs\ucInputNumeric.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Inputs\ucInputNumeric.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Keyboards\Numpad.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Keyboards\Tastatur.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Manual\ucManual.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Manual\ucManual.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Manual\ucManual.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Module\Module_MainPage.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Module\Module_MainPage.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Module\Module_MainPage.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Module\Module_ManualPage.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Module\Module_ManualPage.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Module\Module_ManualPage.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Monitoring\ucMonitoring.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Monitoring\ucMonitoring.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Monitoring\ucMonitoring.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Notification\conNotification.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Settings\ucSettings.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Settings\ucSettings.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Settings\ucSettings.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Station\Station_MainPage.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Station\Station_MainPage.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Station\Station_MainPage.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\Station\Station_ManualPage.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\Station\Station_ManualPage.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Base_HMI\Base\Station\Station_ManualPage.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Base_HMI\Base\UserMgmt\conUserMgmt.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Base_HMI\Base\UserMgmt\LoginPage1.html">
+      <SubType>Content</SubType>
+      <PreloadingContent>True</PreloadingContent>
+    </Content>
+    <Content Include="Images\Plant.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\Scanner.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\TcaCarrier.svg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\TcaCarrierThumb.svg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\TcaTrolley.svg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\AxisManager\conAxisManager.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\conPlcState.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Modules\Module001\conModule001_Main.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Modules\Module001\conModule001_Mainview.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Modules\Module001\conModule001_Manual.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Modules\Module001\conModule001_Monitoring.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Modules\Module001\conModule001_Settings.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Modules\Module001\conModule001_Special.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Order\conOrderStandardComments.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Settings\conSettings_Plant.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Settings\conSettings_Product.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Settings\conSettings_Production.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station020\conStation020_MainviewSecondary.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station010\conStation010_Manual.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station020\conStation020_Main.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station020\conStation020_Mainview.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station020\conStation020_Manual.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station020\conStation020_Monitoring.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station020\conStation020_Settings.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station020\conStation020_Special.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station030\conStation030_Main.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station030\conStation030_Mainview.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station030\conStation030_Manual.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station030\conStation030_Monitoring.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station030\conStation030_Settings.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station030\conStation030_Special.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station040\conStation040_Main.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station040\conStation040_Mainview.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station040\conStation040_Manual.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station040\conStation040_Monitoring.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station040\conStation040_Settings.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station050\conStation050_Main.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station050\conStation050_Mainview.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station050\conStation050_Manual.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station050\conStation050_Monitoring.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station050\conStation050_Settings.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station050\conStation050_Special.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_PalletSelect.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\F_PalletSelect.js</DependentUpon>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_PalletSelect.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_PalletStateToColor.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\F_PalletStateToColor.js</DependentUpon>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_PalletStateToColor.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_TrolleytStateToColor.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\F_TrolleytStateToColor.js</DependentUpon>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_TrolleytStateToColor.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_WorkpieceSelect.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\F_WorkpieceSelect.js</DependentUpon>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_WorkpieceSelect.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_WorkpieceStateToColor.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\F_WorkpieceStateToColor.js</DependentUpon>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\F_WorkpieceStateToColor.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\UcTrolleyCmd.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\UcTrolleyCmd.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\UcTrolleyCmd.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\UcPalletCmd.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\UcPalletCmd.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\UcPalletCmd.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\UcWorkpieceCmd.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\_Specific\UcWorkpieceCmd.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Pages\Stations\_Specific\UcWorkpieceCmd.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_BoolToOkNok.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_BoolToOkNok.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_BoolToOkNok.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_BoolToVisibility.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_BoolToVisibility.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_BoolToVisibility.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_CalcSimpleBarChartTop.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_CalcSimpleBarChartTop.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_CalcSimpleBarChartTop.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_CloseFullScreen.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_CloseFullScreen.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_CloseFullScreen.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_ColorBinding.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_ColorBinding.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_ColorBinding.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_EnforceNumberSign.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_EnforceNumberSign.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_EnforceNumberSign.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_GetSelectionColor.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_GetSelectionColor.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_GetSelectionColor.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_NumInputCommit.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_NumInputCommit.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_NumInputCommit.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_NumInputOpen.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_NumInputOpen.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_NumInputOpen.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_OpenFullScreen.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_OpenFullScreen.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_OpenFullScreen.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_SwitchGlobalLocalNavVisible.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_SwitchGlobalLocalNavVisible.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_SwitchGlobalLocalNavVisible.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_SwitchStringByBool.function.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_SwitchStringByBool.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_ToggleBool.function.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_ToggleBool.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_TranslateString.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_TranslateString.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_TranslateString.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_TranslateText.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_TranslateText.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_TranslateText.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_TranslateTextArray.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_TranslateTextArray.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_TranslateTextArray.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_TranslateTextDatagrid.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_TranslateTextDatagrid.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_TranslateTextDatagrid.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\ReadUrlParameter.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Secondary.view">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\ADS\ADS.Config.remote.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiEcDiagnostics\TcHmiEcDiagnostics.Config.default.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiEcDiagnostics\TcHmiEcDiagnostics.Config.remote.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiEcDiagnostics\TcHmiEcDiagnostics.Storage.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiEventLogger\TcHmiEventLogger.Config.default.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiEventLogger\TcHmiEventLogger.Config.remote.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiEventLogger\TcHmiEventLogger.Storage.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiLua\TcHmiLua.Config.remote.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="Server\TcHmiSqliteLogger\TcHmiSqliteLogger.Config.remote.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="Server\TcHmiSrv\TcHmiSrv.Config.remote.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiUserManagement\TcHmiUserManagement.Config.remote.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="StyleDataGrid.css">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\aktualisieren.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\01-asma-Logo-klein-ohne-Schrift.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\CloseButton.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\EmergencyStop.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\IconNok.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\IconOk.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\none.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\NoOrders.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\Rmth_Logo.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\Rmth_Logo_scharfe_Kanten.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\circle_green.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\circle_pink.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\hexagon_blue.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\hexagon_yellow.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\rectangle_green.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\rectangle_red.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\square_purple.png">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Images\shapes\square_pink.jpg">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="KeyboardLayouts\German - compact.keyboard.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="KeyboardLayouts\Numpad.keyboard.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="packages.config">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\conEplan.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\conInfo.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\conRecipemanagement.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\conSpecial.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Counter\conCounterState.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Counter\conCounter.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Main\conMainTwoRegions.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Main\conPlantControlMain.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Order\conOrderManagement.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Order\conOrderControl.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Order\conOrderState.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\PlantSetup\conPlantSetupState.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\conStationOverview.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station010\conStation010_Main.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station010\conStation010_Mainview.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station010\conStation010_Monitoring.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station010\conStation010_Settings.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Stations\Station010\conStation010_Special.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Pages\Statistics\conStatistics.content">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\babel.min.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\ProviderColorDatagridNotification.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\ProviderColorDatagridNotification.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\ProviderColorDatagridNotification.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_convert_Anzeige_Time.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_convert_Anzeige_Time.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_convert_Anzeige_Time.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\F_convert_Time_Anzeige.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>Scripts\F_convert_Time_Anzeige.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\F_convert_Time_Anzeige.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Scripts\polyfill.min.js">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrier.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrier.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaCarrier\TcaCarrier.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierConfig.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierConfig.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaCarrier\TcaCarrierConfig.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierDraw.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaCarrier\TcaCarrierDraw.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierDraw.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierEditFunction.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaCarrier\TcaCarrierEditFunction.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierEditFunction.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierPopup.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaCarrier\TcaCarrierPopup.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierPopup.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierRefresh.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaCarrier\TcaCarrierRefresh.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierRefresh.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierService.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaCarrier\TcaCarrierService.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaCarrier\TcaCarrierService.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaRackFeeder\RackFeeder.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaRackFeeder\RackFeeder.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaRackFeeder\RackFeeder.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaRackFeeder\StorageDock.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaRackFeeder\StorageDock.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaRackFeeder\StorageDock.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaRackFeeder\TeachTrolleyDock.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaRackFeeder\TeachTrolleyDock.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaRackFeeder\TeachTrolleyDock.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolley.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolley.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaTrolley\TcaTrolley.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyConfig.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyConfig.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaTrolley\TcaTrolleyConfig.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyDraw.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaTrolley\TcaTrolleyDraw.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyDraw.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyPopup.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaTrolley\TcaTrolleyPopup.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyPopup.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyRefresh.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaTrolley\TcaTrolleyRefresh.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyRefresh.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyService.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaTrolley\TcaTrolleyService.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaTrolley\TcaTrolleyService.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaWorkpiecePlace\TcaWorkpieceIcon.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaWorkpiecePlace\TcaWorkpieceIcon.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaWorkpiecePlace\TcaWorkpieceIcon.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaWorkpiecePlace\TcaWorkpieceIconRefresh.function.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaWorkpiecePlace\TcaWorkpieceIconRefresh.ts</DependentUpon>
+    </Content>
+    <Content Include="TcaItems\TcaWorkpiecePlace\TcaWorkpieceIconRefresh.ts">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaWorkpiecePlace\TcaWorkpiecePlace.usercontrol">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TcaItems\TcaWorkpiecePlace\TcaWorkpiecePlace.usercontrol.json">
+      <SubType>Content</SubType>
+      <DependentUpon>TcaItems\TcaWorkpiecePlace\TcaWorkpiecePlace.usercontrol</DependentUpon>
+    </Content>
+    <Content Include="tsconfig.tpl.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="tsconfig.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+      <DependentUpon>tsconfig.tpl.json</DependentUpon>
+    </Content>
+    <Content Include="packages.xsd">
+      <SubType>Content</SubType>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="Properties\tchmiconfig.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Properties\tchmi.framework.Schema.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Properties\tchmi.project.Schema.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Properties\tchmipublish.config.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Properties\tchmimanifest.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Properties\Default.tpl">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include=".tfignore">
+      <SubType>Content</SubType>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include=".gitignore">
+      <SubType>Content</SubType>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="Fonts\Fonts.css">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Fonts\Roboto-Condensed-webfont.woff">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Themes\Base\Base.theme">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Themes\Base\BaseStyle.css">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Themes\Base\Images\Splash-320x534.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Themes\Base\Images\Splash-420x200.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Themes\Base\Images\Splash-800x600.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Themes\Base\Images\Background.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Localization\de-DE.localization">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Localization\en-US.localization">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="KeyboardLayouts\US - compact.keyboard.json">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Favicon.ico">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Beckhoff_Logo.svg">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Manifest\launcher-icon-0-75x.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Manifest\launcher-icon-1-5x.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Manifest\launcher-icon-1x.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Manifest\launcher-icon-2x.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Manifest\launcher-icon-3x.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Images\Manifest\launcher-icon-4x.png">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Content Include="Desktop.view">
+      <SubType>Content</SubType>
+      <Visible>true</Visible>
+    </Content>
+    <Folder Include="Server\ADS\" />
+    <Folder Include="Server\TcHmiLua\" />
+    <Folder Include="Server\TcHmiSqliteLogger\" />
+    <Folder Include="Server\TcHmiSrv\" />
+    <Folder Include="Server\TcHmiUserManagement\" />
+    <Content Include="Server\ADS\ADS.Config.default.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\ADS\ADS.Storage.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiLua\TcHmiLua.Config.default.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="Server\TcHmiLua\TcHmiLua.Storage.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="Server\TcHmiSqliteLogger\TcHmiSqliteLogger.Config.default.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="Server\TcHmiSqliteLogger\TcHmiSqliteLogger.Storage.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="Server\TcHmiSrv\TcHmiSrv.Config.default.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiSrv\TcHmiSrv.Storage.json">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Server\TcHmiUserManagement\TcHmiUserManagement.Config.default.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Content Include="Server\TcHmiUserManagement\TcHmiUserManagement.Storage.json">
+      <SubType>Content</SubType>
+      <Visible>True</Visible>
+    </Content>
+    <Folder Include="Themes\Base\Images\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\plygrd-vbhIII\FrameworkPrj1\FrameworkPrj1\FrameworkPrj1.hmiextproj">
+      <Name>FrameworkPrj1</Name>
+      <Project>{b29c1aa5-7d8d-46b7-a8a3-3dc3a866be7b}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.targets'))" />
+  </Target>
+  <Import Project="packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.targets" Condition="Exists('packages\Microsoft.TypeScript.MSBuild.4.9.5\build\Microsoft.TypeScript.MSBuild.targets')" />
+</Project>

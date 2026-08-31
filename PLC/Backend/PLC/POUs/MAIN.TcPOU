@@ -1,0 +1,527 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MAIN" Id="{bd2e5e27-e7c9-44f5-9dc8-02ae4a0ea03d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR	
+	/// private var's
+	ii						: INT;
+	wsClearText				: WSTRING(255);		// clear text for debug
+	nOnlineChangesMirror	: UDINT;			// online change tracker
+	bInit					: BOOL; 			// PLC init flag
+	bRunUnitTest			: BOOL;				// UnitTest
+	
+	nHmiSize				: ARRAY[0..15] OF UDINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// MAIN program - starting point of the PLC project.
+/// TP/www.rmth.at/5.2025
+/// 
+
+///
+/// CHANGES
+/// - NAME/DATE/COMMENT
+
+wsClearText := "Run system provider (get time, logger, system and PLC info, ...)";
+P_System();
+
+wsClearText := "Init PLC";
+M_ChangeWatchdog();
+
+IF NOT M_Init() THEN
+	RETURN;
+END_IF
+
+wsClearText := "P_Safety";
+P_Safety();
+	
+wsClearText := "Call HMI Controller component";
+P_HMI_Controller();
+
+wsClearText := "Call P_Plant";
+P_Plant();
+
+wsClearText := "P_Supervision";
+P_Supervision(stIO_Cabinet := IO.stControlCabinetIO, nLogger := Services.ILog);
+
+wsClearText := "P_SysSrv";
+P_SysSrv();
+	
+wsClearText := "Run unit tests";
+IF bRunUnitTest THEN
+	P_UnitTest();
+END_IF
+
+Services.b1stShot := FALSE;
+Services.bPlcInitDone := TRUE;
+
+
+(*// DEBUG / TESTS
+nHmiSize[0] := SIZEOF(HMI.stHmiInOut);
+
+nHmiSize[1] := SIZEOF(HMI.stHmiTc3);
+nHmiSize[2] := SIZEOF(HMI.stHmiTc3.stIn);
+nHmiSize[3] := SIZEOF(HMI.stHmiTc3.stOut);
+
+nHmiSize[4] := SIZEOF(HMI.stHmiTc3.stOut.stHeader);
+nHmiSize[5] := SIZEOF(HMI.stHmiTc3.stOut.stPopup);
+nHmiSize[6] := SIZEOF(HMI.stHmiTc3.stOut.stCounter);
+nHmiSize[7] := SIZEOF(HMI.stHmiTc3.stOut.stControlCounter);
+nHmiSize[8] := SIZEOF(HMI.stHmiTc3.stOut.stNotificationControl);
+nHmiSize[9] := SIZEOF(HMI.stHmiTc3.stOut.stNotificationList);
+nHmiSize[10] := SIZEOF(HMI.stHmiTc3.stOut.stNotificationArchiv);
+nHmiSize[11] := SIZEOF(HMI.stHmiTc3.stOut.stConditionMonitoring);
+nHmiSize[12] := SIZEOF(HMI.stHmiTc3.stOut.stSetupPlant);
+nHmiSize[13] := SIZEOF(HMI.stHmiTc3.stOut.stEmergencyStop);
+nHmiSize[14] := SIZEOF(HMI.stHmiTc3.stOut.stDoor);
+//nHmiSize[15] := SIZEOF(HMI.stHmiTc3.stOut.astStation); *)
+]]></ST>
+    </Implementation>
+    <Action Name="Info" Id="{7650a567-0d90-49b9-8119-207eb69b5acf}">
+      <Implementation>
+        <ST><![CDATA[(*
+//----------------------------------------------------------------------
+
+Vorgabe 12.0 s / Stück
+
+Ergebnissdaten Prüflinge: 	iO; Lfd.Nr.;
+							
+Koordinatensystem Anlage
+X = von links nach rechts (Ansicht Vorne)
+Y = Vorne (Eingabe) nach hinten
+Z = Vertikal						
+
+Stationsauswahl
+
+ST001 Eingabe
+
+----------------------------------------
+Schutzbereiche
+
+Schutzbereich 1 -> 	Modul 1 gesamt
+
+//---------------------------------------------------------------------
+Anzahl Rund Takt Tisch (RTT) Nestplätze 4 Nester 1
+
+//---------------------------------------------------------------------
+Abkürzungen Fehler:
+HS = Hochspannung
+
+	
+//---------------------------------------------------------------------
+pragmas
+
+{text 'todo remove after commissioning'} 
+{info 'todo remove after commissioning'} 
+{warning 'todo remove after commissioning'} 
+{error 'todo remove after commissioning'} 
+
+//----------------------------------------------------------------------
+
+Die wichtigsten Infos zu TC3/RMTH Standard:
+	*** min/max und default Werte von Datentypen ***
+		RmthTc3Library -> StaticsConstant
+		
+	*** Stringfunktionen aus RmthTc3Library ***
+		aSClearText[EN] := Concat2-10('Text... / ConcatArray(...
+		F_RealToString / F_RealToStringEx / F_LRealToString / F_LRealToStringEx
+		
+	*** Background -> UnitTest ***
+		Komponenten hier testen!!!
+		
+	*** Automatic Sequence Demo ***
+		siehe Background -> UnitTest -> TestCases -> StationTest -> FB_TestStation (zb.: DEMO oder M_Sequence)
+		
+	*** aktuelle PLC System Info ***
+		Statics.stPlcSystemInfo
+	
+--- TC3 Allgemein ---
+
+	*** DATENTYPEN 	***
+		https://infosys.beckhoff.com/content/1031/tcplccontrol/html/tcplcctrl_plc_data_types_overview.htm?id=7365416610509907248
+	
+	*** ATTRIBUTE 	***
+		https://infosys.beckhoff.com/content/1031/tc3_plc_intro/54043195664658571.html?id=1095976264130046106
+		
+	 - Attribut monitoring (Property-OnlineView)
+		{attribute 'monitoring' := 'variable'}
+		{attribute 'monitoring' := 'call'}
+		
+		variable: 	Eine implizite Variablen wird angelegt, deren Wert aktualisiert wird, wenn die Applikation die Set oder Get Methode der Eigenschaft aufruft.
+		call: 		Der Monitoring-Dienst ruft die Get Methode der Eigenschaft auf
+		
+		Beispiel:
+		{attribute 'monitoring' := 'call'}
+		PROPERTY TestState : E_TestCaseState
+		
+	 - Attribut pack_mode (ändern des Alignments)
+		0	aligned, d.h. es treten keine Speicherlücken auf
+		1	1-byte-aligned (identisch zu aligned)
+		2	2-byte-aligned, d.h. die maximale Größe einer Speicherlücke ist 1 byte
+		4	4-byte-aligned, d.h. die maximale Größe einer Speicherlücke ist 3 byte
+		8	8-byte-aligned, d.h. die maximale Größe einer Speicherlücke ist 7 byte
+		
+		Beispiel:
+		{attribute 'pack_mode' := '1'}
+		TYPE ST_MyStruct:
+		
+--- Text ---		
+		F_CreateDynText("velooffsetchain",0)
+		
+------------------------------------------------------------------------------------------------------------------------
+how to use popup
+		
+CASE nTestStep OF
+	
+	0:
+		;
+	
+	10:
+		IF fbHmiHandler.M_PopupCheck(E_Popup.ePopup01) THEN
+			CASE fbHmiHandler.M_PopupSet(E_Popup.ePopup01,F_CreateDynText("Wasch Prozess Starten ?",0),F_CreateDynText("yes",0),F_CreateDynText("no",0),F_CreateDynText("Info",0),F_CreateDynText("Abbrechen",0)) OF
+				1:
+					nTestStep :=100;
+				2:
+					nTestStep :=0;		
+				4:	
+					nTestStep :=200;
+			END_CASE			
+		END_IF
+	100:
+		IF fbHmiHandler.M_PopupCheck(E_Popup.ePopup02) THEN
+			CASE fbHmiHandler.M_PopupSet(E_Popup.ePopup02,F_CreateDynText("Wollen Sie wirklich den Wasch Prozess Starten ?? Sicher ??",0),F_CreateDynText("yes",0),F_CreateDynText("",0),F_CreateDynText("Abbruch",0),F_CreateDynText("",0)) OF
+
+				1:
+					nTestStep :=200;		
+				3:	
+					nTestStep :=0;
+			END_CASE			
+		END_IF
+		
+	200:
+		IF fbHmiHandler.M_PopupCheck(E_Popup.ePopup01) THEN
+			CASE fbHmiHandler.M_PopupSet(E_Popup.ePopup01,F_CreateDynText("Prozess Fertig",0),F_CreateDynText("OK",0),F_CreateDynText("",0),F_CreateDynText("",0),F_CreateDynText("",0)) OF
+				1:
+					nTestStep :=0;
+			END_CASE			
+		END_IF	
+END_CASE
+
+IF FALSE THEN
+	IF fbHmiHandler.M_PopupCheck(E_Popup.ePopupSafetyEs) THEN
+		fbHmiHandler.M_PopupSet(E_Popup.ePopupSafetyEs,F_CreateDynText("Nothalt nicht OK -> Bitte Quittieren !",0),F_CreateDynText("",0),F_CreateDynText("",0),F_CreateDynText("",0),F_CreateDynText("OK",0)) ;
+	END_IF	
+END_IF		
+		
+		
+*)]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="M_ChangeWatchdog" Id="{33892116-16d7-4e1a-88a7-e35e1857f998}">
+      <Declaration><![CDATA[METHOD PRIVATE M_ChangeWatchdog : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wsClearText := "Run onlineChange watchdog";
+
+stPlcAppSystemInfo := Statics.stPlcSystemInfo.stPlcAppSystemInfo;
+IF nOnlineChangesMirror <> stPlcAppSystemInfo.OnlineChangeCnt THEN
+	wsClearText := "OnlineChange detected -> ReInit!";
+	bInit := FALSE;	
+	nOnlineChangesMirror := stPlcAppSystemInfo.OnlineChangeCnt;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{f74952ec-f0a4-4874-996f-0f42b6a228da}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Init : BOOL
+VAR
+	// local temp var's
+	ISt : IStation;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[///
+///	PLC INIT: Initialisierung aller Komponenten
+/// - Einstellungen treffen
+/// - setzen von Referenzen
+/// - wichtig: in einem Zyklus fertig!
+
+wsClearText := "Check PLC init done";
+IF bInit THEN
+	M_Init := TRUE;
+	RETURN;
+END_IF
+
+wsClearText := "PLC init: first shot setup";
+IF Statics.stPlcSystemInfo.stPlcTaskSystemInfo.FirstCycle THEN
+	;//P_HMI.recipeManagement.M_ReadRecipe();
+END_IF
+
+wsClearText := "PLC init: wait for valid system Time";
+IF Statics.dtNow = dtMinValue THEN
+	RETURN;
+END_IF
+
+{region "configuration and logging"}
+wsClearText := "PLC init: setup/load configuration";
+stConfig.stLogConfig.eLoggingProvider := E_LoggingProvider.eLoggingProviderFile;
+stConfig.stLogConfig.sLogName := 'PlcLog.txt';
+stConfig.stLogConfig.sLogPath := '/home/';
+stConfig.stLogConfig.eLogLevel := E_LogLevel.eLogLevel_info;
+
+wsClearText := "Set up logging provider";
+P_System.fbFileLog.Source := stConfig.stLogConfig.sLogName;
+P_System.fbFileLog.sPath := stConfig.stLogConfig.sLogPath;
+P_System.fbFileLog.LogLevel := stConfig.stLogConfig.eLogLevel;
+	
+P_System.fbEventLog.Source := stConfig.stLogConfig.sLogName;
+P_System.fbEventLog.LogLevel := stConfig.stLogConfig.eLogLevel;
+	
+P_System.fbDebugLog.Source := stConfig.stLogConfig.sLogName;
+P_System.fbDebugLog.LogLevel := stConfig.stLogConfig.eLogLevel;
+IF stConfig.stLogConfig.eLoggingProvider = E_LoggingProvider.eLoggingProviderFile THEN
+	Services.ILog := P_System.fbFileLog;
+ELSIF stConfig.stLogConfig.eLoggingProvider = E_LoggingProvider.eLoggingProviderEventLog THEN
+	Services.ILog := P_System.fbEventLog;
+ELSE // default
+	Services.ILog := P_System.fbDebugLog;
+END_IF
+
+Services.fbEventHandler.Init();
+
+{endregion}
+
+{region "initialize HMI controller and provider"}
+wsClearText := "Initialize HMI";
+P_HMI_Controller.M_Init();
+HMI.fbHmiHwProvider.M_Init();
+HMI.fbHmiTc3Provider.M_Init();
+{endregion}
+
+{region "initialize components, stations and modules"}
+
+wsClearText := "Initialize plant components";
+// plant component initialization here...
+	 
+
+wsClearText := "Initialize stations, modules and plant";
+
+// sample 1: quick, default IOs and services:
+//		fbSt010OvenA.M_Init();
+	 
+// sample 2: using custom settings, IOs and services:
+//		fbSt010OvenA.Station := E_Station.eStation_ST010_OvenA;
+//		fbSt010OvenA.Name := stTextListGlobal.stText_ST010_Name;
+//		fbSt010OvenA.Active := TRUE;
+//		fbSt010OvenA.Enable := TRUE;
+//		fbSt010OvenA.M_SetReferences(IO.st010_OvenA_IO);
+//		ISt := fbSt010OvenA.M_InitEx(Services.ILog, Services.fbNotiHandler);
+//		fbModul001.M_RegisterStation(ISt);
+	 
+fbSt010OvenA.M_Init();
+fbSt020OvenB.M_Init();
+fbSt030Handling.M_Init();
+fbSt040Storage.M_Init();
+fbSt050Mould.M_Init();
+fbModul001.M_Init();
+P_Plant.M_Init();
+
+{endregion}
+
+wsClearText := "Initialize Safety";
+P_Safety.M_Init();
+
+wsClearText := "Initialize Supervision";
+P_Supervision.M_Init();
+
+wsClearText := "PLC init done.";
+Services.ILog.AddLog(TO_STRING(wsClearText), sSource, E_LogLevel.eLogLevel_info);
+
+bInit := TRUE;
+M_Init := bInit;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_OnlineChange" Id="{8a450ade-d4bb-4acb-9891-b22f5760d414}">
+      <Declaration><![CDATA[ {attribute 'call_after_online_change_slot' := '1'}
+METHOD M_OnlineChange : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bInit := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="MAIN">
+      <LineId Id="1038" Count="3" />
+      <LineId Id="1187" Count="0" />
+      <LineId Id="1044" Count="2" />
+      <LineId Id="1048" Count="14" />
+      <LineId Id="1066" Count="14" />
+      <LineId Id="1114" Count="0" />
+      <LineId Id="1081" Count="1" />
+      <LineId Id="1126" Count="1" />
+      <LineId Id="1125" Count="0" />
+      <LineId Id="1128" Count="0" />
+      <LineId Id="1131" Count="1" />
+      <LineId Id="1134" Count="1" />
+      <LineId Id="1139" Count="0" />
+      <LineId Id="1142" Count="0" />
+      <LineId Id="1144" Count="0" />
+      <LineId Id="1146" Count="1" />
+      <LineId Id="1149" Count="2" />
+      <LineId Id="1153" Count="0" />
+      <LineId Id="1155" Count="0" />
+      <LineId Id="1157" Count="1" />
+      <LineId Id="1161" Count="0" />
+      <LineId Id="1141" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.Info">
+      <LineId Id="41" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="237" Count="3" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="251" Count="1" />
+      <LineId Id="165" Count="5" />
+      <LineId Id="218" Count="1" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="4" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="87" Count="2" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="99" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="44" Count="3" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="5" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="214" Count="2" />
+      <LineId Id="259" Count="1" />
+      <LineId Id="303" Count="1" />
+      <LineId Id="263" Count="39" />
+      <LineId Id="261" Count="1" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.M_ChangeWatchdog">
+      <LineId Id="13" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.M_Init">
+      <LineId Id="102" Count="1" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="172" Count="3" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="79" Count="2" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="634" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="615" Count="17" />
+      <LineId Id="746" Count="0" />
+      <LineId Id="633" Count="0" />
+      <LineId Id="635" Count="0" />
+      <LineId Id="485" Count="0" />
+      <LineId Id="711" Count="0" />
+      <LineId Id="638" Count="0" />
+      <LineId Id="708" Count="0" />
+      <LineId Id="714" Count="0" />
+      <LineId Id="709" Count="1" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="707" Count="0" />
+      <LineId Id="565" Count="0" />
+      <LineId Id="691" Count="0" />
+      <LineId Id="658" Count="0" />
+      <LineId Id="689" Count="1" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="642" Count="0" />
+      <LineId Id="641" Count="0" />
+      <LineId Id="643" Count="0" />
+      <LineId Id="636" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="672" Count="0" />
+      <LineId Id="674" Count="1" />
+      <LineId Id="673" Count="0" />
+      <LineId Id="676" Count="0" />
+      <LineId Id="670" Count="0" />
+      <LineId Id="637" Count="0" />
+      <LineId Id="682" Count="0" />
+      <LineId Id="645" Count="0" />
+      <LineId Id="720" Count="0" />
+      <LineId Id="726" Count="0" />
+      <LineId Id="738" Count="0" />
+      <LineId Id="745" Count="0" />
+      <LineId Id="541" Count="0" />
+      <LineId Id="700" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="600" Count="0" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="607" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="435" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.M_OnlineChange">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

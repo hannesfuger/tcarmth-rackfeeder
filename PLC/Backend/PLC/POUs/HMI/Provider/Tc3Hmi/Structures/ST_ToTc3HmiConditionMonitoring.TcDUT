@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_ToTc3HmiConditionMonitoring" Id="{46620884-5682-43ce-82f6-1d90427461c5}">
+    <Declaration><![CDATA[TYPE ST_ToTc3HmiConditionMonitoring :
+STRUCT
+	fVoltage_L1	:REAL;
+	fVoltage_L2	:REAL;
+	fVoltage_L3	:REAL;
+	fVoltage_L1_L2 :REAL;
+	fVoltage_L2_L3 :REAL;
+	fVoltage_L3_L1 :REAL;
+	fPowerFactor :REAL;
+	fCurrent_L1 :REAL;
+	fCurrent_L2 :REAL;
+	fCurrent_L3 :REAL;
+	fRealPower_L1 :REAL;	//Wirkleistung
+	fRealPower_L2 :REAL;	//Wirkleistung
+	fRealPower_L3 :REAL;	//Wirkleistung
+	fIdlePower_L1 :REAL;	//Blindleistung
+	fIdlePower_L2 :REAL;	//Blindleistung
+	fIdlePower_L3 :REAL;	//Blindleistung
+	fApparentPower_L1 :REAL;	//Scheinleistung
+	fApparentPower_L2 :REAL;	//Scheinleistung
+	fArrarentPower_L3 :REAL;	//Scheinleistung
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

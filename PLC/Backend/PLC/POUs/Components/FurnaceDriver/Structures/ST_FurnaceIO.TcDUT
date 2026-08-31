@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_FurnaceIO" Id="{1e20d351-cebc-4dda-a3ab-1c7c5f750142}">
+    <Declaration><![CDATA[/// Turck RFID IO structure.
+TYPE ST_FurnaceIO :
+STRUCT
+	
+	/// Data to device.           
+	stOut		AT%Q*		: ST_FurnaceOut;
+	
+	/// Data from device.
+	stIn		AT%I*		: ST_FurnaceIn;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

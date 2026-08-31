@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_FurnaceOut" Id="{8e06e916-a8ac-4787-9d35-a05c91a5faf9}">
+    <Declaration><![CDATA[{attribute 'pack_mode' := '0'}
+TYPE ST_FurnaceOut :
+STRUCT
+	bPWMSignal					: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_Counter_Item_String" Id="{c29104b4-b009-4e66-afe7-b67813644376}">
+    <Declaration><![CDATA[TYPE ST_Counter_Item_String :
+STRUCT
+	stIndex					:ST_Text;
+	stGroup					:ST_Text;
+	stName					:ST_Text;
+	stValueOk				:ST_Text;	
+	stValueNok				:ST_Text;
+	stValueTotal			:ST_Text;	
+	stValueOkLevel1			:ST_Text;
+	stReactionOkLevel1		:ST_Text;
+	stValueOkLevel2			:ST_Text;
+	stReactionOkLevel2		:ST_Text;
+	stValueNokLevel1		:ST_Text;
+	stReactionNokLevel1		:ST_Text;
+	stValueNokLevel2		:ST_Text;
+	stReactionNokLevel2		:ST_Text;
+	stValueTotalLevel1		:ST_Text;
+	stReactionTotalLevel1	:ST_Text;
+	stValueTotalLevel2		:ST_Text;
+	stReactionTotalLevel2	:ST_Text;		
+	stUserLevel				:ST_Text;
+	stDataType				:ST_Text;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

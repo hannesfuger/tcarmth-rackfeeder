@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_CreateDynTextEx" Id="{c52bd20c-0ebc-4f65-b00e-7bb9df2b34fd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_CreateDynTextEx : ST_Text
+VAR_INPUT
+	nNameId		: INT;		//example simatic hmi
+	wsNameId	: WSTRING;	//standard name
+	wsName		: WSTRING;	//standard name
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_CreateDynTextEx.nNameId := nNameId;
+F_CreateDynTextEx.wsNameId := wsNameId;
+F_CreateDynTextEx.wsName := wsName;
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_CreateDynTextEx">
+      <LineId Id="31" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

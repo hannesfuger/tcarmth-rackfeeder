@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_PxAB_SxHandAsBs_OUT" Id="{1037e897-c43a-491d-978a-d83a5942b1ac}">
+    <Declaration><![CDATA[TYPE ST_PxAB_SxHandAsBs_OUT :
+STRUCT
+	bLedS4	: BOOL; // LED zu Taste Sx
+	bLedS5	: BOOL;
+	bLedS6	: BOOL;
+	bLedS7	: BOOL;
+	bLedS8	: BOOL;
+	bLedS9	: BOOL;
+	bLedS10	: BOOL;
+	bLedS11	: BOOL;
+	bLedS12	: BOOL;
+	bLedS13	: BOOL;
+	bLedS14	: BOOL;
+	bLedS15	: BOOL;
+	bLedS16	: BOOL;
+	bLedS17	: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

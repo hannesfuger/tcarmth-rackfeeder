@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <DUT Name="E_Mover_XTS" Id="{8c568738-81f1-43f5-8106-c0f6e5deccce}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE E_Mover_XTS :
+(
+	eMoverXts_none := 0,
+	// UnitTest axis
+	eMoverXts_01,
+	eMoverXts_02,
+	eMoverXts_03,
+	eMoverXts_04,
+	eMoverXts_05,
+	eMoverXts_06,
+	eMoverXts_07,
+	eMoverXts_08,
+	eMoverXts_09,
+	eMoverXts_10,
+	eMoverXts_11,
+	eMoverXts_12,
+	eMoverXts_13,
+	eMoverXts_14,
+	eMoverXts_15,
+	eMoverXts_16,
+	eMoverXts_17,
+	eMoverXts_18,
+	eMoverXts_19,
+	eMoverXts_20,
+	eMoverXts_21,
+	eMoverXts_22,
+	eMoverXts_23,
+	eMoverXts_24,
+	eMoverXts_25,
+	eMoverXts_26,
+	
+	eMoverXts_MaxAxis
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

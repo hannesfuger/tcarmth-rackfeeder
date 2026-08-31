@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St010_IO_OUT" Id="{84bb27e7-3008-4158-b39d-c1eb4326a94f}">
+    <Declaration><![CDATA[TYPE ST_St010_IO_OUT :
+STRUCT
+	bOvenFan :BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

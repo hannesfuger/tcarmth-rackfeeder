@@ -1,0 +1,71 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-identifier",
+      "displayName": "Identifier",
+      "visible": true,
+      "type": "tchmi:general#/definitions/String",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "Identifier",
+      "propertySetterName": "setIdentifier",
+      "propertyGetterName": "getIdentifier",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-min",
+      "displayName": "Min",
+      "visible": true,
+      "type": "tchmi:general#/definitions/Number",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "Min",
+      "propertySetterName": "setMin",
+      "propertyGetterName": "getMin",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-max",
+      "displayName": "Max",
+      "visible": true,
+      "type": "tchmi:general#/definitions/Number",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "Max",
+      "propertySetterName": "setMax",
+      "propertyGetterName": "getMax",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-value",
+      "displayName": "Value",
+      "visible": true,
+      "type": "tchmi:general#/definitions/Number",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "Value",
+      "propertySetterName": "setValue",
+      "propertyGetterName": "getValue",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.742.5/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

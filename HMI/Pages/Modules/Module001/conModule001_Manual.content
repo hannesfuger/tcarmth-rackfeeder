@@ -1,0 +1,6 @@
+<div id="conModule001_Manual" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-left-unit="px" data-tchmi-top-unit="px" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-creator-viewport-width="1024" data-tchmi-creator-viewport-height="768">
+
+<div id="Module001_ManualPage" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Module/Module_ManualPage.usercontrol" data-tchmi-stmodulebasetohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::arrStModule[1]%/s%" data-tchmi-stmodulebasefromhmi="%s%PLC1.HMI.stHmiTc3::stIn::arrStModule[1]%/s%">     
+</div>
+
+</div>

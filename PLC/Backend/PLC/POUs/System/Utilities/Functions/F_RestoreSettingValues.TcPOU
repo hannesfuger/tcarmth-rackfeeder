@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_RestoreSettingValues" Id="{9e0c5711-5181-4895-bcc6-7c8ad2891b62}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_RestoreSettingValues : BOOL
+VAR_IN_OUT
+	astSettings	: ARRAY[*] OF ST_Data_Item;
+	astBackup	: ARRAY[*] OF ST_Data_Item;
+END_VAR
+VAR
+	xx, nLb, nUb : INT;
+	stItmTemp	 : REFERENCE TO ST_Data_Item;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nLb := TO_INT(LOWER_BOUND(astSettings, 1));
+nUb := TO_INT(UPPER_BOUND(astSettings, 1));
+
+FOR xx := nLb TO nUb DO 
+	stItmTemp REF= F_FindBackupItem(astSettings[xx], astBackup);	// get backup
+	F_CopyDataItemValues(astSettings[xx], stItmTemp);				// restore values	
+END_FOR
+
+F_RestoreSettingValues := TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="F_RestoreSettingValues">
+      <LineId Id="23" Count="7" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

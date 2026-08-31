@@ -1,0 +1,694 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="P_Safety" Id="{a3db4c99-61b6-4b7f-8925-ef0b085a8082}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM P_Safety
+VAR_INPUT
+	//fbSafetyAccessManager		: ARRAY[1..E_SafetyAccess.eSafetyAccess_nMaxIdx] OF FB_SafetyAccessManager;
+	//bDoorRequestSafetyAccess	: ARRAY[1..E_Door.eDoor_nMaxIdx] OF BOOL;
+	bDoorOpnS1_3,
+	bDoorClsS1_3 				: BOOL;
+END_VAR
+VAR_OUTPUT
+	bError,
+	bMachineRequestStart,
+	bMachineRequestStop,
+	bMachineRequestCycleStop	: BOOL;
+	nSchott2StateCol 			: DINT := STATICS.stColor.Gray;
+END_VAR
+VAR
+	/// Safets IOs
+	stIO			: REFERENCE TO ST_SafetyIO;
+
+	/// logger & event handler
+	ILog			: I_Logger;
+	IEvent			: I_EventHandler;
+	
+	/// private var's
+	bSimulation		: BOOL;
+	bTestReset		: BOOL;
+	aa, ii			: INT;
+	nStep			: INT;
+	stStepText		: ST_Text;
+	
+	tofSafetyRun		: ARRAY[0..iSafety_Anzahl_TwinSafeGruppen] OF tof;
+	bFBSafeFbErr		: BOOL;
+	bFBSafeOutErr		: BOOL;
+	bFBSafeComErr		: BOOL;
+	bGrpPrtOtherErr		: BOOL;
+	
+	iResetCnt,
+	iErrAckCnt			: INT;
+	tonDelay			: TON;	
+	
+	bEdm_EmergencyStop		: BOOL;
+	stEdm_State_Nothalt		: ST_Text;
+	arrTonEdmCheck			: ARRAY[0..50] OF TON;
+	//arrReleaseDoorOpen	: ARRAY[1..2] OF BOOL; //1=Modul 1 Schott 2= Modul 1 General
+	
+	fTrigErrorAck			: F_TRIG;
+	
+	// Safe Gate MBM
+	fbSaftyDoors_MGB2		: ARRAY[0..4] OF FB_SafeDoorMGB2;
+	fbSaftyDoors			: ARRAY[0..1] OF FB_SafetyDoor;
+	
+	//fbDoor				: ARRAY[1..E_Door.eDoor_nMaxIdx] OF FB_Door;
+	iDoorSequence			: ARRAY[1..iSafety_Anzahl_Schutzbereiche] OF INT;
+	tonDoorWait				: ARRAY[1..iSafety_Anzahl_Schutzbereiche] OF TON;
+	tonDoorTimeout			: ARRAY[1..iSafety_Anzahl_Schutzbereiche] OF TON;
+	
+	bTest					: BOOL;
+	
+	rtrigReset 				: R_TRIG;
+	
+	tofEsOk,
+	tofAreaOkST10,
+	tofAreaOkST80 			: TOF;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// HMI access provider
+/// 
+
+M_Mapping();
+
+tofEsOk(IN := IO.stSafetyIO.stIn.bSAFE_ES_Ok, PT := T#500MS);
+tofAreaOkST10(IN := IO.stSafetyIO.stIn.bSAFE_Area_Ok_ST10, PT := T#2S);
+
+M_Edm();
+
+// run diagnostics
+M_Diagnostics();
+
+FOR aa := 1 TO iSafety_Anzahl_Schutzbereiche DO
+	tonDoorWait[aa].PT:=T#500MS;
+	tonDoorWait[aa]();
+	tonDoorWait[aa].IN:=FALSE;
+	
+	tonDoorTimeout[aa].PT:=T#5000MS;
+	tonDoorTimeout[aa]();
+	tonDoorTimeout[aa].IN:=FALSE;	
+END_FOR
+
+
+tofSafetyRun[1].IN:=NOT stIO.stOut.bSafetyErrAck[1];
+tofSafetyRun[1].PT:=T#4S;
+tofSafetyRun[1]();
+stIO.stOut.bSafe_Tsg_Run[1]:=tofSafetyRun[1].Q;
+
+// calls
+M_DoorSequence();
+M_General();
+
+// Simulation ohne HW
+IF bSimulation THEN // OR iIBN <> 0 THEN
+	stIO.stIn.bSAFE_ES_Ok := TRUE;
+
+	FOR aa := 1 TO iSafety_Anzahl_Schutzbereiche DO
+		stIO.stIn.bSAFE_AREA_Ok[aa] := TRUE;
+	END_FOR
+	
+	FOR aa := 1 TO E_Door.eDoor_nMaxIdx DO
+		stIO.stIn.bSAFE_GATE_Ok[aa] := TRUE;		
+	END_FOR
+	
+	stIO.stIn.bCompressedAirOk := TRUE;
+	
+
+	RETURN; // EXIT
+END_IF
+
+// Reset sequence
+CASE nStep OF
+	0: 	
+		stStepText := F_CreateDynText("wait for reset command.", 0);
+		IF (HMI.stHmi.stIn.stSafety.bQuitSafety OR bTestReset OR HMI.stHmi.stIn.stMain.stButton_Reset.bClick) THEN
+			bTestReset := FALSE;
+			bError := FALSE;
+			iErrAckCnt := 0;
+			nStep := 10;
+		END_IF
+	
+	10:	
+		stStepText := F_CreateDynText("Start resetting TwinSAFE", 0);
+		IF ErrorAckRequest THEN
+			stIO.stOut.bSafetyErrAck[1] := TRUE;			
+			nStep := 20;
+		ELSE
+			nStep := 50;
+		END_IF
+		
+	20:	
+		stStepText := F_CreateDynText("Error ack TwinSAFE groups", 0);
+		tonDelay(IN := TRUE, PT := T#1S);
+		IF tonDelay.Q THEN
+			stIO.stOut.bSafetyErrAck[1] := FALSE;
+			tonDelay(IN := FALSE);
+			IF bFBSafeFbErr OR bFBSafeOutErr OR bFBSafeComErr OR bGrpPrtOtherErr  THEN // chk error still active
+				nStep := 30;
+			ELSE
+				iErrAckCnt := 0;
+				nStep := 50;
+			END_IF			
+		END_IF
+		
+	30:	
+		stStepText := F_CreateDynText("Restart error ack TwinSAFE group", 0);
+		tonDelay(IN := TRUE, PT := T#1S);
+		IF tonDelay.Q THEN
+			tonDelay(IN := FALSE);
+			iErrAckCnt := iErrAckCnt + 1;
+			IF iErrAckCnt < 3 THEN
+				nStep := 10;
+			ELSE
+				nStep := 0;
+			END_IF
+		END_IF
+		
+	50:
+		iResetCnt := 0;
+		nStep := 55;
+		
+		
+// Restart FBs
+		
+	55:
+		// Feedback NIO
+		IF NOT stIO.stIn.bSAFE_ES_Ok AND 
+		NOT stIO.stOut.bSafety_EDM_OUT[1] THEN
+			IEvent.Select(Tc_Events.TwinSafeEventClass.EdmErrorEvent)
+		  	  	  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_EDM_Error.wsName)
+		  	  	  .ArgSbAppendRaise(' | Safety Feedback Not-Halt');
+			nStep := 0;				
+		ELSE
+			nStep := 56;				
+		END_IF
+
+	56:	
+		stStepText := F_CreateDynText("Restart TwinSAFE FBs", 0);
+		stIO.stOut.bRestartPLC	:= TRUE;
+		tonDelay(IN := TRUE, PT := T#0.5S);
+		IF tonDelay.Q THEN
+			tonDelay(IN := FALSE);
+			stIO.stOut.bRestartPLC	:= FALSE;
+			nStep := 57;
+		END_IF
+	57:	
+		stStepText := F_CreateDynText("wait", eLanguage);
+		tonDelay(IN := TRUE, PT := T#0.2S);
+		IF tonDelay.Q THEN
+			tonDelay(IN := FALSE);
+			IF iResetCnt < 2 THEN // Schleife
+				iResetCnt := iResetCnt + 1;
+				nStep := 56;
+			ELSE			
+				nStep := 60;
+			END_IF
+		END_IF		
+		
+	60:	
+		nStep := 100;
+		
+	100:
+		stStepText := F_CreateDynText("Reset TwinSAFE Done", 0);
+		bError := FALSE;
+		//stIO.stOut.bMainPressure := TRUE;
+		(*// beim ersten Start bestimmte Türen autom. verriegeln wenn geschlossen
+		IF NOT bFirstShot THEN
+			fbSaftyDoors[2].LockDoor();	// TA Vorne
+		END_IF	
+		bFirstShot := TRUE;*)
+		nStep := 0;
+		
+END_CASE]]></ST>
+    </Implementation>
+    <Folder Name="Methods" Id="{b76932cc-bc9f-4bcc-bdc0-54578893adc4}" />
+    <Folder Name="OpMode" Id="{94dbcb11-05ec-4aed-9d95-d0d33cc9c821}" />
+    <Folder Name="Private" Id="{dc67e5b8-3d2a-499b-a735-986744730bf4}" />
+    <Folder Name="Properties" Id="{f22a9324-3f9d-4308-ae71-fc14a5250b23}" />
+    <Property Name="CompressedAirOk" Id="{7167cae3-b89d-4c61-88e7-03d37aa92b16}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY INTERNAL CompressedAirOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{75d7023f-02d4-437b-819d-8bb7683ec79f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CompressedAirOk := EmergencyStopOk AND stIO.stIn.bCompressedAirOk;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="EmergencyStopOk" Id="{bf6fd446-fd6f-42ce-8499-c252c57a07c4}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC EmergencyStopOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{5e3441e2-fcf1-4860-9bb1-bfb8bf91d29e}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EmergencyStopOk := tofEsOk.Q;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ErrorAckRequest" Id="{5f77fd6d-f767-4680-ab1b-136531b1fa92}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC ErrorAckRequest : BOOL]]></Declaration>
+      <Get Name="Get" Id="{c6016b27-9062-4fa2-b4a7-67cb8af81ece}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ErrorAckRequest := bFBSafeFbErr OR bFBSafeOutErr OR bFBSafeComErr OR bGrpPrtOtherErr OR 
+					NOT stIO.stIn.bSAFE_ES_Ok OR stIO.stIn.bSAFE_DRIVES_STO OR
+					stIO.stIn.bSAFE_ConfirmTimeout;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="M_Diagnostics" Id="{20458c32-134a-4975-92ed-79c60800c422}" FolderPath="Private\">
+      <Declaration><![CDATA[METHOD PRIVATE M_Diagnostics : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TwinSAFE Fehler										
+bFBSafeFbErr :=		IO.stSafetyIO.stIn.bSafe_FbError_Master[0] OR
+					IO.stSafetyIO.stIn.bSafe_FbError_Master[1];
+					
+bFBSafeOutErr :=	IO.stSafetyIO.stIn.bSafe_OutError_Master[0] OR
+					IO.stSafetyIO.stIn.bSafe_OutError_Master[1];
+					
+bFBSafeComErr :=	IO.stSafetyIO.stIn.bSafe_ComError_Master[0] OR
+					IO.stSafetyIO.stIn.bSafe_ComError_Master[1];
+
+bGrpPrtOtherErr :=	IO.stSafetyIO.stIn.bSafe_OtherError_Master[0] OR
+					IO.stSafetyIO.stIn.bSafe_OtherError_Master[1];
+	
+// diag ES
+IF NOT IO.stSafetyIO.stIn.bSAFE_ES_Ok THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+		  .ArgSetWString(stTextListGlobal.stText_Safety.stText_Safety_ES.wsName)
+		  .Raise();
+END_IF
+
+(*	Fehlerauswertung der Sicherheitstechnik
+
+	eNoti_Safety ,
+	eNoti_Safety_NotHalt ,
+	eNoti_Safety_Schutzbereich ,
+	eNoti_Safety_HW ,
+	eNoti_Safety_FBs ,
+*)
+IF stHmi.stIn.stSafety.bQuitSafety THEN
+	bError := FALSE;
+END_IF
+
+(*	Allgemein - > eNoti_Safety	*)
+IF IO.stSafetyIO.stIn.bSafe_EL6900_WcState[0] THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.HwErrorEvent)
+		  .ArgSetString('EL6910 (=A02.K20-1KF1.354) - WC State')
+		  .Raise();
+	bError := TRUE;
+
+(*	Gruppen FB Fehler	*)
+ELSIF IO.stSafetyIO.stIn.bSafe_FbError_Master[0] THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+		  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_Grp_Error.wsName)
+		  .ArgSbAppend(' | 000_ES | (=A02.K20-1KF1.354) | ')
+		  .ArgSbAppendWsRaise(stTextListGlobal.stText_Safety.stText_Safety_GrpFB_Error.wsName);
+	bError := TRUE;
+ELSIF IO.stSafetyIO.stIn.bSafe_FbError_Master[1] THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+		  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_Grp_Error.wsName)
+		  .ArgSbAppend(' | 000_Areas | (=A02.K20-1KF1.354) | ')
+		  .ArgSbAppendWsRaise(stTextListGlobal.stText_Safety.stText_Safety_GrpFB_Error.wsName);
+	bError := TRUE;
+END_IF
+
+
+(*	NotHalt Meldungen - > eNoti_Safety_NotHalt	*)
+//IF NOT IO.stSafetyIO.stIn.bSafe_EStop_State[E_EmergencyStop.eEmergencyStop_1] THEN
+//	IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+//		  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_ES.wsName)
+//		  .ArgSbAppendRaise(' | Schrank | BMK=A01.ES1');
+//	bError := TRUE;                                                                             
+//ELS
+
+IF NOT IO.stSafetyIO.stIn.bSafe_EStop_State[E_EmergencyStop.eEmergencyStop_2] THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+		  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_ES.wsName)
+		  .ArgSbAppendRaise(' | Schrank | BMK=A01.ES2');
+	bError := TRUE;
+END_IF
+
+// Door/Area Meldungen
+IF NOT IO.stSafetyIO.stIn.bSAFE_Area_Ok_ST10 THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.WarningEvent)
+		  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_DoorOpen.wsName)
+		  .ArgSbAppendRaise(' | Ofen A | BMK=');
+END_IF
+IF NOT IO.stSafetyIO.stIn.bSAFE_Area_Ok_ST20 THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.WarningEvent)
+		  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_DoorOpen.wsName)
+		  .ArgSbAppendRaise(' | Ofen B | BMK=');
+END_IF
+
+//ToDo: Safety FB's,.. diag
+RETURN;
+
+(********	Diagnose Emergency Stop	*********)
+fbDiag_NotHalt[1].wsFunctionBlockText := "++A1+P1-6S2 - TSG 000 - ES_Haupt_Pult_1";
+fbDiag_NotHalt[2].wsFunctionBlockText := "++M1+P1-2S1 - TSG 000 - ES_Modul_1_Pult_1";
+fbDiag_NotHalt[3].wsFunctionBlockText := "++M1+P2-2S1 - TSG 000 - ES_Modul_1_Pult_2";
+
+(********	Diagnose TwoHand	*********)
+fbDiag_TwoHand[1].wsFunctionBlockText := "++A1+P1-5S2 - TSG 000 - BA_Tasten - Taste_Betriebsart_Aus";
+fbDiag_TwoHand[2].wsFunctionBlockText := "++A1+P1-5S2 - TSG 000 - BA_Tasten - Taste_Betriebsart_Hand";
+fbDiag_TwoHand[3].wsFunctionBlockText := "++A1+P1-5S2 - TSG 000 - BA_Tasten - Taste_Betriebsart_Ruest";
+fbDiag_TwoHand[4].wsFunctionBlockText := "++A1+P1-5S2 - TSG 000 - BA_Tasten - Taste_Betriebsart_Auto";
+fbDiag_TwoHand[5].wsFunctionBlockText := "++A1+P1-6S4 - TSG 000 - BA_Tasten - Taste_P1_Zustimmung_1";
+fbDiag_TwoHand[6].wsFunctionBlockText := "++A1+P1-6S6 - TSG 000 - BA_Tasten - Taste_P1_Zustimmung_2";
+
+(********	Diagnose MachineMonitoring	*********)
+fbDiag_MachineMonitoring[1].wsFunctionBlockText := "++M1+PSEN_001-2S2 - TSG 000 - Modul1 Tuer 1";
+fbDiag_MachineMonitoring[2].wsFunctionBlockText := "++M1+PSEN_002-2S2 - TSG 000 - Modul1 Tuer 2";
+fbDiag_MachineMonitoring[3].wsFunctionBlockText := "++M1+PSEN_003-2S2 - TSG 000 - Modul1 Tuer 3";
+fbDiag_MachineMonitoring[4].wsFunctionBlockText := "++M1+PSEN_004-2S2 - TSG 000 - Modul1 Tuer 4";
+fbDiag_MachineMonitoring[5].wsFunctionBlockText := "++M1+PSEN_005-2S2 - TSG 000 - Modul1 Schott 1";
+fbDiag_MachineMonitoring[6].wsFunctionBlockText := "++M1+E2-73BG7 - TSG 000 - Modul1 Schott 2";
+
+
+(********	Diagnose EDM	*********)
+//fbDiag_EDM[1].wsFunctionBlockText := ""; // Not-Halt = wird über ES Baustein überwacht
+fbDiag_EDM[1].wsFunctionBlockText := "++M1+E1-80K3K4 - TSG 002 - Edm Pilotluft Lastspannung_Modul 1";
+fbDiag_EDM[2].wsFunctionBlockText := "++M1+E1-80K3K4 - TSG 002 - Edm Rtt";
+
+(*	Logik	*)
+
+(*	FB Details	*)
+(*	Autoquitt		*)
+FOR aa := 1 TO iSafetyDiag_Anzahl_FbEmergencyStop DO
+
+	(*	Not-Halt Diagnose		*)
+	fbDiag_NotHalt[aa].stIn := Iarr_SafetyDiag_NotHalt[aa];
+	fbDiag_NotHalt[aa]( );
+	(*	Error anzeigen	*)
+	IF fbDiag_NotHalt[aa].bError THEN
+		IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_FB_Error.wsName)
+		  	  .ArgSbAppend(' | ')
+			  .ArgSbAppendWsRaise(fbDiag_NotHalt[aa].stErrorText.wsName);
+	END_IF
+END_FOR
+
+FOR aa := 0 TO iSafetyDiag_Anzahl_FbMachineMonitoring DO
+	(*	MachineMonitoring (Schutztürbaustein) Diagnose		*)
+	fbDiag_MachineMonitoring[aa].stIn := Iarr_SafetyDiag_MachineMonitoring[aa];
+	fbDiag_MachineMonitoring[aa]( );
+	(*	Error anzeigen	*)
+	IF fbDiag_MachineMonitoring[aa].bError THEN
+		IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_FB_Error.wsName)
+		  	  .ArgSbAppend(' | ')
+			  .ArgSbAppendWsRaise(fbDiag_MachineMonitoring[aa].stErrorText.wsName);
+	END_IF
+END_FOR
+
+FOR aa := 0 TO iSafetyDiag_Anzahl_FbTwoHand DO
+	(*	TwoHand (Taster) Diagnose		*)
+	fbDiag_TwoHand[aa].stIn := Iarr_SafetyDiag_TwoHand[aa];
+	fbDiag_TwoHand[aa]( );
+	(*	Warnungen anzeigen	*)
+	IF fbDiag_TwoHand[aa].bWarning THEN
+		IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_FB_Error.wsName)
+		  	  .ArgSbAppend(' | ')
+			  .ArgSbAppendWsRaise(fbDiag_TwoHand[aa].stWarningText.wsName);
+	END_IF
+	(*	Error anzeigen	*)
+	IF fbDiag_TwoHand[aa].bError THEN
+		IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_FB_Error.wsName)
+		  	  .ArgSbAppend(' | ')
+			  .ArgSbAppendWsRaise(fbDiag_TwoHand[aa].stErrorText.wsName);
+	END_IF
+END_FOR
+
+// EDM Diagnose
+FOR aa := 0 TO iSafetyDiag_Anzahl_FbEDM DO
+	(*	EDM FB Diagnose		*)
+	fbDiag_EDM[aa].stIn := Iarr_SafetyDiag_EDM[aa];
+	fbDiag_EDM[aa]( );
+	(*	Error anzeigen	*)
+	IF fbDiag_EDM[aa].bError THEN
+		IEvent.Select(Tc_Events.TwinSafeEventClass.EdmErrorEvent)
+			  .ArgSbInitWs(stTextListGlobal.stText_Safety.stText_Safety_FB_Error.wsName)
+		  	  .ArgSbAppend(' | ')
+			  .ArgSbAppendWsRaise(fbDiag_EDM[aa].stErrorText.wsName);
+	END_IF
+END_FOR
+
+
+(*	Hardware	*)
+FOR aa := 1 TO iSafety_Anzahl_EL69xx DO
+	fbTwinSAFE_HW_Diag[aa].bEnable := Services.bPlcInitDone;
+	fbTwinSAFE_HW_Diag[aa].stEcMasterAmsAdr := IO.stControlCabinetIO.stIn.stEtherCATMasterAmsAdr;
+	fbTwinSAFE_HW_Diag[aa].nEcMasterDevId := IO.stControlCabinetIO.stIn.uiEcMasterDevId;
+	fbTwinSAFE_HW_Diag[aa].nDeviceState := IO.stControlCabinetIO.stIn.eEtherCATDeviceState;
+	fbTwinSAFE_HW_Diag[aa].dtNow := Statics.dtNow; // current system time
+	fbTwinSAFE_HW_Diag[aa]();
+	IF fbTwinSAFE_HW_Diag[aa].bError THEN
+		IEvent.Select(Tc_Events.TwinSafeEventClass.HwErrorEvent)
+		  	  .ArgSbInitWs(fbTwinSAFE_HW_Diag[aa].stErrorText.wsName)
+		  	  .ArgSbAppendRaise(' | Safety Feedback Not-Halt');
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DoorSequence" Id="{ce8e403c-822f-47b3-b7ba-f426e96ba4b5}" FolderPath="Private\">
+      <Declaration><![CDATA[METHOD private M_DoorSequence : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Safe Gates
+
+// A
+fbSaftyDoors[0].sName := 'Tür Ofen A';
+fbSaftyDoors[0].bAblaufGestoppt := Services.stGlobalModuleInfo.bStation_All_Stopped;
+fbSaftyDoors[0].bFreigabeTuerEntriegeln := NOT fbSaftyDoors[0].bSAFE_AnforderungSchutzbereich_Ein;
+fbSaftyDoors[0](stIO := Safety.arrSaftyDoors[0]);
+IF fbSaftyDoors[0].bError THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+		  .ArgSbInit('Türe A Fehler | ')
+		  .ArgSbAppendWsRaise(fbSaftyDoors[0].stErrorText.wsName);
+END_IF
+
+// B
+fbSaftyDoors[1].sName := 'Tür Ofen B';
+fbSaftyDoors[1].bAblaufGestoppt := Services.stGlobalModuleInfo.bStation_All_Stopped;
+fbSaftyDoors[1].bFreigabeTuerEntriegeln := NOT fbSaftyDoors[1].bSAFE_AnforderungSchutzbereich_Ein;
+fbSaftyDoors[1](stIO := Safety.arrSaftyDoors[1]);
+IF fbSaftyDoors[1].bError THEN
+	IEvent.Select(Tc_Events.TwinSafeEventClass.ErrorEvent)
+		  .ArgSbInit('Türe B Fehler | ')
+		  .ArgSbAppendWsRaise(fbSaftyDoors[1].stErrorText.wsName);
+END_IF
+
+// reset
+rtrigReset(CLK := HMI.stHmi.stIn.stSafety.bQuitSafety);
+IF rtrigReset.Q THEN
+	FOR ii := 0 TO 1 DO
+		fbSaftyDoors[ii].M_Reset();
+	END_FOR
+END_IF
+
+// request manual on request open door
+bMachineRequestCycleStop := NOT (fbSaftyDoors[0].bFreigabeAblauf AND fbSaftyDoors[1].bFreigabeAblauf);
+bMachineRequestStart := NOT bMachineRequestCycleStop AND (fbSaftyDoors[0].bStartAblauf OR fbSaftyDoors[1].bStartAblauf);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Edm" Id="{cf4525ab-e98b-4397-a91c-4648d58cc62a}" FolderPath="Private\">
+      <Declaration><![CDATA[METHOD private M_Edm : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//ToDo: EDM
+//bEdm_EmergencyStop:=TRUE;
+//stEdm_State_Nothalt:= F_CreateDynText("Alle EDM Nothalt Signale OK", 0);	
+//
+//stIO.stOut.bSafety_EDM_OUT[E_EDM_Out.eEdmOut_Nothalt] := bEdm_EmergencyStop; //Nothalt
+
+//stIO.stOut.bSafety_EDM_OUT[E_EDM_Out.eEdmOut_Modul1_Freigabeventil] := IO.st001_Modul_IO.stIn.bSignal_Modul1SafetyEdmVentilinsel;//AND IO.st001_Modul_IO.stIn.bSensor_Modul1PilotluftDs;//NOT stIO.stIn.bSafety_Aktor[E_Safety_Actor.eSafety_Actor_Freigabeventil_Area1];
+
+//stIO.stOut.bSafety_EDM_OUT[E_EDM_Out.eEdmOut_Modul1_Rtt] := NOT SafetyArea2_Ok;
+
+//EDM Check Meldungen
+
+//fbEdmCheck[1].bEnable := TRUE;
+//fbEdmCheck[1].bActor := stIO.stIn.bSAFE_ES_Ok;
+//fbEdmCheck[1].bEdm := stIO.stOut.bSafety_EDM_OUT[E_EDM_Out.eEdmOut_Nothalt];
+//fbEdmCheck[1].tActorOnEdmOffDelay := T#1S;
+//fbEdmCheck[1].tActorOffEdmOnDelay := T#1S;
+//fbEdmCheck[1]();
+//IF fbEdmCheck[1].bEdmError THEN
+//	fbEdmCheck[1].M_Reset();	
+//																		
+//	INotiHdl.M_SetNotification(F_CreateDynText("0",0),
+//					stTextListGlobal.stText_NG_Safety, 							// Grp
+//					stTextListGlobal.stText_Safety.stText_Safety_ES, 			// Text 1 (stTextListGlobal / F_CreateDynText("xxx",0))				 
+//					F_CreateDynText("EDM Nothalt",0), 							// Text 2 (stTextListGlobal / F_CreateDynText("xxx",0))
+//					stEdm_State_Nothalt,										// Text 3 (stTextListGlobal / F_CreateDynText("xxx",0))	
+//					E_AlarmPriority.Warning,									// Priority
+//					E_NotificationMode.eNotificationMode_Auto					// Notification mode (Autoreset or manually reset by user)
+//					);										
+//										
+//END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_General" Id="{62aeeab2-3721-462b-b801-c6cebf596e13}" FolderPath="Private\">
+      <Declaration><![CDATA[METHOD private M_General : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[;
+//Zustimm bereits in Safety ausgewertet mit Betriebsart
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{83805d63-39e2-4a85-a14a-af5b166d1563}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD INTERNAL M_Init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init Safety stuff here...
+
+// set up logger
+ILog := Services.ILog;
+
+// set up safety IOs
+stIO REF= IO.stSafetyIO;
+
+// set up event handler 
+IEvent := Services.fbEventHandler;
+
+//aSClearText[EN] := 'Safety init done.';
+M_Init := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Mapping" Id="{53f9afab-f156-4623-a313-4ed699666d69}" FolderPath="Private\">
+      <Declaration><![CDATA[METHOD PRIVATE M_Mapping : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stIO.stIn.bSAFE_DRIVES_STO := stIO.stIn.bSAFE_DRIVE_A_STO OR
+								stIO.stIn.bSAFE_DRIVE_B_STO OR
+								stIO.stIn.bSAFE_DRIVES_HG_STO;
+								
+//IO.stSafetyIO.stIn.bSAFE_Areas_Ok := IO.stSafetyIO.stIn. AND 
+//									 IO.stSafetyIO.stIn.bSAFE_Area_Ok_ST20;
+									 
+									 
+// machine stop from safety (ES/Door stop ramp)
+bMachineRequestStop := NOT (stIO.stIn.bSAFE_ES_Ok AND
+							IO.stSafetyIO.stIn.bSAFE_Areas_Ok );// AND
+							//IO.stSafetyIO.stIn.bSAFE_Area_Ok_ST20);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="OpMode_Auto" Id="{be8d2d58-8396-4a8d-a3e1-5b4ad6b3dfdd}" FolderPath="OpMode\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY OpMode_Auto : BOOL]]></Declaration>
+      <Get Name="Get" Id="{66cff5c2-7631-4f98-aa07-865a7785c570}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OpMode_Auto := stIO.stIn.bSafe_OpMode_Auto;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OpMode_Manual" Id="{f951eadd-25ae-4ec1-9324-9d6d6a31c516}" FolderPath="OpMode\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY OpMode_Manual : BOOL]]></Declaration>
+      <Get Name="Get" Id="{ff3b9cf0-12f7-4086-9356-d7b75df3c95b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OpMode_Manual := stIO.stIn.bSafe_OpMode_Manual;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OpMode_Off" Id="{f2a6de9b-0e5f-4f2a-b9bd-f28d294f1dd2}" FolderPath="OpMode\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY OpMode_Off : BOOL]]></Declaration>
+      <Get Name="Get" Id="{0ba95615-85ca-467a-a1f6-3da3ef8852ab}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OpMode_Off := stIO.stIn.bSafe_OpMode_Off;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OpMode_Ruest" Id="{0ffe3f29-a1f2-4aa9-b22a-2146c0f8be63}" FolderPath="OpMode\">
+      <Declaration><![CDATA[PROPERTY OpMode_Ruest : BOOL]]></Declaration>
+      <Get Name="Get" Id="{d59be17b-0d73-4556-8ae3-3815c6aeddc9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OpMode_Ruest := stIO.stIn.bSafe_OpMode_Ruest;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SafetyAreaOk_ST10" Id="{b7a50e27-71e4-4746-9ba7-855cf14ec79f}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY INTERNAL SafetyAreaOk_ST10 : BOOL]]></Declaration>
+      <Get Name="Get" Id="{d94b51dc-1331-4552-9182-cafa30c0219e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SafetyAreaOk_ST10 := tofAreaOkST10.Q;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SafetyAreaOk_ST20" Id="{ce2073e5-33ad-4fd7-8243-baba809136f2}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY PUBLIC SafetyAreaOk_ST20 : BOOL]]></Declaration>
+      <Get Name="Get" Id="{aa35ca31-d35a-4cb3-8ac8-7ab4af2d8934}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SafetyAreaOk_ST20 := IO.stSafetyIO.stIn.bSAFE_Area_Ok_ST20;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SafetyOk" Id="{3f02d142-9800-42fb-8a9d-c52924792db4}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC SafetyOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{957a3a36-4daa-4c89-b11f-fdf972dd044b}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SafetyOk := EmergencyStopOk AND IO.stSafetyIO.stIn.bSAFE_Areas_Ok;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

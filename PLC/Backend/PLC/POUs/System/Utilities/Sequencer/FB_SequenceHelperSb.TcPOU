@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_SequenceHelperSb" Id="{bcf99656-7ad2-47fc-ab2f-9b2be02aa13f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SequenceHelperSb EXTENDS FB_SequenceHelper
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	wsb 			: FB_WStringBuilder;
+	iInfoTextId		: INT;
+	wsInfoTextId 	: WSTRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^();]]></ST>
+    </Implementation>
+    <Property Name="Info" Id="{80474ce1-b87d-45cf-ae1b-7abdf012e9cc}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Info : REFERENCE TO FB_WStringBuilder]]></Declaration>
+      <Get Name="Get" Id="{2c3277fa-3d3a-446a-84ff-b48029e89c47}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Info Ref= wsb;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="InfoTextId" Id="{01dde9df-d404-4259-a18d-c2a1fa1e90c5}">
+      <Declaration><![CDATA[PROPERTY PUBLIC InfoTextId : INT]]></Declaration>
+      <Get Name="Get" Id="{f01b7fdf-d428-48a4-9122-398f04159b2f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[InfoTextId := iInfoTextId;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{13989555-d239-4255-95f1-4e75b7e7fbce}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[iInfoTextId := InfoTextId;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="InfoTextWsId" Id="{770ab5c3-87a9-40ff-bbce-8d0e717e1d3e}">
+      <Declaration><![CDATA[PROPERTY PUBLIC InfoTextWsId : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{0d26ca09-6c9a-4987-8fea-9bc334b78dd3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[InfoTextWsId := wsInfoTextId;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4e185fe0-8c86-4614-ac94-247f598961c4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[wsInfoTextId := InfoTextWsId;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="SetInfo" Id="{3047607d-e78c-4a31-8dc5-0a4a1b0ce1db}">
+      <Declaration><![CDATA[METHOD PUBLIC SetInfo : BOOL
+VAR_INPUT
+	stInfo : ST_Text;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[iInfoTextId := stInfo.nNameId;
+wsb.Set(stInfo.wsName);
+wsInfoTextId := stInfo.wsNameId;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SequenceHelperSb">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelperSb.Info.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelperSb.InfoTextId.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelperSb.InfoTextId.Set">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelperSb.InfoTextWsId.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelperSb.InfoTextWsId.Set">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelperSb.SetInfo">
+      <LineId Id="1" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

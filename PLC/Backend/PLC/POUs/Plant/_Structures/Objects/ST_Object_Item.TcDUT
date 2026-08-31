@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Object_Item" Id="{7db2e2eb-3134-4f44-be23-b475aea659a0}">
+    <Declaration><![CDATA[TYPE ST_Object_Item :
+STRUCT
+	nIndexColor		: UDINT;	//ToDo: nIndexColor not used in HMI!!!
+	stGroup			: ST_Text;	//example -> station 001
+	stType			: ST_Text;	//example -> axis
+	stName			: ST_Text;	//example -> axis x
+	stState			: ST_Text;	//example -> drive positiv
+	stValue			: ST_Text;	//example -> 105.66 mm
+	diObjectIndex	: DINT;		//example -> 10005
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

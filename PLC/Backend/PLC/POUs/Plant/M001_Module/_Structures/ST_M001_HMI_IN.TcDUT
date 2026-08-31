@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_M001_HMI_IN" Id="{485215b1-6499-4085-8ee0-5ade199f6a51}">
+    <Declaration><![CDATA[TYPE ST_M001_HMI_IN :
+STRUCT
+	bQuit : BOOL;
+	//bJogVm : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

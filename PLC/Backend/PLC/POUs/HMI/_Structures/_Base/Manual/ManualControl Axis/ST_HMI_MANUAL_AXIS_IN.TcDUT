@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_MANUAL_AXIS_IN" Id="{a08c7a72-ea53-450e-9f86-2e1926f0dc91}">
+    <Declaration><![CDATA[TYPE ST_HMI_MANUAL_AXIS_IN :
+STRUCT
+	fTargetPosition		: REAL;
+	eJogMode			: E_Axis_JogMode;
+	
+	stButtonJogPos,
+	stButtonJogNeg,
+	stButtonGoTo,
+	stButtonGear,
+	stButtonBrake,			
+	stButtonSetPos,	// ToDo: chk nicht verwendet?
+	stButtonRefReset	: ST_HMI_BUTTON_IN;
+	
+	nSelectedRowIndex	: UINT;
+	bSetTargetFromList	: BOOL;
+	bSetTarget			: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

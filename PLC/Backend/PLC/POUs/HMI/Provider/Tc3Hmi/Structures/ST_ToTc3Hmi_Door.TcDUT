@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_ToTc3Hmi_Door" Id="{ad3e4301-e823-48d3-b957-aff53db94109}">
+    <Declaration><![CDATA[TYPE ST_ToTc3Hmi_Door :
+STRUCT
+	stName			: ST_Text;
+	stItem			: ST_Text;
+	stStateColor	: ST_HMI_COLOR_STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

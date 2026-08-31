@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_ToTc3Hmi" Id="{f8450d45-2108-4875-94c1-3fcfc7a169bd}">
+    <Declaration><![CDATA[TYPE ST_ToTc3Hmi EXTENDS ST_HMI_OUT:
+STRUCT
+	sSetTargetPage				: WSTRING := "Pages/Stations/conStationOverview.content";
+	stHeader					: ST_Header;
+	
+	stPopup						: ST_PopUp_ToHmi;
+	
+	stCounter					: ARRAY[0..CONST.iMaxIdxCounter] OF ST_Counter_Item_String;
+	stControlCounter			: ST_CounterControlOut;
+	
+	stConditionMonitoring		: ST_ToTc3HmiConditionMonitoring;
+	stSetupPlant				: ARRAY[0..30] OF ST_SetupPlant_Item_String;
+	stEmergencyStop				: ARRAY[0..20] OF ST_ToTc3Hmi_EmergencyStop;
+	stDoor						: ARRAY[0..20] OF ST_ToTc3Hmi_Door;
+	
+	//stations
+	//astStation					: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_StationToTc3Hmi;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,740 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_EventHandler" Id="{15ddc12e-d496-402a-851f-a36d0274e1a7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_EventHandler IMPLEMENTS I_EventHandler
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// private instance var's
+	iLog			: I_Logger;
+	afbAlarm      	: ARRAY[0..Const.iMaxIdxAlam] OF FB_TcAlarm;
+	fbCodeErrRef,
+	fbAlarmRef      : REFERENCE TO FB_TcAlarm;
+	fbMsg			: FB_TcMessage;
+	fbEventLogger	: FB_TcEventLogger;
+	ISb 			: I_StringBuilder;
+	fbInternalSb	: FB_StringBuilder;
+	iCntAlm			: INT;
+	bInfoActive,
+	bWarningActive,
+	bErrorActive	: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//ToDo: SetJsonAttribute (e.g.: error reaction)
+//ToDo: F_GetEventText o.ä.
+//ToDo: Listener?
+
+// unit tests
+Test();]]></ST>
+    </Implementation>
+    <Folder Name="Fluent" Id="{d2bbe7f3-5e4b-4cc3-aa32-c720a5287f9b}">
+      <Folder Name="StringBuilder" Id="{fcbc0fab-a6db-4129-b0c7-3a0281c2e83b}" />
+    </Folder>
+    <Folder Name="Properties" Id="{63e5b720-7618-4c1a-b230-482d965e0c2d}" />
+    <Folder Name="SimpleMsg" Id="{ae694419-03a6-450d-b02e-b681c0ee8f90}" />
+    <Method Name="ArgAddDint" Id="{a0f05de7-44e2-4def-b35f-8d4f1a855e11}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddDint : I_EventHandler
+VAR_INPUT
+	value : DINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgAddDint := THIS^;
+IF __ISVALIDREF(fbAlarmRef) THEN
+	fbAlarmRef.ipArguments.AddDInt(value);
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgAddEventRef" Id="{6d53bd2d-6ff4-4620-a3f0-cd16b37035a0}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddEventRef : I_EventHandler
+VAR_INPUT
+	value : TcEventEntry;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgAddEventRef := THIS^;
+IF __ISVALIDREF(fbAlarmRef) THEN
+	fbAlarmRef.ipArguments.AddEventReferenceEx(value);
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgAddLreal" Id="{f58f88ba-eecf-4ee6-93c3-f50790edaf05}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddLreal : I_EventHandler
+VAR_INPUT
+	value : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgAddLreal := THIS^;
+IF __ISVALIDREF(fbAlarmRef) THEN
+	fbAlarmRef.ipArguments.AddLReal(value);
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgAddString" Id="{b7defce1-c44c-4877-b18a-8de91a9a0687}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgAddString := THIS^;
+IF __ISVALIDREF(fbAlarmRef) THEN
+	fbAlarmRef.ipArguments.AddString(value);
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgAddWString" Id="{df6e7669-76f4-40f3-9750-93822785ae03}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgAddWString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgAddWString := THIS^;
+IF __ISVALIDREF(fbAlarmRef) THEN
+	fbAlarmRef.ipArguments.AddWString(value);
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgClear" Id="{711b7cb5-ea45-4174-91b9-167f83a91498}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgClear : I_EventHandler]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgClear := THIS^;
+IF __ISVALIDREF(fbAlarmRef) THEN
+	fbAlarmRef.ipArguments.Clear();
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppend" Id="{d2d4a8c9-c966-4d76-a27f-1661401580a3}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppend : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppend := THIS^;
+
+IF ISb <> 0 THEN
+	ISb.Append(value);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppendAny" Id="{7bc07fa3-be49-444a-b032-24ce77801483}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendAny : I_EventHandler
+VAR_INPUT
+	value : ANY;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppendAny := THIS^;
+
+IF ISb <> 0 THEN
+	ISb.AppendAny(value);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppendAnyRaise" Id="{a814fe43-1556-4b26-bf00-8661f391cd0c}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendAnyRaise : HRESULT
+VAR_INPUT
+	value : ANY;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppendAnyRaise := ArgSbAppendAny(value).ArgSetSbRaise();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppendRaise" Id="{5a237caa-ae8e-46c8-a87e-08d50843e498}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendRaise : HRESULT
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppendRaise := ArgSbAppendSet(value).Raise();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppendS" Id="{3c65e138-dbf6-4ed5-aaee-5912040b50c7}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendS : I_EventHandler
+VAR_INPUT
+	value : T_MaxString := '';
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppendS := ArgSbAppend(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppendSet" Id="{b46737c0-41fd-4660-b440-0b0fa7c2152b}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendSet : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppendSet := ArgSbAppend(value).ArgSetSb();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppendWs" Id="{f3f16ae3-4024-4f3e-a07d-a8e4fc39c782}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendWs : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppendWs := THIS^;
+
+IF ISb <> 0 THEN
+	ISb.AppendWs(value);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbAppendWsRaise" Id="{e2782b5b-50a6-430e-b3db-8126b33ea375}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbAppendWsRaise : HRESULT
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSbAppendWsRaise := ArgSbAppendWs(value).ArgSetSbRaise();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbInit" Id="{b1ec0e9a-05cb-493e-96e3-206a1518a5d4}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbInit : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Isb := fbInternalSb.Set(value);
+ArgSbInit := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbInitExternal" Id="{355f971e-a413-454f-b883-bdb8992cbb7c}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbInitExternal : I_EventHandler
+VAR_INPUT
+	sb	: I_StringBuilder;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ISb := sb;
+ArgSbInitExternal := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSbInitWs" Id="{f2bae4ed-ebcb-40eb-8c0b-35ec9dea60ce}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSbInitWs : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Isb := fbInternalSb.SetWs(value);
+ArgSbInitWs := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSetDint" Id="{5afe283e-bc59-4fa2-b13a-bbc0c036bb15}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetDint : I_EventHandler
+VAR_INPUT
+	value : DINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSetDint := ArgClear().ArgAddDint(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSetEventRef" Id="{bc16718f-95fc-4020-be08-dda3136e53e7}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetEventRef : I_EventHandler
+VAR_INPUT
+	value : TcEventEntry;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSetEventRef := ArgClear().ArgAddEventRef(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSetLreal" Id="{f33f133a-277d-4ddf-80b9-d8e30b421a13}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetLreal : I_EventHandler
+VAR_INPUT
+	value : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSetLreal := ArgClear().ArgAddLreal(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSetSb" Id="{e2cf4d4e-36ca-4e85-a6bf-fd4680840585}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetSb : I_EventHandler
+VAR_INPUT
+	sb 		: I_StringBuilder := 0; // optional external string builder, set to 0 to use internal
+END_VAR
+VAR
+	value	: STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF sb = 0 THEN
+	sb := Isb;
+END_IF
+
+value := sb.ToString();
+ArgSetSb := ArgClear().ArgAddString(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSetSbRaise" Id="{fa5c1d0e-634f-476e-984e-f0c8181a0e57}" FolderPath="Fluent\StringBuilder\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetSbRaise : HRESULT
+VAR_INPUT
+	sb	: I_StringBuilder := 0; // optional external string builder, set to 0 to use internal
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSetSbRaise := ArgSetSb(sb).Raise();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSetString" Id="{a70b022b-ab77-40f4-b874-0d6d5e6d1a48}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSetString := ArgClear().ArgAddString(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ArgSetWString" Id="{7f3a8654-472d-488f-98bb-f06bc8c61fcc}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC ArgSetWString : I_EventHandler
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ArgSetWString := ArgClear().ArgAddWString(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CreateAlarm" Id="{1f60ac4f-2e26-4b3b-8d04-66a211566c2d}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC CreateAlarm : I_EventHandler
+VAR_INPUT
+	stEventEntry      : TcEventEntry;
+    bWithConfirmation : BOOL := FALSE;
+    ipSourceInfo      : I_TcSourceInfo := NULL;
+END_VAR
+VAR
+	hres 	: HRESULT;
+	msg		: STRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CreateAlarm := THIS^;
+IF (iCntAlm > Const.iMaxIdxAlam) THEN
+	msg := CONCAT('Max. events exceeded, Const.iMaxIdxAlam: ', TO_STRING(Const.iMaxIdxAlam));
+	fbCodeErrRef.ipArguments.Clear().AddString(msg);
+	fbCodeErrRef.Raise(0);
+	RETURN;
+END_IF
+
+hres := afbAlarm[iCntAlm].CreateEx(stEventEntry, bWithConfirmation, ipSourceInfo);
+
+IF (hres = S_OK) THEN
+	iCntAlm := iCntAlm + 1;
+ELSE
+	msg := CONCAT('Create alarm failed, HRESULT: ', TO_STRING(hres));
+	fbCodeErrRef.ipArguments.Clear().AddString(msg);
+	fbCodeErrRef.Raise(0);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ErrorActive" Id="{0e6431d2-f8db-4726-8b67-e4d53b5c74be}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY ErrorActive : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f0fa74ee-b95e-4d22-975a-e1578c84fd38}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ErrorActive := bErrorActive;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="InfoActive" Id="{00622ccf-c6d3-491f-aaaa-96ee484f4af0}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY InfoActive : BOOL]]></Declaration>
+      <Get Name="Get" Id="{b33334a8-5d23-4c9e-92a7-5e1ba2424e3c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[InfoActive := bInfoActive;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Init" Id="{fb7a6f7b-d623-47ab-8142-e647ea1a6022}">
+      <Declaration><![CDATA[METHOD Init : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[iLog := SERVICES.ILog;
+
+// init alarm event classes
+CreateAlarm(TC_Events.InternalEventClass.InfoEvent);
+CreateAlarm(TC_Events.InternalEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.InternalEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.CodeEventClass.InfoEvent);
+CreateAlarm(TC_Events.CodeEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.CodeEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.SystemEventClass.InfoEvent);
+CreateAlarm(TC_Events.SystemEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.SystemEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.EtherCatEventClass.InfoEvent);
+CreateAlarm(TC_Events.EtherCatEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.EtherCatEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.EtherCatEventClass.DevicStateErrorEvent, TRUE);
+CreateAlarm(TC_Events.EtherCatEventClass.LinkStateErrorEvent, TRUE);
+CreateAlarm(TC_Events.HardwareEventClass.InfoEvent);
+CreateAlarm(TC_Events.HardwareEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.HardwareEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.TwinSafeEventClass.InfoEvent);
+CreateAlarm(TC_Events.TwinSafeEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.TwinSafeEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.TwinSafeEventClass.HwErrorEvent, TRUE);
+CreateAlarm(TC_Events.SettingsEventClass.InfoEvent);
+CreateAlarm(TC_Events.SettingsEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.SettingsEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.RecipeEventClass.InfoEvent);
+CreateAlarm(TC_Events.RecipeEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.RecipeEventClass.ErrorEvent, TRUE);
+CreateAlarm(TC_Events.PlantEventClass.InfoEvent);
+CreateAlarm(TC_Events.PlantEventClass.WarningEvent, TRUE);
+CreateAlarm(TC_Events.PlantEventClass.ErrorEvent, TRUE);
+
+// register simple message not needed:
+//CreateMessage(TC_Events.MessageEventClass.InfoEvent);
+
+fbCodeErrRef REF= afbAlarm[0];
+fbAlarmRef REF= afbAlarm[0];]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Raise" Id="{e70de61e-a502-44e9-a48e-2cdfab490faf}">
+      <Declaration><![CDATA[METHOD PUBLIC Raise : HRESULT
+VAR_INPUT
+	nTimeStamp : ULINT := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(fbAlarmref) THEN 
+	Raise := S_FALSE;
+	RETURN;	
+END_IF
+
+bInfoActive := fbAlarmRef.eSeverity >= TcEventSeverity.Info;
+bWarningActive := fbAlarmRef.eSeverity >= TcEventSeverity.Warning;
+bErrorActive := fbAlarmRef.eSeverity >= TcEventSeverity.Error;
+Raise := fbAlarmref.Raise(nTimeStamp);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{d27a7122-a7a6-4cac-bd3d-60c72f3b7d27}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbEventLogger.ConfirmAllAlarms();
+fbEventLogger.ClearAllAlarms();
+fbEventLogger.ClearLoggedEvents(0);
+
+bInfoActive :=
+bWarningActive :=
+bErrorActive := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Select" Id="{acc4527b-aa49-4a3f-8e5a-cc2218a63cc8}" FolderPath="Fluent\">
+      <Declaration><![CDATA[METHOD PUBLIC Select : I_EventHandler
+VAR_INPUT
+	stEventEntry : TcEventEntry;
+END_VAR
+VAR
+	hres : HRESULT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Select := THIS^;
+fbAlarmRef REF= afbAlarm[0];
+hres := fbEventLogger.GetAlarmEx(stEventEntry, 0, fbAlarmRef);
+IF hres <> S_OK OR NOT __ISVALIDREF(fbAlarmRef) THEN
+	fbAlarmRef REF= afbAlarm[0];
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Send" Id="{fce0bd20-fde8-463f-b238-4262ebb02044}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC Send : BOOL
+VAR_INPUT
+	stEventEntry      : TcEventEntry;
+    ipSourceInfo      : I_TcSourceInfo := NULL;
+    nTimeStamp        : ULINT := 0;
+    ipArguments       : I_TcArguments := NULL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Send := fbEventLogger.SendMessageEx(stEventEntry, ipSourceInfo, nTimeStamp, ipArguments) = S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SendJson" Id="{4f727c5f-68e6-4b53-93ea-43be75604602}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC SendJson : BOOL
+VAR_INPUT
+	stEventEntry      : TcEventEntry;
+    ipSourceInfo      : I_TcSourceInfo := NULL;
+    nTimeStamp        : ULINT := 0;
+    ipArguments       : I_TcArguments := NULL;
+END_VAR
+VAR_IN_OUT CONSTANT
+    sJsonAttribute    : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SendJson := fbEventLogger.SendMessageEx2(stEventEntry, ipSourceInfo, nTimeStamp, ipArguments, sJsonAttribute) = S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SendString" Id="{7740b874-26f7-4c93-aad8-6040f7f3132e}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC SendString : BOOL
+VAR_IN_OUT CONSTANT
+	msg : STRING;	
+END_VAR
+VAR_INST
+	args : FB_TcArguments;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SendString := Send(TC_EVENTS.MessageEventClass.InfoEvent, NULL, 0, 
+													args.Clear().AddString(msg));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SendStringJson" Id="{e92fa693-1d37-401f-85b1-1d4c3a1d5fc4}" FolderPath="SimpleMsg\">
+      <Declaration><![CDATA[METHOD PUBLIC SendStringJson : BOOL
+VAR_IN_OUT CONSTANT
+	msg				: STRING;
+	sJsonAttribute	: STRING;
+END_VAR
+VAR_INST
+	args 			: FB_TcArguments;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SendStringJson := SendJson(TC_EVENTS.MessageEventClass.InfoEvent, NULL, 0, 
+													args.Clear().AddString(msg), 
+													sJsonAttribute);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Test" Id="{6dd5f8ba-68eb-4a0b-b379-52cf1523025c}">
+      <Declaration><![CDATA[METHOD PRIVATE Test : BOOL
+VAR_INST
+	// event alarm test
+	iTestCase		: INT;
+	bAlarmTest, 
+	bMsgTest,
+	bClearAlarmTest : BOOL;
+	HRES			: HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// alarm tests
+IF bAlarmTest THEN
+	bAlarmTest := FALSE;
+	IF iTestCase = 0 THEN
+		HRES := fbEventLogger.GetAlarmEx(TC_Events.CodeEventClass.ErrorEvent, 0, fbAlarmRef);
+		IF (HRES <> 0 OR  NOT __ISVALIDREF(fbAlarmRef)) THEN RETURN; END_IF
+		iTestCase := 10;
+		fbAlarmRef.ipArguments.Clear().AddString('check bounds');
+		fbAlarmRef.Raise(0);
+		
+	ELSIF iTestCase = 1 THEN
+		Select(TC_Events.CodeEventClass.ErrorEvent)
+			  .ArgSetString('check bounds')
+			  .Raise();
+		RETURN;
+	ELSIF iTestCase = 2 THEN
+		Select(TC_Events.HardwareEventClass.ErrorEvent)
+			  .ArgSetString('div 0')
+			  .Raise();
+	ELSIF iTestCase = 3 THEN		
+		Select(TC_Events.HardwareEventClass.WarningEvent)
+			  .ArgSetString('check pointer')
+			  .Raise();
+	ELSIF iTestCase = 4 THEN
+		// adding localizable argument sample 
+		Select(TC_Events.SettingsEventClass.InfoEvent)
+			  .ArgSetEventRef(TC_Events.TranslationListEventClass.TranslationListEventClass_NameEvent)
+			  .ArgAddString('sdc')
+			  .Raise();
+	END_IF
+	
+	//fbAlarm.eConfirmationState = TcEventConfirmationState.WaitForConfirmation
+	//fbAlarm.bActive
+END_IF
+
+// simple message tests
+IF bMsgTest THEN
+	bMsgTest := FALSE;
+	IF iTestCase = 0 THEN
+		SendString('Rezept wurde geladen!');
+	ELSIF iTestCase = 2 THEN
+		SendString('Rezept wurde gespeichert!');
+	ELSIF iTestCase = 3 THEN
+		SendString('Rezept wurde kopiert!');
+	ELSE
+		Send(TC_Events.MessageEventClass.InfoEvent, Null, 0, fbMsg.ipArguments);
+	END_IF
+	
+	//fbMsg.Send();
+END_IF
+
+// reset/clear alarms
+IF bClearAlarmTest THEN
+	bClearAlarmTest := FALSE;
+	Reset();
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="WarningActive" Id="{9509dd0d-e8b6-4af2-8ece-e73686062c40}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY WarningActive : BOOL]]></Declaration>
+      <Get Name="Get" Id="{857e3c4c-42cb-46f6-9c65-a463c6ce1bed}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[WarningActive := bWarningActive;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_EventHandler">
+      <LineId Id="405" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="410" Count="0" />
+      <LineId Id="408" Count="0" />
+      <LineId Id="407" Count="0" />
+      <LineId Id="411" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgAddDint">
+      <LineId Id="1" Count="5" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgAddEventRef">
+      <LineId Id="1" Count="5" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgAddLreal">
+      <LineId Id="1" Count="5" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgAddString">
+      <LineId Id="1" Count="5" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgAddWString">
+      <LineId Id="1" Count="5" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgClear">
+      <LineId Id="1" Count="5" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppend">
+      <LineId Id="1" Count="4" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppendAny">
+      <LineId Id="1" Count="4" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppendAnyRaise">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppendRaise">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppendS">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppendSet">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppendWs">
+      <LineId Id="1" Count="4" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbAppendWsRaise">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbInit">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbInitExternal">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSbInitWs">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSetDint">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSetEventRef">
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSetLreal">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSetSb">
+      <LineId Id="3" Count="0" />
+      <LineId Id="5" Count="1" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSetSbRaise">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSetString">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ArgSetWString">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.CreateAlarm">
+      <LineId Id="1" Count="16" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.ErrorActive.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.InfoActive.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.Init">
+      <LineId Id="1" Count="3" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="23" Count="4" />
+      <LineId Id="6" Count="2" />
+      <LineId Id="28" Count="3" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="9" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.Raise">
+      <LineId Id="1" Count="3" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.Reset">
+      <LineId Id="1" Count="2" />
+      <LineId Id="5" Count="2" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.Select">
+      <LineId Id="1" Count="6" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.Send">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.SendJson">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.SendString">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.SendStringJson">
+      <LineId Id="1" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.Test">
+      <LineId Id="1" Count="55" />
+    </LineIds>
+    <LineIds Name="FB_EventHandler.WarningActive.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

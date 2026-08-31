@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Data_Item" Id="{c4301cb8-1301-4525-aec6-7579f8a10a4c}">
+    <Declaration><![CDATA[TYPE ST_Data_Item :
+STRUCT
+	stIndex		: ST_Text;
+	stGroup		: ST_Text;
+	stName		: ST_Text;
+	
+	bValue		: BOOL;
+	tValue		: TIME;
+	sValue		: WSTRING;
+	nValue		: INT;
+	fValue		: LREAL;
+	fValueMin	: LREAL;
+	fValueMax	: LREAL;
+	
+	stUnit		: ST_Text;
+	eUserLevel	: E_User_Level;
+	eDataType	: E_DataType;
+	eRecipeMode	: E_RecipeMode;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

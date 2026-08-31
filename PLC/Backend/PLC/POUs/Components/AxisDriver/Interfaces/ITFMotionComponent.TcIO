@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.7">
+  <Itf Name="ITFMotionComponent" Id="{aec88895-9490-401f-8556-3b58d60f278e}">
+    <Declaration><![CDATA[INTERFACE ITFMotionComponent EXTENDS ITFComponent
+]]></Declaration>
+  </Itf>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" height="100%" viewBox="-6 -6 920 1904" xmlns="http://www.w3.org/2000/svg">
+	<!-- Linke Rolle -->
+	<rect x="108" y="1716" width="72" height="140" rx="30" fill="#888" stroke="#222" stroke-width="6"></rect>
+	<!-- Rechte Rolle -->
+	<rect x="728" y="1716" width="72" height="140" rx="30" fill="#888" stroke="#222" stroke-width="6"></rect>
+	<!-- Rahmen -->
+	<rect x="0" y="0" width="908" height="1752" rx="68" fill="#d3d3d3" stroke="#222" stroke-width="6"></rect>
+	<!-- Linkes Fach -->
+	<rect x="36" y="36" width="400" height="1680" rx="50" fill="whitesmoke" stroke="#222" stroke-width="6"></rect>
+	<!-- Rechtes Fach -->
+	<rect x="472" y="36" width="400" height="1680" rx="50" fill="whitesmoke" stroke="#222" stroke-width="6"></rect>
+</svg>

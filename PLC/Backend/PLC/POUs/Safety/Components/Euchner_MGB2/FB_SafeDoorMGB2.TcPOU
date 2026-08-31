@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SafeDoorMGB2" Id="{2529485b-5b5b-4708-852e-42fea621a2ac}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SafeDoorMGB2
+VAR_IN_OUT
+	// IO reference
+	stIO 				: ST_MGB2_IO;
+END_VAR
+VAR_INPUT
+	/// Name der Schutztuere
+	sName								:STRING;
+	
+	bEnableSubModul_1					:BOOL := TRUE;
+	bEnableSubModul_2					:BOOL := TRUE;
+	
+	/// Ablauf der Anlage gestoppt -> Freigabe zum Abschalten der Safety
+	bAblaufGestoppt						:BOOL;
+	
+	/// Tuere entriegeln von Safety (Feedbacks)
+	bFreigabeTuerEntriegeln				:BOOL;
+END_VAR
+VAR_OUTPUT
+	/// Fehler
+	bError								:BOOL;
+	stErrorText							:ST_Text;
+	
+	/// Freigabe an Anlagenbereich zum Ausfueren der Abläufe
+	bFreigabeAblauf							:BOOL;
+	
+	/// Anforderung an Safety für Sicherheit
+	bSAFE_AnforderungSchutzbereich_Ein		:BOOL;
+END_VAR
+VAR
+	stInMgb						: ST_Euchner_MGB2_IN;
+	stOutMgb					: ST_Euchner_MGB2_Out;
+	stInMsm						: ST_Euchner_MSM_IN;
+	stOutMsm					: ST_Euchner_MSM_Out;
+	stInMsmConfirm				: ST_Euchner_MSM_DA_IN;
+	stOutMsmConfirm				: ST_Euchner_MSM_DA_Out;
+	
+	bReset,
+	bStarting,
+	bLockDoorRequest,
+	bOpenDoorRequest			:BOOL;
+	fbTaAnforderung				:FB_TON_RMTH;
+	fbTaQuittieren				:FB_TON_RMTH;
+	fbSafetyOk					:FB_TON_RMTH;
+	tonReset					: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[M_Mapping();
+M_Supervision();
+
+// Timer, Flanken
+fbTaAnforderung(IN := stInMsm.bSM_I_S2, PT:= T#50MS);		// stIO.stIn.bTa_Gelb_S2
+fbTaQuittieren(IN := stInMsm.bSM_I_S3, PT:= T#50MS);		// stIO.stIn.bTa_Weiss_S3
+
+stOutMsm.bSM_O_H1 := FALSE;
+stOutMsm.bSM_O_H2 := FALSE;
+stOutMsm.bSM_O_H3 := FALSE;
+
+tonReset.IN := bReset;
+tonReset.PT := T#150MS;
+tonReset();
+IF tonReset.Q THEN
+	bReset := FALSE;
+END_IF
+stOutMgb.bLM_ACK_ER := stOutMgb.bLM_ACK_G := bReset;
+stOutMgb.bLM_ACK_G := stOutMgb.bLM_ACK_G := bReset;
+
+(*	Funktion OK	*)
+IF NOT bError THEN
+
+	// mapp ES button to led
+	IF NOT stInMsm.bSM_I_S1 THEN
+		stOutMsm.bSM_O_H1 := Statics.stPulse.bToggle500ms; 
+	ELSE
+		stOutMsm.bSM_O_H1 := FALSE;
+	END_IF
+
+	//---------------------------- Open ---------------------------------
+	// Anforderung Tuere oeffnen
+	IF fbTaAnforderung.Qr OR bOpenDoorRequest THEN
+		bOpenDoorRequest := FALSE;
+		bFreigabeAblauf := FALSE;
+		bStarting := FALSE;
+	END_IF
+	// Safety abschalten
+	IF NOT bFreigabeAblauf AND bAblaufGestoppt AND 	// Abläufe sind gestoppt in dem Bereich
+	NOT bStarting THEN
+		bSAFE_AnforderungSchutzbereich_Ein := FALSE;		// Abschalten in Safety
+	END_IF
+	
+	// Rückmeldung von Safety das entriegelt werden darf
+	IF NOT bSAFE_AnforderungSchutzbereich_Ein AND 
+	bFreigabeTuerEntriegeln AND NOT bStarting THEN
+		stOutMgb.bLM_O_CL := TRUE; // entriegeln	
+	END_IF
+	
+	
+	// Signal LED - Gelb
+	IF bStarting THEN
+		stOutMsm.bSM_O_H2 := FALSE;	
+	ELSIF NOT bFreigabeAblauf AND NOT bFreigabeTuerEntriegeln THEN
+		stOutMsm.bSM_O_H2 := Statics.stPulse.bToggle500ms;
+	ELSIF NOT stIO.bSAFE_DoorSafetyOk THEN
+		stOutMsm.bSM_O_H2 := TRUE;
+	ELSE
+		stOutMsm.bSM_O_H2 := FALSE;
+	END_IF
+	
+	
+	//---------------------------- Close + Start --------------------------
+	// Tuere quittieren (geschlossen und verriegeln) -> fallende Flanke
+	IF fbTaQuittieren.Qf OR bLockDoorRequest THEN
+		bLockDoorRequest := FALSE;
+		IF stInMgb.bLM_I_SK AND stInMgb.bLM_I_OL THEN	// stIO.stIn.bMeldungRiegelzunge_OT   stInMgb.bLM_I_SK AND stInMgb.bLM_I_OL
+			stOutMgb.bLM_O_CL := FALSE; // verriegeln
+			bSAFE_AnforderungSchutzbereich_Ein := TRUE;	// Safety Ein
+			bStarting := TRUE;
+		END_IF
+	END_IF
+	
+	fbSafetyOk(IN := stIO.bSAFE_DoorSafetyOk, PT := T#200MS);
+	IF bStarting THEN
+		IF fbSafetyOk.Q THEN
+			bFreigabeAblauf := TRUE;
+			bStarting := FALSE;
+		END_IF
+	END_IF
+	
+	// Signal LED - Weiss
+	IF stIO.bSAFE_DoorSafetyOk THEN
+		stOutMsm.bSM_O_H3 := TRUE;
+	ELSIF bStarting THEN
+		stOutMsm.bSM_O_H3 := Statics.stPulse.bToggle500ms;
+	ELSIF stInMgb.bLM_I_OT THEN		// stIO.stIn.bMeldungRiegelzunge_OT
+		stOutMsm.bSM_O_H3 := Statics.stPulse.bToggle1000ms;
+	ELSE
+		stOutMsm.bSM_O_H3 := FALSE;
+	END_IF
+	
+// 
+// ERROR
+ELSE
+
+	stOutMsm.bSM_O_H1 := Statics.stPulse.bToggle500ms;
+	stOutMsm.bSM_O_H2 := Statics.stPulse.bToggle500ms;
+	stOutMsm.bSM_O_H3 := Statics.stPulse.bToggle500ms;
+
+	stOutMgb.bLM_O_CL := TRUE;
+	IF stInMsm.bSM_I_S2 OR stInMsm.bSM_I_S3 THEN
+		bReset := TRUE;
+	END_IF
+	IF stInMsm.bSM_I_S2 AND stInMgb.bLM_I_SK AND stInMgb.bLM_I_OL THEN
+		stOutMgb.bLM_O_CL := FALSE;
+	ELSIF stInMsm.bSM_I_S3 THEN	(*AND bEnable*)
+		stOutMgb.bLM_O_CL := TRUE;
+	END_IF
+	
+END_IF
+
+stIO.bSAFE_UnlockDoor := stOutMgb.bLM_O_CL;
+]]></ST>
+    </Implementation>
+    <Method Name="M_Error" Id="{9efcc23d-a67d-4335-b294-805caf92f8f3}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Error : BOOL
+VAR_INPUT
+	stError: ST_Text;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bError	:=TRUE;
+stErrorText	:= stError;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_LockDoor" Id="{d2f41fdb-2d30-4bfa-bc77-bef65e03e170}">
+      <Declaration><![CDATA[METHOD M_LockDoor : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//IF stInMgb.bLM_I_OT THEN
+	bLockDoorRequest := TRUE;	
+//END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Mapping" Id="{f330119d-2703-427e-8266-acc1c7c28c7c}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Mapping : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//mgb mapping in
+stInMgb.bLM_D_RUN := 	stIO.stHwInMgb.nByte0.0;
+stInMgb.bLM_I_SK := 	stIO.stHwInMgb.nByte0.1;
+stInMgb.bLM_E_SM1 := 	stIO.stHwInMgb.nByte0.2;
+stInMgb.bLM_E_SM2 := 	stIO.stHwInMgb.nByte0.3;
+stInMgb.bLM_E_ER := 	stIO.stHwInMgb.nByte0.4;
+stInMgb.bLM_E_G := 		stIO.stHwInMgb.nByte0.5;
+stInMgb.bLM_I_OD := 	stIO.stHwInMgb.nByte0.6;
+stInMgb.bLM_I_OT := 	stIO.stHwInMgb.nByte0.7;
+stInMgb.bLM_I_OL := 	stIO.stHwInMgb.nByte1.0;
+
+//mgb mapping out
+stIO.stHwOutMgb.nByte0.0 := stOutMgb.bLM_O_CL;
+stIO.stHwOutMgb.nByte0.1 := stOutMgb.bLM_ACK_ER;
+stIO.stHwOutMgb.nByte0.2 := stOutMgb.bLM_ACK_G;
+
+//msm mapping in
+stInMsm.bSM_I_S1 := 	stIO.stHwInMsm.nByte0.0;
+stInMsm.bSM_I_S2 := 	stIO.stHwInMsm.nByte0.1;
+stInMsm.bSM_I_S3 := 	stIO.stHwInMsm.nByte0.2;
+stInMsm.bSM_E_S1 := 	stIO.stHwInMsm.nByte0.5;
+
+stInMsmConfirm.bSM_I_X3 := 	stIO.stHwInMsmConfirm.nByte0.0;	// Zustimm
+stInMsmConfirm.bSM_I_T1 := 	stIO.stHwInMsmConfirm.nByte0.2;	// Minus
+stInMsmConfirm.bSM_I_T2 := 	stIO.stHwInMsmConfirm.nByte0.1; // Plus
+stInMsmConfirm.bSM_E_X3 := 	stIO.stHwInMsmConfirm.nByte0.5;
+
+//msm mapping out
+stIO.stHwOutMsm.nByte0.0 := stOutMsm.bSM_O_H1;
+stIO.stHwOutMsm.nByte0.1 := stOutMsm.bSM_O_H2;
+stIO.stHwOutMsm.nByte0.2 := stOutMsm.bSM_O_H3;
+stIO.stHwOutMsm.nByte0.3 := stOutMsm.bSM_O_H1_B;
+stIO.stHwOutMsm.nByte0.4 := stOutMsm.bSM_O_H2_B;
+stIO.stHwOutMsm.nByte0.5 := stOutMsm.bSM_O_H3_B;
+
+stIO.stHwOutMsmConfirm.nByte0.0 := stOutMsmConfirm.bSM_O_L2;
+stIO.stHwOutMsmConfirm.nByte0.1 := stOutMsmConfirm.bSM_O_L1;
+stIO.stHwOutMsmConfirm.nByte0.3 := stOutMsmConfirm.bSM_O_L2_B;
+stIO.stHwOutMsmConfirm.nByte0.4 := stOutMsmConfirm.bSM_O_L1_B;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_OpenDoor" Id="{4457949b-f49b-47bf-ac08-fd23921ab2c2}">
+      <Declaration><![CDATA[METHOD M_OpenDoor : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bOpenDoorRequest := TRUE;	
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{f73856ed-33f9-487c-958c-50e5a4a77463}">
+      <Declaration><![CDATA[METHOD M_Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bReset	:= TRUE;
+bError	:= FALSE;
+MEMSET(ADR(stErrorText),0,SIZEOF(stErrorText));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Supervision" Id="{2232e2a2-9718-4d43-900f-f79e3cbdbc2a}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Supervision : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stInMgb.bLM_E_SM1 AND bEnableSubModul_1 AND FALSE THEN
+	M_Error(F_CreateDynTextEx(0, "Safety_MGB2_ErrBit_Submod1", "MGB2 - Fehlermeldebit für Submodul 1")); 	
+ELSIF stInMgb.bLM_E_SM2 AND bEnableSubModul_2 THEN
+	M_Error(F_CreateDynTextEx(0, "Safety_MGB2_ErrBit_Submod2", "MGB2 - Fehlermeldebit für Submodul 2"));	
+ELSIF stInMgb.bLM_E_ER THEN
+	M_Error(F_CreateDynTextEx(0, "Safety_MGB2_ErrBit_EscapeUnlock", "MGB2 - für Fluchtentriegelung"));	
+ELSIF stInMgb.bLM_E_G THEN
+	M_Error(F_CreateDynTextEx(0, "Safety_MGB2_ErrBit_ModError", "MGB2 - allgemeiner Modulfehler"));
+ELSIF stInMsm.bSM_E_S1 THEN
+	M_Error(F_CreateDynTextEx(0, "Safety_MSM_ErrBit_Sx", "MSM - Fehler"));
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SafeDoorMGB2">
+      <LineId Id="3" Count="32" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="36" Count="78" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SafeDoorMGB2.M_Error">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SafeDoorMGB2.M_LockDoor">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SafeDoorMGB2.M_Mapping">
+      <LineId Id="3" Count="38" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SafeDoorMGB2.M_OpenDoor">
+      <LineId Id="4" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SafeDoorMGB2.M_Reset">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SafeDoorMGB2.M_Supervision">
+      <LineId Id="3" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_Popup" Id="{138627db-24fc-4b7b-bda3-efe1e9c78bb1}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_Popup :
+(
+	ePopupNone := 0,
+	ePopupSafetyEs,
+	ePopupStempelkissenWechseln,
+	ePopup02,
+	ePopup03,
+	ePopup04,
+	ePopupMax
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

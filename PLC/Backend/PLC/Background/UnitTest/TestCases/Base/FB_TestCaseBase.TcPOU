@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TestCaseBase" Id="{1f0dc0dd-a567-4aa1-bc21-370db998da9a}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Test case template
+FUNCTION_BLOCK INTERNAL FB_TestCaseBase IMPLEMENTS ITestCase
+VAR
+	/// state of test case
+	eState	: E_TestCaseState;
+	/// result of test case
+	eResult	: E_TestResult;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Reset" Id="{0f19a61a-bedf-491c-b539-0a6ac82f1352}">
+      <Declaration><![CDATA[{attribute 'object_name' := 'Reset'}
+METHOD Reset
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// reset var's
+eState := E_TestCaseState.eTestCaseState_ready;
+eResult := E_TestResult.eTestResult_none;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{682cf9bd-e5a2-4777-80df-63d898df2a3b}">
+      <Declaration><![CDATA[{attribute 'object_name' := 'Run'}
+METHOD Run : E_TestCaseState
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set state to running, if ready
+IF eState = E_TestCaseState.eTestCaseState_ready AND eResult = E_TestResult.eTestResult_none THEN
+	eState := E_TestCaseState.eTestCaseState_running;
+ELSIF eState <> E_TestCaseState.eTestCaseState_running THEN
+	eState := E_TestCaseState.eTestCaseState_error;
+END_IF
+
+Run := eState;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="TestResult" Id="{c6c5e47f-9860-4e04-a93c-16c7a3541708}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY TestResult : E_TestResult
+]]></Declaration>
+      <Get Name="Get" Id="{d1afe8a9-8fce-456f-ab88-74981c29cc4e}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TestResult := eResult;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TestState" Id="{ed4b6957-bc0d-495d-abd2-ce81fe66878b}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY TestState : E_TestCaseState
+]]></Declaration>
+      <Get Name="Get" Id="{9f2518cc-1b0e-40b4-8a30-981d71d4ed42}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TestState := eState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_TestCaseBase">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestCaseBase.Reset">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestCaseBase.Run">
+      <LineId Id="3" Count="6" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestCaseBase.TestResult.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestCaseBase.TestState.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

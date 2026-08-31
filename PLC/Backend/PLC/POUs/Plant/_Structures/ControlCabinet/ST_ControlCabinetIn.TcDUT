@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_ControlCabinetIn" Id="{295c1198-33be-418c-a674-398a78230e39}">
+    <Declaration><![CDATA[TYPE ST_ControlCabinetIn :
+STRUCT
+	/// EtherCAT master AMS Netid
+	stEtherCATMasterAmsAdr 			: ST_AmsAddr;
+	/// EtherCAT master device state
+	eEtherCATDeviceState			: E_EcDeviceState;
+	/// EtherCAT master device id
+	uiEcMasterDevId					: UINT;
+	/// EtherCAT Box Status & control cabinet IOs
+	IarrEcStates					: ARRAY[0..E_EtherCatBox.eEtherCatBox_nMaxIdx] OF UINT;
+
+	// =A01.K20
+	//stA01	: ST_ControlCabinet_A01_In;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

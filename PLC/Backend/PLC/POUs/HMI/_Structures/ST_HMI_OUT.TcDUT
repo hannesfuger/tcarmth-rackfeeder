@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_OUT" Id="{283045e1-b74b-4f0e-9d98-06354c409da6}">
+    <Declaration><![CDATA[TYPE ST_HMI_OUT : //EXTENDS ST_HMI_BASE_OUT :
+STRUCT
+	// note, ST_HMI_BASE_OUT is not inherited anymoredue to performance issues in provider mapping
+	stCommon			: REFERENCE TO ST_HMI_BASE_OUT;
+	
+	// additional, project specific stuff:
+	stButtonDoorOpen	: ST_HMI_BUTTON_OUT;
+	stButtonDoorClose	: ST_HMI_BUTTON_OUT;
+	stButtonConfirm		: ST_HMI_BUTTON_OUT;
+	
+	stM001 : ST_M001_HMI_OUT;
+	stSt010 : ST_St010_HMI_OUT;
+	stSt020 : ST_St020_HMI_OUT;
+	stSt030 : ST_St030_HMI_OUT;
+	stSt040 : ST_St040_HMI_OUT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

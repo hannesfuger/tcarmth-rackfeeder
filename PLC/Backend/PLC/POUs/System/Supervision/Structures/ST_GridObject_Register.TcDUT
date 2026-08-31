@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_GridObject_Register" Id="{34a599bf-b70e-4374-9ad1-88d49c45969f}">
+    <Declaration><![CDATA[TYPE ST_GridObject_Register :
+STRUCT
+	sGroup				:STRING;
+	dtZeitStempel		:STRING;
+	fFuelldruck			:REAL;
+	fFuellzeit			:REAL;
+	fGasTemperatur		:REAL;	
+	fLaenge_Mit_Kappe	:REAL;
+	fLaenge_Ohne_Kappe	:REAL;
+	fMasse_Differenz	:REAL;
+	fMasse_Leer			:REAL;	
+	fMasse_Voll			:REAL;
+	ePartState			:STRING;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

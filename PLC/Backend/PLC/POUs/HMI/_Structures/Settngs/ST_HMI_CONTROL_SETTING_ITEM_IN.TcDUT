@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_CONTROL_SETTING_ITEM_IN" Id="{1566ec03-009d-44c2-8a00-3d5eea5bfecf}">
+    <Declaration><![CDATA[TYPE ST_HMI_CONTROL_SETTING_ITEM_IN :
+STRUCT
+	stButtonSave		: ST_HMI_BUTTON_IN;
+	nSelectedRowIndex	: UINT;
+	nSelectedColumIndex	: UINT;
+	bInputBool			: BOOL;
+	nInputNumber		: INT;
+	fInputFloat			: REAL;
+	wsInputString		: WSTRING;
+	eUserLevel			: E_User_Level;
+	eRecipeMode			: E_RecipeMode;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

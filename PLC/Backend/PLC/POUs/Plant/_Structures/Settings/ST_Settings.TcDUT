@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_Settings" Id="{347b37a0-54ef-430f-a36f-ddaa3cc8903f}">
+    <Declaration><![CDATA[TYPE ST_Settings :
+STRUCT
+	// plant/product/production settings
+	stPlant_Settings		: ARRAY[0..E_PlantSettings.ePlantSetting_nMaxIdx] OF ST_Data_Item;			// plant
+	stProduct_Settings		: ARRAY[0..E_ProductSettings.eProductSettings_nMaxIdx] OF ST_Data_Item;		// product data
+	stProduction_Settings	: ARRAY[0..E_ProductionSettings.eProductionSettings_nMaxIdx] OF ST_Data_Item;	// production data
+
+	// module & station settings
+	stModuleSettings		: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_ModuleDynSettings;
+	stStationSettings		: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_StationDynSettings;
+	
+	stCarrier				: TcaCarrierConfig;
+	stTrolley				: TcaTrolleyConfig;
+	
+	// special settings
+	//PalletLayoutIndexEnable	: ARRAY[0..CONST.iMaxIdxPalletWorkpieceX, 0..CONST.iMaxIdxPalletWorkpieceY] OF BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

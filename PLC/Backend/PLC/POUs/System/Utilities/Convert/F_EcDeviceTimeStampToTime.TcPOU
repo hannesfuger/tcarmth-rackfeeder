@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_EcDeviceTimeStampToTime" Id="{f18413ab-7b27-43ac-9ece-1ef07923db69}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_EcDeviceTimeStampToTime : TIME
+VAR_INPUT
+	nDeviceTimeStamp : ULINT;
+END_VAR
+VAR
+	fDevieTimeStamp : LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fDevieTimeStamp := ULINT_TO_LREAL(nDeviceTimeStamp) / 1E6; 		// ns to ms
+F_EcDeviceTimeStampToTime := LREAL_TO_TIME(fDevieTimeStamp);	// ms to time]]></ST>
+    </Implementation>
+    <LineIds Name="F_EcDeviceTimeStampToTime">
+      <LineId Id="9" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

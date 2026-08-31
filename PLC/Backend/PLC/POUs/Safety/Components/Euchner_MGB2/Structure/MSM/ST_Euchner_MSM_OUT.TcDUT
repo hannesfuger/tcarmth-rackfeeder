@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MSM_OUT" Id="{48fa46d0-0fee-4176-ae2d-1b726883eada}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MSM_OUT :
+STRUCT
+	///SM_O_H1 | Led Nothalt
+	bSM_O_H1: BOOL;
+	///SM_O_H2 | Led Taster S2
+	bSM_O_H2: BOOL;
+	///SM_O_H3 | Led Taster S3
+	bSM_O_H3: BOOL;
+	///SM_O_H1 | Led Nothalt blink
+	bSM_O_H1_B: BOOL;
+	///SM_O_H2 | Led Taster S2 blink
+	bSM_O_H2_B: BOOL;
+	///SM_O_H3 | Led Taster S3 blink
+	bSM_O_H3_B: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

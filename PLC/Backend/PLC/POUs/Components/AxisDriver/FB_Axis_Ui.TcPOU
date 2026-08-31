@@ -1,0 +1,707 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Axis_Ui" Id="{2ef1aff6-46a9-4680-aefa-3ffadae15d9b}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Visu Interface für Achse
+FUNCTION_BLOCK FB_Axis_Ui EXTENDS FB_ManualUiBase
+VAR_INPUT
+	///	Zus. Freigabe für Positive Richtung	
+	bFreigabe_P		: BOOL := TRUE;
+	///	Zus. Freigabe für Negative Richtung	
+	bFreigabe_N		: BOOL := TRUE;
+	
+	/// Tippen +
+	bJogP			:BOOL;
+	/// Tippen -
+	bJogN			:BOOL;
+	/// GoTo
+	//bGoTo		:BOOL;
+	/// Geschwindigkeit
+	fVelocity		:REAL := 1;
+	
+	/// Maximaler Weg pro Bewegung
+	fMaxWeg			: REAL := 500;
+	bModulo			: BOOL := FALSE;
+	bEnableRefReset	: BOOL;	
+	bEnableGear		: BOOL := FALSE;
+	fGearRatio		: LREAL := 1;
+	eMasterAxisId	: E_Axis := E_Axis.eAxis_none;
+	bEnableBrakeControl	: BOOL := FALSE;
+	bEnableSetPos	: BOOL := FALSE;
+	
+	// axis manager
+	stAxisManager	: ST_AxisManager;
+	stUnit			: ST_Text;
+END_VAR
+VAR_IN_OUT
+	/// Achse in GRST
+	bInHome			: BOOL;
+	// axis reference
+	fbAxis			: FB_AxisDriver;
+	// hmi control IN
+	stHMIControlIn	: ST_HMI_MANUAL_AXIS_IN;
+	// hmi control OUT
+	stHMIControlOut	: ST_HMI_MANUAL_AXIS_OUT;
+END_VAR
+VAR_OUTPUT	
+	/// 0=Undefiniert; 
+	/// 1=Fehler; 
+	/// 2=Fahrt Positiv; 
+	/// 3=Fahrt Negativ
+	/// 4=Stillstand
+	/// 5=Synchron
+	iStatus				: INT;
+	stState				: ST_Text;
+	
+	/// Servo Istposition
+	fPosition			: LREAL;
+	diColor_Position	: UDINT := STATICS.stColor.Gray;
+	diColor_State		: UDINT;
+	diColorSelectedItem	: UDINT;
+	sText_State			: STRING;
+END_VAR
+VAR
+	nn	: INT;
+	stAxisState				: Tc2_MC2.ST_AxisStatus;
+	eManualMode				: E_ManualMode;
+	eManualModeOLD			: E_ManualMode;
+	
+	posEnableManual			: R_TRIG;
+	negEnableManual			: F_TRIG;
+	posIndexChanged			: R_TRIG;
+	rtrigGearIn				: R_TRIG;
+	ftrigGearOut			: F_TRIG;
+	posGoTo,
+	posGear,
+	posTip_P,
+	posTip_N,
+	posRefReset,	
+	rtrigTargetListClick,			
+	rtrigBrake				: R_TRIG;
+	
+	fTargetPos				: LREAL;
+	fStartPos				: LREAL;
+	bManualModeAbsolute,
+	bMovingAbs				: BOOL;
+	bGear					: BOOL;
+	
+	bBrakeOff				: BOOL;
+	
+	posSelGoTo,
+	posTippPos,
+	posTippNeg,
+	posSelJogTipp,
+	posSelJog001,
+	posSelJog01,
+	posSelJog1,
+	posSelJog10,
+	posSelJog100,
+	posSelMoveSollposAbs	: R_TRIG;
+	
+	tonRefReset				: TON;
+	
+	fSollPositionLatched	: REAL;
+	
+	stHomeParameter			: ST_AxisHomingParameter;
+	
+	tonTagetListClick		: ton;
+	bTagetListClickSave		: BOOL;
+	nTargetListIdx			: UINT;
+	bFromTargetList			: BOOL; // FALSE from Input feld TRUE from List
+	
+	// master axis reference, if needed (else, set to dummy)
+	stMasterAxisRef			: REFERENCE TO AXIS_REF REF= NcIO.stAxisDummy;
+END_VAR
+VAR PERSISTENT
+	stTargetList			: ARRAY[0..9] OF ST_UserControl_Manual_Axis_Item; /// product data
+	bCalibratedLocal		: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	Baustein zum bedienen einer Achse ueber die Visu
+*)
+stName := fbAxis.Name;
+nTargetListIdx := stHMIControlIn.nSelectedRowIndex;
+M_AxisManager();
+
+IF (diObjectIndex = diSelectedObjectIndex) AND (diObjectIndex <> 0) AND bEnableManual THEN
+	bManualActive := TRUE;
+	stHMIControlOut.bVisible := TRUE;
+	stHMIControlOut.bVisibleGear := bEnableGear;
+	stHMIControlOut.bVisibleRefReset := bEnableRefReset;
+	stHMIControlOut.bVisibleBrake := bEnableBrakeControl;
+	stHMIControlOut.bVisibleSetPos := bEnableSetPos;
+	stName:= stHMIControlOut.stObjectName := fbAxis.Name;
+
+	stHMIControlOut.sOverride := SEL(fbAxis.bHoldActiv,LREAL_TO_FMTSTR(REAL_TO_LREAL(fbAxis.Override), 4, FALSE),'Hold Activ');
+	stHMIControlOut.sTargetPosition := LREAL_TO_FMTSTR(REAL_TO_LREAL(fTargetPos), 4, FALSE);
+	
+	IF bModulo THEN
+		stHMIControlOut.sActPosition := LREAL_TO_FMTSTR(fbAxis.ModuloPosition, 4, FALSE);
+	ELSE
+		stHMIControlOut.sActPosition := LREAL_TO_FMTSTR(fbAxis.Position, 4, FALSE);
+	END_IF
+	
+	IF stAxisState.Coupled THEN
+		stHMIControlOut.stGearStatus := F_CreateDynText("coupled", 0);
+	ELSE
+		stHMIControlOut.stGearStatus := F_CreateDynText("uncoupled", 0);
+	END_IF
+	
+	IF NOT fbAxis.Homed THEN
+		stHMIControlOut.stRefStatus := F_CreateDynText("unreferenced", 0);
+	ELSE
+		stHMIControlOut.stRefStatus := F_CreateDynText("referenced", 0);
+	END_IF
+	
+	stHMIControlOut.stButtonGoTo.stName := CONST.stTextListGlobal.stText_GoTo;
+	stHMIControlOut.stButtonJogPos.stName := CONST.stTextListGlobal.stText_JogPos;
+	stHMIControlOut.stButtonJogNeg.stName := CONST.stTextListGlobal.stText_JogNeg;
+	stHMIControlOut.stButtonGear.stName := CONST.stTextListGlobal.stText_Gear;
+	stHMIControlOut.stButtonRefReset.stName := CONST.stTextListGlobal.stText_RefReset;
+	stHMIControlOut.stButtonBrake.stName := CONST.stTextListGlobal.stText_Brake;
+	stHMIControlOut.stButtonSetPos.stName := CONST.stTextListGlobal.stText_SetPos;
+
+	stHMIControlOut.aJogModeName[0] :=  CONST.stTextListGlobal.stText_Jogpermanent;
+	stHMIControlOut.aJogModeName[1] :=  CONST.stTextListGlobal.stText_Jog_0_01;
+	stHMIControlOut.aJogModeName[2] :=  CONST.stTextListGlobal.stText_Jog_0_1;
+	stHMIControlOut.aJogModeName[3] :=  CONST.stTextListGlobal.stText_Jog_1_0;	
+	stHMIControlOut.aJogModeName[4] :=  CONST.stTextListGlobal.stText_Jog_10_0;	
+	
+	stHMIControlOut.stButtonGoTo.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonJogPos.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonJogNeg.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonGear.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonRefReset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonBrake.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	
+	IF stHMIControlIn.stButtonGoTo.bClick AND bMovingAbs THEN
+		stHMIControlOut.stButtonGoTo.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF
+	IF stHMIControlIn.stButtonJogPos.bClick AND NOT bMovingAbs AND fbAxis.Velocity > 0.5 THEN
+		stHMIControlOut.stButtonJogPos.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF
+	IF stHMIControlIn.stButtonJogNeg.bClick AND NOT bMovingAbs AND fbAxis.Velocity < -0.5 THEN
+		stHMIControlOut.stButtonJogNeg.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF
+	IF bGear THEN
+		stHMIControlOut.stButtonGear.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF
+	IF tonRefReset.Q THEN
+		stHMIControlOut.stButtonRefReset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF	
+	IF bBrakeOff THEN
+		stHMIControlOut.stButtonBrake.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF	
+
+	// Timer, Flanken
+	posTip_P(CLK := bJogP OR stHMIControlIn.stButtonJogPos.bClick);
+	posTip_N(CLK := bJogN OR stHMIControlIn.stButtonJogNeg.bClick);
+	posGoTo(CLK := (*bGoTo OR*) stHMIControlIn.stButtonGoTo.bClick);
+	posGear(CLK := stHMIControlIn.stButtonGear.bClick);
+	rtrigTargetListClick(CLK := stHMIControlIn.bSetTargetFromList);
+	tonRefReset.PT := T#1S;
+	tonRefReset.IN := stHMIControlIn.stButtonRefReset.bClick;
+	tonRefReset();
+	posRefReset(CLK := tonRefReset.Q);	
+	rtrigBrake(CLK := stHMIControlIn.stButtonBrake.bClick); 
+	IF posTip_N.Q OR posTip_P.Q THEN
+		bMovingAbs := FALSE;
+		bManualModeAbsolute := FALSE;
+	ELSIF posGoTo.Q THEN
+		bManualModeAbsolute := TRUE;
+	END_IF
+	IF posGear.Q AND fbAxis.NotMoving THEN
+		bGear := NOT bGear;
+	END_IF
+	IF rtrigBrake.Q AND (fbAxis.NotMoving OR TRUE)THEN
+		bBrakeOff := NOT bBrakeOff;
+	END_IF
+ELSE
+	IF bManualActive THEN
+		bManualActive := FALSE;
+		stHMIControlOut.bVisible := FALSE;
+	END_IF
+	bBrakeOff := FALSE;
+END_IF	
+	
+// nicht aktiv -> alles löschen und Exit
+IF NOT fbAxis.Active THEN
+	bError := FALSE ;
+	stErrorText := CONST.stTextListGlobal.stText_notext;
+	iStatus := 0;// 0=Undefiniert
+	fPosition := 0;
+	A_StateMapping();
+	RETURN;
+END_IF
+
+// Object mit Index ausgewählt
+IF (diObjectIndex = diSelectedObjectIndex) THEN
+	diColorSelectedItem := STATICS.stColor.LimeGreen;
+ELSE
+	diColorSelectedItem := STATICS.stColor.Gray;
+END_IF
+
+bError := fbAxis.State = E_ComponentState.eComponentState_error;
+IF bError THEN
+	stErrorText := F_CreateDynTextDefault(fbAxis.ClearText);
+ELSE
+	stErrorText := CONST.stTextListGlobal.stText_notext;
+END_IF
+fPosition := fbAxis.Position; // Istposition der Achse
+
+// Status
+stAxisState := fbAxis.AxisState;
+IF bError THEN
+	iStatus := 1; // 1=Fehler; 
+	diColor_State:= STATICS.stColor.Red;
+	stState.wsNameId := "error";
+	stState.wsName := "error";
+	stState.nNameId :=1;
+ELSIF stAxisState.Moving AND stAxisState.PositiveDirection THEN
+	iStatus := 2; // 2=Fahrt Positiv; 
+	diColor_State:= STATICS.stColor.Green;
+	stState.wsNameId := "movepositive";
+	stState.wsName := "movepositive";
+	stState.nNameId :=2;
+ELSIF stAxisState.Moving AND stAxisState.NegativeDirection THEN
+	iStatus := 3; // 3=Fahrt Negativ;
+	diColor_State:= STATICS.stColor.Green;
+	stState.wsNameId := "movenegative";
+	stState.wsName := "movenegative";
+	stState.nNameId :=3;
+ELSIF stAxisState.Coupled THEN
+	iStatus := 5; // 5=Synchron
+	diColor_State:= STATICS.stColor.LightSkyBlue;
+	stState.wsNameId := "coupled";
+	stState.wsName := "coupled";
+	stState.nNameId :=5;
+ELSIF NOT stAxisState.Moving THEN
+	iStatus := 4; // 4=Stillstand
+	diColor_State:= STATICS.stColor.Gray;
+	stState.wsNameId := "notmoveing";
+	stState.wsName := "notmoveing";
+	stState.nNameId :=4;
+ELSE
+	iStatus := 0;// 0=Undefiniert
+	diColor_State:= STATICS.stColor.Orange;
+	stState.wsNameId := "undifined";
+	stState.wsName := "undifined";
+	stState.nNameId :=0;
+END_IF
+
+//Statuszahl Text Zuweisung
+CASE iStatus OF
+	0:
+		sText_State := ('Undefiniert');
+	1:
+		sText_State := ('Fehler');
+	2:
+		sText_State := ('Fahrt Positiv');
+	3:
+		sText_State := ('Fahrt Negativ');
+	4:
+		sText_State := ('Stillstand OK');
+	5:
+		sText_State := ('Synchron');
+END_CASE
+
+bWarning := FALSE;
+stWarnText := CONST.stTextListGlobal.stText_notext;
+
+// Achse stoppen bei Umschaltung(en)
+posEnableManual(CLK := bEnableManual);
+negEnableManual(CLK := bEnableManual);
+posIndexChanged(CLK := bEnableManual AND (diObjectIndex <> diSelectedObjectIndex));
+IF posEnableManual.Q OR negEnableManual.Q OR posIndexChanged.Q THEN
+	IF fbAxis.Moving THEN
+		fbAxis.Halt();
+	END_IF
+	bMovingAbs := FALSE;
+END_IF
+
+// Homing Zurücksetzen
+IF posRefReset.Q AND fbAxis.NotMoving AND fbAxis.Homed AND bEnableRefReset THEN
+	stHomeParameter.eHomingMode := MC_HomingMode.MC_ResetCalibration;
+	fbAxis.HomeEx(stHomeParameter);
+END_IF
+
+// exit wenn nicht dieses Objekt
+IF NOT bEnableManual OR (diObjectIndex <> diSelectedObjectIndex) THEN
+	bMovingAbs := FALSE;
+	A_StateMapping();
+	RETURN;
+END_IF
+
+
+// Handbedienlogik
+// werwenden von Handbediencontrol direkt
+// Status wird in diesem FB gemerkt und wiedereingestellt
+
+// Auswahl Manuelle Funktionen
+A_SelectManualMode();
+
+// Modus wurde geändert -> Achse stoppen
+IF eManualMode <> eManualModeOLD THEN
+	eManualModeOLD := eManualMode;
+	IF fbAxis.Moving THEN
+		fbAxis.Halt();
+	END_IF
+	bMovingAbs := FALSE;
+	bBrakeOff := FALSE;
+END_IF
+
+// Bei Stillstand und Taste Gear in HMI Koppeln
+rtrigGearIn(CLK := bGear);
+ftrigGearOut(CLK := bGear);
+IF fbAxis.NotMoving AND rtrigGearIn.Q AND bEnableGear THEN
+	fbAxis.GearIn(fGearRatio, eMasterAxisId, stMasterAxisRef);
+END_IF
+IF fbAxis.NotMoving AND ftrigGearOut.Q THEN
+	fbAxis.GearOut();
+END_IF
+
+//Bremsen Steuerung
+IF fbAxis.bHasJob OR NOT bEnableBrakeControl THEN
+	bBrakeOff := FALSE;
+END_IF
+IF bBrakeOff THEN
+	; //todo brake control
+END_IF
+
+FOR nn := 0 TO 9 DO
+	stHMIControlout.stTargetList[nn].stName := stTargetList[nn].stName;
+	stHMIControlout.stTargetList[nn].stPos.wsNameId := stHMIControlout.stTargetList[nn].stPos.wsName := TO_WSTRING(stTargetList[nn].fPos);
+END_FOR
+
+//set Target from Target List
+fTargetPos := SEL(bFromTargetList AND nTargetListIdx >= 0 AND nTargetListIdx <= 9, 
+					stHMIControlIn.fTargetPosition, 
+					stTargetList[nTargetListIdx].fPos);
+
+IF rtrigTargetListClick.Q THEN
+	bTagetListClickSave := TRUE;
+END_IF
+
+tonTagetListClick(IN := bTagetListClickSave, PT := T#1S);
+IF tonTagetListClick.Q THEN
+	bTagetListClickSave := FALSE;
+	IF (stTargetList[nTargetListIdx].stName.wsNameId <> "") OR (stTargetList[nTargetListIdx].stName.wsName <> "") THEN
+		bFromTargetList := TRUE;
+	END_IF
+END_IF
+IF stHMIControlIn.bSetTarget THEN
+	bFromTargetList := FALSE;	
+END_IF
+
+// Manuelle Bewegungen
+// Tippen konstant
+IF (eManualMode = E_ManualMode.eManualMode_Tippen) THEN
+	IF posTip_P.Q OR posTip_N.Q THEN
+		bInHome := FALSE;
+		fStartPos := fbAxis.Position;
+	END_IF
+	fbAxis.JogExVel(((bJogN OR stHMIControlIn.stButtonJogNeg.bClick) AND bFreigabe_N), 	// Tip N, max Weg		ABS(fbAxis.Position - fStartPos) < fMaxWeg
+					((bJogP OR stHMIControlIn.stButtonJogPos.bClick) AND bFreigabe_P), 	// Tip P, max Weg		ABS(fbAxis.Position - fStartPos) < fMaxWeg)
+					fVelocity/2, E_JogMode.MC_JOGMODE_CONTINOUS);
+					
+// Tippen um 0.01 Einheit
+ELSIF (eManualMode = E_ManualMode.eManualMode_Jog001) THEN
+	IF posTip_P.Q AND bFreigabe_P THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(0.01, fVelocity);
+	END_IF
+	IF posTip_N.Q AND bFreigabe_N THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(-0.01, fVelocity);
+	END_IF					
+
+// Tippen um 0.1 Einheit
+ELSIF (eManualMode = E_ManualMode.eManualMode_Jog01) THEN
+	IF posTip_P.Q AND bFreigabe_P THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(0.1, fVelocity);
+	END_IF
+	IF posTip_N.Q AND bFreigabe_N THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(-0.1, fVelocity);
+	END_IF
+
+// Tippen um 1 Einheit
+ELSIF (eManualMode = E_ManualMode.eManualMode_Jog1) THEN
+	IF posTip_P.Q AND bFreigabe_P THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(1.0, fVelocity);
+	END_IF
+	IF posTip_N.Q AND bFreigabe_N THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(-1.0, fVelocity);
+	END_IF
+
+// Tippen um 10 Einheiten
+ELSIF (eManualMode = E_ManualMode.eManualMode_Jog10) THEN
+	IF posTip_P.Q AND bFreigabe_P THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(10.0, fVelocity);
+	END_IF
+	IF posTip_N.Q AND bFreigabe_N THEN
+		bInHome := FALSE;
+		fbAxis.MoveRelExVel(-10.0, fVelocity);
+	END_IF
+
+// Tippen um 100 Einheiten
+(*ELSIF (eManualMode = E_ManualMode.eManualMode_Jog100) THEN
+	IF posTip_P.Q AND bFreigabe_P THEN
+		fbAxis.MoveRelExVel(100.0, fVelocity);
+	END_IF
+	IF posTip_N.Q AND bFreigabe_N THEN
+		fbAxis.MoveRelExVel(-100.0, fVelocity);
+	END_IF	*)
+END_IF
+
+// Position anfahren solange Tip Taste gedrueckt
+IF bManualModeAbsolute THEN //IF (eManualMode = E_ManualMode.eManualMode_MoveSollAbs) THEN
+
+	// Halt	
+	IF NOT stHMIControlIn.stButtonGoTo.bClick THEN//bGoTo THEN
+		IF fbAxis.Moving THEN
+			fbAxis.Halt();
+		END_IF
+		fSollPositionLatched := fTargetPos;//stVisuControlPanel.fSollPosition;
+		bMovingAbs := FALSE;
+		
+	// los
+	// Start oder Soll Position geändert
+	ELSIF posGoTo.Q OR (fbAxis.Moving AND fSollPositionLatched <> fTargetPos(*stVisuControlPanel.fSollPosition*)) THEN
+		fSollPositionLatched := fTargetPos;//stVisuControlPanel.fSollPosition;
+		fStartPos := fbAxis.Position;
+		bMovingAbs := TRUE;
+		
+		// möchte in Positive Richtung fahren, keine Freigabe = Alarm
+		IF ((*stVisuControlPanel.fSollPosition*)fTargetPos > fbAxis.Position) THEN
+			IF bFreigabe_P THEN
+				IF NOT bModulo THEN
+					fbAxis.MoveAbsExVel(fTargetPos(*stVisuControlPanel.fSollPosition*), fVelocity);
+				ELSE
+					fbAxis.MoveModExVel(fTargetPos(*stVisuControlPanel.fSollPosition*), fVelocity);
+				END_IF
+				bInHome := FALSE;
+			ELSE
+				bWarning := TRUE;
+				stWarnText := CONST.stTextListGlobal.stText_Comp.stText_AxisUi_PosDirectionWarn;				
+			END_IF
+			
+		// möchte in Negative Richtung fahren, keine Freigabe = Alarm
+		ELSIF ((*stVisuControlPanel.fSollPosition*)fTargetPos < fbAxis.Position) THEN
+			IF bFreigabe_N THEN
+				IF NOT bModulo THEN
+					fbAxis.MoveAbsExVel(fTargetPos(*stVisuControlPanel.fSollPosition*), fVelocity);	
+				ELSE
+					fbAxis.MoveModExVel(fTargetPos(*stVisuControlPanel.fSollPosition*), fVelocity);	
+				END_IF		
+				bInHome := FALSE;
+			ELSE
+				bWarning := TRUE;
+				stWarnText := CONST.stTextListGlobal.stText_Comp.stText_AxisUi_NegDirectionWarn;				
+			END_IF
+			
+		END_IF
+		
+	// max. Weg Begrenzen
+	ELSIF (ABS(fbAxis.Position - fStartPos) > fMaxWeg) AND fbAxis.Moving AND bMovingAbs THEN
+		fbAxis.Halt();
+		bMovingAbs := FALSE;
+	END_IF
+	
+END_IF
+
+
+//IF (eManualMode <> E_ManualMode.eManualMode_MoveSollAbs) THEN
+//	bMovingAbs := FALSE;
+//END_IF
+
+A_StateMapping();]]></ST>
+    </Implementation>
+    <Folder Name="Public" Id="{8bf2cf34-414a-4774-8a27-e2c34c93551b}" />
+    <Action Name="A_SelectManualMode" Id="{28c2bf3f-cc1f-4021-897c-bb2e556fe5af}">
+      <Implementation>
+        <ST><![CDATA[
+// Auswahl Manuelle Funktionen
+
+posSelGoTo(CLK := stHMIControlIn.stButtonGoTo.bClick);
+posTippPos(CLK := stHMIControlIn.stButtonJogPos.bClick);
+posTippNeg(CLK := stHMIControlIn.stButtonJogNeg.bClick);
+
+CASE stHMIControlIn.eJogMode OF
+	E_Axis_JogMode.eJogMode_0: // Tippen um Schritt
+		eManualMode := E_ManualMode.eManualMode_Tippen;
+	E_Axis_JogMode.eJogMode_1: // Tippen um 0,01
+		eManualMode := E_ManualMode.eManualMode_Jog001;
+	E_Axis_JogMode.eJogMode_2: // Tippen um 0,1
+		eManualMode := E_ManualMode.eManualMode_Jog01;
+	E_Axis_JogMode.eJogMode_3: // Tippen um 1
+		eManualMode := E_ManualMode.eManualMode_Jog1;
+	E_Axis_JogMode.eJogMode_4: // Tippen um 10
+		eManualMode := E_ManualMode.eManualMode_Jog10;
+	E_Axis_JogMode.eJogMode_5: // Tippen um 100
+		eManualMode := E_ManualMode.eManualMode_Jog100;
+	//E_Axis_JogMode.eJogMode_1: // Absolut Positionieren
+	//	eManualMode := E_ManualMode.eManualMode_MoveSollAbs;	
+END_CASE
+
+//posSelJogTipp(CLK := stVisuControlPanel.bTippen);
+//posSelJog001(CLK := stVisuControlPanel.bJog001);
+//posSelJog01(CLK := stVisuControlPanel.bJog01);
+//posSelJog1(CLK := stVisuControlPanel.bJog1);
+//posSelJog10(CLK := stVisuControlPanel.bJog10);
+//posSelJog100(CLK := stVisuControlPanel.bJog100);
+//posSelMoveSollposAbs(CLK := stVisuControlPanel.bSollposAnfahren);
+
+//IF posSelJogTipp.Q THEN
+//	eManualMode := E_ManualMode.eManualMode_Tippen;
+//END_IF
+//IF posSelJog001.Q THEN
+//	eManualMode := E_ManualMode.eManualMode_Jog001;
+//END_IF
+//IF posSelJog01.Q THEN
+//	eManualMode := E_ManualMode.eManualMode_Jog01;
+//END_IF
+//IF posSelJog1.Q THEN
+//	eManualMode := E_ManualMode.eManualMode_Jog1;
+//END_IF
+//IF posSelJog10.Q THEN
+//	eManualMode := E_ManualMode.eManualMode_Jog10;
+//END_IF
+//IF posSelJog100.Q THEN
+//	eManualMode := E_ManualMode.eManualMode_Jog100;
+//END_IF
+//IF posSelMoveSollposAbs.Q THEN
+//	eManualMode := E_ManualMode.eManualMode_MoveSollAbs;
+//END_IF
+
+//// andere Typen
+//stVisuControlPanelStatus.bAusSelected := FALSE;
+//stVisuControlPanelStatus.bEinSelected := FALSE;
+//// Servos
+/////Servo Tippen	
+//stVisuControlPanelStatus.bTippenSelected := (eManualMode = E_ManualMode.eManualMode_Tippen);
+/////Servo Jog 0.01
+//stVisuControlPanelStatus.bJog001Selected := (eManualMode = E_ManualMode.eManualMode_Jog001);
+/////Servo Jog 0.1
+//stVisuControlPanelStatus.bJog01Selected := (eManualMode = E_ManualMode.eManualMode_Jog01);
+/////Servo Jog 1
+//stVisuControlPanelStatus.bJog1Selected := (eManualMode = E_ManualMode.eManualMode_Jog1);
+/////Servo Jog 10
+//stVisuControlPanelStatus.bJog10Selected := (eManualMode = E_ManualMode.eManualMode_Jog10);
+/////Servo Jog 100
+//stVisuControlPanelStatus.bJog100Selected := (eManualMode = E_ManualMode.eManualMode_Jog100);
+/////Servo Sollposition Anfahren
+//stVisuControlPanelStatus.bSollposAnfahrenSelected := (eManualMode = E_ManualMode.eManualMode_MoveSollAbs);]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_StateMapping" Id="{fe6c07ed-1bba-4a63-926d-d41c2e8e9219}">
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(stStateObject) THEN
+	RETURN;
+END_IF
+
+// state mapping
+stStateObject.stState := stState;
+stStateObject.stValue.wsName := TO_WSTRING(LREAL_TO_FMTSTR(REAL_TO_LREAL(fPosition), 2, FALSE));
+stStateObject.nIndexColor := diColorSelectedItem;]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="M_AxisManager" Id="{96b5401b-fd47-4197-9752-12b04a3b6ead}">
+      <Declaration><![CDATA[METHOD PRIVATE M_AxisManager : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// map axis info
+stAxisManager.bAxisEnabled := fbAxis.bEnable;
+stAxisManager.bCalibrated := SEL(stAxisManager.bUseLocalCalibration, fbAxis.Homed, bCalibratedLocal);
+stAxisManager.fActPos := fbAxis.Position;
+stAxisManager.stBmk := stBmk;
+stAxisManager.stName := stName;
+stAxisManager.stUnit := stUnit;
+//stAxisManager.stInfo := ST_Text;
+
+// set/reset calibration
+IF stAxisManager.bSetCalibration THEN
+	stAxisManager.bSetCalibration := FALSE;
+	IF stAxisManager.bUseLocalCalibration THEN bCalibratedLocal := TRUE; RETURN; END_IF
+	fbAxis.SetCalibration(TRUE);
+ELSIF stAxisManager.bResetCalibration THEN
+	stAxisManager.bResetCalibration := FALSE;
+	IF stAxisManager.bUseLocalCalibration THEN bCalibratedLocal := FALSE; RETURN; END_IF
+	fbAxis.SetCalibration(FALSE);
+END_IF
+
+// set ax pos offset
+IF stAxisManager.bSetPosGo THEN
+	stAxisManager.bSetPosGo := FALSE;
+	fbAxis.SetAxPosOffs(stAxisManager.fSetPos);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetMaserAxRef" Id="{59e0ff93-a8c6-4238-b663-63143eb43338}" FolderPath="Public\">
+      <Declaration><![CDATA[METHOD PUBLIC M_SetMaserAxRef : BOOL
+VAR_IN_OUT
+	fbAxRef : AXIS_REF;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stMasterAxisRef REF= fbAxRef;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_TargetListAddItem" Id="{5df97b79-d663-4b8f-95b8-2e76dc98e4e3}" FolderPath="Public\">
+      <Declaration><![CDATA[METHOD PUBLIC M_TargetListAddItem : BOOL
+VAR_INPUT
+	stSetName		: ST_Text;
+	fSetPosition	: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR nn := 0 TO 9 DO
+	IF (stTargetList[nn].stName.wsNameId = stSetName.wsNameId)OR (stTargetList[nn].stName.wsName = stSetName.wsName)THEN
+		stTargetList[nn].fPos := fSetPosition;
+		EXIT;
+	ELSIF (stTargetList[nn].stName.wsNameId = "") AND (stTargetList[nn].stName.wsName = "") THEN
+		stTargetList[nn].stName := stSetName;
+		stTargetList[nn].fPos := fSetPosition;
+		EXIT;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_TargetListClear" Id="{2125551e-cb3f-4932-9a04-a35e01f503c9}" FolderPath="Public\">
+      <Declaration><![CDATA[METHOD M_TargetListClear : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMSET(ADR(stTargetList), 0, SIZEOF(stTargetList));]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ManualMode" Id="{81b1794f-9ed1-420c-8061-2dabc9daf6f9}">
+      <Declaration><![CDATA[PROPERTY ManualMode : E_ManualMode]]></Declaration>
+      <Get Name="Get" Id="{d739606d-e3b6-41dc-a107-c0b7eac625b7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ManualMode := eManualMode;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{26ae4312-0d94-4d03-94ab-ef53363e1b83}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eManualMode := ManualMode;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

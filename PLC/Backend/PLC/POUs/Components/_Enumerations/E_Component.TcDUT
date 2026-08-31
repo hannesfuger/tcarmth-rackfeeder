@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_Component" Id="{781dfb0a-629c-4aa9-8271-3df78a05904a}">
+    <Declaration><![CDATA[/// Enumeration of all plant components
+TYPE E_Component :
+(
+	/// component not set
+	eComponent_none := 0,
+
+	/// component max index (keep @ last)
+	eComponent_nMaxIdx
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

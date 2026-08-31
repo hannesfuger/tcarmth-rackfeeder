@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_UserControl_Manual_Drive_FromHmi" Id="{f159a81f-4ea6-4ff3-8308-4d3894eaba97}">
+    <Declaration><![CDATA[TYPE ST_UserControl_Manual_Drive_FromHmi :
+STRUCT
+	eJogMode					: E_Drive_JogMode;
+	stButton_Tipp_Pos,
+	stButton_Tipp_Neg,
+	stButton_Stop				: ST_HMI_BUTTON_IN;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_BASE_OUT" Id="{a7dcbc14-aad3-4052-9629-d69071d99904}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_OUT :
+STRUCT
+	stMain			: ST_HMI_BASE_CONTROL_OUT;
+	arrStModule		: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_HMI_BASE_Module_OUT;
+	arrStStation	: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_HMI_BASE_STATION_OUT;
+	
+	stRecipe		: ST_HMI_RECIPE_OUT; 	// Recipe Management structure
+	stSettings 		: ST_HMI_CONTROL_SETTING_OUT;
+	stMonitoring	: ST_Monitoring;		// monitoring to hmi or data bench
+	stSafety		: ST_HMI_SAFETY_OUT;	// Safety info
+	stUserMgmt		: ST_HMI_USER_MGMT_OUT;
+	stTrafficLight	: ST_HMI_TRAFFIC_LIGHT_OUT;
+	
+	aSystemInfos	: ARRAY[0..CONST.iMaxIdxSystemInfo] OF ST_NameValue;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

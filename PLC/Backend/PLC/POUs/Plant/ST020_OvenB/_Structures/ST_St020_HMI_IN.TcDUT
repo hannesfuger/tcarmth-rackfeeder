@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St020_HMI_IN" Id="{2a4e39de-5cfa-44e3-ab2e-c8a561dac8e1}">
+    <Declaration><![CDATA[TYPE ST_St020_HMI_IN :
+STRUCT	
+	bJogUp : BOOL; // Tippen Vor; DT-WH, 2FDI-NO; P10A-52SJ1
+	bJogDown : BOOL; // Tippen Zurück; DT-BK, 2FDI-NO; P10A-52SJ3
+	
+	bJogCh1Ouside : BOOL;
+	bJogCh1Inside : BOOL;
+	
+	bJogCh2Ouside : BOOL;
+	bJogCh2Inside : BOOL;
+	
+	bManual : BOOL;
+	bQuit : BOOL;
+	
+	bJog : BOOL;
+	bSpeed : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Curve" Id="{0108773e-ab1c-4c5b-9db0-1402807c311f}">
+    <Declaration><![CDATA[TYPE ST_Curve :
+STRUCT
+	stCurve	: ARRAY[0..0, 0..100] OF ST_Point;
+	stColor	: ARRAY[0..0] OF ST_HMI_COLOR_STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="Safety" Id="{53e8fddf-1fe0-44c6-8e7b-9c138a852989}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL
+
+(*	Diagnose Safety PLC		*)
+	Iarr_SafetyDiag_NotHalt					AT %I*	:ARRAY[0..iSafetyDiag_Anzahl_FbEmergencyStop] OF ST_SafetyDiagInfo;	(*	Safety Diagnose Info für Not-Halt Baustein		*)
+	fbDiag_NotHalt									:ARRAY[0..iSafetyDiag_Anzahl_FbEmergencyStop] OF FB_TwinSAFEDiag_EmergencyStop;
+	Iarr_SafetyDiag_MachineMonitoring		AT %I*	:ARRAY[0..iSafetyDiag_Anzahl_FbMachineMonitoring] OF ST_SafetyDiagInfo;	(*	Safety Diagnose Info für Schutztüren Baustein		*)
+	fbDiag_MachineMonitoring						:ARRAY[0..iSafetyDiag_Anzahl_FbMachineMonitoring] OF FB_TwinSAFEDiag_MachineMonitoring;
+	Iarr_SafetyDiag_TwoHand					AT %I*	:ARRAY[0..iSafetyDiag_Anzahl_FbTwoHand] OF ST_SafetyDiagInfo;	(*	Safety Diagnose Info für 2Hand Baustein		*)
+	fbDiag_TwoHand									:ARRAY[0..iSafetyDiag_Anzahl_FbTwoHand] OF FB_TwinSAFEDiag_TwoHand;
+	Iarr_SafetyDiag_EDM						AT %I*	:ARRAY[0..iSafetyDiag_Anzahl_FbEDM] OF ST_SafetyDiagInfo;	(*	Safety Diagnose Info für EDM Baustein		*)
+	fbDiag_EDM										:ARRAY[0..iSafetyDiag_Anzahl_FbEDM] OF FB_TwinSAFEDiag_EDM;
+
+(*	HW		*)
+	fbTwinSAFE_HW_Diag						: ARRAY[1..iSafety_Anzahl_EL69xx] OF FB_TwinSAFE_HW_Diag;
+	
+	arrSaftyDoors							: ARRAY[0..1] OF ST_SafetyDoor_IO;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

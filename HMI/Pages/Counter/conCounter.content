@@ -1,0 +1,492 @@
+<div id="conCounter" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+<div id="CounterDataGrid" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiDatagrid" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-src-data="%f%F_TranslateTextDatagrid(%s%PLC1.HMI.stHmiTc3::stOut::stCounter%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%, 20)%/f%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-row-height-unit="px" data-tchmi-table-border-width-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-header-height-unit="px" data-tchmi-show-row-numbers="false" data-tchmi-row-numbers-width-unit="px" data-tchmi-row-numbers-font-size-unit="px" data-tchmi-grid-font-size-unit="px" data-tchmi-selected-row-index="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::nSelectedRowIndex|BindingMode=TwoWay%/s%" data-tchmi-selected-column-index="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::nSelectedColumIndex|BindingMode=TwoWay%/s%" data-tchmi-creator-locked="True" data-tchmi-zindex="2">
+<script data-tchmi-target-attribute="data-tchmi-src-column" type="application/json">
+[
+  {
+    "name": "stName",
+    "label": "%l%name%/l%",
+    "control": "TextBlock",
+    "width": 15,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 15,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueOk",
+    "label": "%l%ok%/l%",
+    "control": "TextBlock",
+    "width": 5,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 5,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueNok",
+    "label": "%l%nok%/l%",
+    "control": "TextBlock",
+    "width": 5,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 5,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueTotal",
+    "label": "%l%total%/l%",
+    "control": "TextBlock",
+    "width": 5,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 5,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueOkLevel1",
+    "label": "%l%ok1%/l%",
+    "control": "TextBlock",
+    "width": 3,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 3,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stReactionOkLevel1",
+    "label": "Reaction",
+    "control": "TextBlock",
+    "width": 7,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 7,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueOkLevel2",
+    "label": "%l%ok2%/l%",
+    "control": "TextBlock",
+    "width": 3,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 3,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stReactionOkLevel2",
+    "label": "Reaction",
+    "control": "TextBlock",
+    "width": 7,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 7,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueNokLevel1",
+    "label": "%l%nok1%/l%",
+    "control": "TextBlock",
+    "width": 3,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 3,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stReactionNokLevel1",
+    "label": "Reaction",
+    "control": "TextBlock",
+    "width": 7,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 7,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueNokLevel2",
+    "label": "%l%nok2%/l%",
+    "control": "TextBlock",
+    "width": 3,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 3,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stReactionNokLevel2",
+    "label": "Reaction",
+    "control": "TextBlock",
+    "width": 7,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 7,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueTotalLevel1",
+    "label": "Total 1",
+    "control": "TextBlock",
+    "width": 3,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 3,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stReactionTotalLevel1",
+    "label": "Reaction",
+    "control": "TextBlock",
+    "width": 7,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 7,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stValueTotalLevel2",
+    "label": "Total 2",
+    "control": "TextBlock",
+    "width": 3,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 3,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stReactionTotalLevel2",
+    "label": "Reaction",
+    "control": "TextBlock",
+    "width": 7,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 7,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  },
+  {
+    "name": "stUserLevel",
+    "label": "%l%userlevel%/l%",
+    "control": "TextBlock",
+    "width": 10,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 10,
+    "minWidthUnit": "%",
+    "cellBackground": null,
+    "textColor": null,
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center"
+  }
+]
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-cell-content-padding" type="application/json">
+{
+  "left": 3,
+  "leftUnit": "px",
+  "right": 3,
+  "rightUnit": "px",
+  "top": 0,
+  "topUnit": "px",
+  "bottom": 0,
+  "bottomUnit": "px"
+}
+</script>
+
+</div>
+
+<div id="Counter_Sitename" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="5" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%l%counter%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center" data-tchmi-creator-locked="True" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+
+<div id="CounterButtonSave" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="8" data-tchmi-height-unit="%" data-tchmi-left="89.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="91" data-tchmi-top-unit="%" data-tchmi-width="10" data-tchmi-width-unit="%" data-tchmi-zindex="2" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-creator-locked="True" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::stButtonSave%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::stButtonSave%/s%">
+</div>
+<div id="Counter_Keyboard" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="41.9" data-tchmi-height-unit="%" data-tchmi-left="1.0" data-tchmi-left-unit="%" data-tchmi-top="41.7" data-tchmi-top-unit="%" data-tchmi-width="66.9" data-tchmi-width-unit="%" data-tchmi-target-content="Base_HMI/Base/Keyboards/Tastatur.content" data-tchmi-zindex="0" data-tchmi-visibility="Visible" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-creator-locked="True">
+</div>
+<div id="Counter_Inputstring" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="8" data-tchmi-height-unit="%" data-tchmi-left="21" data-tchmi-left-unit="%" data-tchmi-top="91" data-tchmi-top-unit="%" data-tchmi-width="35" data-tchmi-width-unit="%" data-tchmi-auto-select-text="True" data-tchmi-auto-focus-out="False" data-tchmi-text-horizontal-alignment="Center" data-tchmi-zindex="3" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::wsInputString|BindingMode=TwoWay%/s%" data-tchmi-creator-locked="True" data-tchmi-is-enabled="%s%PLC1.HMI.stHmiTc3::stOut::stStation_100::stControlCarrier::bVisible_String%/s%" data-tchmi-opacity="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_String%/s%" data-tchmi-visibility="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_String%/s%" data-tchmi-text-font-size-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onUserInteractionFinished",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Counter_Keyboard::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Collapsed"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Keyboard_German::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Collapsed"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Counter_Keyboard::Zindex%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:general#/definitions/UDINT",
+          "value": 0
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Counter_Keyboard::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Visible"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Keyboard_German::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Visible"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Counter_Keyboard::Zindex%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:general#/definitions/UDINT",
+          "value": 5
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="Counter_Info" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8" data-tchmi-height-unit="%" data-tchmi-left="0.7" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::stInfo%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="91" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size-unit="%" data-tchmi-zindex="0" data-tchmi-text-font-size="120" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-creator-locked="True" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-opacity="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisibleInfo%/s%" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+</div>
+<div id="Counter_Userlevel" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCombobox" data-tchmi-combobox-text="Select" data-tchmi-height="3.5" data-tchmi-height-unit="%" data-tchmi-left="89.9" data-tchmi-left-unit="%" data-tchmi-top="4.9" data-tchmi-top-unit="%" data-tchmi-width="9.1" data-tchmi-width-unit="%" data-tchmi-creator-visibility="Visible" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-zindex="3" data-tchmi-src-data="%f%F_TranslateTextArray(%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::aUserLevelUsers%/s%, %s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::nUserLevelUsers%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-creator-locked="True" data-tchmi-selected-index="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::eUserLevel|BindingMode=TwoWay%/s%" data-tchmi-visibility="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_UserLevel%/s%" data-tchmi-opacity="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_UserLevel%/s%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="Counter_NumericInput" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiNumericInput" data-tchmi-auto-focus-out="False" data-tchmi-decimal-digits="0" data-tchmi-height="8" data-tchmi-height-unit="%" data-tchmi-left="56.9" data-tchmi-left-unit="%" data-tchmi-top="91" data-tchmi-top-unit="%" data-tchmi-width="15" data-tchmi-width-unit="%" data-tchmi-value-horizontal-alignment="Center" data-tchmi-value-font-size-unit="%" data-tchmi-auto-select-text="True" data-tchmi-min-value="-1000000" data-tchmi-max-value="1000000" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-value="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::nInputNumber|BindingMode=TwoWay%/s%" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-creator-locked="True" data-tchmi-opacity="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_Number%/s%" data-tchmi-visibility="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_Number%/s%" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.Pxxx_Name_HMI.F_NumInputOpen",
+        "fnParams": [],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onUserInteractionFinished",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.Pxxx_Name_HMI.F_NumInputCommit",
+        "fnParams": [],
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="CounterButton_Reset" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="8" data-tchmi-height-unit="%" data-tchmi-left="78.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="90.7" data-tchmi-top-unit="%" data-tchmi-width="10" data-tchmi-width-unit="%" data-tchmi-zindex="2" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-creator-locked="False" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::stButtonReset%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::stButtonReset%/s%">
+</div>
+<div id="Counter_Reaction" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCombobox" data-tchmi-combobox-text="Select" data-tchmi-height="3.5" data-tchmi-height-unit="%" data-tchmi-left="56.9" data-tchmi-left-unit="%" data-tchmi-top="86.3" data-tchmi-top-unit="%" data-tchmi-width="15.0" data-tchmi-width-unit="%" data-tchmi-creator-visibility="Visible" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-zindex="3" data-tchmi-src-data="%f%F_TranslateTextArray(%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::aReaction%/s%, %s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::nReaction%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-creator-locked="True" data-tchmi-selected-index="%s%PLC1.HMI.stHmiTc3::stIn::stControlCounter::eReaction|BindingMode=TwoWay%/s%" data-tchmi-visibility="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_Reaction%/s%" data-tchmi-opacity="%s%PLC1.HMI.stHmiTc3::stOut::stControlCounter::bVisible_Reaction%/s%" data-tchmi-text-font-size-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+</div>

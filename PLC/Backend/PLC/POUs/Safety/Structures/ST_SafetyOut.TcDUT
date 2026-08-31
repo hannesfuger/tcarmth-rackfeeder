@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyOut" Id="{d9c41eed-1ee9-47b7-81ea-fb346145c11d}">
+    <Declaration><![CDATA[TYPE ST_SafetyOut :
+STRUCT
+	/// Restart from PLC
+	bRestartPLC		: BOOL;		// Fuer Safety-FBs und AX5805
+	
+	//------------------------------------------------------------------------------------------------------------
+	//user definged variables
+	bSafetyErrAck			: ARRAY[0..iSafety_Anzahl_EL69xx] OF BOOL ;	(*	Error Ack Sicherheit  *)
+	bSafe_Tsg_Run			: ARRAY[0..iSafety_Anzahl_TwinSafeGruppen] OF BOOL; 	(* 	Ausgang Out TwinSAFE Gruppe Run -> Safety Master Klemme	*)
+	bSafety_EDM_OUT			: ARRAY[0..100] OF BOOL;		(* 1 = ES	To Safety Logic EDM	*)
+	
+	bSAFE_LockCmdA,
+	bSAFE_LockCmdB			: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_StationFromTc3Hmi" Id="{c486bbe5-5b24-4698-a3fc-100a104ce934}">
+    <Declaration><![CDATA[TYPE ST_StationFromTc3Hmi :
+STRUCT
+	astButton						: ARRAY[0..iMaxIdxLocalButton] OF ST_HMI_BUTTON_IN; // station specific buttons
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

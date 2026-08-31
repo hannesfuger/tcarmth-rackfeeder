@@ -1,0 +1,270 @@
+<div id="conOrderControl" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+<div id="conOrderControl_Sitename" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="6.3" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%l%ordercontrol%/l%" data-tchmi-top="-0.5" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-creator-locked="True" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+
+</div>
+<div id="OrderControl_SetPartState" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="20" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="OrderControl_SetPartStateButton" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="48.0" data-tchmi-height-unit="%" data-tchmi-left="68" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="20.1" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stControlOrder::stButtonSetPartState%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stControlOrderIn::stButtonSetPartState%/s%">
+</div>
+<div id="OrderControl_SetPartStateDmc" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%dmccode%/l%" data-tchmi-top="53" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px">
+</div>
+<div id="OrderControl_SetPartStateComment" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%comment%/l%" data-tchmi-top="2" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px">
+</div>
+<div id="OrderControl_SetPartState_Input_DmcCode" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiInput" data-tchmi-auto-focus-out="True" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%s%PLC1.HMI.stHmiTc3::stIn::stControlOrderIn::wsPartStateDmcCode|BindingMode=TwoWay%/s%" data-tchmi-top="68" data-tchmi-top-unit="%" data-tchmi-width="60" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-auto-select-text="true" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%OrderManagement_OrderState::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Order/conOrderState.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="OrderControl_SetPartState_Scanner" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-height="26.8" data-tchmi-height-unit="%" data-tchmi-left="68.0" data-tchmi-left-unit="%" data-tchmi-top="71.0" data-tchmi-top-unit="%" data-tchmi-width="6.9" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-src="Images/Scanner.png">
+</div>
+<div id="OrderControl_SetPartState_Commnet_Input" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%s%PLC1.HMI.stHmiTc3::stIn::stControlOrderIn::wsPartStateComment|BindingMode=TwoWay%/s%" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="60" data-tchmi-width-unit="%" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-auto-select-text="true" data-tchmi-text-font-size="150">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%OrderManagement_OrderState::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Order/conOrderStandardComments.content"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%OrderControl_Region_Keyboard::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Visible"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%OrderControl_Region_Keyboard::Zindex%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:general#/definitions/UDINT",
+          "value": 5
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Keyboard_German::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Visible"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+</div>
+<div id="OrderControl_LoadOrder" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="20" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="26" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="OrderControl_LoadOrderButton" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="48.0" data-tchmi-height-unit="%" data-tchmi-left="68" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="20.1" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stControlOrder::stButtonOrder%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stControlOrderIn::stButtonOrder%/s%">
+</div>
+<div id="OrderControl_LoadOrderNumber" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%constructionordernumber%/l%" data-tchmi-top="48" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+</div>
+<div id="OrderControl_LoadOrderState" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%State%/l%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px">
+</div>
+<div id="OrderControl_LoadOrder_Input_Number" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiInput" data-tchmi-auto-focus-out="True" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%s%PLC1.HMI.stHmiTc3::stIn::stControlOrderIn::wsPartOrderCode|BindingMode=TwoWay%/s%" data-tchmi-top="64.2" data-tchmi-top-unit="%" data-tchmi-width="60" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-auto-select-text="true" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%OrderManagement_OrderState::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Order/conOrderState.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="OrderControl_LoadOrder_Current_State" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stControlOrder::stOrderInfo%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="60" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size="150" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+
+</div>
+<div id="OrderControl_LoadOrder_Scanner" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-height="26.8" data-tchmi-height-unit="%" data-tchmi-left="68.0" data-tchmi-left-unit="%" data-tchmi-top="71.0" data-tchmi-top-unit="%" data-tchmi-width="6.9" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-src="Images/Scanner.png">
+</div>
+</div>
+<div id="OrderControl_PlantEmpty" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="20" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="47" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="OrderControl_PlantEmptyButton" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="48.0" data-tchmi-height-unit="%" data-tchmi-left="68" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="20.1" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stControlOrder::stButtonEmptyPlant%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stControlOrderIn::stButtonEmptyPlant%/s%">
+</div>
+<div id="OrderControl_PlantEmptyState" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%State%/l%" data-tchmi-top="6.0" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px">
+</div>
+<div id="OrderControl_PlantEmpty_Current_State" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="47.8" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stControlOrder::stEmptyPlantInfo%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="60" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size="150" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+
+</div>
+</div>
+<div id="OrderControl_Region_Keyboard" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="70" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-target-content="Base_HMI/Base/Keyboards/Tastatur.content" data-tchmi-zindex="5" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+
+</div>
+</div>

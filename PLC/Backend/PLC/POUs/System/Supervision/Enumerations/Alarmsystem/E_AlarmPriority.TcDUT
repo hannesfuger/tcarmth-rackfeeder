@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_AlarmPriority" Id="{b64d8a7c-172d-400c-91e4-e8ce61736e24}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE E_AlarmPriority :
+(
+	Undefined 	:= 0,
+	Info 		:= 1,
+	Warning 	:= 2,
+	Error 		:= 3
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

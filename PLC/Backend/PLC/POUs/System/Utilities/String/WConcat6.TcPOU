@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="WConcat6" Id="{13d3f840-39e1-410f-863a-ef316af538bc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION WConcat6 : WSTRING(255)
+VAR_INPUT
+	wsExpression1: WSTRING(255);
+	wsExpression2: WSTRING(255);
+	wsExpression3: WSTRING(255);
+	wsExpression4: WSTRING(255);
+	wsExpression5: WSTRING(255);
+	wsExpression6: WSTRING(255);
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[WConcat6 := WCONCAT(wsExpression1, wsExpression2);
+WConcat6 := WCONCAT(WConcat6, wsExpression3);
+WConcat6 := WCONCAT(WConcat6, wsExpression4);
+WConcat6 := WCONCAT(WConcat6, wsExpression5);
+WConcat6 := WCONCAT(WConcat6, wsExpression6);]]></ST>
+    </Implementation>
+    <LineIds Name="WConcat6">
+      <LineId Id="28" Count="2" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="31" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

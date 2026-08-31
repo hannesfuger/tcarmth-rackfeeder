@@ -1,0 +1,243 @@
+<div id="conUserMgmt_1" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="800" data-tchmi-height="640">
+
+<div id="UserMgmt_TcHmiButton_Login" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="50" data-tchmi-height-unit="px" data-tchmi-left="103" data-tchmi-left-unit="px" data-tchmi-text="Login" data-tchmi-top="32" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.Beckhoff.Logout",
+        "fnParams": [
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/Boolean",
+            "value": true
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="UserMgmt_TcHmiButton_Logout" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="50" data-tchmi-height-unit="px" data-tchmi-left="213" data-tchmi-left-unit="px" data-tchmi-text="Logout" data-tchmi-top="32" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.Beckhoff.Logout",
+        "fnParams": [
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/Boolean",
+            "value": true
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="UserMgmt_TcHmiButton_TcHmiUserManagement" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiUserManagement" data-tchmi-height="48" data-tchmi-height-unit="px" data-tchmi-left="323" data-tchmi-left-unit="px" data-tchmi-top="32" data-tchmi-top-unit="px" data-tchmi-width="190" data-tchmi-width-unit="px">
+</div>
+<div id="UserMgmt_TcHmiButton_TcHmiTextblock_CurUsr" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="528" data-tchmi-left-unit="px" data-tchmi-text="Current User" data-tchmi-top="31" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="UserMgmt_TcHmiButton_TcHmiTextblock_CurUsrName" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="528" data-tchmi-left-unit="px" data-tchmi-text="%f%TcHmi.Server.getCurrentUser()%/f%" data-tchmi-top="57" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="UserMgmt_TcHmiButton_TcHmiButton_SuperUser" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="50" data-tchmi-height-unit="px" data-tchmi-left="56" data-tchmi-left-unit="px" data-tchmi-text="SuperUser" data-tchmi-top="280" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-access-config" type="application/json">
+[
+  {
+    "accessright": "operate",
+    "group": "__SystemUsers",
+    "permission": "Deny"
+  },
+  {
+    "accessright": "operate",
+    "group": "__SystemMaintenanceUsers",
+    "permission": "Deny"
+  },
+  {
+    "accessright": "operate",
+    "group": "__SystemGuests",
+    "permission": "Deny"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemMaintenanceUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemGuests",
+    "permission": "Allow"
+  }
+]
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "var userGroup = TcHmi.Server.getGroupsOfCurrentUser();",
+          "if(userGroup.length) {",
+          "    console.log('Current user is in groups ' + userGroup.join(', '));",
+          "} else {",
+          "    console.log('We have no current user group.');",
+          "}"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="UserMgmt_TcHmiButton_TcHmiButton_MaintenanceUser" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="50" data-tchmi-height-unit="px" data-tchmi-left="55" data-tchmi-left-unit="px" data-tchmi-text="Maintenance" data-tchmi-top="358" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+<script data-tchmi-target-attribute="data-tchmi-access-config" type="application/json">
+[
+  {
+    "accessright": "operate",
+    "group": "__SystemUsers",
+    "permission": "Deny"
+  },
+  {
+    "accessright": "operate",
+    "group": "__SystemMaintenanceUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "operate",
+    "group": "__SystemGuests",
+    "permission": "Deny"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemMaintenanceUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemGuests",
+    "permission": "Allow"
+  }
+]
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "var userGroup = TcHmi.Server.getGroupsOfCurrentUser();",
+          "if(userGroup.length) {",
+          "    console.log('Current user is in groups ' + userGroup.join(', '));",
+          "} else {",
+          "    console.log('We have no current user group.');",
+          "}"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="UserMgmt_TcHmiButton_TcHmiButton_Operator" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="50" data-tchmi-height-unit="px" data-tchmi-left="55" data-tchmi-left-unit="px" data-tchmi-text="Operator" data-tchmi-top="431" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+<script data-tchmi-target-attribute="data-tchmi-access-config" type="application/json">
+[
+  {
+    "accessright": "operate",
+    "group": "__SystemUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "operate",
+    "group": "__SystemMaintenanceUsers",
+    "permission": "Deny"
+  },
+  {
+    "accessright": "operate",
+    "group": "__SystemGuests",
+    "permission": "Deny"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemMaintenanceUsers",
+    "permission": "Allow"
+  },
+  {
+    "accessright": "observe",
+    "group": "__SystemGuests",
+    "permission": "Allow"
+  }
+]
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "var userGroup = TcHmi.Server.getGroupsOfCurrentUser();",
+          "if(userGroup.length) {",
+          "    console.log('Current user is in groups ' + userGroup.join(', '));",
+          "} else {",
+          "    console.log('We have no current user group.');",
+          "}"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  }
+]
+</script>
+</div>
+</div>

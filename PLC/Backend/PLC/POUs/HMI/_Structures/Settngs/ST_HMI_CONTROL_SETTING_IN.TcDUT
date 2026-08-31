@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_CONTROL_SETTING_IN" Id="{e55a0fae-6e16-4cf8-8b5c-4510d732b8c3}">
+    <Declaration><![CDATA[TYPE ST_HMI_CONTROL_SETTING_IN :
+STRUCT
+	stControlSetting_Plant		: ST_HMI_CONTROL_SETTING_ITEM_IN;
+	stControlSetting_Product	: ST_HMI_CONTROL_SETTING_ITEM_IN;
+	stControlSetting_Production	: ST_HMI_CONTROL_SETTING_ITEM_IN;	
+	
+	astControlSetting_Modules	: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_HMI_CONTROL_SETTING_ITEM_IN;
+	astControlSetting_Stations	: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_HMI_CONTROL_SETTING_ITEM_IN;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

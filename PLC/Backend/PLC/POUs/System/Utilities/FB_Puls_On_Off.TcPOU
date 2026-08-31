@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_Puls_On_Off" Id="{0b1a6a54-debb-4d6f-9b1c-bb8895e5c483}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Puls_On_Off
+VAR_INPUT
+	bEnable		: BOOL;
+	tPulsOn		: TIME:= T#5S;
+	tPulsOff	: TIME:= T#5S;
+END_VAR
+VAR_OUTPUT
+	bOut		: BOOL;
+END_VAR
+VAR
+	tonPulsOn	: ton;
+	tonPulsOff	: ton;	
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+tonPulsOn.PT:=tPulsOn;
+tonPulsOn();
+tonPulsOn.IN:=NOT tonPulsOff.Q AND bEnable;
+
+tonPulsOff.PT:=tPulsOff;
+tonPulsOff();
+tonPulsOff.IN:=tonPulsOn.Q;
+
+bOut:=NOT tonPulsOn.Q AND bEnable;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Puls_On_Off">
+      <LineId Id="23" Count="8" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

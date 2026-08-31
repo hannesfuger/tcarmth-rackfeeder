@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_CopyDataItemValues" Id="{5034ad68-f30d-4b6e-b1ef-ca590599d4a6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_CopyDataItemValues : BOOL
+VAR_IN_OUT
+	stDst : ST_Data_Item;
+	stSrc : ST_Data_Item;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[stDst.bValue := stSrc.bValue;
+stDst.tValue := stSrc.tValue;
+stDst.sValue := stSrc.sValue;
+stDst.nValue := stSrc.nValue;
+stDst.fValue := stSrc.fValue;
+//stDst.fValueMin := stSrc.fValueMin;
+//stDst.fValueMax := stSrc.fValueMax;
+
+F_CopyDataItemValues := TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="F_CopyDataItemValues">
+      <LineId Id="11" Count="7" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

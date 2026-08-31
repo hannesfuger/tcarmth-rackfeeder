@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_UserControl_Manual_Axis_FromHmi" Id="{df3e3d54-b9ef-44a3-999f-d8d73938b7b2}">
+    <Declaration><![CDATA[TYPE ST_UserControl_Manual_Axis_FromHmi :
+STRUCT
+	fTargetPosition				: REAL;
+	eJogMode					: E_Axis_JogMode;
+	stButtonJogPos,
+	stButtonJogNeg,
+	stButtonGoTo,
+	stButtonGear,
+	stButtonBrake,			
+	stButtonSetPos,	
+	stButtonRefReset			: ST_HMI_BUTTON_IN;
+	nSelectedRowIndex			: UINT;
+	nSelectedColumnIndex		: UINT;		
+	bTargetListClick			: BOOL;
+	bSetTargetClick				: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,41 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-ststationbasetohmi",
+      "displayName": "stStationBaseToHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_BASE_STATION_OUT",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stStationBaseToHmi",
+      "propertySetterName": "setStStationBaseToHmi",
+      "propertyGetterName": "getStStationBaseToHmi",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-ststationbasefromhmi",
+      "displayName": "stStationBaseFromHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_BASE_STATION_IN",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stStationBaseFromHmi",
+      "propertySetterName": "setStStationBaseFromHmi",
+      "propertyGetterName": "getStStationBaseFromHmi",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.742.5/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

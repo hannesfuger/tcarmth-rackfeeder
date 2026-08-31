@@ -1,0 +1,41 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-stpopuptohmi",
+      "displayName": "stPopupToHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_PopUp_ToHmi",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stPopupToHmi",
+      "propertySetterName": "setStPopupToHmi",
+      "propertyGetterName": "getStPopupToHmi",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-stpopupfromhmi",
+      "displayName": "stPopupFromHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_PopUp_FromHmi",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stPopupFromHmi",
+      "propertySetterName": "setStPopupFromHmi",
+      "propertyGetterName": "getStPopupFromHmi",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.760.44/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Var2File_Com" Id="{3e078358-4297-4b2c-84c4-8c06a9c5d667}">
+    <Declaration><![CDATA[/// Communication structure to the Var2File application 
+TYPE ST_Var2File_Com :
+STRUCT
+	// FROM Application
+	
+	/// Application is running (application set to 1000 every 1 sec) 
+	nAppRunning				: UDINT;
+	
+	/// Application work progress
+	nAppProgress			: UDINT;
+
+	/// Applications error code
+	nAppErrorCode			: UDINT;
+	
+	/// App-Job ist finished
+	bAppJobFinished			: BOOL;
+	
+	/// App-Job canceled by user
+	bAppJobCanceled			: BOOL;
+	
+	
+	// TO Application
+	/// request job cancel
+	bJobCancelRequest		: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,75 @@
+<div id="ucManualControlDrive" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="300" data-tchmi-creator-viewport-height="300" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+
+<div id="UcButton_ucmanualcontroldrive_neg" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="3.0" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="45" data-tchmi-top-unit="%" data-tchmi-width="40" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%pp%stManualControlDriveToHmi::stButtonJogNeg%/pp%" data-tchmi-stbuttonfromhmi="%pp%stManualControlDriveFromHmi::stButtonJogNeg%/pp%">
+
+</div>
+
+<div id="UcButton_ucmanualcontroldrive_pos" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="57.0" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="45" data-tchmi-top-unit="%" data-tchmi-width="40" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%pp%stManualControlDriveToHmi::stButtonJogPos%/pp%" data-tchmi-stbuttonfromhmi="%pp%stManualControlDriveFromHmi::stButtonJogPos%/pp%">
+
+</div>
+
+<div id="TcHmiTextblock_ucmanualcontroldriveobjectname" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%pp%stManualControlDriveToHmi::stObjectName%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="1" data-tchmi-top-unit="%" data-tchmi-width="98" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div id="UcButton_ucmanualcontroldrivestop" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="20" data-tchmi-height-unit="%" data-tchmi-left="3.0" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="80" data-tchmi-top-unit="%" data-tchmi-width="93.6" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%pp%stManualControlDriveToHmi::stButtonStop%/pp%" data-tchmi-stbuttonfromhmi="%pp%stManualControlDriveFromHmi::stButtonStop%/pp%">
+
+</div>
+
+<div id="TcHmiCombobox_ucmanualcontroldrivemode" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCombobox" data-tchmi-combobox-text="Select" data-tchmi-height="20" data-tchmi-height-unit="%" data-tchmi-left="3.0" data-tchmi-left-unit="%" data-tchmi-top="17.8" data-tchmi-top-unit="%" data-tchmi-width="93.2" data-tchmi-width-unit="%" data-tchmi-text-horizontal-alignment="Center" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="px" data-tchmi-selected-index="%pp%stManualControlDriveFromHmi::eJogMode|BindingMode=TwoWay%/pp%" data-tchmi-src-data="%f%F_TranslateTextArray(%pp%stManualControlDriveToHmi::aDriveModeName%/pp%, 2, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+
+</div>

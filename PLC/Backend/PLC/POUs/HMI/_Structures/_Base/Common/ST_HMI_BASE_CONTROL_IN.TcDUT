@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_BASE_CONTROL_IN" Id="{7e796361-db7e-4720-8e7a-ae84c4902996}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_CONTROL_IN :
+STRUCT
+	// control
+	stButton_Start,
+	stButton_CycleStop,
+	stButton_Stop,
+	stButton_Home,
+	stButton_Step,
+	stButton_Reset 		: ST_HMI_BUTTON_IN;
+	
+	// OP modes
+	stButton_OPM_Auto,
+	stButton_OPM_Step,
+	stButton_OPM_Manual	: ST_HMI_BUTTON_IN;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

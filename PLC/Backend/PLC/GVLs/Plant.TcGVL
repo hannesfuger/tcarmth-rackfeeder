@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="Plant" Id="{94a82695-734f-4100-bdb7-f86314da5465}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL
+	// objects (plant-, module- and station objects) 
+	stObjects			: ST_Objects;
+	
+	// modules
+	fbModul001			: FB_M001_Module;
+	stM001IModule		: ST_M001_Interface;
+	
+	/// stations
+	fbSt010OvenA		: FB_St010_OvenA;
+	stSt010IOvenA		: ST_St010_Interface;
+	
+	fbSt020OvenB		: FB_St020_OvenB;
+	stSt020IOvenB		: ST_St020_Interface;
+	
+	fbSt030Handling		: FB_St030_Handling;
+	stSt030IHandling	: ST_St030_Interface;
+	
+	fbSt040Storage		: FB_St040_Storage;
+	stSt040IStorage		: ST_St040_Interface;
+	
+	fbSt050Mould		: FB_St050_Mould;
+	stSt050IMould		: ST_St050_Interface;
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

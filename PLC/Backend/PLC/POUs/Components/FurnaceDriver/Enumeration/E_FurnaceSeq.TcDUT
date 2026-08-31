@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_FurnaceSeq" Id="{ba3e80f4-84b3-4331-8e64-0bb756524472}">
+    <Declaration><![CDATA[TYPE E_FurnaceSeq :
+(
+	eFurnaceSeq_none := 0,
+	eFurnaceSeq_Auto,
+	eFurnaceSeq_Hand,
+	eFurnaceSeq_Tune,
+	eFurnaceSeq_off
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

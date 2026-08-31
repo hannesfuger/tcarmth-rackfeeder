@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_AxisManager" Id="{15dd5671-bf41-4846-9149-ccd1bcebf0ea}">
+    <Declaration><![CDATA[TYPE ST_AxisManager :
+STRUCT
+	// HMI page axis manager
+	
+	// info flags, pos & text
+	bAxisEnabled,
+	bCalibrated,
+	bSetCalibrationVisible,
+	bResetCalibrationVisible,
+	bEnablePosSet 	: BOOL;
+	
+	fActPos 		: LREAL;
+	stBmk, stName, 
+	stUnit, stInfo 	: ST_Text;
+	//----------
+	
+	// additional axis disable flag
+	bDisable,
+	// disable soft limits flag
+	bDisableSoftLimits,
+	
+	// set/reset calibration flag (ax must have no error and enable)
+	bSetCalibration,
+	bResetCalibration,
+	
+	// use local calibration- or sxis calibration flag
+	bUseLocalCalibration, // setting intern!
+	
+	// trigger to set position (ax not enabled)
+	bSetPosGo 			: BOOL;
+	// absolute position to set
+	fSetPos 			: REAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

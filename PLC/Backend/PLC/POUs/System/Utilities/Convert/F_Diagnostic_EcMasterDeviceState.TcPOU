@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Diagnostic_EcMasterDeviceState" Id="{e3672b09-bc1c-4880-a6a7-d28936e7dc50}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Function convert EtherCat master device state into an text
+FUNCTION F_Diagnostic_EcMasterDeviceState : WSTRING(80)
+VAR_INPUT
+	/// Function input
+	nDeviceState			:UINT;
+END_VAR
+VAR
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE nDeviceState OF
+	// Link error
+	16#1:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: Link error";
+		
+	// I/O locked after link error (I/O reset required)
+	16#2:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: I/O locked after link error (I/O reset required)";
+		
+	// Link error (redundancy adapter)
+	16#4:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: Link error (redundancy adapter)";
+		
+	// Missing one frame (redundancy mode)
+	16#8:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: Missing one frame (redundancy mode)";
+		
+	// Out of send resources (I/O reset required)
+	16#10:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: Out of send resources (I/O reset required)";
+		
+	// Watchdog triggered
+	16#20:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: Watchdog triggered";
+		
+	// Ethernet driver (miniport) not found
+	16#40:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: Ethernet driver (miniport) not found";
+		
+	// I/O reset active
+	16#80:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: I/O reset active";
+		
+	// At least one device in "INIT" state
+	16#100:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: At least one device in INIT state";
+		
+	// At least one device in "PRE-OP" state
+	16#200:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: At least one device in PRE-OP state";
+		
+	// At least one device in "SAFE-OP" state
+	16#400:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: At least one device in SAFE-OP state";
+		
+	// At least one device indicates an error state
+	16#800:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: At least one device indicates an error state";
+		
+	// DC not in sync
+	16#1000:
+		F_Diagnostic_EcMasterDeviceState := "EtherCat: DC not in sync";
+		
+	ELSE 
+		F_Diagnostic_EcMasterDeviceState := WCONCAT("EtherCat error: ", UINT_TO_WSTRING(nDeviceState));
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="F_Diagnostic_EcMasterDeviceState">
+      <LineId Id="117" Count="1" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="119" Count="1" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="121" Count="2" />
+      <LineId Id="146" Count="1" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="150" Count="1" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="154" Count="1" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="166" Count="1" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="174" Count="1" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="178" Count="1" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="182" Count="1" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="186" Count="1" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="141" Count="2" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Byte_To_DWord" Id="{f9afc8a6-4f6a-43c7-985f-9c744329e673}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Byte_To_DWord : DWORD
+VAR_INPUT
+	bByte0	: BYTE;
+	bByte1	: BYTE;
+	bByte2	: BYTE;
+	bByte3	: BYTE;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[MEMCPY(ADR(F_Byte_To_DWord),ADR(bByte0),SIZEOF(bByte0)); (*set  zero*)
+MEMCPY(ADR(F_Byte_To_DWord)+1,ADR(bByte1),SIZEOF(bByte0)); (*set  zero*)
+MEMCPY(ADR(F_Byte_To_DWord)+2,ADR(bByte2),SIZEOF(bByte0)); (*set  zero*)
+MEMCPY(ADR(F_Byte_To_DWord)+3,ADR(bByte3),SIZEOF(bByte0)); (*set  zero*)]]></ST>
+    </Implementation>
+    <LineIds Name="F_Byte_To_DWord">
+      <LineId Id="12" Count="2" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

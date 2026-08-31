@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_ColorToStringHexColor" Id="{1e1b512c-5673-4d7e-946d-c71c1048e02b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ColorToStringHexColor : STRING
+VAR_INPUT
+	color : UDINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF color = STATICS.stColor.None THEN
+	F_ColorToStringHexColor := STATICS.stColor.NoneString;
+ELSIF color = STATICS.stColor.Transparent THEN
+	F_ColorToStringHexColor := STATICS.stColor.TransparentString;	
+ELSIF color = STATICS.stColor.Theme THEN
+	F_ColorToStringHexColor := STATICS.stColor.ThemeString;
+ELSE
+	F_ColorToStringHexColor  := Concat(
+								'#',
+								Delete(
+									DWORD_TO_HEXSTR(
+											color,
+											8,
+											FALSE)
+									,2
+									,1));//#hexadecimal
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_ColorToStringHexColor">
+      <LineId Id="51" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="55" Count="4" />
+      <LineId Id="61" Count="7" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="50" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

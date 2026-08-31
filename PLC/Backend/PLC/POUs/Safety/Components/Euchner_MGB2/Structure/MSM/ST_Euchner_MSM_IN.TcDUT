@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MSM_IN" Id="{2a0618c7-3735-4579-94b5-93ec12e3c710}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MSM_IN :
+STRUCT
+	///SM_I_S1 | Nothalt
+	bSM_I_S1: BOOL;
+	///SM_I_S2 | Taster beleuchtet
+	bSM_I_S2: BOOL;
+	///SM_I_S3 | Taster beleuchtet
+	bSM_I_S3: BOOL;
+	///SM_E_S1 | Fehler Sx
+	bSM_E_S1: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

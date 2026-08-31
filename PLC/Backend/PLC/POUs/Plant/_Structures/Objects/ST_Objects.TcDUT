@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Objects" Id="{99c04aa7-03cf-4c18-b9de-a786ae46d8a0}">
+    <Declaration><![CDATA[TYPE ST_Objects :
+STRUCT	
+	stPlant_Objects		: ARRAY[0..iMaxIdxObject] OF ST_Object_Item; // e.g.: P001_Plant
+	stModule_Objects	: ARRAY[0..iMaxIdxObject] OF ST_Object_Item; // e.g.: M001_Prepare
+	//ToDo: clean up objects --> stStation_Objects	: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_Objects_Station; // e.g.: ST001_Separation, ...
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

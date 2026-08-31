@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Device" Id="{7f23a655-b176-447d-80d0-4d1a4ddd490b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC FB_Device EXTENDS FB_ComponentBase
+VAR_INPUT
+	// IO reference
+	stIn		: ST_DeviceIn;
+	//stIO : REFERENCE TO ST_DeviceIO;
+END_VAR
+VAR_OUTPUT
+	bOut		: BOOL;
+	fValue		: LREAL;
+	stOut		: ST_DeviceOut;
+END_VAR
+VAR
+	// private var's
+	bEnable : BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bOut := stOut.bRun;
+fValue := stout.fValue;]]></ST>
+    </Implementation>
+    <Property Name="Enable" Id="{e4721e20-53b4-4670-87fa-30bbcc95656d}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Enable : BOOL]]></Declaration>
+      <Get Name="Get" Id="{9727f9ac-59df-43d2-bb46-57830436bd38}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Enable := bEnable;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{77c89f51-8570-4e1b-a012-6e54f8f56d9c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bEnable := Enable;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="M_Off" Id="{a13597b7-8b8a-4945-8888-edf7b53cfaa2}">
+      <Declaration><![CDATA[METHOD PUBLIC M_Off : BOOL;
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stOut.bRun := FALSE;
+M_Off := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_On" Id="{f17dde1d-ffa4-4d42-bf9e-d7ad881568ae}">
+      <Declaration><![CDATA[METHOD PUBLIC M_On : BOOL;
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bEnable THEN
+	stOut.bRun := TRUE;
+	M_On := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{57fa2749-3f58-4840-a0b8-f25232cbf356}">
+      <Declaration><![CDATA[METHOD M_Reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_Reset := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Value" Id="{0585073b-32fd-44b5-8171-bd856093f69b}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC Value : LREAL]]></Declaration>
+      <Get Name="Get" Id="{cacae9ac-2971-420a-a48b-8fd2f86e8955}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Value := stOut.fValue;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a9351200-a99a-4427-b7f4-b8a36d069494}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[stOut.fValue := Value;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_Device">
+      <LineId Id="9" Count="0" />
+      <LineId Id="25" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.Enable.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.Enable.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.M_Off">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.M_On">
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.M_Reset">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.Value.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.Value.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

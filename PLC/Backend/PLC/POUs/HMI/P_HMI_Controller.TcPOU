@@ -1,0 +1,1460 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="P_HMI_Controller" Id="{1001bf94-b602-4ce6-8726-f74c3dcfe1ee}" SpecialFunc="None">
+    <Declaration><![CDATA[/// HMI access provider (host for sub hmi provider)
+PROGRAM INTERNAL P_HMI_Controller
+VAR_OUTPUT	
+	// default items from HMI to module & stations
+	aStHmiToModule	: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_DefaultHmiToPlc;
+	aStHmiToStation	: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_DefaultHmiToPlc;
+	bLedTest 		: BOOL;
+END_VAR
+VAR
+	stHmiBaseOut	: ST_HMI_BASE_OUT;
+	IEvent			: I_EventHandler;
+	aiHmiProvider	: ARRAY[0..E_HMI_PROVIDER.eHmiProvider_nMaxIdx] OF ITF_HMI_PROVIDER;
+
+	// default trigger
+	aFbProviderRequestTrigger	: ARRAY[0..E_HMI_PROVIDER.eHmiProvider_nMaxIdx] OF FB_ProviderRequestTrigger;
+	
+	aFbTrigHmiToModule			: ARRAY[0..eModule_nMaxIdx] OF FB_HmiBaseControlTrigger;
+	aFbTrigHmiToStation			: ARRAY[0..eStation_nMaxIdx] OF FB_HmiBaseControlTrigger;
+			
+	/// private variabe
+	ii							: INT;
+	stHmiInEmpty 				: ST_HMI_IN;	
+	
+	sChanges					: T_MaxString;
+	fbSettingsHandling 			: FB_SettingsHandling;
+	fbMonitoringHandling		: FB_MonitoringHandling;
+	
+	tonUserLevelLogOut				: TON;
+	rTrigUserManagmentLogIn,
+	rTrigUserManagmentLogOut,
+	rTrigUserManagmentSubmit		: R_TRIG;	
+	fTrigUserManagmentSubmit		: F_TRIG;
+	rTrigUserManagmentDelete		: R_TRIG;
+	
+	nUserManagemenetColumnIdx_Old	: UINT;
+	nUserManagemenetRowIdx_Old		: UINT;
+	
+	sUserLevelLastUser				: STRING;
+	stAxisManagerDummy 				: ST_AxisManager;
+END_VAR
+VAR PERSISTENT
+	// user data
+	iUserLevel					: INT;	(*user level 0 = none 1= Operator 2 = Plant Manager 3 = maintenance 4 = reserve 5= admin 6= programmer*)
+	stUserLevel					: ARRAY [0..20] OF ST_User_Management;
+	bPasswordSave				: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// HMI access provider
+/// 
+
+// build general HMI out
+M_PlcToHmi();
+
+// init summary IN (resets combined or-signals)
+stHMI.stIn := stHmiInEmpty;
+
+// loop provider, run & chk control requests
+FOR ii := 0 TO E_HMI_PROVIDER.eHmiProvider_nMaxIdx DO
+	IF aiHmiProvider[ii] = 0 THEN CONTINUE;	END_IF
+	
+	M_PlcToProvider(aiHmiProvider[ii]);
+	aiHmiProvider[ii].M_Run();
+	IF aiHmiProvider[ii].Mute THEN CONTINUE; END_IF
+	M_ProviderToPlc(aiHmiProvider[ii], aFbProviderRequestTrigger[ii]);
+END_FOR
+
+bLedTest := stHmi.stIn.stSpecial.stButton_LedTest.bClick;
+
+// build module & station signals
+M_HmiToModules();
+M_HmiToStations();
+
+// user mgmt --> switched to Beckhoff HMI UserMgmt
+HMI.eUserLevel := HMI.stHmiTc3.stIn.stUserMgmt.iHmiUserLevel;
+//M_UserManagement();
+M_AxisManagement();
+
+// reset
+IF stHmi.stIn.stMain.stButton_Reset.bClick THEN
+	M_Reset();
+END_IF
+]]></ST>
+    </Implementation>
+    <Folder Name="Internal" Id="{b48ca80e-6357-403c-8a51-b7c6601216eb}">
+      <Folder Name="Mapping" Id="{65687a48-3ae2-48b6-98f5-42b28635f7f2}" />
+      <Folder Name="Provider" Id="{167141c2-f5cc-4f86-b287-6fc46f5449c0}" />
+      <Folder Name="System" Id="{d9275ffe-49af-47c6-88e7-bb05cc816b06}" />
+      <Folder Name="SystemInfo" Id="{3a78ae08-88bb-4fa0-9b4b-0f0e41878bee}" />
+    </Folder>
+    <Folder Name="ProjectSpecific" Id="{eaae998b-3347-4fa7-9ff3-b6515ef9f5ea}" />
+    <Method Name="M_AddSystemInfo" Id="{035692ca-124f-4663-8196-2301ec1f1d9d}" FolderPath="Internal\SystemInfo\">
+      <Declaration><![CDATA[METHOD PRIVATE M_AddSystemInfo : BOOL
+VAR
+	idx : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// add/update system infos
+idx := 0;
+M_UpdateSystemInfo('App.ProjectName', Statics.stPlcSystemInfo.stPlcAppSystemInfo.ProjectName, idx);
+M_UpdateSystemInfo('Software Version', stLibVersion_PLC.sVersion, idx);
+M_UpdateSystemInfo('Safety Device Serial', UDINT_TO_STRING(IO.stSafetyIO.stIn.nSerialNumber), idx);
+M_UpdateSystemInfo('Safety Project CRC', WORD_TO_STRING(IO.stSafetyIO.stIn.nProjectCrc), idx);
+M_UpdateSystemInfo('', '', idx);
+M_UpdateSystemInfo('App.AppName', Statics.stPlcSystemInfo.stPlcAppSystemInfo.AppName, idx);
+M_UpdateSystemInfo('App.AppTimestamp', DT_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.AppTimestamp), idx);
+M_UpdateSystemInfo('App.AdsPort', UDINT_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.AdsPort), idx);
+M_UpdateSystemInfo('App.ObjId', UDINT_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.ObjId), idx);
+M_UpdateSystemInfo('App.TaskCnt', UDINT_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.TaskCnt), idx);
+M_UpdateSystemInfo('App.OnlineChangeCnt', UDINT_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.OnlineChangeCnt), idx);
+M_UpdateSystemInfo('App.Flags', DWORD_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.Flags), idx);
+M_UpdateSystemInfo('App.BootDataLoaded', BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.BootDataLoaded), idx);
+M_UpdateSystemInfo('App.OldBootData', BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.OldBootData), idx);
+M_UpdateSystemInfo('App.KeepOutputsOnBP', BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.KeepOutputsOnBP), idx);
+M_UpdateSystemInfo('App.ShutdownInProgress',  BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.ShutdownInProgress), idx);
+M_UpdateSystemInfo('App.LicensesPending',  BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.LicensesPending), idx);
+M_UpdateSystemInfo('App.BSODOccured',  BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcAppSystemInfo.BSODOccured), idx);	 
+//M_AddSystemInfo('App.TComSrvPtr', Statics.stPlcSystemInfo.stPlcAppSystemInfo.TComSrvPtr, idx); 
+M_UpdateSystemInfo('Task.TaskName', Statics.stPlcSystemInfo.stPlcTaskSystemInfo.TaskName, idx);
+M_UpdateSystemInfo('Task.AdsPort', UINT_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.AdsPort), idx);
+M_UpdateSystemInfo('Task.Priority', UINT_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.Priority), idx);
+M_UpdateSystemInfo('Task.CycleTime', Concat2x(F_LRealToStringEx(Statics.stPlcSystemInfo.fCycleTime * 1E3, 0), ' ms, '), idx);
+M_UpdateSystemInfo('Task.LastExecTime', Concat2x(F_LRealToStringEx(Statics.stPlcSystemInfo.fLastExecTime * 1E6, 1), ' µs'), idx);
+M_UpdateSystemInfo('Task.CycleCount',UDINT_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.CycleCount), idx);
+M_UpdateSystemInfo('Task.DcTaskTime', LINT_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.DcTaskTime), idx);
+M_UpdateSystemInfo('Task.FirstCycle', BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.FirstCycle), idx);
+M_UpdateSystemInfo('Task.CycleTimeExceeded', BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.CycleTimeExceeded), idx);
+M_UpdateSystemInfo('Task.InCallAfterOutputUpdate', BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.InCallAfterOutputUpdate), idx);
+M_UpdateSystemInfo('Task.RTViolation', BOOL_TO_STRING(Statics.stPlcSystemInfo.stPlcTaskSystemInfo.RTViolation), idx);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_AxisManagement" Id="{e5ec7200-49ba-4cea-907c-785f42dac177}" FolderPath="Internal\System\">
+      <Declaration><![CDATA[METHOD M_AxisManagement : INT
+VAR_INPUT
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT Services.bPlcInitDone THEN
+	RETURN;
+END_IF
+
+HMI.stHmiInOut.stHmiAxisManager.bEnableAxisMgr := P_Safety.OpMode_Off;
+
+CASE HMI.stHmiInOut.stHmiAxisManager.eAxis OF
+	E_Axis.eAxis_OvenA: HMI.stHmiInOut.stHmiAxisManager.stAxisManager REF= fbSt010OvenA.fbAxisUi.stAxisManager;
+	E_Axis.eAxis_OvenB: HMI.stHmiInOut.stHmiAxisManager.stAxisManager REF= fbSt020OvenB.fbAxisUi.stAxisManager;
+	
+	E_Axis.eAxis_Handling_X: HMI.stHmiInOut.stHmiAxisManager.stAxisManager REF= fbSt030Handling.fbAxisXUi.stAxisManager;
+	E_Axis.eAxis_Handling_Y: HMI.stHmiInOut.stHmiAxisManager.stAxisManager REF= fbSt030Handling.fbAxisYUi.stAxisManager;
+	E_Axis.eAxis_Handling_Z: HMI.stHmiInOut.stHmiAxisManager.stAxisManager REF= fbSt030Handling.fbAxisZUi.stAxisManager;
+	
+	ELSE
+		;//HMI.stHmiInOut.stHmiAxisManager.stAxisManager REF= fbModul001.fbAxisVmUi.stAxisManager;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_CombineCommonSignals" Id="{fdddde5a-10b9-46a7-9710-c95e7916e3df}" FolderPath="Internal\Provider\">
+      <Declaration><![CDATA[METHOD PRIVATE M_CombineCommonSignals : BOOL
+VAR_IN_OUT
+	stCtrlSum : ST_HMI_BASE_CONTROL_IN;
+	stCtrlPrv : ST_HMI_BASE_CONTROL_IN;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[F_OR_REF(stCtrlSum.stButton_Start.bClick, 		stCtrlPrv.stButton_Start.bClick);
+F_OR_REF(stCtrlSum.stButton_CycleStop.bClick,	stCtrlPrv.stButton_CycleStop.bClick);
+F_OR_REF(stCtrlSum.stButton_Stop.bClick, 		stCtrlPrv.stButton_Stop.bClick);
+F_OR_REF(stCtrlSum.stButton_Home.bClick, 		stCtrlPrv.stButton_Home.bClick);
+F_OR_REF(stCtrlSum.stButton_Step.bClick, 		stCtrlPrv.stButton_Step.bClick);
+F_OR_REF(stCtrlSum.stButton_Reset.bClick, 		stCtrlPrv.stButton_Reset.bClick);
+F_OR_REF(stCtrlSum.stButton_OPM_Auto.bClick,	stCtrlPrv.stButton_OPM_Auto.bClick);
+F_OR_REF(stCtrlSum.stButton_OPM_Step.bClick,	stCtrlPrv.stButton_OPM_Step.bClick);
+F_OR_REF(stCtrlSum.stButton_OPM_Manual.bClick,	stCtrlPrv.stButton_OPM_Manual.bClick);
+
+M_CombineCommonSignals := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_HmiToModules" Id="{de60b582-4fef-4e42-bc93-72d7875835b8}" FolderPath="Internal\Mapping\">
+      <Declaration><![CDATA[METHOD PRIVATE M_HmiToModules : BOOL
+VAR
+	ii	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// loop modules, default HMI to module (start, stop, reset, OpModes,...)
+FOR ii := 0 TO E_Module.eModule_nMaxIdx DO
+	// run only for valid modules
+	IF P_Plant.aIModule[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bStart := 			stHmi.stIn.arrStModule[ii].stButton_Start.bClick OR 
+															stHmi.stIn.stMain.stButton_Start.bClick;
+															
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bStop := 			stHmi.stIn.arrStModule[ii].stButton_CycleStop.bClick OR 
+															stHmi.stIn.stMain.stButton_Stop.bClick;
+															
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bFastStop := 		stHmi.stIn.arrStModule[ii].stButton_Stop.bClick OR 
+															stHmi.stIn.stMain.stButton_CycleStop.bClick;
+															
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bReset := 			stHmi.stIn.arrStModule[ii].stButton_Reset.bClick OR 
+															stHmi.stIn.stMain.stButton_Reset.bClick;
+
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bStep := 			stHmi.stIn.arrStModule[ii].stButton_Step.bClick OR 
+															stHmi.stIn.stMain.stButton_Step.bClick; 
+															
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bHome := 			stHmi.stIn.arrStModule[ii].stButton_Home.bClick OR 
+															stHmi.stIn.stMain.stButton_Home.bClick; 
+															
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bOpModeManual := 	stHmi.stIn.arrStModule[ii].stButton_OPM_Manual.bClick OR 
+															stHmi.stIn.stMain.stButton_OPM_Manual.bClick; 
+															
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bOpModeAuto := 		stHmi.stIn.arrStModule[ii].stButton_OPM_Auto.bClick OR 
+															stHmi.stIn.stMain.stButton_OPM_Auto.bClick; 
+															
+	aFbTrigHmiToModule[ii].stHmiToPlcIn.bOpModeStep := 		stHmi.stIn.arrStModule[ii].stButton_OPM_Step.bClick OR 
+															stHmi.stIn.stMain.stButton_OPM_Step.bClick;
+
+	IF P_Safety.OpMode_Auto THEN
+		aFbTrigHmiToModule[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_auto;
+	ELSIF P_Safety.OpMode_Manual THEN		
+		aFbTrigHmiToModule[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_manual;
+//		ELSIF P_Safety.Betriebsart_Ruest THEN		
+//			aFbTrigHmiToModule[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_manual;
+	ELSIF P_Safety.OpMode_Off THEN
+		aFbTrigHmiToModule[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_off;
+	ELSE
+		aFbTrigHmiToModule[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_off;
+	END_IF
+
+	aFbTrigHmiToModule[ii](stHmiToPlcOut := aStHmiToModule[ii]);
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_HmiToStations" Id="{1d7efc9f-cd93-4d57-8d4a-22aab39b423e}" FolderPath="Internal\Mapping\">
+      <Declaration><![CDATA[METHOD PRIVATE M_HmiToStations : BOOL
+VAR
+	ii	: INT;
+	ISt	: IStation;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// loop stations, default HMI to mostationdule (start, stop, reset, OpModes,...)
+FOR ii := 0 TO E_Station.eStation_nMaxIdx DO
+	// run only for valid stations
+	IF P_Plant.aIStaton[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+
+	ISt := P_Plant.aIStaton[ii];
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bStart := 			stHmi.stIn.arrStStation[ii].stButton_Start.bClick OR 
+															//to start all stations of the module:
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_Start.bClick OR 
+															stHmi.stIn.stMain.stButton_Start.bClick;
+															
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bStop := 			stHmi.stIn.arrStStation[ii].stButton_CycleStop.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_CycleStop.bClick OR 
+															stHmi.stIn.stMain.stButton_Stop.bClick;
+															
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bFastStop := 		stHmi.stIn.arrStStation[ii].stButton_Stop.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_Stop.bClick OR 
+															stHmi.stIn.stMain.stButton_CycleStop.bClick;
+															
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bReset := 			stHmi.stIn.arrStStation[ii].stButton_Reset.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_Reset.bClick OR 
+															stHmi.stIn.stMain.stButton_Reset.bClick;
+
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bStep := 			stHmi.stIn.arrStStation[ii].stButton_Step.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_Step.bClick OR 
+															stHmi.stIn.stMain.stButton_Step.bClick; 
+															
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bHome := 			stHmi.stIn.arrStStation[ii].stButton_Home.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_Home.bClick OR 
+															stHmi.stIn.stMain.stButton_Home.bClick; 
+															
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bOpModeManual := 	stHmi.stIn.arrStStation[ii].stButton_OPM_Manual.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_OPM_Manual.bClick OR 
+															stHmi.stIn.stMain.stButton_OPM_Manual.bClick; 
+															
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bOpModeAuto := 	stHmi.stIn.arrStStation[ii].stButton_OPM_Auto.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_OPM_Auto.bClick OR 
+															stHmi.stIn.stMain.stButton_OPM_Auto.bClick; 
+															
+	aFbTrigHmiToStation[ii].stHmiToPlcIn.bOpModeStep := 	stHmi.stIn.arrStStation[ii].stButton_OPM_Step.bClick OR 
+															//stHmi.stIn.arrStModule[ISt.Parent].stButton_OPM_Step.bClick OR 
+															stHmi.stIn.stMain.stButton_OPM_Step.bClick;
+
+	IF P_Safety.OpMode_Auto THEN
+		aFbTrigHmiToStation[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_auto;
+	ELSIF P_Safety.OpMode_Manual THEN		
+		aFbTrigHmiToStation[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_manual;
+//		ELSIF P_Safety.Betriebsart_Ruest THEN		
+//			aFbTrigHmiToStation[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_manual;
+	ELSIF P_Safety.OpMode_Off THEN
+		aFbTrigHmiToStation[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_off;
+	ELSE
+		aFbTrigHmiToStation[ii].stHmiToPlcIn.eSafetyOpMode := E_OpMode.eOpMode_off;
+	END_IF
+
+	aFbTrigHmiToStation[ii](stHmiToPlcOut := aStHmiToStation[ii]);
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{9cd17b16-22fd-4dde-9ad5-d8a163e9f28c}" FolderPath="Internal\System\">
+      <Declaration><![CDATA[METHOD INTERNAL M_Init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	nn : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//aSClearText[EN] := 'Initialize HMI';
+
+// set up defaults
+M_SetReferences(Services.fbEventHandler);
+
+// init HMI stuff here...
+
+iUserLevel := E_User_Level.eUser_Level_none;
+
+// main
+
+stHmi.stOut.stCommon.stMain.stButton_Home.stName		:= stTextListGlobal.stText_Home;
+stHmi.stOut.stCommon.stMain.stButton_Step.stName		:= stTextListGlobal.stText_Step;
+stHmi.stOut.stCommon.stMain.stButton_Reset.stName		:= stTextListGlobal.stText_Reset;
+stHmi.stOut.stCommon.stMain.stButton_CycleStop.stName	:= stTextListGlobal.stText_CycleStop;
+stHmi.stOut.stCommon.stMain.stButton_Start.stName		:= stTextListGlobal.stText_Start;
+stHmi.stOut.stCommon.stMain.stButton_Stop.stName		:= stTextListGlobal.stText_Stop;
+stHmi.stOut.stCommon.stMain.stButton_PlantLight.stName	:= stTextListGlobal.stText_PlantLight;
+
+// OP modes
+stHmi.stOut.stCommon.stMain.stSwitch_OPM_1 := Const.stTextListGlobal.stText_off;
+stHmi.stOut.stCommon.stMain.stSwitch_OPM_2 := Const.stTextListGlobal.stText_Manual;
+stHmi.stOut.stCommon.stMain.stSwitch_OPM_3 := Const.stTextListGlobal.stText_Setup;
+stHmi.stOut.stCommon.stMain.stSwitch_OPM_4 := Const.stTextListGlobal.stText_Auto;
+	                                            
+stHmi.stOut.stCommon.stMain.stButton_OPM_Auto.stName	:= stTextListGlobal.stText_OPM_Auto;
+stHmi.stOut.stCommon.stMain.stButton_OPM_Step.stName	:= stTextListGlobal.stText_OPM_Step;
+stHmi.stOut.stCommon.stMain.stButton_OPM_Manual.stName	:= stTextListGlobal.stText_OPM_Manual;
+
+// user mgmt
+stHmi.stOut.stCommon.stUserMgmt.stButton_LogOut.stName	:= stTextListGlobal.stText_logout;
+stHmi.stOut.stCommon.stUserMgmt.stButton_LogIn.stName	:= stTextListGlobal.stText_login;
+stHmi.stOut.stCommon.stUserMgmt.stButton_Submit.stName	:= stTextListGlobal.stText_submit;
+//stHmi.stOut.stCommon.stUserManagment.stUserLevel		:= stUserLevel;
+
+FOR ii := 1 TO E_Module.eModule_nMaxIdx - 1 DO
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_OPM_Auto.stName := stTextListGlobal.stText_Auto;
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_OPM_Step.stName := stTextListGlobal.stText_Step;
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_OPM_Manual.stName:= stTextListGlobal.stText_Manual;
+	
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_Home.stName := stTextListGlobal.stText_Home;
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_Step.stName := stTextListGlobal.stText_Step;
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_Reset.stName := stTextListGlobal.stText_Reset;
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_CycleStop.stName := stTextListGlobal.stText_CycleStop;
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_Start.stName := stTextListGlobal.stText_Start;
+	stHmi.stOut.stCommon.arrStModule[ii].stButton_Stop.stName := stTextListGlobal.stText_Stop;	
+	
+	//stHmi.stOut.stCommon.arrStModule[ii].stInfo1 := stTextListGlobal.stText_AllOk;
+	//stHmi.stOut.stCommon.arrStModule[ii].stInfo2 := stTextListGlobal.stText_AllOk;	
+END_FOR
+
+FOR ii := 1 TO E_Station.eStation_nMaxIdx - 1 DO
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_OPM_Auto.stName := stTextListGlobal.stText_Auto;
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_OPM_Step.stName := stTextListGlobal.stText_Step;
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_OPM_Manual.stName:= stTextListGlobal.stText_Manual;
+	
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_Home.stName := stTextListGlobal.stText_Home;
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_Step.stName := stTextListGlobal.stText_Step;
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_Reset.stName := stTextListGlobal.stText_Reset;
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_CycleStop.stName := stTextListGlobal.stText_CycleStop;
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_Start.stName := stTextListGlobal.stText_Start;
+	stHmi.stOut.stCommon.arrStStation[ii].stButton_Stop.stName := stTextListGlobal.stText_Stop;	
+	
+	//stHmi.stOut.stCommon.arrStStation[ii].stInfo1 := stTextListGlobal.stText_AllOk;
+	//stHmi.stOut.stCommon.arrStStation[ii].stInfo2 := stTextListGlobal.stText_AllOk;	
+END_FOR
+
+FOR ii := 0 TO E_User.eUser_nMaxIdx - 1 DO
+	stUserLevel[ii].iUserLevelMax:=(E_User_Level.eUser_Level_nMaxIdx);
+END_FOR
+
+// call axis mgr to set ref
+M_AxisManagement();
+
+
+//aSClearText[EN] := 'HMI init done.';
+M_Init := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_OnControlRequest" Id="{e1d254e2-425d-43fa-8f00-d27ab37dd67c}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PRIVATE M_OnControlRequest : BOOL
+VAR_INPUT
+	IProvider 	: ITF_HMI_PROVIDER;
+	eRequest	: E_HMI_CONTROL_REQUEST;
+END_VAR
+VAR
+	xx 			: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF IProvider = 0 THEN
+	RETURN;
+END_IF
+
+// loop provider, reset request on oher provider
+FOR xx := 0 TO E_HMI_PROVIDER.eHmiProvider_nMaxIdx DO
+	IF aiHmiProvider[xx] = 0 OR aiHmiProvider[xx] = IProvider THEN
+		CONTINUE;
+	END_IF
+	
+	CASE eRequest OF
+		E_HMI_CONTROL_REQUEST.Default:
+			aiHmiProvider[xx].RequestManualControl := FALSE;
+			
+		E_HMI_CONTROL_REQUEST.RecipeMgmtRequest:
+			aiHmiProvider[xx].RequestRecipeMgmt := FALSE;
+			
+		E_HMI_CONTROL_REQUEST.SettingMgmtRequest:
+			aiHmiProvider[xx].RequestSettingMgmt := FALSE;
+
+		E_HMI_CONTROL_REQUEST.UserMgmtRequest:
+			aiHmiProvider[xx].RequestUserMgmt := FALSE;
+	END_CASE
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PlcToHmi" Id="{8e1ccc5f-4302-4d03-b1e9-a08d4dc2978f}" FolderPath="Internal\Mapping\">
+      <Declaration><![CDATA[METHOD PRIVATE M_PlcToHmi : BOOL
+VAR
+	IMd	: IModule;
+	ISt	: IStation;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// add/update system infos
+M_AddSystemInfo();
+
+// map safety infos to HMI
+stHmi.stOut.stCommon.stSafety.bSAFE_ES_Ok := IO.stSafetyIO.stIn.bSAFE_ES_Ok;
+stHmi.stOut.stCommon.stSafety.bSAFE_AREA_Ok := IO.stSafetyIO.stIn.bSAFE_AREA_Ok;
+//stHmi.stOut.stCommon.stSafety.bSAFE_CONFIRMDEVICE_OK := IO.stSafetyIO.stIn.bSAFE_CONFIRMDEVICE_OK;
+stHmi.stOut.stCommon.stSafety.bLedResetSafety := SEL(P_Safety.ErrorAckRequest, FALSE, stPulse.bToggle500ms);
+stHmi.stOut.stCommon.stSafety.bLedResetAreaST10 := SEL(P_Safety.SafetyAreaOk_ST10, stPulse.bToggle500ms, FALSE);
+stHmi.stOut.stCommon.stSafety.bLedResetAreaST33 := SEL(NOT P_Safety.EmergencyStopOk OR P_Safety.SafetyAreaOk_ST20, stPulse.bToggle500ms, FALSE);
+
+// OP mode manual
+stHmi.stOut.stCommon.stMain.stButton_OPM_Manual.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF FALSE THEN
+	stHmi.stOut.stCommon.stMain.stButton_OPM_Manual.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Orange);
+ELSIF stGlobalModuleInfo.bStation_Any_Manual AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_OPM_Manual.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Orange);	
+END_IF
+
+// OP mode auto
+stHmi.stOut.stCommon.stMain.stButton_OPM_Auto.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF stGlobalModuleInfo.bStation_All_Auto THEN
+	stHmi.stOut.stCommon.stMain.stButton_OPM_Auto.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+ELSIF FALSE AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_OPM_Auto.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);	
+END_IF
+
+// OP mode step
+stHmi.stOut.stCommon.stMain.stButton_OPM_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF FALSE THEN
+	stHmi.stOut.stCommon.stMain.stButton_OPM_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);
+ELSIF stGlobalModuleInfo.bStation_Any_Step AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_OPM_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);	
+END_IF
+
+// home
+stHmi.stOut.stCommon.stMain.stButton_Home.bLed := FALSE;
+stHmi.stOut.stCommon.stMain.stButton_Home.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF stGlobalModuleInfo.bStation_All_InHome THEN
+	stHmi.stOut.stCommon.stMain.stButton_Home.bLed := TRUE;
+	stHmi.stOut.stCommon.stMain.stButton_Home.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LightBlue);
+ELSIF stGlobalModuleInfo.bStation_Any_Homing AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_Home.bLed := TRUE;
+	stHmi.stOut.stCommon.stMain.stButton_Home.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LightBlue);	
+END_IF
+
+// step
+stHmi.stOut.stCommon.stMain.stButton_Step.bLed := FALSE;
+stHmi.stOut.stCommon.stMain.stButton_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF FALSE THEN
+	stHmi.stOut.stCommon.stMain.stButton_Step.bLed := TRUE;
+	stHmi.stOut.stCommon.stMain.stButton_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);
+ELSIF stGlobalModuleInfo.bStation_Any_Step AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_Step.bLed := TRUE;
+	stHmi.stOut.stCommon.stMain.stButton_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);	
+END_IF
+
+// start
+stHmi.stOut.stCommon.stMain.stButton_Start.bLed := FALSE;
+stHmi.stOut.stCommon.stMain.stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF stGlobalModuleInfo.bStation_All_Started THEN
+	stHmi.stOut.stCommon.stMain.stButton_Start.bLed := TRUE;
+	stHmi.stOut.stCommon.stMain.stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+ELSIF stGlobalModuleInfo.bStation_All_Auto AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_Start.bLed := TRUE;
+	stHmi.stOut.stCommon.stMain.stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);	
+END_IF
+
+// cycle stop
+stHmi.stOut.stCommon.stMain.stButton_CycleStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF stGlobalModuleInfo.bStation_All_Stopped THEN
+	stHmi.stOut.stCommon.stMain.stButton_CycleStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+ELSIF FALSE AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_CycleStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);	
+END_IF
+
+// stop
+stHmi.stOut.stCommon.stMain.stButton_Stop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF stGlobalModuleInfo.bStation_All_Stopped THEN
+	stHmi.stOut.stCommon.stMain.stButton_Stop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+ELSIF FALSE AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_Stop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);	
+END_IF
+
+//reset button
+stHmi.stOut.stCommon.stMain.stButton_Reset.bLed := FALSE;
+stHmi.stOut.stCommon.stMain.stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+IF (stGlobalModuleInfo.bStation_Any_Error OR P_Safety.bError) AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.stMain.stButton_Reset.bLed := TRUE;
+	stHmi.stOut.stCommon.stMain.stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+END_IF
+
+// plant light
+stHmi.stOut.stCommon.stMain.stButton_PlantLight.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+//IF IO.stControlCabinetIO.stOut.bAktor_Schuetz_Anlagenbeleuchtung THEN
+	stHmi.stOut.stCommon.stMain.stButton_PlantLight.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Yellow);
+//END_IF
+
+// plant traffic light
+stHmi.stOut.stCommon.stTrafficLight.bLedGN := FALSE;							// green
+IF stGlobalModuleInfo.bStation_All_Started THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedGN := TRUE;
+ELSIF stGlobalModuleInfo.bStation_All_Auto THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedGN := stPulse.bToggle1000ms;	
+END_IF
+
+stHmi.stOut.stCommon.stTrafficLight.bLedGE := FALSE;							// yellow
+IF (IEvent.WarningActive <> 0) THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedGE := TRUE;
+ELSIF FALSE THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedGE := stPulse.bToggle1000ms;	
+END_IF
+
+stHmi.stOut.stCommon.stTrafficLight.bLedRT := FALSE;							// red
+IF (IEvent.ErrorActive <> 0) THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedRT := TRUE;
+ELSIF FALSE THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedRT := stPulse.bToggle1000ms;	
+END_IF
+
+stHmi.stOut.stCommon.stTrafficLight.bLedBL := FALSE;							// blue
+IF (IEvent.InfoActive <> 0) THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedBL := TRUE;
+ELSIF FALSE THEN
+	stHmi.stOut.stCommon.stTrafficLight.bLedBL := stPulse.bToggle1000ms;	
+END_IF
+
+// settings
+sChanges := sEmpty;
+Services.bSettingsSaved := FALSE;
+stHmi.stOut.stCommon.stSettings.stControlSetting_Plant.stButtonSave.stName := stTextListGlobal.stText_Save;
+stHmi.stOut.stCommon.stSettings.stControlSetting_Product.stButtonSave.stName := stTextListGlobal.stText_Save;
+stHmi.stOut.stCommon.stSettings.stControlSetting_Production.stButtonSave.stName := stTextListGlobal.stText_Save;
+fbSettingsHandling(eUserLevel := HMI.eUserLevel, stControlSettingIn := stHmi.stIn.stSettings.stControlSetting_Plant, stControlSettingOut := stHmi.stOut.stCommon.stSettings.stControlSetting_Plant, stSettings := Services.stSettings.stPlant_Settings, stSettingsView := stHmi.stOut.stCommon.stSettings.stSettingViewPlant, sChanges := sChanges);
+fbSettingsHandling(eUserLevel := HMI.eUserLevel, stControlSettingIn := stHmi.stIn.stSettings.stControlSetting_Product, stControlSettingOut := stHmi.stOut.stCommon.stSettings.stControlSetting_Product, stSettings := Services.stSettings.stProduct_Settings, stSettingsView := stHmi.stOut.stCommon.stSettings.stSettingViewProduct, sChanges := sChanges);
+fbSettingsHandling(eUserLevel := HMI.eUserLevel, stControlSettingIn := stHmi.stIn.stSettings.stControlSetting_Production, stControlSettingOut := stHmi.stOut.stCommon.stSettings.stControlSetting_Production, stSettings := Services.stSettings.stProduction_Settings, stSettingsView := stHmi.stOut.stCommon.stSettings.stSettingViewProduction, sChanges := sChanges);
+
+// modules, settings, nav buttons,.. out
+FOR ii := 0 TO E_Module.eModule_nMaxIdx DO
+	IF P_Plant.aIModule[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	IMd := P_Plant.aIModule[ii];
+	M_PlcToHmiModule(IMd);
+END_FOR
+
+// stations, settings, nav buttons,.. out
+FOR ii := 0 TO E_Station.eStation_nMaxIdx DO
+	IF P_Plant.aIStaton[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	ISt := P_Plant.aIStaton[ii];
+	M_PlcToHmiStation(ISt);
+END_FOR
+
+// map project specific out 
+M_SpecificPlcOut();
+
+// track settings changes
+IF sChanges <> sEmpty THEN
+	ILog.AddLog(Concat5('Settings Changed, ', 'EKS level: ', TO_STRING(HMI.eUserLevel), '. Changes: ', sChanges), 
+				'HMI Controller', 
+				E_LogLevel.eLogLevel_info);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PlcToHmiModule" Id="{ec3cfa2a-f9c0-4e65-8b57-289dc884eaab}" FolderPath="Internal\Mapping\">
+      <Declaration><![CDATA[METHOD PRIVATE M_PlcToHmiModule : BOOL
+VAR_INPUT
+	IMd				: IModule;
+END_VAR
+VAR
+	xx				: INT;
+	nModuleIndex	: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set up texts
+nModuleIndex := IMd.Module;
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stName := IMd.Name;
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButtonNavigation.stName := IMd.Name;
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stState_Auto := IMd.TextAuto;
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stState_Home := IMd.TextHome;
+stHmi.stOut.stCommon.stSettings.astSettingModules[nModuleIndex].stControlSetting.stButtonSave.stName := stTextListGlobal.stText_Save;
+
+FOR xx := 0 TO CONST.iMaxIdxLocalStepChain DO
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].aStepChainName[xx] := IMd.GetStepChainTest(xx);
+END_FOR
+
+// module state
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stState := CONST.stTextListGlobal.stText_None;
+IF IMd.State = E_ComponentState.eComponentState_none THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stState := CONST.stTextListGlobal.stText_None;
+ELSIF IMd.State = E_ComponentState.eComponentState_error THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stState := CONST.stTextListGlobal.stText_Error;	
+END_IF
+
+// state OP mode buttons
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Manual.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Auto.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);	
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Home.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_CycleStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Stop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+
+// op modes
+stHmi.stOut.stCommon.arrStModule[nModuleIndex].stManual.bManualMode := IMd.OpMode = E_OpMode.eOpMode_manual;
+IF IMd.OpMode = E_OpMode.eOpMode_manual THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Manual.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Orange);
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Manual.stColor;
+END_IF
+IF IMd.OpMode = E_OpMode.eOpMode_auto THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Auto.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Auto.stColor;
+END_IF
+IF IMd.OpMode = E_OpMode.eOpMode_step THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButtonNavigation.stColor.color := SEL(stPulse.bToggle1000ms OR IMd.RunCycle, F_ColorToStringHexColor(STATICS.stColor.Theme), stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_OPM_Step.stColor.color);
+END_IF
+
+// state button home
+IF IMd.InHome THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Home.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LightBlue);
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Home.stColor;
+END_IF
+
+// state button start
+IF ((IMd.OpMode = E_OpMode.eOpMode_auto OR IMd.OpMode = E_OpMode.eOpMode_step) AND IMd.RunCycle) THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+ELSIF (IMd.OpMode = E_OpMode.eOpMode_step) THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);
+END_IF
+
+// state button stop/cycle stop
+IF IMd.Stopped THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Stop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_CycleStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);	
+END_IF
+
+// state button reset
+IF IMd.State = E_ComponentState.eComponentState_error AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStModule[nModuleIndex].stButton_Reset.stColor;
+END_IF
+
+// module monitoring
+fbMonitoringHandling(nDigits := 3, 
+						stMonitoring := stHmi.stOut.stCommon.stMonitoring.astMonitoringModule[nModuleIndex].astMonitoring, 
+						stMonitoringView := stHmi.stOut.stCommon.stMonitoring.astMonitoringModule[nModuleIndex].astMonitoringView);
+
+// module settings
+fbSettingsHandling(eUserLevel := HMI.eUserLevel, 
+						stControlSettingIn := stHmi.stIn.stSettings.astControlSetting_Modules[nModuleIndex], 
+						stControlSettingOut := stHmi.stOut.stCommon.stSettings.astSettingModules[nModuleIndex].stControlSetting, 
+						stSettings := Services.stSettings.stModuleSettings[nModuleIndex].stDynStationSettings,
+						stSettingsView := stHmi.stOut.stCommon.stSettings.astSettingModules[nModuleIndex].stSettingView,
+					sChanges := sChanges);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PlcToHmiStation" Id="{ed1bab62-b467-4343-90f8-57aee2dd9195}" FolderPath="Internal\Mapping\">
+      <Declaration><![CDATA[METHOD PRIVATE M_PlcToHmiStation : BOOL
+VAR_INPUT
+	ISt				: IStation;
+END_VAR
+VAR
+	xx				: INT;
+	nStationIndex	: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set up texts
+nStationIndex := Ist.Station;
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stName := ISt.Name;
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButtonNavigation.stName := ISt.Name;
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stState_Auto := ISt.TextAuto;
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stState_Home := ISt.TextHome;
+stHmi.stOut.stCommon.stSettings.astSettingStations[nStationIndex].stControlSetting.stButtonSave.stName := stTextListGlobal.stText_Save;
+
+FOR xx := 0 TO CONST.iMaxIdxLocalStepChain DO
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].aStepChainName[xx] := ISt.GetStepChainTest(xx);
+END_FOR
+
+// station state
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stState_Station := CONST.stTextListGlobal.stText_None;
+IF Ist.State = E_ComponentState.eComponentState_none THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stState_Station := CONST.stTextListGlobal.stText_None;
+ELSIF Ist.State = E_ComponentState.eComponentState_error THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stState_Station := CONST.stTextListGlobal.stText_Error;	
+END_IF
+
+// state OP mode buttons
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Manual.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Auto.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);	
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Home.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_CycleStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Stop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+
+// op modes
+stHmi.stOut.stCommon.arrStStation[nStationIndex].stManual.bManualMode := Ist.OpMode = E_OpMode.eOpMode_manual;
+IF Ist.OpMode = E_OpMode.eOpMode_manual THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Manual.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Orange);
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Manual.stColor;
+END_IF
+IF Ist.OpMode = E_OpMode.eOpMode_auto THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Auto.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Auto.stColor;
+END_IF
+IF Ist.OpMode = E_OpMode.eOpMode_step THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Step.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButtonNavigation.stColor.color := SEL(stPulse.bToggle1000ms OR Ist.RunCycle, F_ColorToStringHexColor(STATICS.stColor.Theme), stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_OPM_Step.stColor.color);
+END_IF
+
+// state button home
+IF Ist.InHome THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Home.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LightBlue);
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Home.stColor;
+END_IF
+
+// state button start
+IF ((Ist.OpMode = E_OpMode.eOpMode_auto OR Ist.OpMode = E_OpMode.eOpMode_step) AND Ist.RunCycle) THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+ELSIF (Ist.OpMode = E_OpMode.eOpMode_step) THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Start.stColor.color := F_ColorToStringHexColor(STATICS.stColor.White);
+END_IF
+
+// state button stop/cycle stop
+IF Ist.Stopped THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Stop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_CycleStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);	
+END_IF
+
+// state button reset
+IF Ist.State = E_ComponentState.eComponentState_error AND stPulse.bToggle1000ms THEN
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Reset.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	stHmi.stOut.stCommon.arrStStation[nStationIndex].stButtonNavigation.stColor := stHmi.stOut.stCommon.arrStStation[nStationIndex].stButton_Reset.stColor;
+END_IF
+
+// station monitoring
+fbMonitoringHandling(nDigits := 3, 
+						stMonitoring := stHmi.stOut.stCommon.stMonitoring.astMonitoringStation[nStationIndex].astMonitoring, 
+						stMonitoringView := stHmi.stOut.stCommon.stMonitoring.astMonitoringStation[nStationIndex].astMonitoringView);
+
+// station settings
+fbSettingsHandling(eUserLevel := HMI.eUserLevel, 
+						stControlSettingIn := stHmi.stIn.stSettings.astControlSetting_Stations[nStationIndex], 
+						stControlSettingOut := stHmi.stOut.stCommon.stSettings.astSettingStations[nStationIndex].stControlSetting, 
+						stSettings := Services.stSettings.stStationSettings[nStationIndex].stDynStationSettings,
+						stSettingsView := stHmi.stOut.stCommon.stSettings.astSettingStations[nStationIndex].stSettingView,
+					sChanges := sChanges);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PlcToProvider" Id="{1ac8b7a5-6e97-473b-bb78-438fd6b67958}" FolderPath="Internal\Provider\">
+      <Declaration><![CDATA[METHOD PRIVATE M_PlcToProvider : BOOL
+VAR_IN_OUT
+	IPrv		: ITF_HMI_PROVIDER;
+END_VAR
+VAR
+	iMd, iSt 	: INT;
+	stHmiOutPr 	: REFERENCE TO ST_HMI_OUT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// main
+stHmiOutPr REF= IPrv.ItfHmiOut;
+
+//(mapping of common out not needed anymore, due to reference type!)
+//stHmiOutPr.stCommon.stMain := stHmi.stOut.stCommon.stMain;
+//	 
+//// modules, just map
+//FOR iMd := 0 TO E_Module.eModule_nMaxIdx DO
+//	IF P_Plant.aIModule[iMd] = 0 THEN
+//		CONTINUE;
+//	END_IF
+//	stHmiOutPr.arrStModule[iMd] := stHmi.stOut.arrStModule[iMd]; 
+//END_FOR
+//	 
+//// stations, just map
+//FOR iSt := 0 TO E_Station.eStation_nMaxIdx DO
+//	IF P_Plant.aIStaton[iSt] = 0 THEN
+//		CONTINUE;
+//	END_IF
+//	stHmiOutPr.arrStStation[iSt] := stHmi.stOut.arrStStation[iSt]; 
+//END_FOR
+//
+//// recipe, settings, safety, user mgmt, traffic LEDs and system info
+//stHmiOutPr.stRecipe := stHmi.stOut.stRecipe;
+//stHmiOutPr.stSettings := stHmi.stOut.stSettings;
+//stHmiOutPr.stMonitoring := stHmi.stOut.stMonitoring;
+//stHmiOutPr.stSafety := stHmi.stOut.stSafety;
+//stHmiOutPr.stUserMgmt := stHmi.stOut.stUserMgmt;
+//stHmiOutPr.stTrafficLight := stHmi.stOut.stTrafficLight;
+//stHmiOutPr.aSystemInfos := stHmi.stOut.aSystemInfos;
+	 
+// additional, project specific
+M_SpecificProviderOut(stHmiOutPr);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ProviderToPlc" Id="{63f036a0-0f11-4876-8ed1-9b1f8cb0814d}" FolderPath="Internal\Provider\">
+      <Declaration><![CDATA[METHOD PRIVATE M_ProviderToPlc : BOOL
+VAR_IN_OUT
+	IPrv		: ITF_HMI_PROVIDER;
+	fbPrvRqTrig	: FB_ProviderRequestTrigger;
+END_VAR
+VAR
+	iMd, iSt 	: INT;
+	stHmiInPr 	: REFERENCE TO ST_HMI_IN;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// main
+stHmiInPr REF= IPrv.ItfHmiIn;
+M_CombineCommonSignals(stHmi.stIn.stMain, stHmiInPr.stMain);
+	 
+// modules
+FOR iMd := 0 TO E_Module.eModule_nMaxIdx DO
+	IF P_Plant.aIModule[iMd] = 0 THEN
+		CONTINUE;
+	END_IF
+	M_CombineCommonSignals(stHmi.stIn.arrStModule[iMd], stHmiInPr.arrStModule[iMd]);
+	F_OR_REF(stHmi.stIn.arrStModule[iMd].stButtonNavigation.bClick, stHmiInPr.arrStModule[iMd].stButtonNavigation.bClick);
+	
+	IF IPrv.RequestManualControl THEN
+		stHmi.stIn.arrStModule[iMd].iStepchain := stHmiInPr.arrStModule[iMd].iStepchain;
+		stHmi.stIn.arrStModule[iMd].stManual := stHmiInPr.arrStModule[iMd].stManual;
+	END_IF
+END_FOR
+
+// stations
+FOR iSt := 0 TO E_Station.eStation_nMaxIdx DO
+	IF P_Plant.aIStaton[iSt] = 0 THEN
+		CONTINUE;
+	END_IF
+	M_CombineCommonSignals(stHmi.stIn.arrStStation[iSt], stHmiInPr.arrStStation[iSt]);
+	F_OR_REF(stHmi.stIn.arrStStation[iSt].stButtonNavigation.bClick, stHmiInPr.arrStStation[iSt].stButtonNavigation.bClick);
+	
+	IF IPrv.RequestManualControl THEN
+		stHmi.stIn.arrStStation[iSt].iStepchain := stHmiInPr.arrStStation[iSt].iStepchain;
+		stHmi.stIn.arrStStation[iSt].stManual := stHmiInPr.arrStStation[iSt].stManual;
+	END_IF
+END_FOR
+
+// recipe
+IF IPrv.RequestRecipeMgmt THEN
+	stHmi.stIn.stRecipe := stHmiInPr.stRecipe;
+END_IF
+	 
+// settings
+IF IPrv.RequestSettingMgmt THEN
+	stHmi.stIn.stSettings := stHmiInPr.stSettings;
+END_IF
+
+// special
+F_OR_REF(stHmi.stIn.stSpecial.stButton_LedTest.bClick, stHmiInPr.stSpecial.stButton_LedTest.bClick);
+F_OR_REF(stHmi.stIn.stSpecial.stButton_CloseHmi.bClick, stHmiInPr.stSpecial.stButton_CloseHmi.bClick);
+F_OR_REF(stHmi.stIn.stSpecial.stButton_SetSystemTime.bClick, stHmiInPr.stSpecial.stButton_SetSystemTime.bClick);
+F_OR_REF(stHmi.stIn.stSpecial.stButton_Eplan.bClick, stHmiInPr.stSpecial.stButton_Eplan.bClick);
+F_OR_REF(stHmi.stIn.stSpecial.stButton_Calculator.bClick, stHmiInPr.stSpecial.stButton_Calculator.bClick);
+F_OR_REF(stHmi.stIn.stSpecial.stButton_KeyenceAutoIdNetwNav.bClick, stHmiInPr.stSpecial.stButton_KeyenceAutoIdNetwNav.bClick);
+F_OR_REF(stHmi.stIn.stSpecial.stButton_KeyenceIv2Nav.bClick, stHmiInPr.stSpecial.stButton_KeyenceIv2Nav.bClick);
+F_OR_REF(stHmi.stIn.stSpecial.stButton_CleanScreen.bClick, stHmiInPr.stSpecial.stButton_CleanScreen.bClick);
+
+// user mgmt
+IF IPrv.RequestRecipeMgmt THEN
+	stHmi.stIn.stUserMgmt := stHmiInPr.stUserMgmt;
+END_IF
+
+// additional, project specific
+M_SpecificProviderIn(IPrv, stHmiInPr);
+
+// auto handle control request (Bedienhoheit)
+fbPrvRqTrig(IProvider := IPrv);
+IF fbPrvRqTrig.bManCtrlReq THEN
+	M_OnControlRequest(IProvider := IPrv, E_HMI_CONTROL_REQUEST.Default);
+ELSIF fbPrvRqTrig.bRecipeMgmtRequest THEN
+	M_OnControlRequest(IProvider := IPrv, E_HMI_CONTROL_REQUEST.RecipeMgmtRequest);
+ELSIF fbPrvRqTrig.bSettingMgmtRequest THEN
+	M_OnControlRequest(IProvider := IPrv, E_HMI_CONTROL_REQUEST.SettingMgmtRequest);
+ELSIF fbPrvRqTrig.bUserMgmtRequest THEN
+	M_OnControlRequest(IProvider := IPrv, E_HMI_CONTROL_REQUEST.UserMgmtRequest);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_RegisterProvider" Id="{a21ca5fa-7285-4a09-aced-67f8ac5c772d}" FolderPath="Internal\System\">
+      <Declaration><![CDATA[METHOD INTERNAL M_RegisterProvider : BOOL
+VAR_INPUT
+	IProvider : ITF_HMI_PROVIDER;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aiHmiProvider[IProvider.Provider] := IProvider;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{2e41c3f0-027e-4526-88ad-d8d080168d86}">
+      <Declaration><![CDATA[/// resets all notification flags and reset-needed state 
+METHOD M_Reset
+VAR
+	iPr : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// RESET
+IEvent.Reset();
+
+FOR ii := 0 TO E_HMI_PROVIDER.eHmiProvider_nMaxIdx DO
+	IF aiHmiProvider[iPr] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	aiHmiProvider[iPr].M_Reset();
+END_FOR
+
+// reset LED test
+stHmi.stIn.stSpecial.stButton_LedTest.bClick := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetReferences" Id="{6af0ab64-2f6e-4949-bbc5-96215052e0c3}" FolderPath="Internal\System\">
+      <Declaration><![CDATA[METHOD M_SetReferences : BOOL
+VAR_IN_OUT
+	IEventHndler : FB_EventHandler;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[HMI.stHmi.stOut.stCommon REF= stHmiBaseOut;
+IEvent := IEventHndler;
+M_SetReferences := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SpecificPlcOut" Id="{1a21169e-e6ee-4916-85ce-c5bc0db2be03}" FolderPath="ProjectSpecific\">
+      <Declaration><![CDATA[METHOD PRIVATE M_SpecificPlcOut : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// additional, project specific OUT (safety)
+
+// opn door
+//stHmi.stOut.stButtonDoorOpen.bLed := FALSE;
+//IF NOT P_Safety.SafetyArea1Ok THEN
+//	stHmi.stOut.stButtonDoorOpen.bLed := TRUE;
+//ELSIF (NOT P_Safety.SafetyArea1Ok) AND stPulse.bToggle1000ms THEN
+//	stHmi.stOut.stButtonDoorOpen.bLed := TRUE;	
+//END_IF
+//
+//// cls door
+//stHmi.stOut.stButtonDoorClose.bLed := FALSE;
+//IF  P_Safety.SafetyArea1Ok THEN
+//	stHmi.stOut.stButtonDoorClose.bLed := TRUE;
+//ELSIF (NOT P_Safety.SafetyArea1Ok ) AND stPulse.bToggle1000ms 
+//	AND NOT (NOT P_Safety.SafetyArea1Ok )
+//THEN
+//	stHmi.stOut.stButtonDoorClose.bLed := TRUE;	
+//END_IF
+
+// confirm
+//stHmi.stOut.stButtonConfirm.bLed := FALSE;
+//IF stHmi.stIn.stSafety.bConfirm THEN
+//	stHmi.stOut.stButtonConfirm.bLed := TRUE;
+//END_IF
+
+// station specific..
+
+M_SpecificPlcOut := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SpecificProviderIn" Id="{10fe7cec-fa3f-4a2f-82ec-ec0331ecb94d}" FolderPath="ProjectSpecific\">
+      <Declaration><![CDATA[METHOD PRIVATE M_SpecificProviderIn : BOOL
+VAR_IN_OUT
+	IPrv		: ITF_HMI_PROVIDER;
+	stHmiInPr	: ST_HMI_IN;
+END_VAR
+
+VAR
+	
+	//stHmiInPr 	: REFERENCE TO ST_HMI_IN;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//stHmiInPr REF= IPrv.ItfHmiIn;
+
+// additional, project specific IN
+F_OR_REF(stHmi.stIn.stSafety.bQuitSafety, stHmiInPr.stSafety.bQuitSafety);
+F_OR_REF(stHmi.stIn.stSafety.bQuitAreaST10, stHmiInPr.stSafety.bQuitAreaST10);
+F_OR_REF(stHmi.stIn.stSafety.bUnlockDoorST33, stHmiInPr.stSafety.bUnlockDoorST33);
+
+F_OR_REF(stHmi.stIn.arrStModule[E_Module.eModule_M001].stButton_Reset.bClick, stHmiInPr.stM001.bQuit);
+
+F_OR_REF(stHmi.stIn.stSt010.bJogCh1Inside, stHmiInPr.stSt010.bJogCh1Inside);
+F_OR_REF(stHmi.stIn.stSt010.bJogCh2Inside, stHmiInPr.stSt010.bJogCh2Inside);
+F_OR_REF(stHmi.stIn.stSt010.bJogCh1Ouside, stHmiInPr.stSt010.bJogCh1Ouside);
+F_OR_REF(stHmi.stIn.stSt010.bJogCh2Ouside, stHmiInPr.stSt010.bJogCh2Ouside);
+F_OR_REF(stHmi.stIn.stSt010.bJogDown, stHmiInPr.stSt010.bJogDown);
+F_OR_REF(stHmi.stIn.stSt010.bJogUp, stHmiInPr.stSt010.bJogUp);
+F_OR_REF(stHmi.stIn.stSt010.bSpeed, stHmiInPr.stSt010.bSpeed);
+F_OR_REF(stHmi.stIn.stSt010.bJog, stHmiInPr.stSt010.bJog);
+
+F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST010_OvenA].stButton_OPM_Manual.bClick, stHmiInPr.stSt010.bManual);
+F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST010_OvenA].stButton_Reset.bClick, stHmiInPr.stSt010.bQuit);
+
+stHmiInPr.arrStStation[E_Station.eStation_ST010_OvenA].stManual.stManualAxis.eJogMode := stHmi.stIn.arrStStation[E_Station.eStation_ST010_OvenA].stManual.stManualAxis.eJogMode;
+IF stHmiInPr.stSt010.bJog THEN
+
+	IF 	stHmi.stIn.arrStStation[E_Station.eStation_ST010_OvenA].stManual.stManualAxis.eJogMode <> E_Axis_JogMode.eJogMode_0 THEN
+		stHmi.stIn.arrStStation[E_Station.eStation_ST010_OvenA].stManual.stManualAxis.eJogMode := E_Axis_JogMode.eJogMode_0;
+	ELSE
+		stHmi.stIn.arrStStation[E_Station.eStation_ST010_OvenA].stManual.stManualAxis.eJogMode :=  SEL(stHmiInPr.stSt010.bSpeed, E_Axis_JogMode.eJogMode_1, E_Axis_JogMode.eJogMode_2);
+	END_IF
+
+END_IF
+	
+	
+F_OR_REF(stHmi.stIn.stSt020.bJogCh1Inside, stHmiInPr.stSt020.bJogCh1Inside);
+F_OR_REF(stHmi.stIn.stSt020.bJogCh2Inside, stHmiInPr.stSt020.bJogCh2Inside);
+F_OR_REF(stHmi.stIn.stSt020.bJogCh1Ouside, stHmiInPr.stSt020.bJogCh1Ouside);
+F_OR_REF(stHmi.stIn.stSt020.bJogCh2Ouside, stHmiInPr.stSt020.bJogCh2Ouside);
+F_OR_REF(stHmi.stIn.stSt020.bJogDown, stHmiInPr.stSt020.bJogDown);
+F_OR_REF(stHmi.stIn.stSt020.bJogUp, stHmiInPr.stSt020.bJogUp);
+F_OR_REF(stHmi.stIn.stSt020.bSpeed, stHmiInPr.stSt020.bSpeed);
+F_OR_REF(stHmi.stIn.stSt020.bJog, stHmiInPr.stSt020.bJog);
+
+F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST020_OvenB].stButton_OPM_Manual.bClick, stHmiInPr.stSt020.bManual);
+F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST020_OvenB].stButton_Reset.bClick, stHmiInPr.stSt020.bQuit);
+
+
+stHmiInPr.arrStStation[E_Station.eStation_ST020_OvenB].stManual.stManualAxis.eJogMode := stHmi.stIn.arrStStation[E_Station.eStation_ST020_OvenB].stManual.stManualAxis.eJogMode;
+IF stHmiInPr.stSt020.bJog THEN
+
+	IF 	stHmi.stIn.arrStStation[E_Station.eStation_ST020_OvenB].stManual.stManualAxis.eJogMode <> E_Axis_JogMode.eJogMode_0 THEN
+		stHmi.stIn.arrStStation[E_Station.eStation_ST020_OvenB].stManual.stManualAxis.eJogMode := E_Axis_JogMode.eJogMode_0;
+	ELSE
+		stHmi.stIn.arrStStation[E_Station.eStation_ST020_OvenB].stManual.stManualAxis.eJogMode :=  SEL(stHmiInPr.stSt020.bSpeed, E_Axis_JogMode.eJogMode_1, E_Axis_JogMode.eJogMode_2);
+	END_IF
+
+END_IF
+
+
+F_OR_REF(stHmi.stIn.stSt030.bJogXN, stHmiInPr.stSt030.bJogXN);
+F_OR_REF(stHmi.stIn.stSt030.bJogXP, stHmiInPr.stSt030.bJogXP);
+F_OR_REF(stHmi.stIn.stSt030.bJogYN, stHmiInPr.stSt030.bJogYN);
+F_OR_REF(stHmi.stIn.stSt030.bJogYP, stHmiInPr.stSt030.bJogYP);
+F_OR_REF(stHmi.stIn.stSt030.bJogZN, stHmiInPr.stSt030.bJogZN);
+F_OR_REF(stHmi.stIn.stSt030.bJogZP, stHmiInPr.stSt030.bJogZP);
+F_OR_REF(stHmi.stIn.stSt030.bSpeed, stHmiInPr.stSt030.bSpeed);
+F_OR_REF(stHmi.stIn.stSt030.bJog, stHmiInPr.stSt030.bJog);
+
+F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST030_Handling].stButton_OPM_Manual.bClick, stHmiInPr.stSt030.bManual);
+F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST030_Handling].stButton_Reset.bClick, stHmiInPr.stSt030.bQuit);
+
+stHmiInPr.arrStStation[E_Station.eStation_ST030_Handling].stManual.stManualAxis.eJogMode := stHmi.stIn.arrStStation[E_Station.eStation_ST030_Handling].stManual.stManualAxis.eJogMode;
+IF stHmiInPr.stSt030.bJog THEN
+
+	IF 	stHmi.stIn.arrStStation[E_Station.eStation_ST030_Handling].stManual.stManualAxis.eJogMode <> E_Axis_JogMode.eJogMode_0 THEN
+		stHmi.stIn.arrStStation[E_Station.eStation_ST030_Handling].stManual.stManualAxis.eJogMode := E_Axis_JogMode.eJogMode_0;
+	ELSE
+		stHmi.stIn.arrStStation[E_Station.eStation_ST030_Handling].stManual.stManualAxis.eJogMode :=  SEL(stHmiInPr.stSt030.bSpeed, E_Axis_JogMode.eJogMode_1, E_Axis_JogMode.eJogMode_2);
+	END_IF
+
+END_IF
+
+F_OR_REF(stHmi.stIn.stSt040.bJog01Down, stHmiInPr.stSt040.bJog01Down);
+F_OR_REF(stHmi.stIn.stSt040.bJog01Up, stHmiInPr.stSt040.bJog01Up);
+F_OR_REF(stHmi.stIn.stSt040.bJog02Down, stHmiInPr.stSt040.bJog02Down);
+F_OR_REF(stHmi.stIn.stSt040.bJog02Up, stHmiInPr.stSt040.bJog02Up);
+F_OR_REF(stHmi.stIn.stSt040.bSpeed, stHmiInPr.stSt010.bSpeed);
+F_OR_REF(stHmi.stIn.stSt040.bJog, stHmiInPr.stSt010.bJog);
+
+F_OR_REF(stHmi.stIn.stSt040.bJog, stHmiInPr.stSt040.bJog);F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST040_Storage].stButton_OPM_Manual.bClick, stHmiInPr.stSt040.bManual);
+F_OR_REF(stHmi.stIn.arrStStation[E_Station.eStation_ST040_Storage].stButton_Reset.bClick, stHmiInPr.stSt040.bQuit);
+
+stHmiInPr.arrStStation[E_Station.eStation_ST040_Storage].stManual.stManualAxis.eJogMode := stHmi.stIn.arrStStation[E_Station.eStation_ST040_Storage].stManual.stManualAxis.eJogMode;
+IF stHmiInPr.stSt040.bJog THEN
+
+	IF 	stHmi.stIn.arrStStation[E_Station.eStation_ST040_Storage].stManual.stManualAxis.eJogMode <> E_Axis_JogMode.eJogMode_0 THEN
+		stHmi.stIn.arrStStation[E_Station.eStation_ST040_Storage].stManual.stManualAxis.eJogMode := E_Axis_JogMode.eJogMode_0;
+	ELSE
+		stHmi.stIn.arrStStation[E_Station.eStation_ST040_Storage].stManual.stManualAxis.eJogMode :=  SEL(stHmiInPr.stSt040.bSpeed, E_Axis_JogMode.eJogMode_1, E_Axis_JogMode.eJogMode_2);
+	END_IF
+
+END_IF
+
+
+// map override only from HW-provider (Poti)
+IF IPrv.Provider = E_HMI_PROVIDER.eHmiProvider_HW THEN
+	stHmi.stIn.iOverride := TO_INT(stHmiInPr.iOverride * 3.051851E-3);
+END_IF
+
+M_SpecificProviderIn := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SpecificProviderOut" Id="{03e80cfa-25f1-48e9-bc72-8f1fedb8300c}" FolderPath="ProjectSpecific\">
+      <Declaration><![CDATA[METHOD PRIVATE M_SpecificProviderOut : BOOL
+VAR_IN_OUT
+	stHmiOutPr : ST_HMI_OUT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// additional, project specific OUT to provider
+stHmiOutPr.stM001 := stHmi.stOut.stM001;
+
+stHmiOutPr.stSt010 := stHmi.stOut.stSt010;
+stHmiOutPr.stSt020 := stHmi.stOut.stSt020;
+stHmiOutPr.stSt030 := stHmi.stOut.stSt030;
+stHmiOutPr.stSt040 := stHmi.stOut.stSt040;
+
+M_SpecificProviderOut := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_UpdateSystemInfo" Id="{35e50d10-4d55-4c1d-b712-f344df5b8865}" FolderPath="Internal\SystemInfo\">
+      <Declaration><![CDATA[METHOD PRIVATE M_UpdateSystemInfo : BOOL
+VAR_INPUT
+	sName 	: STRING(31);
+	sValue 	: STRING;
+END_VAR
+VAR_IN_OUT
+	idx 	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF idx < 0 OR idx > CONST.iMaxIdxSystemInfo THEN
+	M_UpdateSystemInfo := FALSE;
+	RETURN;
+END_IF
+
+stHmi.stOut.stCommon.aSystemInfos[idx].sName := sName;
+stHmi.stOut.stCommon.aSystemInfos[idx].sValue := sValue;
+idx := idx + 1;
+M_UpdateSystemInfo := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_UserManagement" Id="{11d4fd22-14bf-40a2-b82c-493d0f2e7819}">
+      <Declaration><![CDATA[METHOD M_UserManagement : INT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[tonUserLevelLogOut.IN:= (iUserLevel >= E_User_Level.eUser_Level_Maintenance);
+tonUserLevelLogOut.PT:=T#15M;
+tonUserLevelLogOut();
+
+rTrigUserManagmentSubmit.CLK := stHmi.stIn.stUserMgmt.stButton_Submit.bClick;
+rTrigUserManagmentSubmit();
+rTrigUserManagmentLogIn.CLK := stHmi.stIn.stUserMgmt.stButton_LogIn.bClick;
+rTrigUserManagmentLogIn();
+rTrigUserManagmentLogOut.CLK := stHmi.stIn.stUserMgmt.stButton_LogOut.bClick;
+rTrigUserManagmentLogOut();
+
+IF rTrigUserManagmentLogIn.Q THEN
+	IF (stHmi.stIn.stUserMgmt.sUserManagment_InputPassword = stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].sPassword) THEN
+		stHmi.stIn.stUserMgmt.sUserManagment_InputPassword := '';
+		//sPasswort := stHmi.stIn.stUserManagment.sUserManagment_InputPassword;
+		iUserLevel := stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel;
+		sUserLevelLastUser := stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].sName;
+		sUserLevelLastUser := CONCAT(sUserLevelLastUser,'  Level: ');
+		sUserLevelLastUser := CONCAT(sUserLevelLastUser,TO_STRING(iUserLevel));	
+	ELSE
+		;
+	END_IF	
+	//stHmi.stIn.stUserManagment.sUserManagment_InputPassword := '';
+ELSIF tonUserLevelLogOut.Q OR rTrigUserManagmentLogOut.Q THEN
+	iUserLevel := E_User_Level.eUser_Level_none;
+	//stHmi.stIn.stUserManagment.sUserManagment_InputPassword := '';
+END_IF
+
+IF iIBN > 0 THEN
+	iUserLevel := 6;
+END_IF
+
+IF tonUserLevelLogOut.Q THEN
+	iUserLevel:= E_User_Level.eUser_Level_none;
+END_IF
+
+FOR ii:=0 TO (E_User_Level.eUser_Level_nMaxIdx-1) DO
+	stHmi.stOut.stCommon.stUserMgmt.bUserLevel[ii]:=FALSE;
+END_FOR
+
+CASE iUserLevel OF
+
+	E_User_Level.eUser_Level_none:
+		stHmi.stOut.stCommon.stUserMgmt.sUserState:='Kein Benutzer';
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[0]:=TRUE;
+		
+	E_User_Level.eUser_Level_Operator:
+		stHmi.stOut.stCommon.stUserMgmt.sUserState:=sUserLevelLastUser;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[0]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[1]:=TRUE;
+		
+	E_User_Level.eUser_Level_Manager:
+		stHmi.stOut.stCommon.stUserMgmt.sUserState:=sUserLevelLastUser;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[0]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[1]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[2]:=TRUE;	
+		
+	E_User_Level.eUser_Level_Maintenance:
+		stHmi.stOut.stCommon.stUserMgmt.sUserState:=sUserLevelLastUser;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[0]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[1]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[2]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[3]:=TRUE;
+		
+	E_User_Level.eUser_Level_Level4:
+		stHmi.stOut.stCommon.stUserMgmt.sUserState:=sUserLevelLastUser;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[0]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[1]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[2]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[3]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[4]:=TRUE;		
+	
+	E_User_Level.eUser_Level_Admin:
+		stHmi.stOut.stCommon.stUserMgmt.sUserState:=sUserLevelLastUser;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[0]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[1]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[2]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[3]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[4]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[5]:=TRUE;	
+		
+	E_User_Level.eUser_Level_Programmer:
+		stHmi.stOut.stCommon.stUserMgmt.sUserState:=sUserLevelLastUser;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[0]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[1]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[2]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[3]:=TRUE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[4]:=TRUE;		
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[5]:=TRUE;	
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevel[6]:=TRUE;			
+ELSE
+	stHmi.stOut.stCommon.stUserMgmt.sUserState:='Benutzer unbekannt';
+END_CASE
+
+iUserLevel:=LIMIT(0, iUserLevel, (E_User_Level.eUser_Level_nMaxIdx - 1));
+
+stHmi.stOut.stCommon.stUserMgmt.bPasswordInputVisible := bPasswordSave;
+stHmi.stOut.stCommon.stUserMgmt.bCreateDeleteUserVisible := iUserLevel >= E_User_Level.eUser_Level_Admin; // only Admin or programmer can delete a user
+
+
+FOR ii:=0 TO (E_User.eUser_nMaxIdx-1) DO
+	stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].sName := stUserLevel[ii].sName;		
+	stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].iUserLevel := stUserLevel[ii].iUserLevel;
+	stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].iUserLevelMin := stUserLevel[ii].iUserLevelMin;
+	stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].iUserLevelMax := stUserLevel[ii].iUserLevelMax;
+	IF (iUserLevel < E_User_Level.eUser_Level_Admin) AND (stUserLevel[ii].sName <> '')
+	THEN
+		stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].sPassword:='*****';
+	ELSIF (iUserLevel >= stUserLevel[ii].iUserLevel(* E_User_Level.eUser_Level_Admin*)) AND (stUserLevel[ii].sName <> '') THEN
+		stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].sPassword:=stUserLevel[ii].sPassword;
+	ELSIF NOT (iUserLevel >= stUserLevel[ii].iUserLevel (*E_User_Level.eUser_Level_Admin*)) AND (stUserLevel[ii].sName <> '')  
+	THEN
+		stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].sPassword:='*****';
+	ELSE
+		stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].sPassword:='';
+	END_IF
+	IF (stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].sName <> '') THEN
+		CASE stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].iUserLevel OF
+			0:
+				stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].stUserLevelName := stTextListGlobal.stText_UserLevel_None;
+
+			1:
+				stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].stUserLevelName := stTextListGlobal.stText_UserLevel_Operator;
+
+			2:
+				stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].stUserLevelName := stTextListGlobal.stText_UserLevel_Manager;
+
+			3:
+				stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].stUserLevelName := stTextListGlobal.stText_UserLevel_Maintenance;
+
+			4:
+				stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].stUserLevelName := stTextListGlobal.stText_UserLevel_None;
+
+			5:
+				stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].stUserLevelName := stTextListGlobal.stText_UserLevel_Admin;
+
+			6:
+				stHmi.stOut.stCommon.stUserMgmt.stUserLevel[ii].stUserLevelName := stTextListGlobal.stText_UserLevel_Programmer;		
+
+		END_CASE
+	END_IF
+END_FOR
+
+stHmi.stOut.stCommon.stUserMgmt.aUserLevelList[0] := stTextListGlobal.stText_UserLevel_None;
+stHmi.stOut.stCommon.stUserMgmt.aUserLevelList[1] := stTextListGlobal.stText_UserLevel_Operator;
+stHmi.stOut.stCommon.stUserMgmt.aUserLevelList[2] := stTextListGlobal.stText_UserLevel_Manager;
+stHmi.stOut.stCommon.stUserMgmt.aUserLevelList[3] := stTextListGlobal.stText_UserLevel_Maintenance;
+stHmi.stOut.stCommon.stUserMgmt.aUserLevelList[4] := stTextListGlobal.stText_UserLevel_None;
+stHmi.stOut.stCommon.stUserMgmt.aUserLevelList[5] := stTextListGlobal.stText_UserLevel_Admin;
+stHmi.stOut.stCommon.stUserMgmt.aUserLevelList[6] := stTextListGlobal.stText_UserLevel_Programmer;
+
+IF fTrigUserManagmentSubmit.Q THEN
+	stHmi.stIn.stUserMgmt.sUserManagment_InputString := '';
+	stHmi.stIn.stUserMgmt.nUserManagment_InputUserLevel := 0;
+END_IF
+
+// Column of the grid
+CASE stHmi.stIn.stUserMgmt.stControlObject.nSelectedColumIndex OF 
+	// Name
+	0:
+		// selected col/row changed
+		IF nUserManagemenetColumnIdx_Old <> stHmi.stIn.stUserMgmt.stControlObject.nSelectedColumIndex OR
+		nUserManagemenetRowIdx_Old <> stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex THEN
+			nUserManagemenetColumnIdx_Old := stHmi.stIn.stUserMgmt.stControlObject.nSelectedColumIndex;
+			nUserManagemenetRowIdx_Old := stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex;
+			stHmi.stIn.stUserMgmt.sUserManagment_InputString := stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].sName;
+		END_IF
+		stHmi.stOut.stCommon.stUserMgmt.stInputDisplayText := F_CreateDynText("Name", 0);
+		stHmi.stOut.stCommon.stUserMgmt.bKeyboardInputVisible := stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Admin] 
+																	OR stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Programmer];
+		stHmi.stOut.stCommon.stUserMgmt.bNumpadInputVisible := FALSE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevelInputVisible := FALSE;
+		//Reihe 1 - Name des Benutzers nur übernehmen wenn Admin
+		IF stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Admin] 
+			OR stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Programmer] 
+		THEN
+			IF rTrigUserManagmentSubmit.Q THEN
+				IF ((iUserLevel = E_User_Level.eUser_Level_Admin)
+					AND (stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel <= E_User_Level.eUser_Level_Admin))
+					OR stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Programmer]
+				THEN	
+					stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].sName := stHmi.stIn.stUserMgmt.sUserManagment_InputString;
+				ELSE
+					stHmi.stOut.stCommon.stUserMgmt.sUserState:='Benutzer level incorrect';
+				END_IF
+			END_IF
+		END_IF
+
+	// Passwort
+	1:
+		// selected col/row changed
+		IF nUserManagemenetColumnIdx_Old <> stHmi.stIn.stUserMgmt.stControlObject.nSelectedColumIndex OR
+		nUserManagemenetRowIdx_Old <> stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex THEN
+			nUserManagemenetColumnIdx_Old := stHmi.stIn.stUserMgmt.stControlObject.nSelectedColumIndex;
+			nUserManagemenetRowIdx_Old := stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex;
+			stHmi.stIn.stUserMgmt.sUserManagment_InputString := '*****';
+		END_IF
+		stHmi.stOut.stCommon.stUserMgmt.stInputDisplayText := F_CreateDynText("Passwort", 0);
+		stHmi.stOut.stCommon.stUserMgmt.bKeyboardInputVisible := stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Admin] OR stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Programmer];
+		stHmi.stOut.stCommon.stUserMgmt.bNumpadInputVisible := FALSE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevelInputVisible := FALSE;
+		//Reihe 2 - Passwort der Eingabe gleich hinterlegtem Passwort dann User aktivieren
+		IF (stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Admin] AND (stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel < E_User_Level.eUser_Level_Programmer)) 
+			OR stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Programmer] 
+		THEN
+			IF rTrigUserManagmentSubmit.Q  
+				AND (stHmi.stIn.stUserMgmt.sUserManagment_InputString <> '') 
+				AND (stHmi.stIn.stUserMgmt.sUserManagment_InputString <> '*****') THEN
+				stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].sPassword := stHmi.stIn.stUserMgmt.sUserManagment_InputString;
+			END_IF
+		END_IF
+
+	// Stufe
+	2:
+		// selected col/row changed
+		IF nUserManagemenetColumnIdx_Old <> stHmi.stIn.stUserMgmt.stControlObject.nSelectedColumIndex OR
+		nUserManagemenetRowIdx_Old <> stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex THEN
+			nUserManagemenetColumnIdx_Old := stHmi.stIn.stUserMgmt.stControlObject.nSelectedColumIndex;
+			nUserManagemenetRowIdx_Old := stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex;
+			stHmi.stIn.stUserMgmt.nUserManagment_InputUserLevel := stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel;
+		END_IF
+		stHmi.stOut.stCommon.stUserMgmt.stInputDisplayText := F_CreateDynText("Stufe", 0);
+		stHmi.stOut.stCommon.stUserMgmt.bKeyboardInputVisible := FALSE;
+		stHmi.stOut.stCommon.stUserMgmt.bNumpadInputVisible := FALSE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevelInputVisible := stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Admin];
+		IF (stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Admin] 
+				AND (stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel < E_User_Level.eUser_Level_Programmer)
+				AND (stHmi.stIn.stUserMgmt.nUserManagment_InputUserLevel < E_User_Level.eUser_Level_Programmer)) 
+			OR stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Programmer] 
+		THEN
+			IF rTrigUserManagmentSubmit.Q THEN
+				stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel := stHmi.stIn.stUserMgmt.nUserManagment_InputUserLevel;
+			END_IF
+		END_IF
+
+	ELSE
+		//ELSE Alle Visible Rücksetzen
+		stHmi.stOut.stCommon.stUserMgmt.bKeyboardInputVisible := FALSE;
+		stHmi.stOut.stCommon.stUserMgmt.bNumpadInputVisible := FALSE;
+		stHmi.stOut.stCommon.stUserMgmt.bUserLevelInputVisible := FALSE;
+		
+END_CASE
+
+// Delete user
+rTrigUserManagmentDelete( CLK := stHmi.stIn.stUserMgmt.bDeleteUser );
+IF rTrigUserManagmentDelete.Q THEN
+	IF ((iUserLevel >= E_User_Level.eUser_Level_Admin) AND (stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel < E_User_Level.eUser_Level_Programmer) ) 
+		OR stHmi.stOut.stCommon.stUserMgmt.bUserLevel[E_User_Level.eUser_Level_Programmer]
+	THEN
+		stHmi.stOut.stCommon.stUserMgmt.stUserManagementMessage := F_CreateDynText("", 0);
+		
+		stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].sName  := '';
+		stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].sPassword  := '';
+		stUserLevel[stHmi.stIn.stUserMgmt.stControlObject.nSelectedRowIndex].iUserLevel := TO_INT( E_User_Level.eUser_Level_none );
+		// message
+		stHmi.stOut.stCommon.stUserMgmt.stUserManagementMessage := F_CreateDynText("Benutzer gelöscht!", 0);
+	
+	ELSIF stHmi.stIn.stUserMgmt.sCreateDeleteUserName = '' THEN
+		stHmi.stOut.stCommon.stUserMgmt.stUserManagementMessage := F_CreateDynText("Benutzername ist leer!", 0);
+	ELSIF stHmi.stIn.stUserMgmt.sCreateDeleteUserName <> stHmi.stIn.stUserMgmt.sCreateDeleteUserNameConfirm THEN
+		stHmi.stOut.stCommon.stUserMgmt.stUserManagementMessage := F_CreateDynText("Benutzername bitte bestätigen!", 0);
+	END_IF	
+END_IF
+
+HMI.eUserLevel := iUserLevel;
+
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

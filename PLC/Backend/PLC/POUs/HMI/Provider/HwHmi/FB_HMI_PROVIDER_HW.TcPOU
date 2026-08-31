@@ -1,0 +1,432 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_HMI_PROVIDER_HW" Id="{632e964c-abf7-4910-8081-85c8764931c5}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_HMI_PROVIDER_HW EXTENDS FB_HMI_PROVIDER_BASE
+VAR
+	stIn		: REFERENCE TO HMI_PROVIDER_HW_IN;
+	stOut		: REFERENCE TO HMI_PROVIDER_HW_OUT;
+	bLedTest	: BOOL;
+	
+	nSelStation : E_Station;
+	bAlternativ : BOOL;	
+	bJog : BOOL;
+	bSpeed : BOOL;
+
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Internal" Id="{82b7c4ec-d8ae-478f-8222-ca40d45214df}" />
+    <Folder Name="Properties" Id="{29e655d9-6e03-4cdd-80e9-caf680d46df8}" />
+    <Method Name="M_EuchnerToPLC" Id="{2de1a994-565c-478f-aa41-00d3b731df8d}">
+      <Declaration><![CDATA[METHOD M_EuchnerToPLC : BOOL
+VAR_INST		
+	fbSelection				:FB_TON_RMTH;
+	fbAlt					:FB_TON_RMTH;
+	fbJog					:FB_TON_RMTH;
+	fbSpeed					:FB_TON_RMTH;
+	
+	rtrigJog01				:R_TRIG;
+	rtrigJog02				:R_TRIG;
+	rtrigReset				:R_TRIG;
+	
+	nNewSelection			: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbSelection(IN := stIn.stP51A_S1HandBs.bSelect01 OR stIn.stP51A_S1HandBs.bSelect02 OR stIn.stP51A_S1HandBs.bSelect03 OR stIn.stP51A_S1HandBs.bSelect04 OR stIn.stP51A_S1HandBs.bSelect05 OR stIn.stP51A_S1HandBs.bSelect06 , PT:= T#50MS);	//Selection
+fbAlt(IN := stIn.stP51A_S1HandBs.bAlt, PT:= T#50MS);	//Selection
+
+fbJog(IN := stIn.stP51A_S1HandBs.bJog, PT:= T#50MS, Qr=> bJog);	//Selection
+stIn.stSt010.bJog := stIn.stSt020.bJog := stIn.stSt030.bJog := stIn.stSt040.bJog := bJog;
+
+fbSpeed(IN := stIn.stP51A_S1HandBs.bDistance, PT:= T#50MS);	//Selection
+
+IF fbSpeed.Qr THEN
+	bSpeed := NOT bSpeed;
+END_IF
+
+IF fbJog.Qr THEN
+	bSpeed := FALSE;	
+END_IF
+
+stIn.stSt010.bSpeed := stIn.stSt020.bSpeed := stIn.stSt030.bSpeed := stIn.stSt040.bSpeed := bSpeed;
+
+// Umschalten Station
+IF fbSelection.Qr THEN
+	bAlternativ := FALSE;
+	IF stIn.stP51A_S1HandBs.bSelect01 THEN
+		nNewSelection := E_Station.eStation_ST010_OvenA;
+	ELSIF stIn.stP51A_S1HandBs.bSelect02 THEN
+		nNewSelection := E_Station.eStation_ST020_OvenB;		
+	ELSIF stIn.stP51A_S1HandBs.bSelect03 THEN
+		nNewSelection := E_Station.eStation_ST030_Handling;		
+	ELSIF stIn.stP51A_S1HandBs.bSelect04 THEN
+		nNewSelection := E_Station.eStation_ST040_Storage;		
+	ELSIF stIn.stP51A_S1HandBs.bSelect05 THEN
+		nNewSelection := E_Station.eStation_ST050_Mould;		
+	ELSIF stIn.stP51A_S1HandBs.bSelect06 THEN
+		nNewSelection := E_Station.eStation_none;		
+	END_IF
+	
+	IF nNewSelection = nSelStation THEN
+		nSelStation := E_Station.eStation_none;
+	ELSE
+		nSelStation := nNewSelection;
+	END_IF	
+	
+END_IF
+
+
+// Umschalten auf Alternativ
+IF fbAlt.Qr THEN
+	bAlternativ := NOT bAlternativ;
+END_IF
+rtrigJog01(CLK := stIn.stP51A_S1HandBs.bLeft OR stIn.stP51A_S1HandBs.bRight);
+rtrigJog02(CLK := stIn.stP51A_S1HandBs.bDown OR stIn.stP51A_S1HandBs.bUp);
+rtrigReset(CLK := );
+
+// Stationsfunktionen
+CASE nSelStation OF
+	
+
+	eStation_none:  stIn.stM001.bQuit := stIn.stP51A_S1HandBs.bReset;
+
+	
+	eStation_ST010_OvenA: 	//stIn.stSt010.bManual := stIn.stP51A_S1HandBs.bReset;	
+		stIn.stSt010.bQuit := stIn.stP51A_S1HandBs.bReset;
+
+		// set up index	
+		IF NOT bAlternativ THEN
+			stOut.stP51A_S1HandBs.bLedLeft := TRUE;
+			stOut.stP51A_S1HandBs.bLedRight := TRUE;	
+			stIn.stSt010.bJogCh1Inside := stIn.stP51A_S1HandBs.bLeft;
+	   		stIn.stSt010.bJogCh1Ouside := stIn.stP51A_S1HandBs.bRight;	
+			IF rtrigJog01.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST010_OvenA].stManual.diSelectedObjectIndex := fbSt010OvenA.fbAxisCh1Ui.diObjectIndex;			
+				bRequestManualControl := TRUE;
+			END_IF					
+		ELSE
+			stOut.stP51A_S1HandBs.bLedLeft := TRUE;
+			stOut.stP51A_S1HandBs.bLedRight := TRUE;
+			stIn.stSt010.bJogCh2Inside := stIn.stP51A_S1HandBs.bLeft;
+	   		stIn.stSt010.bJogCh2Ouside := stIn.stP51A_S1HandBs.bRight;	
+			IF rtrigJog01.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST010_OvenA].stManual.diSelectedObjectIndex := fbSt010OvenA.fbAxisCh2Ui.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF
+		END_IF
+		
+		stOut.stP51A_S1HandBs.bLedUp := TRUE;
+		stOut.stP51A_S1HandBs.bLedDown := TRUE;
+		stIn.stSt010.bJogUp := stIn.stP51A_S1HandBs.bUp;
+		stIn.stSt010.bJogDown := stIn.stP51A_S1HandBs.bDown;
+		IF rtrigJog02.Q THEN
+			stIn.arrStStation[E_Station.eStation_ST010_OvenA].stManual.diSelectedObjectIndex := fbSt010OvenA.fbAxisUi.diObjectIndex;
+			bRequestManualControl := TRUE;
+		END_IF		
+	
+	eStation_ST020_OvenB: 	//stIn.stSt020.bManual := stIn.stP51A_S1HandBs.bReset;
+		stIn.stSt020.bQuit := stIn.stP51A_S1HandBs.bReset;
+
+		IF NOT bAlternativ THEN
+			stOut.stP51A_S1HandBs.bLedLeft := TRUE;
+			stOut.stP51A_S1HandBs.bLedRight := TRUE;	
+			stIn.stSt020.bJogCh1Inside := stIn.stP51A_S1HandBs.bLeft;
+	   		stIn.stSt020.bJogCh1Ouside := stIn.stP51A_S1HandBs.bRight;	
+			IF rtrigJog01.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST020_OvenB].stManual.diSelectedObjectIndex := fbSt020OvenB.fbAxisCh1Ui.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF					
+		ELSE
+			stOut.stP51A_S1HandBs.bLedLeft := TRUE;
+			stOut.stP51A_S1HandBs.bLedRight := TRUE;
+			stIn.stSt020.bJogCh2Inside := stIn.stP51A_S1HandBs.bLeft;
+	   		stIn.stSt020.bJogCh2Ouside := stIn.stP51A_S1HandBs.bRight;	
+			IF rtrigJog01.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST020_OvenB].stManual.diSelectedObjectIndex := fbSt020OvenB.fbAxisCh2Ui.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF
+		END_IF
+		
+		stOut.stP51A_S1HandBs.bLedUp := TRUE;
+		stOut.stP51A_S1HandBs.bLedDown := TRUE;
+		stIn.stSt020.bJogUp := stIn.stP51A_S1HandBs.bUp;
+		stIn.stSt020.bJogDown := stIn.stP51A_S1HandBs.bDown;
+		IF rtrigJog02.Q THEN
+			stIn.arrStStation[E_Station.eStation_ST020_OvenB].stManual.diSelectedObjectIndex := fbSt020OvenB.fbAxisUi.diObjectIndex;
+			bRequestManualControl := TRUE;
+		END_IF	
+	
+	
+	eStation_ST030_Handling: 	//stIn.stSt030.bManual := stIn.stP51A_S1HandBs.bReset;
+		stIn.stSt030.bQuit := stIn.stP51A_S1HandBs.bReset;
+	
+		IF NOT bAlternativ THEN
+			stOut.stP51A_S1HandBs.bLedLeft := TRUE;
+			stOut.stP51A_S1HandBs.bLedRight := TRUE;
+			stIn.stSt030.bJogXN := stIn.stP51A_S1HandBs.bLeft;
+	   		stIn.stSt030.bJogXP := stIn.stP51A_S1HandBs.bRight;	
+			IF rtrigJog01.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST030_Handling].stManual.diSelectedObjectIndex := fbSt030Handling.fbAxisXUi.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF	
+			
+			stOut.stP51A_S1HandBs.bLedUp := TRUE;
+			stOut.stP51A_S1HandBs.bLedDown := TRUE;	
+			stIn.stSt030.bJogYN := stIn.stP51A_S1HandBs.bDown;
+	   		stIn.stSt030.bJogYP := stIn.stP51A_S1HandBs.bUp;
+			IF rtrigJog02.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST030_Handling].stManual.diSelectedObjectIndex := fbSt030Handling.fbAxisYUi.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF	
+	
+		ELSE
+			stOut.stP51A_S1HandBs.bLedLeft := TRUE;
+			stOut.stP51A_S1HandBs.bLedRight := TRUE;
+			stIn.stSt030.bJogZN := stIn.stP51A_S1HandBs.bLeft;
+			stIn.stSt030.bJogZP := stIn.stP51A_S1HandBs.bRight;
+			IF rtrigJog01.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST030_Handling].stManual.diSelectedObjectIndex := fbSt030Handling.fbAxisZUi.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF	
+					
+			stOut.stP51A_S1HandBs.bLedUp := FALSE;
+			stOut.stP51A_S1HandBs.bLedDown := FALSE;
+			
+		END_IF		
+		
+	eStation_ST040_Storage: 	//stIn.stSt040.bManual := stIn.stP51A_S1HandBs.bReset;
+		stIn.stSt040.bQuit := stIn.stP51A_S1HandBs.bReset;
+
+		stOut.stP51A_S1HandBs.bLedLeft := FALSE;
+		stOut.stP51A_S1HandBs.bLedRight := FALSE;	
+	
+		IF NOT bAlternativ THEN
+			stOut.stP51A_S1HandBs.bLedUp := TRUE;
+			stOut.stP51A_S1HandBs.bLedDown := TRUE;
+			stIn.stSt040.bJog01Down := stIn.stP51A_S1HandBs.bDown;
+	   		stIn.stSt040.bJog01Up := stIn.stP51A_S1HandBs.bUp;
+			IF rtrigJog02.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST040_Storage].stManual.diSelectedObjectIndex := fbSt040Storage.fbAxis1Ui.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF					
+		ELSE
+			stOut.stP51A_S1HandBs.bLedUp := TRUE;
+			stOut.stP51A_S1HandBs.bLedDown := TRUE;
+			stIn.stSt040.bJog02Down := stIn.stP51A_S1HandBs.bDown;
+	   		stIn.stSt040.bJog02Up := stIn.stP51A_S1HandBs.bUp;
+			IF rtrigJog02.Q THEN
+				stIn.arrStStation[E_Station.eStation_ST040_Storage].stManual.diSelectedObjectIndex := fbSt040Storage.fbAxis2Ui.diObjectIndex;
+				bRequestManualControl := TRUE;
+			END_IF
+		END_IF
+				
+
+END_CASE
+
+
+
+
+// chk control request, e.g.: watch for changes --> stIn..bJog.. (for continuous jog only!)
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_HmiToPlc" Id="{9c6132fa-3191-4ba0-a403-d441c6ca707f}">
+      <Declaration><![CDATA[METHOD PRIVATE M_HmiToPlc : BOOL
+VAR_INST
+	rtrigDoorP30A,
+	rtrigDoorOpnP50A,
+	rtrigDoorClsP50A,
+	rtrigVorwHaerten,
+	rtrigVorwAnlassen,
+	rtrigAutoKorrS1,
+	rtrigAutoKorrS2,
+	rtrigAutoKorrS3,
+	rtrigJog : R_TRIG;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// general
+stIn.stMain.stButton_Start.bClick := // stIn.stP10A_OvenA.bAutoOn OR	// Automatik Ein; LDT-GN, 1DI-NO, 1DO; +P30A-21SJ2
+									 stIn.stP50A_Haupt.bAutoOn;				// Automatik Ein, LDT-GN, 1DI-NO, 1DO, BMK: +P50A-21SJ2
+
+stIn.stMain.stButton_Stop.bClick := stIn.stP50A_Haupt.bAutoOff;// OR			// Automatik Aus, DT-RD, 1DI-NO, BMK: +P50A-21SJ3
+									//stIn.stP10B_OvenB.bAutoOff;		// Automatik Aus; DT-RD, 1DI-NO; P10B-1SG2
+
+//stIn.stMain.stButton_Home.bClick := stIn.bTaste_GRST;
+//stIn.stMain.stButton_Step.bClick := stIn.bTaste_Tipp;
+stIn.stMain.stButton_Reset.bClick := stIn.stP50A_Haupt.bEsQuit;// OR
+									 //stIn.stP10A_OvenA.bReset;
+
+//stIn.stMain.stButton_OPM_Manual.bClick := stIn.bTaste_BA_Hand;
+//stIn.stMain.stButton_OPM_Step.bClick := stIn.bTaste_BA_Einricht;
+//stIn.stMain.stButton_OPM_Auto.bClick := stIn.bTaste_BA_Auto;
+stIn.stSafety.bQuitSafety := stIn.stP50A_Haupt.bEsQuit; // OR			// Not-Halt Quittieren, LDT-BU, 1DI-NO, 1DO, BMK: +P50A-21SJ1
+								//stIn.stP10A_OvenA.bReset;	// Reset Not-Halt; LDT-BU, 1DI-NO, 1DO; +P30A-21SJX
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{762ba7f1-9683-4b94-b17b-25a5835d3b66}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Init : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[eProvider := E_HMI_PROVIDER.eHmiProvider_HW;
+//ILog := SERVICES.ILog;
+M_SetReferences(HMI.stHmiHw.stIn, HMI.stHmiHw.stOut);
+
+//aSClearText[EN] := 'HMI init done.';
+M_Init := SUPER^.M_Init();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PlcToEuchner" Id="{f314f17b-a53e-42fd-80f3-163a67bbdde2}">
+      <Declaration><![CDATA[METHOD M_PlcToEuchner : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stOut.stP51A_S1HandBs.bLedSelect01 := FALSE;
+stOut.stP51A_S1HandBs.bLedSelect02 := FALSE;
+stOut.stP51A_S1HandBs.bLedSelect03 := FALSE;
+stOut.stP51A_S1HandBs.bLedSelect04 := FALSE;
+stOut.stP51A_S1HandBs.bLedSelect05 := FALSE;
+stOut.stP51A_S1HandBs.bLedSelect06 := FALSE;
+
+CASE nSelStation OF
+	
+	0: stOut.stP51A_S1HandBs.bLedSelect01 := SEL(plant.fbSt010OvenA.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	   stOut.stP51A_S1HandBs.bLedSelect02 := SEL(plant.fbSt020OvenB.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	   stOut.stP51A_S1HandBs.bLedSelect03 := SEL(plant.fbSt030Handling.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	   stOut.stP51A_S1HandBs.bLedSelect04 := SEL(plant.fbSt040Storage.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	   stOut.stP51A_S1HandBs.bLedSelect05 := SEL(plant.fbSt050Mould.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+
+	1: stOut.stP51A_S1HandBs.bLedSelect01 := SEL(plant.fbSt010OvenA.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	2: stOut.stP51A_S1HandBs.bLedSelect02 := SEL(plant.fbSt020OvenB.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	3: stOut.stP51A_S1HandBs.bLedSelect03 := SEL(plant.fbSt030Handling.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	4: stOut.stP51A_S1HandBs.bLedSelect04 := SEL(plant.fbSt040Storage.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	5: stOut.stP51A_S1HandBs.bLedSelect05 := SEL(plant.fbSt050Mould.State > eComponentState_running, TRUE, Statics.stPulse.bToggle1000ms);
+	
+END_CASE
+
+stOut.stP51A_S1HandBs.bLedAlt := bAlternativ;
+
+IF stIn.arrStStation[nSelStation].stManual.stManualAxis.eJogMode = E_Axis_JogMode.eJogMode_0 THEN
+	stOut.stP51A_S1HandBs.bLedDistance := FALSE;
+	stOut.stP51A_S1HandBs.bLedJog := TRUE;
+ELSIF stIn.arrStStation[nSelStation].stManual.stManualAxis.eJogMode = E_Axis_JogMode.eJogMode_1 THEN
+	stOut.stP51A_S1HandBs.bLedDistance := FALSE;
+	stOut.stP51A_S1HandBs.bLedJog := FALSE;
+ELSIF stIn.arrStStation[nSelStation].stManual.stManualAxis.eJogMode = E_Axis_JogMode.eJogMode_2 THEN
+	stOut.stP51A_S1HandBs.bLedDistance := TRUE;
+	stOut.stP51A_S1HandBs.bLedJog := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_PlcToHmi" Id="{849a2136-9642-474b-85bb-4d2ae96981ef}">
+      <Declaration><![CDATA[METHOD PRIVATE M_PlcToHmi : BOOL
+VAR
+	bEn 	: BOOL;
+	fVal	: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// general
+//stOut.bLed_Reset := stOut.stCommon.stMain.stButton_Reset.bLed;
+//stOut.bLed_Start := stOut.stCommon.stMain.stButton_Start.bLed;
+//stOut.bLed_Tipp := stOut.stCommon.stMain.stButton_Step.bLed;
+//stOut.bLed_GRST := stOut.stCommon.stMain.stButton_Home.bLed;
+bLedTest := P_HMI_Controller.bLedTest;
+
+// e.g. ..AND/OR... SafeArea1Ok...
+stOut.stP50A_Haupt.bLedQuit := bLedTest OR stOut.stCommon.stSafety.bLedResetAreaST10;
+//stOut.stP10A_Pult.bLedQuitLs := bLedTest;
+
+/// specific
+
+// +P10A/B/C Oven
+//stOut.stP10A_Pult.bLedRichtungL/R := bLedTest OR stOut.stSt010.LedRichtungL/R;	// LedRichtungL/R; LDT-BU, 2FDI-NO, 1DO; P10A-51SJ3
+
+
+// LED module / Ampel
+(* IO.stControlCabinetIO.stOut.stA02.bLedModAllgRt :=  bLedTest OR (stPulse.bToggle500ms AND stGlobalModuleInfo.eHeaderPriority = E_AlarmPriority.Error);
+IO.stControlCabinetIO.stOut.stA02.bLedModAllgGe :=  bLedTest OR (stPulse.bToggle500ms AND stGlobalModuleInfo.eHeaderPriority = E_AlarmPriority.Warning);
+IO.stControlCabinetIO.stOut.stA02.bLedModAllgGn :=  bLedTest OR (stGlobalModuleInfo.eHeaderPriority <> E_AlarmPriority.Error AND 
+															     stGlobalModuleInfo.eHeaderPriority <> E_AlarmPriority.Warning AND 
+																 stGlobalModuleInfo.astModuleStationsInfo[E_Module.eModule_M001].bStation_All_Started);
+																 
+IO.stControlCabinetIO.stOut.stA02.bLedModAllgBl :=  bLedTest OR (stPulse.bToggle500ms AND (stSt010IOvenA.bEnde OR stSt010IOvenA.bFehlstelle)); *)
+																							
+																							
+																							]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{555af5e8-0938-4922-86fb-389631bdbc1d}">
+      <Declaration><![CDATA[/// reset
+METHOD M_Reset : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_Reset := SUPER^.M_Reset();
+
+bRequestManualControl := FALSE;
+bRequestRecipeMgmt := FALSE;
+bRequestSettingMgmt := FALSE;
+bRequestUserMgmt := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Run" Id="{07e9bb30-200a-48eb-a776-0cf782ed9318}">
+      <Declaration><![CDATA[METHOD M_Run : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT SUPER^.M_Run() THEN
+	RETURN;
+END_IF
+
+M_HmiToPlc();
+M_EuchnerToPlc();
+
+M_PlcToHmi();
+M_PlcToEuchner();
+
+M_Run := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetReferences" Id="{8675c057-74c8-402b-8040-76cdbf09496d}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD M_SetReferences : BOOL
+VAR_IN_OUT
+	stRefIn		: HMI_PROVIDER_HW_IN;
+	stRefOut	: HMI_PROVIDER_HW_OUT;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_SetReferences := SUPER^.M_SetReferencesBase(stRefIn, stRefOut);
+stIn REF= stRefIn;
+stOut REF= stRefOut;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="RefsValid" Id="{5cda7713-c62b-48cf-b6ec-ac4dc1d2402d}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY RefsValid : bool]]></Declaration>
+      <Get Name="Get" Id="{43394106-d212-4263-8905-dfef2db4d1d4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RefsValid := SUPER^.RefsValid AND_THEN
+			 __ISVALIDREF (stOut) AND_THEN
+			 __ISVALIDREF (stIn);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

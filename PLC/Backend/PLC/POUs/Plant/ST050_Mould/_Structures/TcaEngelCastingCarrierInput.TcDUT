@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaEngelCastingCarrierInput" Id="{77ce7c8d-fabf-4f8a-9168-b5d1e00e6f85}">
+    <Declaration><![CDATA[TYPE TcaEngelCastingCarrierInput : // ENGEL SPS -> ASMA SPS
+STRUCT
+	LifeCounter : UINT;
+	
+	
+	// Modus bzw Status der Gießmaschine und Roboter
+	AutoMode : BOOL;		// Roboter und Gießmaschine im zyklischen Automatikbetrieb
+	SemiAutoMode : BOOL;	// Roboter und Gießmaschine im sequentiellen Halb-Automatikbetrieb
+	ManualMode : BOOL;		// Roboter und Gießmaschine befinden sich in Handbetrieb
+	Error : BOOL;			// Roboter bzw. Gießmaschine hat Error
+	ErrorID : UINT;			// ErrorID
+	
+	// Überwachung und Kontrolle der Roboterposition
+	Moving : BOOL;				// Roboter in Bewegung
+	ParkPosition : BOOL;		// Roboter in Wartepostion
+	OutsideStorage_1 : BOOL;	// Roboter außerhalb Ablage 1
+	OutsideStorage_2 : BOOL;	// Roboter außerhalb Ablage 2
+
+	// Allgemeine Sicherheit                    	
+	SafetyAreaSafe : BOOL;	// Schutztüren geschlossen & quittiert		
+
+	// Anforderung eines Werkstückträgers
+	// Wird ein leerer Werkstückablageplatz oder ein Einleigeteil benötigt muss für den jeweiligen Ablageplatz
+	// ein Job angefrgt werden.
+	// Wenn kein Werkstückträger benötigt wird, kann auch dieser Job erteilt werden (z.B. bei Produktionsende)
+	
+	JobForStorage_1 : TcaEngelCastingCarrierJob;	// Anforderung eines Werkstückträgers für Ablage 1
+	JobForStorage_2 : TcaEngelCastingCarrierJob;	// Anforderung eines Werkstückträgers für Ablage 2
+	
+	// Status des Werkstückträgers
+	// Beim Entnehmen und Bestücken eines Werkstückes durch den Engel Roboter wird die Statusstruktur aktualisiert
+	
+	Storage_1 : TcaEngelCastingCarrierStatus;	// aktueller Status des Werkstückträgers in Ablage 1
+	Storage_2 : TcaEngelCastingCarrierStatus;	// aktueller Status des Werkstückträgers in Ablage 2
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

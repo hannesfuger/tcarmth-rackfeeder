@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="HMI_PROVIDER_HW_IN" Id="{66434260-636d-4c5b-bfce-3c562073a31c}">
+    <Declaration><![CDATA[TYPE HMI_PROVIDER_HW_IN EXTENDS ST_HMI_IN :
+STRUCT
+	// HW specific IN
+	stP10A_Pult	AT%I* : ST_P10A_Pult_IN;
+	
+	stP50A_Haupt AT%I* : ST_P50A_Haupt_IN;
+	
+	stP51A_S1HandBs	AT%I* : ST_P51A_EuchnerHandB_IN;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

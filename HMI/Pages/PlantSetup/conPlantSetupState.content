@@ -1,0 +1,303 @@
+<div id="conPlantSetupState" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+<div id="PlantSetupState" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div id="sPlantSetupStateSitename" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="5" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%plantsetting%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="40" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-background-image-horizontal-alignment="Center" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+</div>
+<div id="PlantSetupStateGrid" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiDatagrid" data-tchmi-height="95" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-row-height-unit="px" data-tchmi-table-border-width-unit="px" data-tchmi-header-height-unit="%" data-tchmi-show-row-numbers="false" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-src-data="%f%F_TranslateTextDatagrid(%s%PLC1.HMI.stHmiTc3::stOut::stSetupPlant%/s%,%s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%,20)%/f%" data-tchmi-header-height="5" data-tchmi-row-height="25">
+<script data-tchmi-target-attribute="data-tchmi-src-column" type="application/json">
+[
+  {
+    "name": "stStation",
+    "label": "%l%station%/l%",
+    "control": "TextBlock",
+    "width": 10,
+    "widthUnit": "%",
+    "resize": true,
+    "sortable": false,
+    "minWidth": 10,
+    "minWidthUnit": "%",
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center",
+    "ignoreEscapeSequences": false,
+    "autoFocusOut": true,
+    "autoSelectText": false
+  },
+  {
+    "name": "stName",
+    "label": "%l%name%/l%",
+    "control": "TextBlock",
+    "width": 40,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 40,
+    "minWidthUnit": "%",
+    "editable": false,
+    "horizontalAlignment": "Left",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center",
+    "ignoreEscapeSequences": false,
+    "autoFocusOut": true,
+    "autoSelectText": false
+  },
+  {
+    "name": "stSet",
+    "label": "%l%set%/l%",
+    "control": "Image",
+    "width": 15,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 15,
+    "minWidthUnit": "%",
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center",
+    "ignoreEscapeSequences": false,
+    "autoFocusOut": true,
+    "autoSelectText": false,
+    "dataDefinitions": [
+      {
+        "value": "0",
+        "source": "Images/none.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Images/IconNokpng.png"
+      },
+      {
+        "value": "1",
+        "source": "Images/shapes/rectangle_green.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Dreieck grün"
+      },
+      {
+        "value": "2",
+        "source": "Images/shapes/rectangle_red.jpg",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Dreieck rot"
+      },
+      {
+        "value": "11",
+        "source": "Images/shapes/square_purple.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Viereck violett"
+      },
+      {
+        "value": "12",
+        "source": "Images/shapes/square_pink.jpg",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Viereck rosa"
+      },
+      {
+        "value": "21",
+        "source": "Images/shapes/hexagon_blue.jpg",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Sechseck blau"
+      },
+      {
+        "value": "22",
+        "source": "Images/shapes/hexagon_yellow.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Sechseck gelb"
+      },
+      {
+        "value": "31",
+        "source": "Images/shapes/circle_green.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Kreis Grün"
+      },
+      {
+        "value": "32",
+        "source": "Images/shapes/circle_pink.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Kreis rosa"
+      }
+    ]
+  },
+  {
+    "name": "stGet",
+    "label": "%l%get%/l%",
+    "control": "Image",
+    "width": 15,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 15,
+    "minWidthUnit": "%",
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center",
+    "ignoreEscapeSequences": false,
+    "autoFocusOut": true,
+    "autoSelectText": false,
+    "dataDefinitions": [
+      {
+        "value": "0",
+        "source": "Images/none.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Images/IconNokpng.png"
+      },
+      {
+        "value": "1",
+        "source": "Images/shapes/rectangle_green.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Dreieck grün"
+      },
+      {
+        "value": "2",
+        "source": "Images/shapes/rectangle_red.jpg",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Dreieck rot"
+      },
+      {
+        "value": "11",
+        "source": "Images/shapes/square_purple.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Viereck violett"
+      },
+      {
+        "value": "12",
+        "source": "Images/shapes/square_pink.jpg",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Viereck rosa"
+      },
+      {
+        "value": "21",
+        "source": "Images/shapes/hexagon_blue.jpg",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Sechseck blau"
+      },
+      {
+        "value": "22",
+        "source": "Images/shapes/hexagon_yellow.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Sechseck gelb"
+      },
+      {
+        "value": "31",
+        "source": "Images/shapes/circle_green.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Kreis Grün"
+      },
+      {
+        "value": "32",
+        "source": "Images/shapes/circle_pink.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Kreis rosa"
+      }
+    ]
+  },
+  {
+    "name": "stState",
+    "label": "%l%State%/l%",
+    "control": "Image",
+    "width": 15,
+    "widthUnit": "%",
+    "resize": false,
+    "sortable": false,
+    "minWidth": 15,
+    "minWidthUnit": "%",
+    "editable": false,
+    "horizontalAlignment": "Center",
+    "verticalAlignment": "Center",
+    "headerHorizontalAlignment": "Center",
+    "headerVerticalAlignment": "Center",
+    "ignoreEscapeSequences": false,
+    "autoFocusOut": true,
+    "autoSelectText": false,
+    "dataDefinitions": [
+      {
+        "value": "0",
+        "source": "Images/none.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "None"
+      },
+      {
+        "value": "1",
+        "source": "Images/IconNokpng.png",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Nok"
+      },
+      {
+        "value": "2",
+        "source": "Images/IconOk.jpg",
+        "width": 25.0,
+        "height": 25.0,
+        "text": "Ok"
+      }
+    ]
+  }
+]
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-cell-content-padding" type="application/json">
+{
+  "left": 3,
+  "leftUnit": "px",
+  "right": 3,
+  "rightUnit": "px",
+  "top": 0,
+  "topUnit": "px",
+  "bottom": 0,
+  "bottomUnit": "px"
+}
+</script>
+<script data-tchmi-target-attribute="data-tchmi-selected-row-value" type="application/json">
+
+</script>
+<script data-tchmi-target-attribute="data-tchmi-selected-cell-value" type="application/json">
+
+</script>
+
+</div>
+</div>
+</div>

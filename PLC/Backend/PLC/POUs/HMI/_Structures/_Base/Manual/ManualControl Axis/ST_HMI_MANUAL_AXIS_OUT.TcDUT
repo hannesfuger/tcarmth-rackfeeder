@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_MANUAL_AXIS_OUT" Id="{c6a4ec81-ff2f-464a-8972-24dadfbad51e}">
+    <Declaration><![CDATA[TYPE ST_HMI_MANUAL_AXIS_OUT :
+STRUCT
+	bVisible			: BOOL;
+	bVisibleGear		: BOOL;
+	bVisibleRefReset	: BOOL;
+	bVisibleBrake		: BOOL;
+	bVisibleSetPos		: BOOL;
+	stObjectName,
+	stGearStatus		: ST_Text;
+	sOverride			: STRING;
+	sTargetPosition		: STRING;
+	sActPosition		: STRING;
+	stButtonJogPos,
+	stButtonJogNeg,
+	stButtonGoTo,
+	stButtonGear,				
+	stButtonBrake,
+	stButtonSetPos,
+	stButtonRefReset	: ST_HMI_BUTTON_OUT;
+	aJogModeName		: ARRAY[0..5] OF ST_Text;
+	stRefStatus			: ST_Text;	
+	stTargetList		: ARRAY[0..9] OF ST_HMI_NAME_VALUE_STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

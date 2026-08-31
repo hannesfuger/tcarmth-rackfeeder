@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Settings_Row_Delete" Id="{272fef77-b349-417d-9165-7a9e712878d6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Settings_Row_Delete : BOOL
+VAR_IN_OUT
+	aSettings	: ARRAY[*] OF ST_Data_Item; /// settings structure
+END_VAR
+VAR_INPUT
+	nPlace				:INT;
+END_VAR
+VAR
+	nn	: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (nPlace < LOWER_BOUND(aSettings,1)) OR (nPlace > UPPER_BOUND(aSettings,1)) THEN
+	RETURN;
+END_IF
+
+//Check Array Size
+MEMSET(ADR(aSettings[nPlace]),0,SIZEOF(aSettings[nPlace])); (*set  zero*)
+
+FOR nn:= nPlace TO UPPER_BOUND(aSettings,1) BY 1 DO
+	MEMCPY(ADR(aSettings[nn]),ADR(aSettings[nn+1]),SIZEOF(aSettings[nn+1]));		
+END_FOR
+//delete last row
+MEMSET(ADR(aSettings[UPPER_BOUND(aSettings,1)]),0,SIZEOF(aSettings[UPPER_BOUND(aSettings,1)])); (*set  zero*)]]></ST>
+    </Implementation>
+    <LineIds Name="F_Settings_Row_Delete">
+      <LineId Id="17" Count="10" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

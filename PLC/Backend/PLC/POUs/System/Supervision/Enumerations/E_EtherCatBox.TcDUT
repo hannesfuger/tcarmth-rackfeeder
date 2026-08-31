@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_EtherCatBox" Id="{1420311b-d47d-4328-a8c7-0e75ebfd5775}">
+    <Declaration><![CDATA[/// enumeration of all possible EC Boxes
+TYPE E_EtherCatBox :
+(
+	eEtherCatBox_ControlCabinet := 0,
+	eEtherCatBox_Oven_A := 1,
+	eEtherCatBox_Oven_B := 2,
+	eEtherCatBox_Storage := 3,
+	
+	eEtherCatBox_nMaxIdx
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

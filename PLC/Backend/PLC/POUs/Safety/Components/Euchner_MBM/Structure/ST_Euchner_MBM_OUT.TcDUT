@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MBM_OUT" Id="{665b4c93-814f-499c-8df5-3844a42c897d}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MBM_OUT :
+STRUCT
+	///Quittierbit für Fehler allgemein
+	bBM_ACK_G: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,25 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-stemergencystop",
+      "displayName": "stEmergencyStop",
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_ToTc3Hmi_EmergencyStop",
+      "category": "",
+      "description": "",
+      "defaultValue": 0,
+      "defaultValueInternal": 0,
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stEmergencyStop",
+      "propertySetterName": "setStEmergencyStop",
+      "propertyGetterName": "getStEmergencyStop",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.744.4/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

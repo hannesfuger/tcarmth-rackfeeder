@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_ModuleDynSettings" Id="{e71339b8-e061-474a-bc13-3ee08b3273de}">
+    <Declaration><![CDATA[TYPE ST_ModuleDynSettings :
+STRUCT
+
+	// module settings
+	stDynStationSettings	: ARRAY[0..CONST.iMaxIdxLocalSetting] OF ST_Data_Item;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

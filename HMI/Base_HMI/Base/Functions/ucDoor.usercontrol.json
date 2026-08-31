@@ -1,0 +1,23 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-stdoor",
+      "displayName": "stDoor",
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_ToTc3Hmi_Door",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stDoor",
+      "propertySetterName": "setStDoor",
+      "propertyGetterName": "getStDoor",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.744.4/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

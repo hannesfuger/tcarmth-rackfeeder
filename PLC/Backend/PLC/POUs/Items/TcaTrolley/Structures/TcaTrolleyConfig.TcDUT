@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaTrolleyConfig" Id="{d2bac28f-1876-4aaf-8f3b-ec42fb6723a3}">
+    <Declaration><![CDATA[TYPE TcaTrolleyConfig : 
+STRUCT	
+	/// Geometry
+	NumberOfCarriers : INT := 40;
+	RackOrigin : ST_Coordinate;
+	RackDivision : LREAL;
+	CarrierDistance : LREAL;
+	
+	//InitialStatus : eTcaWorkpieceStatus;
+	//RequestStatus : eTcaWorkpieceStatus;	
+	
+	CarrierConfig : TcaCarrierConfig;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

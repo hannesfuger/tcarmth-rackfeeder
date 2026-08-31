@@ -1,0 +1,41 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-stusercontrolmanualaxistohmi",
+      "displayName": "stUserControlManualAxisToHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_MANUAL_AXIS_OUT",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stUserControlManualAxisToHmi",
+      "propertySetterName": "setStUserControlManualAxisToHmi",
+      "propertyGetterName": "getStUserControlManualAxisToHmi",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-stusercontrolmanualaxisfromhmi",
+      "displayName": "stUserControlManualAxisFromHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_MANUAL_AXIS_IN",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stUserControlManualAxisFromHmi",
+      "propertySetterName": "setStUserControlManualAxisFromHmi",
+      "propertyGetterName": "getStUserControlManualAxisFromHmi",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.742.5/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

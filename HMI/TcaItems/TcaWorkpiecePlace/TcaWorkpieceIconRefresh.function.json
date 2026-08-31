@@ -1,0 +1,57 @@
+{
+  "function": {
+    "name": "TcaWorkpieceIconRefresh",
+    "namespace": "TcHmi.Functions.TcHmiProject2",
+    "displayName": "TcaWorkpieceIconRefresh",
+    "description": "",
+    "waitMode": "Synchronous",
+    "category": "TcaWorkpiece",
+    "returnValue": {
+      "type": "tchmi:general#/definitions/String"
+    },
+    "visible": true,
+    "injectContextObject": false,
+    "arguments": [
+      {
+        "name": "container",
+        "displayName": "container",
+        "type": "tchmi:framework#/definitions/TcHmiHtmlHost",
+        "description": "This is an important Parameter which does... This text is used in a tooltip.",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "statusColors",
+        "displayName": "statusColors",
+        "type": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+        "description": "",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      }
+    ]
+  },
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.212/runtimes/native1.12-tchmi/Schema/FunctionDescription.Schema.json",
+  "apiVersion": 1,
+  "version": {
+    "full": "0.0.0.0",
+    "major": 0,
+    "minor": 0,
+    "revision": 0,
+    "build": 0
+  },
+  "dependencyFiles": [
+    {
+      "name": "TcaWorkpieceIconRefresh.js",
+      "type": "JavaScript",
+      "description": ""
+    }
+  ]
+}

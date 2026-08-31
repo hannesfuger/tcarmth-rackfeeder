@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="I_StringBuilder" Id="{1abdcfde-7ca8-4d9d-be6e-54572812c9b6}">
+    <Declaration><![CDATA[INTERFACE I_StringBuilder
+]]></Declaration>
+    <Method Name="Append" Id="{7d930325-acfe-4a2c-b5ea-054ed4071d9c}">
+      <Declaration><![CDATA[METHOD PUBLIC Append : I_StringBuilder // Append text to the current build string.
+VAR_IN_OUT CONSTANT
+	text : T_MaxString; // Text to append to current build string
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="AppendAny" Id="{1b705296-53af-407e-b6b0-2534d0556728}">
+      <Declaration><![CDATA[METHOD PUBLIC AppendAny : I_StringBuilder // Append text to the current build string.
+VAR_INPUT
+	value : ANY; // Value to append to current build string
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="AppendWs" Id="{a6a5fe50-fdfe-4593-8ea9-ed3aaf4fb73d}">
+      <Declaration><![CDATA[METHOD PUBLIC AppendWs : I_StringBuilder
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Clear" Id="{db6fd3c3-6e84-4f3c-ac6f-232176381944}">
+      <Declaration><![CDATA[METHOD PUBLIC Clear : I_StringBuilder // Clear the current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Insert" Id="{fc34f85e-e89e-41c8-9334-37a84cad5b32}">
+      <Declaration><![CDATA[METHOD PUBLIC Insert : I_StringBuilder
+VAR_INPUT
+	text	 : T_MaxString;	// Text to append to current build string
+	position : INT;			// Insert position (Index)
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Reset" Id="{c86bbb1b-a8ef-47dd-9c20-03e18d2527fe}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : I_StringBuilder //Reset current build string to an empty string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Set" Id="{cfa7d7d4-39d7-44f1-859a-4692044e051a}">
+      <Declaration><![CDATA[METHOD PUBLIC Set : I_StringBuilder
+VAR_INPUT
+	text : T_MaxString; //Text to append to current build string
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetWs" Id="{02b45b88-81ca-4236-9bf8-3411d3397f8f}">
+      <Declaration><![CDATA[METHOD PUBLIC SetWs : I_StringBuilder
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="ToString" Id="{c1c4e881-3663-4496-85d3-1b0d61dbf32e}">
+      <Declaration><![CDATA[METHOD PUBLIC ToString : T_MaxString // Returns current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

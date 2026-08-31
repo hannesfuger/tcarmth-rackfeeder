@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_TRAFFIC_LIGHT_OUT" Id="{ab4a16ea-cce9-489b-ac4b-9a8dc188adcc}">
+    <Declaration><![CDATA[TYPE ST_HMI_TRAFFIC_LIGHT_OUT :
+STRUCT
+	bLedGN	: BOOL;
+	bLedGE	: BOOL;
+	bLedRT	: BOOL;
+	bLedBL	: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

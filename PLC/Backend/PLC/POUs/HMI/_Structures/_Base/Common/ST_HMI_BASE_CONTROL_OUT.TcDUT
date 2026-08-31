@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_BASE_CONTROL_OUT" Id="{e274274b-304e-48fd-972a-0852ad719a81}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_CONTROL_OUT :
+STRUCT
+	// control
+	stButton_Home 			: ST_HMI_BUTTON_OUT;
+	stButton_Step			: ST_HMI_BUTTON_OUT;
+	stButton_Reset			: ST_HMI_BUTTON_OUT;
+	stButton_CycleStop		: ST_HMI_BUTTON_OUT;
+	stButton_Start			: ST_HMI_BUTTON_OUT;
+	stButton_Stop			: ST_HMI_BUTTON_OUT;
+	stButton_PlantLight		: ST_HMI_BUTTON_OUT;
+	                                              
+	// OP modes
+	stButton_OPM_Auto,
+	stButton_OPM_Step,
+	stButton_OPM_Manual		: ST_HMI_BUTTON_OUT;
+	
+	// info
+	stSwitch_OPM_1,
+	stSwitch_OPM_2,
+	stSwitch_OPM_3,
+	stSwitch_OPM_4,
+	stInfo1,
+	stInfo2					: ST_Text;
+
+	stColorSwitch_OPM_1,
+	stColorSwitch_OPM_2,
+	stColorSwitch_OPM_3,
+	stColorSwitch_OPM_4		: ST_HMI_COLOR_STRING;			
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

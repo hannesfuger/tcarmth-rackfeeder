@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_SafetyDoor" Id="{1c0181fd-5e24-417a-b0a4-0891d02aa43a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SafetyDoor
+VAR_IN_OUT
+	// IO reference
+	stIO 				: ST_SafetyDoor_IO;
+END_VAR
+VAR_INPUT
+	/// Name der Schutztuere
+	sName								:STRING;
+	
+	bEnableSubModul_1					:BOOL := TRUE;
+	bEnableSubModul_2					:BOOL := TRUE;
+	
+	/// Ablauf der Anlage gestoppt -> Freigabe zum Abschalten der Safety
+	bAblaufGestoppt						:BOOL;
+	
+	/// Tuere entriegeln von Safety (Feedbacks)
+	bFreigabeTuerEntriegeln				:BOOL;
+END_VAR
+VAR_OUTPUT
+	/// Fehler
+	bError								:BOOL;
+	stErrorText							:ST_Text;
+	
+	/// Freigabe an Anlagenbereich zum Ausfueren der Abläufe
+	bFreigabeAblauf,
+	bStartAblauf 						: BOOL;
+	
+	/// Anforderung an Safety für Sicherheit
+	bSAFE_AnforderungSchutzbereich_Ein	: BOOL;
+END_VAR
+VAR
+	stIn					: ST_SafetyDoor_IN;
+	stOut					: ST_SafetyDoor_OUT;
+	
+	bReset,
+	bStarting				: BOOL;
+	fbTaAnforderung			:FB_TON_RMTH;
+	fbTaLock				:FB_TON_RMTH;
+	fbTaStart				:FB_TON_RMTH;
+	fbSafetyOk				:FB_TON_RMTH;
+	tonReset, tonDelay		: TON;
+	nStep					: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[M_Mapping();
+
+// Timer, Flanken
+fbTaAnforderung(IN := stIn.bRequestButton, PT:= T#50MS);	//Blau	
+fbTaLock(IN := stIn.bLockButton, PT:= T#50MS);				//Gelb 
+fbTaStart(IN := stIn.bStartButton, PT:= T#50MS);			//Grün 
+fbSafetyOk(IN := stIn.tsSafe, PT := T#200MS);				//Safety
+
+bStartAblauf := FALSE;
+
+tonReset.IN := bReset;
+tonReset.PT := T#150MS;
+tonReset();
+IF tonReset.Q THEN
+	bReset := FALSE;
+END_IF
+//stOut.tsRestart := bReset;
+
+(*	Funktion OK	*)
+IF NOT bError THEN
+
+	//---------------------------- Open ---------------------------------
+	// Anforderung Tuere oeffnen
+	IF fbTaAnforderung.Qr THEN
+		bFreigabeAblauf := FALSE;
+		bStarting := FALSE;
+	END_IF
+	
+	// Safety abschalten
+	IF NOT bFreigabeAblauf AND bAblaufGestoppt AND 	 // Abläufe sind gestoppt in dem Bereich
+	NOT bStarting THEN
+		bSAFE_AnforderungSchutzbereich_Ein := FALSE; // Abschalten in Safety
+	END_IF
+	
+	// Rückmeldung von Safety das entriegelt werden darf
+	IF fbTaLock.Qf THEN
+		//---------------------------- Close + Start --------------------------
+		// Tuere quittieren (geschlossen und verriegeln) -> fallende Flanke
+		IF NOT stOut.tsLockCmd THEN
+			nStep := 10; // lock
+		ELSE
+			nStep := 100; // open
+		END_IF
+	END_IF
+	
+	IF fbTaStart.Qf OR bStarting THEN
+		IF fbSafetyOk.Q THEN
+			bFreigabeAblauf := TRUE;
+			bStartAblauf := TRUE;
+			bStarting := FALSE;
+		END_IF
+	END_IF
+	
+	
+	
+	//---------------------------- Lights --------------------------	
+	// Signal LED - Grün/Gelb	
+	IF Services.stGlobalModuleInfo.bStation_All_Auto THEN
+		IF Services.stGlobalModuleInfo.bStation_All_Started THEN
+			stOut.bStartLight := TRUE;
+			stOut.bStopLight := FALSE;
+		ELSIF Services.stGlobalModuleInfo.bStation_All_Stopped THEN
+			stOut.bStartLight := FALSE;
+			stOut.bStopLight := TRUE;
+		ELSIF bFreigabeAblauf THEN
+			stOut.bStartLight := Statics.stPulse.bToggle500ms;
+			stOut.bStopLight := Statics.stPulse.bToggle500ms;
+		END_IF
+	ELSE
+		stOut.bStartLight := FALSE;
+		stOut.bStopLight := FALSE;
+	END_IF	
+	
+	// Signal LED - Gelb
+	stOut.bLockLight := NOT stIn.tsOpen;	
+// 
+// ERROR
+ELSE
+
+	stOut.bLockLight := Statics.stPulse.bToggle500ms;
+	stOut.bStopLight := Statics.stPulse.bToggle500ms;
+	stOut.tsLockCmd := FALSE;
+	
+END_IF
+
+tonDelay();
+CASE nStep OF
+	0: // idle
+		IF stIn.tsOpen THEN
+			nStep := 10;
+		END_IF
+	
+	10: // lock
+		IF stIn.tsSafe THEN
+			nStep := 30;
+		ELSE
+			tonDelay(IN := FALSE);
+			stOut.tsRestart := TRUE;
+			nStep := 20;
+		END_IF
+		
+	20: // restart door fb (delay)
+		tonDelay(IN := TRUE, PT := T#300MS);
+		IF tonDelay.Q THEN
+			tonDelay(IN := FALSE);
+			stOut.tsRestart := FALSE;
+			nStep := 10;
+		END_IF
+		
+	30: // lock
+		stOut.tsLockCmd := TRUE; // verriegeln
+		bSAFE_AnforderungSchutzbereich_Ein := TRUE;	// Safety Ein
+		bStarting := TRUE;
+		nStep := 0;
+		
+	100: // open
+		bFreigabeAblauf := FALSE;
+		bStarting := FALSE;
+	
+		IF NOT bSAFE_AnforderungSchutzbereich_Ein AND 
+		bFreigabeTuerEntriegeln AND NOT bStarting THEN
+			stOut.tsLockCmd := FALSE; // entriegeln
+			nStep := 0;
+		END_IF
+		
+		
+END_CASE
+]]></ST>
+    </Implementation>
+    <Method Name="M_Error" Id="{7b9f655d-864c-4193-a81e-ba483bed4741}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Error : BOOL
+VAR_INPUT
+	stError: ST_Text;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bError	:=TRUE;
+stErrorText	:= stError;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Mapping" Id="{592b209e-d29a-4738-a5bc-d5ce99fa8c2e}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Mapping : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//mgb mapping in
+stIn := stIO.stHwIn;
+
+stOut.tsLocked := stIn.bLocked;
+
+stIO.stHwOut := stOut;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{dbcf2873-0285-4f98-aa4c-407d5fab77a0}">
+      <Declaration><![CDATA[METHOD M_Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bReset	:= TRUE;
+bError	:= FALSE;
+MEMSET(ADR(stErrorText),0,SIZEOF(stErrorText));]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

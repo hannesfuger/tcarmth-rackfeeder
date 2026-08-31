@@ -1,0 +1,428 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_WriteCSV" Id="{f430f06f-d4f5-40cd-a593-6e483cde7b33}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_WriteCSV EXTENDS FB_LoggerBase
+VAR_INPUT
+	sSource			: STRING := 'PLC';
+	sPath			: STRING := 'C:\Temp';
+	sYear			: STRING := '2020';
+	sMonth			: STRING := '09';
+	sDay			: STRING := '28';
+	sFileName		: STRING := 'file.csv';
+	tWriteFilter	: TIME := T#1M;
+END_VAR
+VAR_OUTPUT
+	/// Fehler
+	bError			: BOOL;
+	sErrorString	: WSTRING(255);
+END_VAR
+VAR
+	bInit 			: BOOL;
+	fbDirectory		: FB_Directory;
+	sPath_OLD		: STRING;
+	///	log structure		
+	//stLog			: REFERENCE TO ST_FileLog;	
+	stOrderData		: REFERENCE TO ST_FillOrder;
+		
+	///	fbs	
+	fbFileOpen		: FB_FileOpen;
+	fbFileWrite		: FB_FileWrite;
+	fbFileClose		: FB_FileClose;
+	fbFileRename	: FB_FileRename;
+	fbEOF			: FB_EOF;
+	fbFindDir		: FB_EnumFindFileEntry;
+	sFindDirComp	: STRING;
+	
+	///	full path
+	sFullPath		: STRING;
+	sPathNew		: STRING;
+	
+	// file handle
+	hFile			: UINT;
+	
+	//storaged Message
+	saMessage		: ARRAY[0..iMaxIdxCsvData] OF WSTRING(255);
+	iMessageCount	: INT;
+	sText 			: STRING(255);
+	bStartWrite		: BOOL;
+	
+	///	step flow file logging	
+	nStep			: INT;
+	tonDelay		: TON;
+	
+	tonDelayDirectoryExist	:TON;
+	
+	// log buffer	
+	aLogBuffer		: (*ARRAY[0..iMaxIdxLogBuffer] OF*) ST_FillOrder;
+	aWriteBuffer	: (*ARRAY[0..iMaxIdxLogBuffer] OF*) ST_FillOrder;
+	
+END_VAR
+VAR CONSTANT
+	iMaxIdxCsvData		: INT := 20;
+	iMaxIdxLogBuffer	: INT := 1;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[THIS^.Run();]]></ST>
+    </Implementation>
+    <Method Name="Init" Id="{b2ff17f8-eb29-4fc0-9c57-1963b802d7ae}">
+      <Declaration><![CDATA[METHOD PRIVATE Init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Init := bInit;
+IF Init THEN
+	fbFindDir.bExecute:=FALSE;
+	RETURN;
+END_IF
+
+
+fbFindDir(
+	sNetId:= , 
+	sPathName:=sPath , 
+	eCmd:=E_EnumCmdType.eEnumCmd_First , 
+	bExecute:=TRUE , 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrID=> , 
+	bEOE=> , 
+	stFindFile=> );
+	
+	
+
+
+fbDirectory.Create(sPath);
+fbDirectory();
+
+sFindDirComp:=DELETE(sPath,3,1);
+
+bInit := fbDirectory.bDirectoryExist; // OR (fbFindDir.stFindFile.sFileName = sFindDirComp);
+
+IF NOT bInit THEN
+	tonDelayDirectoryExist.IN := TRUE;
+	//bError := TRUE;
+	//sErrorString := F_GetTranslatedTxtEx("Directory does not exist", eLanguage); 
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_StartWrite" Id="{958e4330-f39d-483b-8158-6022e4236887}">
+      <Declaration><![CDATA[METHOD M_StartWrite : BOOL
+VAR_INPUT
+	saMessageTemp 		: ARRAY[0..iMaxIdxCsvData] OF WSTRING(255);
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+bStartWrite := TRUE;
+saMessage := saMessageTemp;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{703259d5-10e7-4851-b553-e65c58e4a1f2}">
+      <Declaration><![CDATA[METHOD Reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bError := FALSE;
+sErrorString := "OK";
+
+aWriteBuffer.bActive := FALSE;
+bStartWrite := FALSE;
+bInit := FALSE;
+nStep := 0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{1df587a9-9292-4ae4-bc16-18be458a4bb5}">
+      <Declaration><![CDATA[METHOD Run
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[tonDelayDirectoryExist(PT:=T#3S);
+
+IF NOT Init() THEN
+	RETURN;
+END_IF
+
+IF tonDelayDirectoryExist.Q AND NOT fbDirectory.bDirectoryExist THEN
+	tonDelayDirectoryExist(IN:=FALSE);
+	bError := TRUE;
+	//sErrorString := F_GetTranslatedTxtEx("Directory does not exist", eLanguage); 
+ELSIF tonDelayDirectoryExist.Q THEN
+	tonDelayDirectoryExist(IN:=FALSE);
+END_IF
+
+IF sPath_OLD <> sPath THEN
+	sPath_OLD := sPath;
+	fbDirectory.Create(sPath);
+	fbDirectory();
+	IF NOT fbDirectory.bDirectoryExist THEN
+		tonDelayDirectoryExist.IN := TRUE;
+		//bError := TRUE;
+		//sErrorString := F_GetTranslatedTxtEx("Directory does not exist", eLanguage); 
+	END_IF
+END_IF
+
+WriteFile();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="WriteFile" Id="{2b9080a2-f4cc-4e87-988e-f3fe8de31858}">
+      <Declaration><![CDATA[METHOD PRIVATE WriteFile : BOOL
+
+VAR
+	///	logging text					
+	
+	ii		: INT;	
+	nn		: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*	FILE LOG	*)
+IF nStep = 0 THEN
+	sFullPath := '';
+	sFullPath := CONCAT(sPath, sDirSeparator);
+	sFullPath := CONCAT(sFullPath, sYear);
+	sFullPath := CONCAT(sFullPath, sMonth);
+	sFullPath := CONCAT(sFullPath, sDay);
+	sFullPath := CONCAT(sFullPath, '_');
+	sFullPath := CONCAT(sFullPath, sFileName);
+END_IF
+
+CASE nStep OF
+
+	0: 	// wait for write request
+		hFile := 0; (*	empty File Handle	*)
+		fbFileOpen(bExecute := FALSE);
+		fbFileWrite(bExecute := FALSE);
+		fbFileClose(bExecute := FALSE);
+		fbEOF(bExecute := FALSE);
+		fbFileRename(bExecute := FALSE);
+		sText := '';
+		IF bStartWrite AND bInit AND NOT bError THEN
+			bStartWrite := FALSE;
+			aWriteBuffer.bActive := TRUE;
+			nStep := 10;	
+		END_IF		
+
+	10: (*	open file	*)
+		fbFileOpen(sPathName := sFullPath,
+					nMode := FOPEN_MODEAPPEND OR FOPEN_MODEPLUS,
+					ePath := PATH_GENERIC,
+					bExecute := TRUE,
+					tTimeout := T#2S,
+					hFile => hFile);
+		IF NOT fbFileOpen.bBusy THEN
+			IF NOT fbFileOpen.bError THEN
+				fbFileOpen(bExecute := FALSE);			
+				nStep := 20;
+			ELSE				
+				nStep := 1000; (*	error	*)
+				bError := TRUE;
+				//sErrorString := F_GetTranslatedTxtEx("Open File failed", eLanguage); 
+			END_IF
+		END_IF
+		
+	20: (* get next log item *)
+		stOrderData REF= 0;
+
+		IF aWriteBuffer.bActive THEN
+			stOrderData REF= aWriteBuffer;
+		END_IF
+		
+		IF __ISVALIDREF(stOrderData) THEN // found
+			nStep := 30;
+		ELSE
+			nStep := 50; // not found - ready
+			//bError := TRUE;
+			//sErrorString := 'no reference found';
+		END_IF
+
+	30: (*	check end of file (max size)	*)
+		fbEOF(hFile := hFile,
+			bExecute := TRUE,
+			tTimeout := T#2S);
+		IF NOT fbEOF.bBusy THEN
+			IF NOT fbEOF.bError THEN
+				fbEOF(bExecute:= FALSE);				
+				IF NOT fbEOF.bEOF THEN
+					iMessageCount:=0;
+					nStep := 40;
+				ELSE					
+					nStep := 100;
+				END_IF
+			ELSE				
+				nStep := 0; (*	error	*)
+				bError := TRUE;
+				//sErrorString := F_GetTranslatedTxtEx("error: end of file", eLanguage);
+			END_IF
+		END_IF	
+		
+	40:
+		sText:=WSTRING_TO_STRING(saMessage[iMessageCount]);	
+		sText := CONCAT(sText, ';');
+		//sText := CONCAT(sText, '$R');
+		
+		nStep := 45;
+		
+	45: (*	write Data 1/2	*)
+		//sText:="";
+		//FOR nn:=0 TO (iMaxCSVdata(*/2*)) BY 1 DO
+		//	sText := WCONCAT(sText, saMessage[nn]);
+		//	sText := WCONCAT(sText, ";");
+		//END_FOR
+		///sText := CONCAT(sText, '$R');
+
+		fbFileWrite(hFile := hFile,
+					pWriteBuff := ADR(sText),
+					cbWriteLen := INT_TO_UINT(LEN(sText)),
+					bExecute := TRUE,
+					tTimeout := T#2S);
+		IF NOT fbFileWrite.bBusy THEN
+			IF NOT fbFileWrite.bError THEN
+				stOrderData.bActive := FALSE;
+				fbFileWrite(bExecute := FALSE);	
+				sText := '';		
+				fbFileWrite(pWriteBuff := ADR(sText));
+				//nStep := 45;
+				IF (iMessageCount < iMaxIdxCsvData) AND (saMessage[iMessageCount]<>"") THEN
+					iMessageCount:=iMessageCount+1;
+					nStep := 40;
+				ELSE
+					iMessageCount:=0;
+					nStep := 46;
+				END_IF		
+			ELSE				
+				nStep := 0; (*	error	*)
+			END_IF
+		END_IF
+
+
+	46: (*	write Data 1/2	*)
+		sText :='$N';
+
+		fbFileWrite(hFile := hFile,
+					pWriteBuff := ADR(sText),
+					cbWriteLen := INT_TO_UINT(LEN(sText)),
+					bExecute := TRUE,
+					tTimeout := T#2S);
+		IF NOT fbFileWrite.bBusy THEN
+			IF NOT fbFileWrite.bError THEN
+				stOrderData.bActive := FALSE;
+				fbFileWrite(bExecute := FALSE);	
+				sText := '';		
+				fbFileWrite(pWriteBuff := ADR(sText));
+				nStep := 20;	
+			ELSE				
+				nStep := 0; (*	error	*)
+			END_IF
+		END_IF
+
+
+
+
+		
+//	45:(*	write Data 2/2	*)
+//		FOR nn:=((iMaxCSVdata/2)+1) TO iMaxCSVdata BY 1 DO
+//			sText := WCONCAT(sText, saMessage[nn]);
+//			sText := WCONCAT(sText, ";");
+//		END_FOR
+//		sText := WCONCAT(sText, "$R");
+//		
+//		fbFileWrite(hFile := hFile,
+//					pWriteBuff := ADR(sText),
+//					cbWriteLen := INT_TO_UINT(WLEN(sText)),
+//					bExecute := TRUE,
+//					tTimeout := T#2S);
+//		IF NOT fbFileWrite.bBusy THEN
+//			IF NOT fbFileWrite.bError THEN
+//				stOrderData.bActive := FALSE;
+//				fbFileWrite(bExecute := FALSE);				
+//				nStep := 20;
+//			ELSE				
+//				nStep := 0; (*	error	*)
+//			END_IF
+//		END_IF
+
+	50: (*	File Close	*)
+		fbFileClose(hFile := hFile,
+				bExecute := TRUE,
+				tTimeout := T#2S);
+		IF NOT fbFileClose.bBusy THEN
+			IF NOT fbFileClose.bError THEN
+				nStep := 60; (*	done	*)
+			ELSE
+				nStep := 0; (*	error	*)
+			END_IF
+		END_IF
+		
+	60:	// run delay
+		tonDelay(IN := TRUE, PT := tWriteFilter);
+		IF tonDelay.Q THEN
+			tonDelay(IN := FALSE);
+			nStep := 0;
+		END_IF
+		
+	100: (*	close file for rename	*)
+		fbFileClose(hFile := hFile,
+					bExecute := TRUE,
+					tTimeout := T#2S);
+		IF NOT fbFileClose.bBusy THEN
+			IF NOT fbFileClose.bError THEN
+				fbFileClose(bExecute := FALSE);
+				nStep := 110;
+			ELSE
+				nStep := 0;
+			END_IF
+		END_IF
+
+	110: (*	Rename full file	*)
+		sPathNew := '';
+		sPathNew := CONCAT(sPath, sDirSeparator);
+		
+		sPathNew := CONCAT(sPathNew, sTimeString);
+		sPathNew := CONCAT(sPathNew,'.log');
+		
+		fbFileRename(sOldName := sFullPath,
+					sNewName := sPathNew ,
+					ePath := PATH_GENERIC ,
+					bExecute := TRUE ,
+					tTimeout := T#2S);
+		IF NOT fbFileRename.bBusy THEN
+			IF NOT fbFileRename.bError THEN
+				nStep := 10; (*	new try	*)
+			ELSE
+				nStep := 0;
+			END_IF
+		END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_WriteCSV">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_WriteCSV.Init">
+      <LineId Id="3" Count="32" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_WriteCSV.M_StartWrite">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_WriteCSV.Reset">
+      <LineId Id="3" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_WriteCSV.Run">
+      <LineId Id="3" Count="24" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_WriteCSV.WriteFile">
+      <LineId Id="3" Count="217" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

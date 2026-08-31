@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_TestCase01FileLog" Id="{53ec71b5-ca91-46ca-87e9-4413130290b0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TestCase01FileLog EXTENDS FB_TestCaseBase
+VAR
+	/// dependencies
+	ILog: I_Logger;
+	
+	bTestOk : BOOL := FALSE;
+	bAddInfo, bAddWarn, bAddErr : BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Run" Id="{e61da4d1-6027-43c7-8f32-aceaeb19f9a1}">
+      <Declaration><![CDATA[{attribute 'object_name' := 'Run'}
+METHOD Run : E_TestCaseState
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init state in base
+Run := SUPER^.Run();
+IF Run <> E_TestCaseState.eTestCaseState_running THEN
+	RETURN;
+END_IF
+
+// test
+ILog := Services.ILog;
+
+IF bAddInfo THEN
+	bAddInfo := FALSE;
+	ILog.AddLog('Test none log message', sSource, E_LogLevel.eLogLevel_none);
+	ILog.AddLog('Test info log message', sSource, E_LogLevel.eLogLevel_info);
+	//P_HMI_Controller.UpdateNotificationPrio(E_Notification.eNotification_generalInf, TRUE, "UnitTest: eNotification_generalInf", E_Priority.ePriority_info);
+
+	//SUPER^.M_SetErrorEx1(stTextListGlobal.stText_NG_Station005,  // Grp
+	//				stTextListGlobal.stText_ST005_Name, "Antrieb (+E2-XXU1)", TO_WSTRING(fbDrive[E_St005_Object_Drive.eSt005_Drive_Antrieb].sErrText), 
+	//				E_NotificationMode.eNotificationMode_Auto);
+
+END_IF
+
+IF bAddWarn THEN
+	bAddWarn := FALSE;
+	ILog.AddLog('Test warning log message', sSource, E_LogLevel.eLogLevel_warn);
+	//P_HMI_Controller.UpdateNotificationPrio(E_Notification.eNotification_generalWarn, TRUE, "UnitTest: eNotification_generalWarn", E_Priority.ePriority_warning);
+END_IF
+
+IF bAddErr THEN
+	bAddErr := FALSE;
+	ILog.AddLog('Test error log message', sSource, E_LogLevel.eLogLevel_err);
+	//P_HMI_Controller.UpdateNotificationPrio(E_Notification.eNotification_generalErr, TRUE, "UnitTest: eNotification_generalErr", E_Priority.ePriority_fault);
+END_IF
+
+// update result and state
+IF bTestOk	THEN
+	bTestOk := FALSE;
+	eResult := E_TestResult.eTestResult_ok; //check log files!
+	eState := E_TestCaseState.eTestCaseState_finished;
+	Run := eState;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TestCase01FileLog">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestCase01FileLog.Run">
+      <LineId Id="97" Count="13" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="137" Count="1" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="111" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

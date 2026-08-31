@@ -1,0 +1,278 @@
+<div id="TcaCarrier" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="400" data-tchmi-creator-viewport-height="600" data-tchmi-zindex="1">
+    <div id="TcaCarrierPopup" data-tchmi-type="TcHmi.Controls.System.TcHmiPopup" data-tchmi-modal="True" data-tchmi-restore-bounds="False" data-tchmi-movable="False" data-tchmi-left="100" data-tchmi-top="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-header-text="Workpiece" data-tchmi-target-file-host-keep-alive="False" data-tchmi-close-on-background="True" data-tchmi-target-file-host-preload="False" data-tchmi-zindex="1">
+
+
+
+
+
+
+
+        <script data-tchmi-target-attribute="data-tchmi-target-file" type="application/json">
+{
+  "path": "TcaItems/TcaWorkpiecePlace/TcaWorkpiecePlace.usercontrol",
+  "attributes": {
+    "data-tchmi-data": "%pp%_workpieceData%/pp%",
+    "data-tchmi-changed": "%pp%_onChanged%/pp%"
+  }
+}
+</script>
+
+
+        
+    
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaCarrierPopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%TcaCarrierPopup%/ctrl%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "write"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "ControlApiFunction",
+        "active": true,
+        "control": "TcaCarrierPopup",
+        "fn": "close",
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%pp%_onChanged%/pp%",
+    "actions": [
+      {
+        "objectType": "Condition",
+        "active": true,
+        "parts": [
+          {
+            "if": [
+              {
+                "compare1": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "symbolExpression": "%pp%_onChanged%/pp%"
+                },
+                "compare2": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "value": true
+                },
+                "compareOperator": "==",
+                "logic": null
+              }
+            ],
+            "then": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%pp%_onChanged%/pp%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "value": false
+                },
+                "asyncWait": true
+              },
+              {
+                "objectType": "Function",
+                "active": true,
+                "fn": "TcHmi.Functions.TcHmiProject2.TcaCarrierPopup",
+                "fnParams": [
+                  {
+                    "objectType": "Symbol",
+                    "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+                    "symbolExpression": "%ctrl%TcaCarrierPopup%/ctrl%"
+                  },
+                  {
+                    "objectType": "StaticValue",
+                    "valueType": "tchmi:general#/definitions/String",
+                    "value": "write"
+                  }
+                ],
+                "asyncWait": true
+              },
+              {
+                "objectType": "ControlApiFunction",
+                "active": true,
+                "control": "TcaCarrierPopup",
+                "fn": "close",
+                "asyncWait": true
+              }
+            ]
+          },
+          {
+            "else": []
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="TcaCarrierHtmlHost" data-tchmi-type="TcHmi.Controls.System.TcHmiHtmlHost" data-tchmi-zindex="1" data-tchmi-tooltip="%tr%TcaWorkpieceStatusColor[0]%/tr%" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-width="100" data-tchmi-height="100">
+
+    <script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaCarrierPopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%TcaCarrierPopup%/ctrl%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "open"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%pp%data%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaCarrierRefresh",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%TcaCarrierHtmlHost%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+            "symbolExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "console.log(\"REFRESH CARRIER\");"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  },
+  {
+    "event": "%pp%config%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaCarrierDraw",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%TcaCarrierHtmlHost%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:server#/definitions/ADS-PLC1.TcaCarrierConfig",
+            "symbolExpression": "%pp%config%/pp%"
+          },
+          {
+            "objectType": "FunctionExpression",
+            "functionExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaCarrierRefresh",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%TcaCarrierHtmlHost%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+            "symbolExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "console.log(\"INIT CARRIER\");"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  }
+]
+</script>
+
+
+</div>
+
+
+
+
+<div id="TcaCarrierImage" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-src="Images/TcaCarrier.svg" data-tchmi-height-mode="Value" data-tchmi-width-mode="Value" data-tchmi-visibility="Visible" data-tchmi-opacity="1" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%">
+
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onInitialized",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctx%owner::Visibility%/ctx%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Hidden"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+</div>

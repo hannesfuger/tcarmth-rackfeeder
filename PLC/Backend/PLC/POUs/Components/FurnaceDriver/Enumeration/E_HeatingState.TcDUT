@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_HeatingState" Id="{a6ca2de5-2572-483c-a5a5-bb395b9da699}">
+    <Declaration><![CDATA[TYPE E_HeatingState :
+(
+	eHeatingState_none := 0,
+	eHeatingState_on,
+	eHeatingState_off
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,798 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_M001_Module" Id="{0b746090-b859-4332-bbee-4e24a70aeb22}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_M001_Module EXTENDS FB_ModuleBase
+VAR
+	// module components
+
+	
+	// actor UIs, access to: iStatus, fPosition, iVisibleState, ..
+	
+	// IO ref
+	stIO			: REFERENCE TO ST_M001_IO;
+	
+	// instannce var's
+	
+	
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[/// 
+/// Module 001 function block 
+/// 
+]]></ST>
+    </Implementation>
+    <Folder Name="DynSetMonObj" Id="{d640bfa2-6fb7-4c23-bac5-bbc75bccd72d}" />
+    <Folder Name="Internal" Id="{4992e3e7-45b1-4934-ba06-31e0424a72f5}" />
+    <Folder Name="StateEngine" Id="{f9190e66-93ae-4939-be0b-574539f3c5e3}">
+      <Folder Name="Alternative" Id="{46b72635-7b14-4c36-87c0-2bf670331e51}" />
+      <Folder Name="CmdPool" Id="{9b67500d-9708-47ff-8183-1fa9e99b1dcd}" />
+    </Folder>
+    <Method Name="GetHgCmd_Default" Id="{24f6ce4a-4dd5-4ffb-858c-52d6dc116a8e}" FolderPath="StateEngine\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_Default : ST_St030_Command
+VAR
+	result : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// get next job for handling
+// 1. drop existing HG pallet
+// 2/3. put empty pallet to storage 1/2
+// 4/5. put unfinished pallet to storage 1/2
+
+// chk HG has active command
+IF Plant.stSt030IHandling.ActiveCommand.Command <> E_St030_Command.eSt030_Command_none THEN
+	// sb.Set('wait for active HG command done. Active cmd: ')
+		//	 .Append(TO_String(Plant.stSt030IHandling.ActiveCommand.Command));
+	RETURN;
+END_IF
+	
+// prio 1: put handling command (e.g. drop existing pallet)
+result := GetHgCmd_Default_Put();
+IF result.Command <> E_St030_Command.eSt030_Command_none THEN
+	// sb.Set('wait for requested HG command is active, cmd: ')
+		//	 .Append(TO_String(Plant.stSt030IHandling.CommandRequest.Command));
+	GetHgCmd_Default := result;
+	RETURN;
+END_IF
+
+// prio 2-6: get handling command (e.g. get unfinished pallet)
+result := GetHgCmd_Default_Get();
+GetHgCmd_Default := result;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_Default_Get" Id="{99858cad-0d87-46ff-83b1-8ead73aa9117}" FolderPath="StateEngine\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_Default_Get : ST_St030_Command
+VAR
+	none	: ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// default logic
+GetHgCmd_Default_Get := none;
+
+// chk pallet already on handling
+IF Plant.stSt030IHandling.Pallet.CarrierPresent THEN
+	RETURN;
+END_IF
+
+// prio 2: req empty carrier @ storage #1
+IF Plant.stSt050IMould.bReqS1Empty AND 
+NOT Plant.stSt040IStorage.Pallet1.HasEmptyWorkpieceplaces THEN
+	IF Plant.stSt040IStorage.Pallet1.CarrierPresent THEN
+		GetHgCmd_Default_Get := GetHgCmd_StorageGet(1); // 1st, get pallet from storage 1
+	ELSE
+		// sb.Set('wait for oven 1/2 has empty pallet)
+		GetHgCmd_Default_Get := GetHgCmd_OvenGetEmptyPallet(); // get empty pallet from oven A/B
+	END_IF
+	RETURN;
+END_IF
+
+// prio 3: req empty carrier @ storage #2
+IF Plant.stSt050IMould.bReqS2Empty AND 
+NOT Plant.stSt040IStorage.Pallet2.HasEmptyWorkpieceplaces THEN
+	IF Plant.stSt040IStorage.Pallet2.CarrierPresent THEN
+		GetHgCmd_Default_Get := GetHgCmd_StorageGet(2); // 1st, get pallet from storage 2
+	ELSE
+		// sb.Set('wait for oven 1/2 has empty pallet)
+		GetHgCmd_Default_Get := GetHgCmd_OvenGetEmptyPallet(); // get empty pallet from oven A/B
+	END_IF
+	RETURN;
+END_IF
+
+// prio 4: req unfinished carrier @ storage #1
+IF Plant.stSt050IMould.bReqS1Unfinished AND 
+NOT Plant.stSt040IStorage.Pallet1.HasWorkpiecesWithRequestStatus THEN
+	IF Plant.stSt040IStorage.Pallet1.CarrierPresent THEN
+		GetHgCmd_Default_Get := GetHgCmd_StorageGet(1); // 1st, get pallet from storage 1
+	ELSE
+		// sb.Set('wait for oven 1/2 has unfinished pallet)
+		GetHgCmd_Default_Get := GetHgCmd_OvenGetUnfinishedPallet(); // get unfinished pallet from oven A/B
+	END_IF
+	RETURN;
+END_IF
+
+// prio 5: req unfinished carrier @ storage #2
+IF Plant.stSt050IMould.bReqS2Unfinished AND 
+NOT Plant.stSt040IStorage.Pallet2.HasWorkpiecesWithRequestStatus THEN
+	IF Plant.stSt040IStorage.Pallet2.CarrierPresent THEN
+		GetHgCmd_Default_Get := GetHgCmd_StorageGet(2); // 1st, get pallet from storage 2
+	ELSE
+		// sb.Set('wait for oven 1/2 has unfinished pallet)
+		GetHgCmd_Default_Get := GetHgCmd_OvenGetUnfinishedPallet(); // get unfinished pallet from oven A/B
+	END_IF
+	RETURN;
+END_IF
+
+// prio 6: req no carrier @ storage #1/2
+IF (Plant.stSt050IMould.bReqS1NoCarrier OR Plant.stM001IModule.bEmptyPlant) AND Plant.stSt040IStorage.Pallet1.CarrierPresent THEN
+	GetHgCmd_Default_Get := GetHgCmd_StorageGet(1); // empty plant, get pallet from storage 1
+ELSIF (Plant.stSt050IMould.bReqS2NoCarrier OR Plant.stM001IModule.bEmptyPlant) AND Plant.stSt040IStorage.Pallet2.CarrierPresent THEN
+	GetHgCmd_Default_Get := GetHgCmd_StorageGet(2); // empty plant, get pallet from storage 2
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_Default_Put" Id="{725bef36-2c65-4ebd-99ec-f115d1b8b79f}" FolderPath="StateEngine\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_Default_Put : ST_St030_Command
+VAR
+	none,
+	result	: ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// default logic
+GetHgCmd_Default_Put := none;
+
+// chk pallet on handling
+IF NOT Plant.stSt030IHandling.Pallet.CarrierPresent THEN
+	RETURN;
+END_IF
+
+// unfinished @ hg --> to storage 1/2
+IF Plant.stSt030IHandling.Pallet.HasUnfinishedWorkpieces THEN
+	// sb.Set('wait for storage request unfinished')
+	IF Plant.stSt050IMould.bReqS1Unfinished AND
+	   NOT Plant.stSt040IStorage.Pallet1.CarrierPresent THEN
+		GetHgCmd_Default_Put := GetHgCmd_StationPut(E_Station.eStation_ST040_Storage, 1);
+	ELSIF Plant.stSt050IMould.bReqS2Unfinished AND
+	   NOT Plant.stSt040IStorage.Pallet2.CarrierPresent THEN
+		GetHgCmd_Default_Put := GetHgCmd_StationPut(E_Station.eStation_ST040_Storage, 2);
+	ELSE
+		// unfinished back to oven 1/2
+		GetHgCmd_Default_Put := GetHgCmd_StationPut(Plant.stSt030IHandling.Source);
+	END_IF
+	RETURN;
+END_IF
+
+// empty @ hg --> to storage 1/2
+IF Plant.stSt030IHandling.Pallet.HasEmptyWorkpieceplaces THEN
+	// sb.Set('wait for storage request empty')
+	IF Plant.stSt050IMould.bReqS1Empty AND
+	   NOT Plant.stSt040IStorage.Pallet1.CarrierPresent THEN
+		GetHgCmd_Default_Put := GetHgCmd_StationPut(E_Station.eStation_ST040_Storage, 1);
+	ELSIF Plant.stSt050IMould.bReqS2Empty AND
+	   NOT Plant.stSt040IStorage.Pallet2.CarrierPresent THEN
+		GetHgCmd_Default_Put := GetHgCmd_StationPut(E_Station.eStation_ST040_Storage, 2);
+	ELSE
+		// empty back to oven 1/2
+		GetHgCmd_Default_Put := GetHgCmd_StationPut(Plant.stSt030IHandling.Source);
+	END_IF
+	RETURN;
+END_IF 
+
+// finished & pallet full @ hg --> to oven 2
+IF Plant.stSt030IHandling.Pallet.HasAllWorkpiecesFinished THEN
+	// sb.Set('wait for oven 2 rdy for finished pallet)
+	// full back to oven 1/2
+	GetHgCmd_Default_Put := GetHgCmd_StationPut(Plant.stSt030IHandling.Source);
+END_IF
+
+//sb.Set('state not implemented: no empty/finished or unfinished');]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_OvenGetEmptyPallet" Id="{71f8a272-6a15-41d2-90ac-d896802e7914}" FolderPath="StateEngine\CmdPool\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_OvenGetEmptyPallet : ST_St030_Command
+VAR
+	result : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[result.Command := E_St030_Command.eSt030_Command_none;
+IF Plant.stSt010IOvenA.Trolley.HasCarrierWithEmptyWorkpieceplace THEN
+	result.Command := E_St030_Command.eSt030_Command_OvenA_Get; // get empty pallet from oven A
+	result.Position := Plant.stSt010IOvenA.Trolley.SlotOfCarrierWithEmptyWorkpieceplace; 
+ELSIF Plant.stSt020IOvenB.Trolley.HasCarrierWithEmptyWorkpieceplace THEN
+	result.Command := E_St030_Command.eSt030_Command_OvenB_Get; // get empty pallet from oven B
+	result.Position := Plant.stSt020IOvenB.Trolley.SlotOfCarrierWithEmptyWorkpieceplace;
+END_IF
+
+GetHgCmd_OvenGetEmptyPallet := result;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_OvenGetUnfinishedPallet" Id="{db618b3e-2f2f-42cb-8953-308d4b5ab3ac}" FolderPath="StateEngine\CmdPool\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_OvenGetUnfinishedPallet : ST_St030_Command
+VAR
+	result : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[result.Command := E_St030_Command.eSt030_Command_none;
+IF Plant.stSt010IOvenA.Trolley.HasCarrierWithUnfinishedWorkpiece THEN
+	result.Command := E_St030_Command.eSt030_Command_OvenA_Get; // get unfinished pallet from oven A
+	result.Position := Plant.stSt010IOvenA.Trolley.SlotOfCarrierWithUnfinishedWorkpiece;	
+ELSIF Plant.stSt020IOvenB.Trolley.HasCarrierWithUnfinishedWorkpiece THEN
+	result.Command := E_St030_Command.eSt030_Command_OvenB_Get; // get unfinished pallet from oven B
+	result.Position := Plant.stSt020IOvenB.Trolley.SlotOfCarrierWithUnfinishedWorkpiece;
+END_IF
+
+GetHgCmd_OvenGetUnfinishedPallet := result;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_StationPut" Id="{66d63ac4-780e-4599-b2e7-8c965cac03a9}" FolderPath="StateEngine\CmdPool\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_StationPut : ST_St030_Command
+VAR_INPUT
+	eStation 	: E_Station;
+	iIxd 		: INT := 0;
+END_VAR
+VAR
+	result 		: ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eStation OF
+	E_Station.eStation_ST010_OvenA:
+		IF Plant.stSt010IOvenA.Trolley.HasEmptySlot THEN
+			result.Command := E_St030_Command.eSt030_Command_OvenA_Put;
+			result.Position := Plant.stSt010IOvenA.Trolley.EmptySlot;
+		ELSE
+			ModuleWarning.ArgSbAppend('Station has no empty slot')
+				 .ArgSbAppendS(TO_STRING(eStation))
+				 .ArgSetSbRaise();		
+		END_IF
+		
+	E_Station.eStation_ST020_OvenB:
+		IF Plant.stSt020IOvenB.Trolley.HasEmptySlot THEN
+			result.Command := E_St030_Command.eSt030_Command_OvenB_Put;
+			result.Position := Plant.stSt020IOvenB.Trolley.EmptySlot;
+		ELSE
+			ModuleWarning.ArgSbAppend('Station has no empty slot')
+				 .ArgSbAppendS(TO_STRING(eStation))
+				 .ArgSetSbRaise();	
+		END_IF
+		
+	E_Station.eStation_ST040_Storage:
+		result.Command := E_St030_Command.eSt030_Command_Storage_Put;
+		result.Position := iIxd;
+		
+ELSE
+	ModuleWarning.ArgSbAppend('Put to station not implemented! Station: ')
+				 .ArgSbAppendS(TO_STRING(eStation))
+				 .ArgSetSbRaise();
+END_CASE
+
+GetHgCmd_StationPut := result;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_StorageGet" Id="{026b8a42-c45b-46a2-9e45-0b6a6251aaee}" FolderPath="StateEngine\CmdPool\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_StorageGet : ST_St030_Command
+VAR_INPUT
+	iIxd : INT;
+END_VAR
+VAR
+	result : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[result.Command := E_St030_Command.eSt030_Command_Storage_Get;
+result.Position := iIxd;
+
+GetHgCmd_StorageGet := result;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_Type3" Id="{a912039f-e29d-4700-b590-7c235a3516eb}" FolderPath="StateEngine\Alternative\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_Type3 : ST_St030_Command
+VAR
+	none : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// hg logic 3
+
+GetHgCmd_Type3 := none;
+
+
+// e.g.: impelemt custom handling command for type 3...]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_Type5" Id="{8ef0a272-07c8-429a-9636-b1149ab6f049}" FolderPath="StateEngine\Alternative\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_Type5 : ST_St030_Command
+VAR
+	none : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// hg logic 5
+
+GetHgCmd_Type5 := none;
+
+
+// e.g.: impelemt custom handling command for type 5...]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetHgCmd_Type6" Id="{74c2d2f5-b1c0-46d1-9f15-1c5010a145e4}" FolderPath="StateEngine\Alternative\">
+      <Declaration><![CDATA[METHOD PRIVATE GetHgCmd_Type6 : ST_St030_Command
+VAR
+	none : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// hg logic 6
+
+GetHgCmd_Type6 := none;
+
+
+// e.g.: impelemt custom handling command for type 6...]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_CallObjects" Id="{04aa5f2c-67d2-481e-a9ac-88f1c18620cd}">
+      <Declaration><![CDATA[METHOD PROTECTED M_CallObjects : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CALL_BVS();
+
+// call..]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynManual" Id="{713014cb-36d3-4a51-a5be-1a155629bc9c}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD INTERNAL M_DynManual : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitManual THEN
+	bInitManual := TRUE;
+	MEMSET(ADR(stHmiManualOut.stObjects), 0, SIZEOF(stHmiManualOut.stObjects)); // reset
+	
+	//M_InitDynManualUi(fbAxisVmUi);
+	
+	//fbAxisVmUi.M_TargetListClear();
+	//fbAxisVmUi.M_TargetListAddItem(F_CreateDynText("Home pos", 0), 15);
+	//fbAxisVmUi.M_TargetListAddItem(F_CreateDynText("Pos Service", 0), 100);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynMonitoring" Id="{d8e9594f-1f17-46b4-97d3-79b662b97cf4}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD PROTECTED M_DynMonitoring : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_DynMonitoring := SUPER^.M_DynMonitoring();
+
+// init
+IF NOT bInitMonitoring THEN
+	bInitMonitoring := TRUE;
+	MEMSET(ADR(stLocalMonitoring), 0, SIZEOF(stLocalMonitoring)); // reset
+	
+	M_InitDynMonitoringItem(0, 								// monitoring index 
+							"VM Position", 					// name
+							Name, 							// group (station name)
+							E_DataType.eDataType_lreal, 	// data type							
+							stTextListGlobal.stText_m);		// unit	
+
+	M_InitDynMonitoringItem(1, "VM Geschwindigkeit", Name, E_DataType.eDataType_lreal, stTextListGlobal.stText_mmin);
+END_IF
+
+//stLocalMonitoring.astMonitoring[0].fValue := stM001IModule.fVmPos;
+//stLocalMonitoring.astMonitoring[1].fValue := stM001IModule.fVmSpeed;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynSettings" Id="{6dcff948-d31f-47e0-a2a0-588197f4fa0c}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD INTERNAL M_DynSettings : BOOL
+VAR_INST
+	fSpeedMir : LREAL;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init station settings
+IF NOT bInitSettings THEN
+	bInitSettings := TRUE;
+	stLocalSettingsBackup := stLocalSettings; // backup
+	MEMSET(ADR(stLocalSettings), 0, SIZEOF(stLocalSettings)); // reset
+	
+	M_InitDynSettingsItem(E_M001_Settings.eM001_Settings_Deaktiv,		// settings index
+		TO_WSTRING(E_M001_Settings.eM001_Settings_Deaktiv),				// settings wsIndex
+		Name,															// group
+		stTextListGlobal.stText_DeactivateModule,						// name
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,		// unit & data type
+		0, 1, 6);														// min, max & user level
+
+	M_InitDynSettingsItem(E_M001_Settings.eM001_Settings_Autohome,
+		TO_WSTRING(E_M001_Settings.eM001_Settings_Autohome),
+		Name,
+		stTextListGlobal.stText_AutoHome,
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,
+		0, 1, 3);
+		
+//	M_InitDynSettingsItem(E_M001_Settings.eM001_Settings_PalletLayout,
+//		TO_WSTRING(E_M001_Settings.eM001_Settings_PalletLayout),
+//		Name,
+//		F_CreateDynTextDefault("Palettenlayout (1-4)"),
+//		stTextListGlobal.stText_notext, E_DataType.eDataType_int,
+//		1, 4, 3);
+		
+	// restore values
+	F_RestoreSettingValues(stLocalSettings.stDynStationSettings, stLocalSettingsBackup.stDynStationSettings);
+END_IF
+
+// run settings mgmt
+//F_Settings_Management(stLocalSettings.stDynStationSettings);
+
+// map current settings values
+bAutoHome := stLocalSettings.stDynStationSettings[E_M001_Settings.eM001_Settings_Autohome].bValue;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Fast" Id="{5c3fab20-b3d9-4d4d-888c-2809bbd0d166}">
+      <Declaration><![CDATA[METHOD INTERNAL M_Fast : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// fast task
+
+Plant.fbSt030Handling.M_SequenceSearch();
+//Plant.fbSt050Mould.M_Run();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Homing" Id="{60e36e84-58af-4f3a-aa69-04d07c1e6124}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Homing
+VAR
+	bTmp : BOOL;
+	stTmpTxt : ST_Text;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Homing sequence
+CASE sqHome.Step OF
+	
+	0:	
+		sqHome.Info.Set("Warte auf GRST Start");
+		IF RunStep AND NOT sqHome.InHome AND bRunHoming THEN
+			bBusy := TRUE;
+			sqAuto.Step := 0;
+			sqHome.StartSequence()
+				  .Step := 10;
+		END_IF
+
+	10:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv");
+		IF P_Safety.bMachineRequestStop THEN
+			sqHome.Info.Set("Anforderung Stop aktiv");
+		ELSIF NOT P_Safety.SafetyOk THEN
+			sqHome.Info.Set("Sicherheit nicht ok");
+		ELSIF bRunHoming THEN
+			sqHome.Step := 20;
+		END_IF	
+	
+	20:
+		sqHome.Info.Set("Warte auf Stationen in GRST");
+		bTmp := TRUE;
+		//FOR ii := 0 TO E_Station.eStation_nMaxIdx DO
+		//	IF aIStaton[ii] = 0 THEN
+		//		CONTINUE;
+		//	END_IF
+		//	IF NOT aIStaton[ii].InHome THEN
+		//		stTmpTxt := aIStaton[ii].Name;
+		//		sqHome.Info.Set("Warte auf Station in GRST: ")
+		//				   .Append(stTmpTxt.wsName);
+		//		bTmp := FALSE;
+		//		EXIT;
+		//	END_IF
+		//END_FOR
+		IF bTmp THEN			
+			sqHome.Step := 100;
+		END_IF
+		
+	100:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv");
+		sqHome.Step := 1000;
+
+	//	homing done			
+	1000:
+		sqHome.Info.Set("Grundstellung erreicht");
+		IF sqHome.StepTime > T#1S THEN			
+			bBusy := FALSE;
+			sqHome.InHome := TRUE;
+			bStopped := TRUE;
+			bRunHoming := FALSE;
+			sqAuto.Step := 0;
+			sqHome.StopSequence()
+				  .Step := 0;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{bcc2e5b5-a4e2-49ee-90e6-764c4d49a3af}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Init : IModule
+VAR_INPUT
+END_VAR
+VAR
+	IMod : IModule;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set up station
+ModuleNb := 1;
+Module := E_Module.eModule_M001;
+Name := stTextListGlobal.stText_M001_Name;
+
+IMod := SUPER^.M_Init()
+			  .M_InitEvents(TC_Events.ModuleM010EventClass.InfoEvent,
+	  				  		TC_Events.ModuleM010EventClass.WarningEvent,
+	  				  		TC_Events.ModuleM010EventClass.ErrorEvent);
+
+// set up default IO references
+M_SetReferences(IO.stM001_Module_IO);
+
+// init components
+
+
+P_Plant.M_RegisterModule(IMod);
+
+bInitSettings	:= FALSE;
+bInitMonitoring := FALSE;
+bInitManual  	:= FALSE;
+
+//aSClearText[EN] := 'Module init done.';
+M_Init := IMod;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Manual" Id="{18016da5-3c6e-4f93-bd06-27c5d26db796}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Manual
+VAR_INST
+	iReq : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// manual mode
+IF (OpMode <> E_OpMode.eOpMode_manual) THEN
+	RETURN;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_OpModeChanged" Id="{b58b9154-b841-4506-a503-5f0dc1daea57}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PROTECTED M_OpModeChanged : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*bBusy := FALSE;
+
+IF eOpMode <> E_OpMode.eOpMode_auto THEN
+	sqAuto.Set(0);
+END_IF*)]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_RegisterStation" Id="{cfb317c3-4148-4d30-baf4-d6d707dde83e}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD INTERNAL M_RegisterStation : E_Module
+VAR_INPUT
+	Ist : IStation;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aIStaton[ISt.Station] := ISt;
+P_Plant.M_RegisterStation(ISt);
+M_RegisterStation := eModule;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Run" Id="{fe3a7cc9-466d-455f-b51d-3bad0f9a9a53}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Run : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	b1stShot				: BOOL := TRUE;
+	stModuleStationsInfoRef	: REFERENCE TO ST_MODULE_STATIONS_INFO;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bSafetyOk := P_Safety.SafetyOk;
+aIStaton[E_Station.eStation_ST010_OvenA].SafetyOk := P_Safety.SafetyOk;
+aIStaton[E_Station.eStation_ST020_OvenB].SafetyOk := P_Safety.SafetyOk;
+aIStaton[E_Station.eStation_ST030_Handling].SafetyOk := P_Safety.SafetyOk;
+aIStaton[E_Station.eStation_ST040_Storage].SafetyOk := P_Safety.SafetyOk;
+aIStaton[E_Station.eStation_ST050_Mould].SafetyOk := P_Safety.SafetyOk;
+
+// call module base (calls station run)
+M_Run := SUPER^.M_Run();
+
+M_DynSettings();
+M_DynManual();
+M_DynMonitoring();
+
+// loop module stations, collect infos
+b1stShot := TRUE;
+stModuleStationsInfoRef REF= stGlobalModuleInfo.astModuleStationsInfo[eModule];
+FOR ii := 0 TO E_Station.eStation_nMaxIdx DO
+	IF aIStaton[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	F_AND_REF_EX(stModuleStationsInfoRef.bStation_All_Auto, aIStaton[ii].OpMode = E_OpMode.eOpMode_auto, b1stShot);
+	F_OR_REF_EX(stModuleStationsInfoRef.bStation_Any_Step, aIStaton[ii].OpMode = E_OpMode.eOpMode_step, b1stShot);
+	F_OR_REF_EX(stModuleStationsInfoRef.bStation_Any_Manual, aIStaton[ii].OpMode = E_OpMode.eOpMode_manual, b1stShot);
+	
+	F_OR_REF_EX(stModuleStationsInfoRef.bStation_Any_Error, aIStaton[ii].State = E_ComponentState.eComponentState_error, b1stShot);
+	F_OR_REF_EX(stModuleStationsInfoRef.bStation_Any_Warning, aIStaton[ii].State = E_ComponentState.eComponentState_warning, b1stShot);
+	F_OR_REF_EX(stModuleStationsInfoRef.bStation_Any_Info, aIStaton[ii].State = E_ComponentState.eComponentState_info, b1stShot);
+	
+	F_AND_REF_EX(stModuleStationsInfoRef.bStation_All_Started, (aIStaton[ii].OpMode = E_OpMode.eOpMode_auto OR aIStaton[ii].OpMode = E_OpMode.eOpMode_step) AND aIStaton[ii].RunCycle, b1stShot);
+	F_AND_REF_EX(stModuleStationsInfoRef.bStation_All_Stopped, aIStaton[ii].Stopped, b1stShot);
+	F_AND_REF_EX(stModuleStationsInfoRef.bStation_All_InHome, aIStaton[ii].InHome, b1stShot);
+	F_OR_REF_EX(stModuleStationsInfoRef.bStation_Any_Homing, aIStaton[ii].Homing, b1stShot);
+	
+	b1stShot := FALSE;
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Sequence" Id="{ac56d7f6-30a2-4ce2-89f2-cc7ec18079eb}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Sequence
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// signal mapping (e.g.: enable)
+stM001IModule.bRunCycle := RunCycle;
+
+// automatic sequence
+CASE sqAuto.Step OF
+	
+	0:	sqAuto.Info.Set("Warte auf Auto Start");
+		IF NOT (RunCycle AND RunStep) THEN RETURN; END_IF
+		
+		sqAuto.Info.Set("Warte auf GRST");
+		//IF sqHome.InHome AND bInHome THEN
+			//fbAxisVm.SetPos(0);
+			sqHome.InHome := FALSE;
+			sqAuto.Step := 10;
+		//ELSE
+		//	INotiHdl.M_SetNotiDefaultInf(stTextlistGlobal.stText_NG_Stations, Name, stTextlistGlobal.stText_station_not_in_hp, stEmptyText);
+		//END_IF
+		
+	10:	sqAuto.Info.Set("Prüfe Startbedingungen");
+		IF NOT RunCycle THEN sqAuto.Step := 900; END_IF				
+		CycleStart();		
+		sqAuto.Step := 100;
+		
+	// work
+	100: sqAuto.Info.Set("Automatik");
+		TransitionLogic();
+		IF NOT RunCycle THEN
+			sqAuto.Step := 900;
+		END_IF
+		
+	// stop from safety	or error
+	800: sqAuto.Info.Set("Fehler/Safety Stop!");
+		FOR ii := 0 TO E_Station.eStation_nMaxIdx DO
+			IF aIStaton[ii] <> 0 THEN
+				aIStaton[ii].RunCycle := FALSE;
+			END_IF
+		END_FOR
+		sqAuto.Step := 900;		
+		
+	// rdy	
+	900: sqAuto.Info.Set("Zyklus beendet");
+		CycleEnd();
+		sqAuto.Step := 0;
+
+	// error
+	1000: sqAuto.Info.Set("Error");
+		bStopped := TRUE;
+		sqHome.InHome := FALSE;
+		bRunHoming := FALSE;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetReferences" Id="{95732bac-aa45-4a9a-b22b-be5de48f12fe}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD INTERNAL M_SetReferences : BOOL
+VAR_IN_OUT
+	stIoRef : ST_M001_IO;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stIO REF= stIoRef;
+M_SetReferences := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Supervision" Id="{88eca460-e5f0-4020-8dbf-712cb042cb10}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Supervision : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// to be subclassed// chk stopped
+IF NOT bRunCycle OR P_Safety.bMachineRequestStop THEN
+	IF sqAuto.StepTime > T#20S THEN
+		bStopped := TRUE;
+	END_IF
+END_IF
+
+(*ToDo: // axis
+IF fbAxisVm.bError THEN
+	SUPER^.M_SetNotification(F_CreateDynTextUn(E_UniqNoti.eUniqNoti_M001_Module_ServoVm),	// id
+					Name,																	// group (e.g.: station name)
+					fbAxisVm.Name,															// txt1 (e.g.: source)
+					fbAxisVmUi.stErrorText,													// txt2 (e.g.: error text)
+					fbAxisVmUi.stBmk,														// txt3 (e.g.: BMK)
+					E_AlarmPriority.Error,													// prio
+					E_NotificationMode.eNotificationMode_Reset,								// notification mode
+					E_AlarmStopMode.Stop);													// alarm stop mode
+					
+
+					
+ELSIF NOT stIO.stIn.bCentrSuctPwrCircBreakerOk THEN
+	SUPER^.M_SetNotification(F_CreateDynTextUn(E_UniqNoti.eUniqNoti_M001_CentralSuction),
+					Name,
+					F_CreateDynTextDefault("Fehler Netz Schutzschalter"),
+					fbCentrSuction.Name,
+					F_CreateDynTextDefault("BMK=+xyz-"),
+					E_AlarmPriority.Error,
+					E_NotificationMode.eNotificationMode_Reset,
+					E_AlarmStopMode.Stop);
+END_IF *)
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{dedc3dfa-3d36-43ed-a3df-30ac47927668}" FolderPath="Internal\">
+      <Declaration><![CDATA[/// Reset station logic
+{attribute 'object_name' := 'Reset'}
+METHOD Reset
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// base logic run
+SUPER^.Reset();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TransitionLogic" Id="{d5dac726-d3a5-4591-a1f8-66a547b0dcc6}" FolderPath="StateEngine\">
+      <Declaration><![CDATA[METHOD PRIVATE TransitionLogic : INT
+VAR
+	hgCmd : ST_St030_Command;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT Plant.stSt050IMould.bEnableHG THEN
+	sqAuto.Info.Set("Wait for HG enable from mould");
+	RETURN;
+END_IF
+
+// switxh logic by type
+CASE Services.stSettings.stProduct_Settings[E_ProductSettings.eProductSettings_ProductType].nValue OF // or use production settings...
+	3: hgCmd := GetHgCmd_Type3(); // e.g.: impelemt custom handling command for type 3...
+	5: hgCmd := GetHgCmd_Type5(); // e.g.: impelemt custom handling command for type 5...
+	6: hgCmd := GetHgCmd_Type6(); // e.g.: impelemt custom handling command for type 6...
+ELSE
+	
+	// default logic
+	hgCmd := GetHgCmd_Default();
+END_CASE
+
+Plant.stSt030IHandling.CommandRequest := hgCmd;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

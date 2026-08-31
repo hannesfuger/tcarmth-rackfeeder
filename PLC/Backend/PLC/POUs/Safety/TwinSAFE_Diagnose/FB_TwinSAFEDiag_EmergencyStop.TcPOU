@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TwinSAFEDiag_EmergencyStop" Id="{f7d3af54-04f1-403e-8aaf-8c8e06dfeab1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TwinSAFEDiag_EmergencyStop
+VAR_INPUT
+	wsFunctionBlockText		: WSTRING;
+	stIn					: ST_SafetyDiagInfo;
+END_VAR
+VAR_OUTPUT
+	bError					: BOOL;
+	stErrorText				: ST_Text;
+	stErrorTextAdd			: ST_Text;
+END_VAR
+VAR
+	{attribute 'hide' := ''}
+	wsTempText: WSTRING(255);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bError := FALSE;
+stErrorText := stEmptyText;
+stErrorTextAdd := stEmptyText;
+
+(*	DIAG:
+	Bit 0: Disc Error (EStopIn1/2)
+	Bit 1: Disc Error (EStopIn3/4)
+	Bit 2: Disc Error (EStopIn5/6)
+	Bit 3: Disc Error (EStopIn7/8)
+	Bit 4: EDM1 Error
+	Bit 5: EDM2 Error		*)
+IF stIn.uintDiag.0 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "Channel: 1/2"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.1 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "Channel: 3/4"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.2 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "Channel: 5/6"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.3 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "Channel: 7/8"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.4 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_EDM_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "EDM 1"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.5 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_EDM_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "EDM 2"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+(*	STATE
+	1: State RUN
+	2: State STOP
+	3: State SAFE
+	4: State ERROR
+	5: State RESET
+	6: State START
+	8: State DELAYOUT	*)
+ELSIF stIn.usintState = 4 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_UnknownError;
+	stErrorTextAdd := F_CreateDynTextDefault(wsFunctionBlockText);
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_TwinSAFEDiag_EmergencyStop">
+      <LineId Id="79" Count="60" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

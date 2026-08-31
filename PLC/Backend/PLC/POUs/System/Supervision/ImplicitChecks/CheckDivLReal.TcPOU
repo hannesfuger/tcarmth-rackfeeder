@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CheckDivLReal" Id="{5c74c70f-78c1-464b-9a29-d100f90d2c96}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Implicitly generated code : DO NOT EDIT!!!
+/// Checks for division by 0, if divisor is 0, replace it with 1 and report error
+{attribute 'no_check' := ''}
+{attribute 'check_div_real64' := ''}
+FUNCTION CheckDivLReal : LREAL
+VAR_INPUT
+	divisor: LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF divisor = 0 THEN
+	// replace divisor and report error if necessary
+	CheckDivLReal := 1;
+	Services.fbEventHandler.Select(TC_Events.CodeEventClass.ErrorEvent)
+						   .ArgSetString('div 0 LREAL')
+						   .Raise();
+ELSE
+	CheckDivLReal:=divisor;
+END_IF;]]></ST>
+    </Implementation>
+    <LineIds Name="CheckDivLReal">
+      <LineId Id="3" Count="2" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

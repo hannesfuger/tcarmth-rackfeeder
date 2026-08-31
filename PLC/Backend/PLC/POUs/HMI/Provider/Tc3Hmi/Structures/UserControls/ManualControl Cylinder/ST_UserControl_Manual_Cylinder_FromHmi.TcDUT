@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_UserControl_Manual_Cylinder_FromHmi" Id="{6f06569f-ced8-4416-8827-f269092a3000}">
+    <Declaration><![CDATA[TYPE ST_UserControl_Manual_Cylinder_FromHmi :
+STRUCT
+	stButton_Hp,
+	stButton_Mp,
+	stButton_Wp	: ST_HMI_BUTTON_IN;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

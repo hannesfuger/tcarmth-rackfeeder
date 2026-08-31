@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaCarrierService" Id="{a05e7cbc-b3a7-482a-a741-a868c9d381ac}">
+    <Declaration><![CDATA[TYPE TcaCarrierService :
+STRUCT
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

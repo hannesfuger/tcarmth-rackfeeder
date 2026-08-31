@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_St020_Settings" Id="{1adf3f23-dceb-4c26-9a45-2bc06891d42e}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+{attribute 'to_string'}
+{attribute 'to_wstring'}
+TYPE E_St020_Settings :
+(
+	//eSt020_Settings_none := 0,
+	
+	eSt020_Settings_Station_Deaktiv,	// Station deaktivieren
+	eSt020_Settings_Autohome,			// automatic home with start button
+	
+	eSt020_Settings_HomeSpeed,			// Homing-Geschwindigkeit [mm/s]
+	eSt020_Settings_JogSpeed,			// Tippgeschwindigkeit [mm/s]
+	eSt020_Settings_WorkSpeed,			// Automatik-Geschwindigkeit [mm/s]
+	eSt020_Settings_JogSpeedCh,			// Tippgeschwindigkeit CH-Achsen [mm/s]
+	eSt020_Settings_WorkSpeedCh,		// Automatik-Geschwindigkeit CH-Achsen [mm/s]
+
+	eSt020_Settings_AxisRefPos,			// Referenzposition Achse [mm]
+	eSt020_Settings_PosHome,			// Homeposition [mm]
+	eSt020_Settings_PosWork,			// Mitnehmerposition unteres Segment [mm]
+	
+	eSt020_Settings_PosHomeCh,			// Homeposition CH-Achsen [mm]
+	eSt020_Settings_PosWorkCh,			// Arbeitsposition CH-Achsen [mm]
+	
+	eSt020_Settings_OvenFixPartHeight,	// Festteilhöhe [mm]
+	eSt020_Settings_OvenSegmentHeight,	// Festteilhöhe [mm]
+	
+	eSt020_Settings_OvenMiddlePointX,	// Mittelpunnkt in X-Richtung [mm]
+	eSt020_Settings_OvenOffsetY,		// Y-Offset Ofen [mm]
+	eSt020_Settings_OvenPickUpDepthZ,	// Teach-Position, Storage 2 Z [mm]
+	
+	eSt020_Settings_XPosRp1,			// Teach-Position, Ofen B, RP 1 X [mm]
+	eSt020_Settings_YPosRp1,			// Teach-Position, Ofen B, RP 1 Y [mm]
+	eSt020_Settings_ZPosRp1,			// Teach-Position, Ofen B, RP 1 Z [mm]
+	                                                           
+	eSt020_Settings_XPosRp2,			// Teach-Position, Ofen B, RP 2 X [mm]
+	eSt020_Settings_YPosRp2,			// Teach-Position, Ofen B, RP 2 Y [mm]
+	eSt020_Settings_ZPosRp2,			// Teach-Position, Ofen B, RP 2 Z [mm]
+	
+	/// has to be set to last index for array bounds!
+	eSt020_Settings_nMaxIdx	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

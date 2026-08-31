@@ -1,0 +1,24 @@
+{
+  "parameters": [
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setConfig",
+      "propertyGetterName": "getConfig",
+      "refTo": "",
+      "name": "data-tchmi-config",
+      "displayName": "config",
+      "visible": true,
+      "type": "tchmi:server#/definitions/ADS-PLC1.TcaTrolleyConfig",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "config"
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.212/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

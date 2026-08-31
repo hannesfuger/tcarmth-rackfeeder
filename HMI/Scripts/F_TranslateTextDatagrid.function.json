@@ -1,0 +1,69 @@
+{
+  "function": {
+    "name": "F_TranslateTextDatagrid",
+    "namespace": "TcHmi.Functions.Pxxx_Name_HMI",
+    "displayName": "F_TranslateTextDatagrid",
+    "description": "",
+    "waitMode": "Synchronous",
+    "category": "Rmth",
+    "returnValue": {
+      "type": "tchmi:general#/definitions/String"
+    },
+    "visible": true,
+    "injectContextObject": false,
+    "arguments": [
+      {
+        "name": "textListArray",
+        "displayName": "textListArray",
+        "type": "tchmi:general#/definitions/Array",
+        "description": "This is an important Parameter which does... This text is used in a tooltip.",
+        "defaultValue": null,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "eLanguage",
+        "displayName": "eLanguage",
+        "type": "tchmi:general#/definitions/INT16",
+        "description": "",
+        "defaultValue": "",
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      },
+      {
+        "name": "showNumberOfLines",
+        "displayName": "showNumberOfLines",
+        "type": "tchmi:general#/definitions/UINT",
+        "description": "",
+        "defaultValue": 30,
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      }
+    ]
+  },
+  "$schema": "./../Packages/Beckhoff.TwinCAT.HMI.Framework.12.760.44/runtimes/native1.12-tchmi/Schema/FunctionDescription.Schema.json",
+  "apiVersion": 1,
+  "version": {
+    "full": "0.0.0.0",
+    "major": 0,
+    "minor": 0,
+    "revision": 0,
+    "build": 0
+  },
+  "dependencyFiles": [
+    {
+      "name": "F_TranslateTextDatagrid.js",
+      "type": "JavaScript",
+      "description": ""
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_CONTROL_SETTING_MODULE_OUT" Id="{d303ccb8-457f-4d5e-a7d3-02a529330680}">
+    <Declaration><![CDATA[TYPE ST_HMI_CONTROL_SETTING_MODULE_OUT :
+STRUCT
+	stControlSetting	: ST_HMI_CONTROL_SETTING_ITEM_OUT;
+	stSettingView		: ARRAY[0..CONST.iMaxIdxLocalSetting] OF ST_Data_Item_String;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

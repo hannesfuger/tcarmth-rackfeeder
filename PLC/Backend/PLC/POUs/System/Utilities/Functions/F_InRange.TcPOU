@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_InRange" Id="{87b424eb-3d5d-4f4a-9f7c-4ea9b0b575fd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_InRange : BOOL
+VAR_INPUT
+	fValue			: LREAL;	//11.5
+	fLowerLimit		: LREAL;	//10
+	fUpperLimit		: LREAL;	//12	
+END_VAR
+VAR
+	fTempUl			: LREAL;
+	fTempLl			: LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_InRange:=(fValue >= fLowerLimit) AND (fValue <= fUpperLimit);]]></ST>
+    </Implementation>
+    <LineIds Name="F_InRange">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_StationDynSettings" Id="{70ed5eee-fc98-4bcb-8d40-46eca5659879}">
+    <Declaration><![CDATA[TYPE ST_StationDynSettings :
+STRUCT
+
+	// station settings
+	stDynStationSettings	: ARRAY[0..CONST.iMaxIdxLocalSetting] OF ST_Data_Item;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

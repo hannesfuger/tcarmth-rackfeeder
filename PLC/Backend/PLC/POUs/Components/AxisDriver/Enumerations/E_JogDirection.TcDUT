@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="E_JogDirection" Id="{cec7526b-6cd1-431b-a799-0bde271ff6ce}">
+    <Declaration><![CDATA[/// Enumeration of possible jog directions.
+TYPE E_JogDirection :
+(
+	/// Jog direction not set
+	eJogDirection_none := 0,
+	/// Jog direction positive
+	eJogDirection_pos,
+	/// Jog direction negative
+	eJogDirection_neg
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

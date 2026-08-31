@@ -1,0 +1,736 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Var2File" Id="{e0c4116f-49d2-4045-b536-b0ee1d11a960}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Handler for interact with the Var2File tool
+FUNCTION_BLOCK FB_Var2File
+VAR_INPUT
+	stConfig			:ST_Var2File_Config;
+END_VAR	
+VAR_OUTPUT
+	/// Fehlerzustand
+	bError				:BOOL;
+	/// Fehlertext
+	stErrorText			:ST_Text;
+	/// Fehlertext Zusatz
+	stErrorText_Add		:ST_Text;
+	/// Warnung
+	bWarning			:BOOL;
+	/// Warnungstext
+	stWarnText			:ST_Text;
+
+	bBusy		: BOOL;
+	bDone		: BOOL;
+	nProgress	: UDINT;
+END_VAR
+VAR
+	// object vars
+	// start load / save
+	fbStart_Exe					: NT_StartProcess;
+	// find file
+	fbFindFile					: FB_EnumFindFileEntry;
+	
+	nProcessStep				: INT;
+
+	// Com struct for application
+	stAppCom					: ST_Var2File_Com;
+	
+	// Save to file start flag
+	bStartSave2File				: BOOL;
+	// load from file flag
+	bStartLoadFromFile			: BOOL;
+	
+	nUseFiltersetId				: INT;
+	sUserDynFilterString		: STRING(255);
+	sUseFileFolder				: STRING(255);
+	sUseFileName				: STRING(255);
+	bRecipeMode					: BOOL;
+	
+	// path to var2file exe
+	sPathString					: STRING(100);
+	sWriteToPlc					: STRING(5) := 'false';
+	sCommand					: T_MAXSTRING;
+	
+	rtrig_Error					: R_TRIG;
+	
+	// check communication with var2file tool
+	tonCheckCom					: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+Parameter:
+	-	Mode:			GUI-Mode oder Background-Mode
+	-	WriteToPlc:		Funktionsmodus	
+		o	wenn TRUE dann werden Variablen in SPS geschrieben
+		o	wenn FALSE werden variablen von der SPS in die Datei geschrieben	
+	-	AMS-NetID:		Ziel NetId aus der die Variablen gelesen/geschrieben werden sollen
+	-	AMS-Port:		Ziel Portnummer
+	-	Filter-Set-ID:		ID (Nummer) des Filtersets das angewendet werden soll
+	-	Dyn.FilterString:	Statt Filter-Set-ID kann ein Filterstring direkt übergeben werden
+	-	FileFolder:		Zielordner für Export-Import Datei
+	-	FileName:		Dateiname
+
+Beispiele:
+	xxxx.exe -Mode Background -amsnetid “192.168.1.1.1.1” -port 851 -filterset 3
+	xxxx.exe -Mode Background -amsnetid “192.168.1.1.1.1” -port 851 -filterstring “GVL_TEST”
+
+	Plausibilität-checks
+*)
+
+// now in TC/BSD mode!
+
+tonCheckCom(PT := T#1M);
+tonCheckCom.IN := FALSE;
+
+CASE nProcessStep OF
+	0:
+		// reset data
+		IF bStartSave2File OR bStartLoadFromFile THEN
+			// reset communication structure
+			MEMSET(ADR(stAppCom), 0, SIZEOF(stAppCom));
+			
+			M_Reset();
+			fbStart_Exe.START := FALSE;
+			fbFindFile.bExecute := FALSE;
+			
+			M_CheckPlausibility();
+			
+			// build path string to exe
+			sPathString := CONCAT( stConfig.sAppExeFilePath, stConfig.sAppExeFileName);
+		END_IF
+		
+		// start sequence
+		IF bStartSave2File THEN
+			sWriteToPlc := 'false';
+			bStartSave2File := FALSE;
+			nProcessStep := 10; // save data
+		ELSIF bStartLoadFromFile THEN
+			sWriteToPlc := 'true';
+			bStartLoadFromFile := FALSE;
+			nProcessStep := 50; // load data
+		END_IF
+		
+// save data
+	10: 
+		// build command string
+		IF stConfig.sAmsNetId = '' THEN
+			sCommand := CONCAT4(sPathString, 
+						' -mode background ',
+						'',
+						' -port 851 ');						
+		ELSE
+			sCommand := CONCAT4(sPathString, 
+						' -mode background -amsNetId "',
+						stConfig.sAmsNetId,
+						'" -port 851 ');			
+		END_IF
+
+		// add filter
+		IF nUseFiltersetId <> 0 THEN
+			sCommand := CONCAT3(sCommand, 
+						' -filterSet ',
+						INT_TO_STRING(nUseFiltersetId));
+		ELSE
+			sCommand := CONCAT4(sCommand, 
+						' -filterstring "',
+						sUserDynFilterString,
+						'"');
+		END_IF
+		
+		// recipe mode
+		IF bRecipeMode THEN
+			sCommand := CONCAT3(sCommand, 
+						' -recipe true ',
+						'');			
+		END_IF
+				
+		// add file destination
+		sCommand := CONCAT5(sCommand, 
+					' -filePath "',
+					sUseFileFolder,
+					'" -fileName ',
+					sUseFileName);
+	
+		nProcessStep := 100;
+		
+// load data
+	50: // enum first entry
+		fbFindFile.eCmd := eEnumCmd_First;
+		nProcessStep := 60;
+		
+	60: // start search file
+		fbFindFile(bExecute := FALSE);
+		fbFindFile(bExecute := TRUE);
+		nProcessStep := 70;
+		
+	70: // wait search is done
+		fbFindFile.bExecute := FALSE;
+		IF NOT fbFindFile.bBusy THEN
+			IF NOT fbFindFile.bError THEN
+				// File found
+				IF fbFindFile.stFindFile.sFileName = sUseFileName THEN
+					nProcessStep := 80;
+					
+				// End of file reached -> file not found
+				ELSIF fbFindFile.bEOE THEN
+					bError := TRUE;
+					stErrorText := F_CreateDynText(TO_WSTRING(CONCAT(sUseFileName, ' - file not found!')), 0);
+				
+					bBusy := FALSE;
+					nProcessStep := 0;
+					
+				// search next file
+				ELSE
+					fbFindFile.eCmd := eEnumCmd_Next; // enum next entry 
+					nProcessStep := 60;
+				END_IF
+				
+			// log error
+			ELSE
+				bError := TRUE;
+				stErrorText := F_CreateDynText(TO_WSTRING(CONCAT(sUseFileName, ' - file or directory not found!')), 0);
+							
+				bBusy := FALSE;
+				nProcessStep := 0;
+			END_IF
+		END_IF
+
+	80: 
+		// build command string
+		IF stConfig.sAmsNetId = '' THEN
+			sCommand := CONCAT4(sPathString, 
+						' -mode background -writeToPlc true ',
+						'',
+						' -port 851 ');		
+		ELSE
+			sCommand := CONCAT4(sPathString, 
+						' -mode background -writeToPlc true -amsNetId "',
+						stConfig.sAmsNetId,
+						'" -port 851 ');			
+		END_IF
+		
+		// recipe mode
+		IF bRecipeMode THEN
+			sCommand := CONCAT3(sCommand, 
+						' -recipe true ',
+						'');			
+		END_IF
+			
+		// add file destination
+		sCommand := CONCAT6(sCommand, 
+					' -filePath "',
+					sUseFileFolder,
+					'" -fileName "',
+					sUseFileName,
+					'"');
+					
+		nProcessStep := 100;
+
+// start application and check communication with tool
+
+	100: // execute app
+		fbStart_Exe.START := TRUE;
+		// wait busy
+		IF fbStart_Exe.BUSY THEN
+			fbStart_Exe.START := FALSE;
+			nProcessStep := 110;
+		END_IF
+		
+	110: // wait not busy
+		IF NOT fbStart_Exe.BUSY THEN
+			IF fbStart_Exe.ERR THEN
+				bBusy := FALSE;
+				nProcessStep := 0;
+			ELSE
+				nProcessStep := 120;
+			END_IF
+		END_IF
+	
+	120: // check communication with tool
+		// tool is done
+		IF stAppCom.bAppJobFinished OR stAppCom.nAppProgress = 100 THEN
+			M_ErrorCode(stAppCom.nAppErrorCode);
+			bBusy := FALSE;
+			nProcessStep := 0;
+			bRecipeMode := FALSE;
+		ELSE
+			tonCheckCom.IN := stAppCom.nAppProgress = 0;
+		END_IF
+		
+		// error -> no communication
+		IF tonCheckCom.Q OR stAppCom.nAppErrorCode > 0 THEN
+			// create alarm
+			bError := TRUE;
+			stErrorText := F_CreateDynText(WCONCAT2x("Error Var2File tool. Error: ", M_ErrorCode(stAppCom.nAppErrorCode)), 0);
+			bBusy := FALSE;
+			nProcessStep := 0;
+			bRecipeMode := FALSE;
+		END_IF
+		
+END_CASE
+
+// call FB's
+IF nProcessStep > 0 THEN
+	fbStart_Exe(
+			NETID	:= '', // local
+			PATHSTR	:= '/bin/sh', // now in TC/BSD mode!, sPathString,
+			DIRNAME	:= '/usr/local/var2file', // stConfig.sAppExeFilePath,
+			COMNDLINE := CONCAT4('ExecuteVar2File.sh ', sWriteToPlc, ' ', sUseFileName), //sCommand,
+			TMOUT	:= T#5S,
+			BUSY	=> , 
+			ERR		=> , 
+			ERRID	=> );
+			
+	fbFindFile(
+			sNetID := '', 
+			sPathName := CONCAT3(sUseFileFolder, sDirSeparator, '*.*'),
+			tTimeout := T#5S);
+END_IF	
+						
+// set alarm
+rtrig_Error( CLK := fbStart_Exe.ERR);
+IF rtrig_Error.Q THEN
+	bError := TRUE;
+	stErrorText := F_CreateDynText(WCONCAT2x("Var2File NT_Process ErrorID: ", TO_WSTRING(fbStart_Exe.ERRID)), 0);
+END_IF
+
+bDone := stAppCom.bAppJobFinished AND NOT bBusy;
+nProgress := stAppCom.nAppProgress;
+
+			
+(*// call FB's (nur Backup hier)
+fbStart_Var2File(
+			NETID	:= '', 
+			PATHSTR	:= 'C:\Rmth\Software\var2file\var2file.exe',//'C:\Tools\var2file_Rmth\PlcTag.WinForms.App.exe', //sPathString, 
+			DIRNAME	:= 'C:\Rmth\Software\var2file',//'C:\Tools\var2file_Rmth', //WSTRING_TO_STRING(wsUseFileFolder), 
+			COMNDLINE := 'C:\Rmth\Software\var2file\var2file.exe -mode background -amsNetId "192.168.163.1.1.1" -port 851 -filterSet 1 -filePath "C:\Temp" -fileName PlcData.json', 
+			TMOUT	:= T#5S,
+			BUSY	=> , 
+			ERR		=> , 
+			ERRID	=> );*)]]></ST>
+    </Implementation>
+    <Method Name="M_CheckPlausibility" Id="{38dcca93-27e9-4054-b9ea-8d0f35b0a8eb}">
+      <Declaration><![CDATA[METHOD PROTECTED M_CheckPlausibility : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	bPlausible			: BOOL;
+	nLastBackslashPos	: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set marker bit
+bPlausible := FALSE;
+
+// plausibility check
+IF stConfig.sAppExeFilePath = '' THEN
+	bError := TRUE;
+	stErrorText := F_CreateDynText("No Var2File exe path", 0);
+	
+ELSIF stConfig.sAppExeFileName = '' THEN
+	bError := TRUE;
+	stErrorText := F_CreateDynText("No Var2File exe name", 0);
+	
+ELSIF sUseFileFolder = '' THEN
+	bError := TRUE;
+	stErrorText := F_CreateDynText("No file folder selected (Var2File)", 0);
+	
+ELSIF sUseFileName = '' THEN
+	bError := TRUE;
+	stErrorText := F_CreateDynText("No file name selected (Var2File)", 0);
+	
+ELSE
+	bPlausible := TRUE;
+	
+	// check if there is 'no' backslash at the end of the file directory path
+	IF RIGHT(sUseFileFolder, 1) = sDirSeparator THEN
+		nLastBackslashPos := LEN(sUseFileFolder);
+		sUseFileFolder := DELETE(sUseFileFolder, 1, nLastBackslashPos);
+	END_IF
+	
+	// no point found in the filename (assumption no file extension)
+	IF FIND(sUseFileName, '.') = 0 THEN
+		// add file extension .json
+		sUseFileName := CONCAT(sUseFileName, '.json');
+	END_IF
+	
+	// check if there is a backslash at the end of the exe directory path
+	IF RIGHT(stConfig.sAppExeFilePath, 1) <> sDirSeparator THEN
+		stConfig.sAppExeFilePath := CONCAT(stConfig.sAppExeFilePath, sDirSeparator);
+	END_IF
+END_IF
+
+IF NOT bPlausible THEN
+	// reset start signals
+	bStartSave2File := FALSE;
+	bStartLoadFromFile := FALSE;
+	bBusy := FALSE;
+END_IF
+
+M_CheckPlausibility := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ErrorCode" Id="{0a51ca0d-4834-45f4-961f-6ea8d9132fb1}">
+      <Declaration><![CDATA[/// convert Var2File error code into an text and send alarm
+METHOD PRIVATE M_ErrorCode : WSTRING
+VAR_INPUT
+	/// Applications error code
+	nErrorCode			: UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE nErrorCode OF
+	0:	// No error
+		RETURN;
+		
+	100:
+		M_ErrorCode := "Job canceled by plc";
+		
+	101:
+		M_ErrorCode := "Job canceled by operator";
+		
+	1000:
+		M_ErrorCode := "Reading plc tags failed";
+		
+	1001:
+		M_ErrorCode := "Reading plc tag values failed";
+		
+	1002:
+		M_ErrorCode := "Reading backup file failed";
+		
+	1003:
+		M_ErrorCode := "Writing backup file failed";
+		
+	1004:
+		M_ErrorCode := "Writing plc tag values failed";
+		
+	ELSE
+		M_ErrorCode := WCONCAT2x("Undefined error code: Error ID = ", TO_WSTRING(nErrorCode));
+END_CASE
+
+// create alarm
+bError := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_JobCancel" Id="{7923691d-722e-400f-92e1-13813dbbab92}">
+      <Declaration><![CDATA[/// cancel active job
+METHOD M_JobCancel : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// not allowed if not running
+IF nProcessStep <= 0 THEN
+	RETURN;
+END_IF
+
+stAppCom.bJobCancelRequest := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_LoadFromFile" Id="{a1eab1d8-31a0-400b-b473-e80f1f51031f}">
+      <Declaration><![CDATA[/// Starts the var2file tool with the given file name
+METHOD M_LoadFromFile : BOOL
+VAR_INPUT
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy THEN
+	M_LoadFromFile := FALSE;
+	RETURN;
+END_IF
+
+M_LoadFromFile := M_LoadFromFileEx(stConfig.sDefaultFileFolderPath, sFileName);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_LoadFromFileEx" Id="{0ba27031-43dd-434c-8867-f8c50a2cb44c}">
+      <Declaration><![CDATA[/// Starts the var2file tool with the given file folder and name
+METHOD M_LoadFromFileEx : BOOL
+VAR_INPUT
+	sFileFolder					: STRING(255);
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy THEN
+	M_LoadFromFileEx := FALSE;
+	RETURN;
+END_IF
+
+nUseFiltersetId := 0;
+sUserDynFilterString := '';
+
+sUseFileFolder	:= sFileFolder;
+sUseFileName := sFileName;
+
+bStartLoadFromFile := TRUE;
+
+bBusy := TRUE;
+
+M_LoadFromFileEx := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_LoadFromFileRecipe" Id="{a1377e55-5863-4fbb-a35d-5df87e4895dc}">
+      <Declaration><![CDATA[/// Starts the var2file tool with the given file folder and name
+METHOD M_LoadFromFileRecipe : BOOL
+VAR_INPUT
+	sFileFolder					: STRING(255);
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy THEN
+	M_LoadFromFileRecipe := FALSE;
+	RETURN;
+END_IF
+
+nUseFiltersetId := 0;
+sUserDynFilterString := '';
+
+sUseFileFolder	:= sFileFolder;
+sUseFileName := sFileName;
+bRecipeMode := TRUE;
+
+bStartLoadFromFile := TRUE;
+
+bBusy := TRUE;
+
+M_LoadFromFileRecipe := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{a51a926d-b109-48c9-8ae9-0be9947b49a1}">
+      <Declaration><![CDATA[METHOD M_Reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// Fehlerzustand
+bError := FALSE;
+/// Fehlertext
+stErrorText := CONST.stTextListGlobal.stText_notext;
+/// Fehlertext Zusatz
+stErrorText_Add	:= CONST.stTextListGlobal.stText_notext;
+/// Warnung
+bWarning := FALSE;
+/// Warnungstext
+stWarnText := CONST.stTextListGlobal.stText_notext;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SaveToFileAll" Id="{9b95b0ca-f8cf-41f8-bb90-0cee4ea82ea5}">
+      <Declaration><![CDATA[/// Starts the var2file tool for all user variables
+METHOD M_SaveToFileAll : BOOL
+VAR_INPUT
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy THEN
+	M_SaveToFileAll := FALSE;
+	RETURN;
+END_IF
+
+M_SaveToFileAll := M_SaveToFileFilterSetEx(stConfig.nFilterSetIDAllVars, stConfig.sDefaultFileFolderPath, sFileName);
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SaveToFileFilterSet" Id="{321e8506-61dd-494d-a501-063a65ac37d8}">
+      <Declaration><![CDATA[/// Starts the var2file tool with the given filterset
+METHOD M_SaveToFileFilterSet : BOOL
+VAR_INPUT
+	nFiltersetId				: INT;
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy THEN
+	M_SaveToFileFilterSet := FALSE;
+	RETURN;
+END_IF
+
+M_SaveToFileFilterSet := M_SaveToFileFilterSetEx(nFiltersetId, stConfig.sDefaultFileFolderPath, sFileName);
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SaveToFileFilterSetEx" Id="{fe43912d-b4b5-43f4-879f-1104d96568ac}">
+      <Declaration><![CDATA[/// Starts the var2file tool with the given filterset
+METHOD M_SaveToFileFilterSetEx : BOOL
+VAR_INPUT
+	nFiltersetId				: INT;
+	sFileFolder					: STRING(255);
+	SFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy OR nFiltersetId = 0 THEN
+	M_SaveToFileFilterSetEx := FALSE;
+	RETURN;
+END_IF
+
+nUseFiltersetId := nFiltersetId;
+sUserDynFilterString := '';
+bRecipeMode := FALSE;
+
+sUseFileFolder	:= sFileFolder;
+sUseFileName := sFileName;
+
+bStartSave2File := TRUE;
+
+bBusy := TRUE;
+
+M_SaveToFileFilterSetEx := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SaveToFileFilterString" Id="{91eb2057-6529-4190-9a19-6cc5e8d43370}">
+      <Declaration><![CDATA[/// Starts the var2file tool with the given filterstring
+METHOD M_SaveToFileFilterString : BOOL
+VAR_INPUT
+	sDynFilterString			: STRING(255);
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy THEN
+	M_SaveToFileFilterString := FALSE;
+	RETURN;
+END_IF
+
+M_SaveToFileFilterString := M_SaveToFileFilterStringEx(sDynFilterString, stConfig.sDefaultFileFolderPath, sFileName);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SaveToFileFilterStringEx" Id="{41f1a1a2-e065-4ed7-94dd-3399a9cff7c1}">
+      <Declaration><![CDATA[/// Starts the var2file tool with the given filterstring
+METHOD M_SaveToFileFilterStringEx : BOOL
+VAR_INPUT
+	sDynFilterString			: STRING(255);
+	sFileFolder					: STRING(255);
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy OR sDynFilterString = '' THEN
+	M_SaveToFileFilterStringEx := FALSE;
+	RETURN;
+END_IF
+
+nUseFiltersetId := 0;
+sUserDynFilterString := sDynFilterString;
+bRecipeMode := FALSE;
+
+sUseFileFolder	:= sFileFolder;
+sUseFileName := sFileName;
+
+bStartSave2File := TRUE;
+
+bBusy := TRUE;
+
+M_SaveToFileFilterStringEx := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SaveToFileRecipe" Id="{b5ae088b-524d-4ad7-bde1-5973c8e1495b}">
+      <Declaration><![CDATA[METHOD M_SaveToFileRecipe : BOOL
+VAR_INPUT
+	sDynFilterString			: STRING(255) := 'Objects.fbRecipeManager.stRecipe.stRecipeWork';
+	sFileFolder					: STRING(255);
+	sFileName					: STRING(255);	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// not allowed if already running
+IF bBusy OR sDynFilterString = '' THEN
+	M_SaveToFileRecipe := FALSE;
+	RETURN;
+END_IF
+
+nUseFiltersetId := 0;
+sUserDynFilterString := sDynFilterString;
+bRecipeMode := TRUE;
+
+sUseFileFolder	:= sFileFolder;
+sUseFileName := sFileName;
+
+bStartSave2File := TRUE;
+
+bBusy := TRUE;
+
+M_SaveToFileRecipe := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Var2File">
+      <LineId Id="253" Count="249" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_CheckPlausibility">
+      <LineId Id="3" Count="47" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_ErrorCode">
+      <LineId Id="3" Count="30" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_JobCancel">
+      <LineId Id="3" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_LoadFromFile">
+      <LineId Id="3" Count="6" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_LoadFromFileEx">
+      <LineId Id="3" Count="16" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_LoadFromFileRecipe">
+      <LineId Id="3" Count="17" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_Reset">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_SaveToFileAll">
+      <LineId Id="3" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_SaveToFileFilterSet">
+      <LineId Id="3" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_SaveToFileFilterSetEx">
+      <LineId Id="3" Count="17" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_SaveToFileFilterString">
+      <LineId Id="3" Count="6" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_SaveToFileFilterStringEx">
+      <LineId Id="3" Count="17" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Var2File.M_SaveToFileRecipe">
+      <LineId Id="3" Count="17" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

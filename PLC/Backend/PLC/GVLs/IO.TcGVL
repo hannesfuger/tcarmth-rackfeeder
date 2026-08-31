@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="IO" Id="{e364d737-a63c-4c7f-8b00-b4046f2dfea6}">
+    <Declaration><![CDATA[/// Machine IO structures 
+{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	/// Safety IO'S
+	stSafetyIO			: ST_SafetyIO;
+	
+	/// control cabinet IOs
+	stControlCabinetIO	: ST_ControlCabinetIO;
+	
+	// module
+	stM001_Module_IO	: ST_M001_IO;
+
+	// stations
+	{attribute 'contextName' := 'PlcTask'}
+	st010_OvenA_IO		: ST_St010_IO;
+	{attribute 'contextName' := 'PlcTask'}
+	st020_OvenB_IO		: ST_St020_IO;
+	{attribute 'contextName' := 'PlcTaskFast'}
+	st030_Handling_IO	: ST_St030_IO;
+	{attribute 'contextName' := 'PlcTask'}
+	st040_Storage_IO	: ST_St040_IO;
+	{attribute 'contextName' := 'PlcTask'}
+	st050_Mould_IO		: ST_St050_IO;
+
+	
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

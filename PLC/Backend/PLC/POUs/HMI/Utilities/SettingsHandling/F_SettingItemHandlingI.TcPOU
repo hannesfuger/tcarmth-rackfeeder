@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="F_SettingItemHandlingI" Id="{d9e5c355-481e-4003-9dfb-8c04fcfd7faa}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_SettingItemHandlingI : INT
+VAR_IN_OUT
+	nValue 		: INT;
+	stSetting 	: ST_Data_Item;
+END_VAR
+VAR
+	stInfo 		: ST_Text;
+	sChanges	: T_MaxString;
+	IEvent		: I_EventHandler;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_SettingItemHandlingI := stSetting.nValue;
+
+IF Services.bSettingsSaved OR NOT Services.bPlcInitDone THEN
+	nValue := stSetting.nValue;
+	RETURN;
+END_IF
+
+IF nValue = stSetting.nValue THEN
+	RETURN;
+END_IF
+
+sChanges := sEmpty;
+IEvent := Services.fbEventHandler;
+
+// 1. chk user level
+IF NOT F_ChkSettingUserLevel(HMI.eUserLevel, stSetting, stInfo => stInfo) THEN							  
+	IEvent.Select(TC_Events.SettingsEventClass.WarningEvent)
+		  .ArgAddWString(stInfo.wsName)
+		  .Raise();
+							
+	nValue := stSetting.nValue;
+	RETURN;
+END_IF
+
+
+// 2. chk min/max value
+IF NOT F_ChkSettingLimitN(nValue, stSetting, stInfo => stInfo) THEN
+	IEvent.Select(TC_Events.SettingsEventClass.WarningEvent)
+		  .ArgAddWString(stInfo.wsName)
+		  .Raise();
+							
+	nValue := stSetting.nValue;
+	RETURN;
+END_IF
+
+// 3. save changes
+IF stSetting.eDataType = E_DataType.eDataType_bool THEN
+	F_TrackSettingChangesB(nValue = 1, stSetting, sChanges);
+ELSIF stSetting.eDataType = E_DataType.eDataType_int THEN
+	F_TrackSettingChangesI(TO_INT(nValue), stSetting, sChanges);
+ELSIF stSetting.eDataType = E_DataType.eDataType_lreal THEN
+	F_TrackSettingChangesF(TO_REAL(nValue), stSetting, sChanges);
+ELSIF stSetting.eDataType = E_DataType.eDataType_wstring THEN
+	F_TrackSettingChangesWs(TO_WSTRING(nValue), stSetting, sChanges);
+ELSIF stSetting.eDataType = E_DataType.eDataType_time_ms THEN
+	F_TrackSettingChangesT(TO_TIME(nValue), stSetting, sChanges);
+ELSIF stSetting.eDataType = E_DataType.eDataType_time_s THEN
+	F_TrackSettingChangesT(TO_TIME(nValue * 1000), stSetting, sChanges);
+ELSIF stSetting.eDataType = E_DataType.eDataType_time_m THEN
+	F_TrackSettingChangesT(TO_TIME(nValue * 60000), stSetting, sChanges);
+ELSIF stSetting.eDataType = E_DataType.eDataType_time_h THEN
+	F_TrackSettingChangesT(TO_TIME(nValue * 360000),stSetting, sChanges);
+END_IF
+
+// 4. track settings changes
+IF sChanges <> sEmpty THEN
+	ILog.AddLog(Concat5('Settings Changed, ', 'EKS level: ', TO_STRING(HMI.eUserLevel), '. Changes: ', sChanges), 
+				'HMI Controller', 
+				E_LogLevel.eLogLevel_info);
+END_IF
+
+nValue := stSetting.nValue;
+F_SettingItemHandlingI := stSetting.nValue;]]></ST>
+    </Implementation>
+    <LineIds Name="F_SettingItemHandlingI">
+      <LineId Id="132" Count="1" />
+      <LineId Id="114" Count="6" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="26" Count="5" />
+      <LineId Id="137" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="38" Count="26" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="134" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

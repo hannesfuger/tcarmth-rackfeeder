@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <Itf Name="ITFComponent" Id="{0c339870-3919-4156-9e10-4458967cc3e3}">
+    <Declaration><![CDATA[INTERFACE ITFComponent EXTENDS __System.IQueryInterface 
+]]></Declaration>
+    <Property Name="Active" Id="{a4013bac-f678-40d6-b6e3-75f80b396d7b}">
+      <Declaration><![CDATA[/// Get's or set's a value indicating whether this component is active or not.
+PROPERTY Active : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{af35816a-6e99-4110-b78f-ac05c3ac3868}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{79941203-7a00-4cd8-82bc-f02302f41a88}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="ClearText" Id="{1b270129-2b79-4ed2-8681-18554c509971}">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+PROPERTY ClearText : WSTRING(255)
+]]></Declaration>
+      <Get Name="Get" Id="{6beec932-c0ca-48e0-91e5-86775b94b797}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="ID" Id="{d6eb581a-9300-43d2-a537-fd27c418df38}">
+      <Declaration><![CDATA[PROPERTY ID : INT
+]]></Declaration>
+      <Get Name="Get" Id="{a70e8b71-2e06-4591-a3d1-6a2521787bc6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{0397acb8-1194-48f7-a076-a7b502c58cc9}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="LastError" Id="{f1d9d119-6784-4c74-950f-734bdedcbab4}">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+PROPERTY LastError : T_MaxString
+]]></Declaration>
+      <Get Name="Get" Id="{882a1694-bf62-497a-8196-c43862a41266}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Logger" Id="{c94da13d-936f-4604-8f56-f9d4637d5aa0}">
+      <Declaration><![CDATA[PROPERTY Logger : I_Logger
+]]></Declaration>
+      <Set Name="Set" Id="{86accb3c-15ac-4d20-b299-f862adcd0a23}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="Name" Id="{dfe3cfb1-960f-481b-9895-7c3d2fdb66bb}">
+      <Declaration><![CDATA[PROPERTY Name : ST_Text
+]]></Declaration>
+      <Get Name="Get" Id="{3ed505ba-48a7-4459-a5b0-60e9cc302605}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{4fd43b83-a34d-4197-ae89-db48925894aa}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="ObjectId" Id="{3b25599c-30b5-4fd6-958e-979f9ea8eddb}">
+      <Declaration><![CDATA[PROPERTY ObjectId : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{05c23f4f-324e-4902-a8e9-ff8c3e111e4e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Path" Id="{d49383b0-7900-4755-8881-e6510a11411d}">
+      <Declaration><![CDATA[PROPERTY Path : String]]></Declaration>
+      <Get Name="Get" Id="{81f6854d-d864-4189-ad35-0ff1836e1149}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RefsValid" Id="{fa04309d-9f80-475c-97db-b5a91f3a4fc4}">
+      <Declaration><![CDATA[PROPERTY RefsValid : BOOL]]></Declaration>
+      <Get Name="Get" Id="{be8fe2db-8038-4f53-acbc-4f79a5540e2b}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{d20f6564-ac00-4f07-b6e7-4efc746c414a}">
+      <Declaration><![CDATA[/// Reset component logic
+{attribute 'object_name' := 'Reset'}
+METHOD Reset
+]]></Declaration>
+    </Method>
+    <Method Name="Run" Id="{9456d1b6-8b95-48fd-bbab-7ac1c5ad6db3}">
+      <Declaration><![CDATA[/// Run component logic
+{attribute 'object_name' := 'Run'}
+METHOD Run : E_ComponentState
+]]></Declaration>
+    </Method>
+    <Property Name="State" Id="{62ee10f7-b429-4216-b697-b5f173ac2511}">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+PROPERTY State : E_ComponentState
+]]></Declaration>
+      <Get Name="Get" Id="{55b5c8bf-e40a-4d54-a4c5-8ddf14ed0583}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="StateToString" Id="{6b6e811f-0f6a-45c4-af3a-a9178954bbe3}">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+PROPERTY StateToString : STRING
+]]></Declaration>
+      <Get Name="Get" Id="{8b6e04fc-9441-4459-b058-ef6def792db0}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Typ" Id="{600151d1-2b3c-4c87-a5bb-ed8db31b21c9}">
+      <Declaration><![CDATA[PROPERTY Typ : E_ComponentType]]></Declaration>
+      <Get Name="Get" Id="{a79651d5-3615-41ad-8b6b-c03c92d545e8}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

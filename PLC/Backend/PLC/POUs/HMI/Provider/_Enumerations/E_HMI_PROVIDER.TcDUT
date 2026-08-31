@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_HMI_PROVIDER" Id="{e2253a9c-7378-48ea-8436-3ffca42af5c1}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_HMI_PROVIDER :
+(
+	eHmiProvider_none,
+	eHmiProvider_HW,
+	eHmiProvider_TC3HMI,
+	
+	// keep this last:
+	eHmiProvider_nMaxIdx
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

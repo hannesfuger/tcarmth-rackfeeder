@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_MANUAL_CYLINDER_OUT" Id="{8519e38e-9004-4337-b25f-23b8d519bb46}">
+    <Declaration><![CDATA[TYPE ST_HMI_MANUAL_CYLINDER_OUT :
+STRUCT
+	bVisible		: BOOL;
+	stObjectName	: ST_Text;
+	stButtonHp,
+	stButtonMp,
+	stButtonWp		: ST_HMI_BUTTON_OUT;
+	bMpVisible		: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

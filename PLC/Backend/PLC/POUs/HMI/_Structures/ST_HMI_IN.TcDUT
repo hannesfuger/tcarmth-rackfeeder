@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_IN" Id="{8624ea1f-8195-402b-99e1-a9c7b9de0dc4}">
+    <Declaration><![CDATA[TYPE ST_HMI_IN EXTENDS ST_HMI_BASE_IN :
+STRUCT
+	// additional, project specific stuff:
+	iOverride		: INT;
+	
+	stM001 	: ST_M001_HMI_IN;
+	stSt010 : ST_St010_HMI_IN;
+	stSt020 : ST_St020_HMI_IN;
+	stSt030 : ST_St030_HMI_IN;
+	stSt040 : ST_St040_HMI_IN;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

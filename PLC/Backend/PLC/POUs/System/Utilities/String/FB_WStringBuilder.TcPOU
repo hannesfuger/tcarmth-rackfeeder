@@ -1,0 +1,254 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_WStringBuilder" Id="{f859d0ac-4880-46e1-88e0-7dda813d9199}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_WStringBuilder IMPLEMENTS I_WStringBuilder
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+    wsString : WSTRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// String Builder for WSTRING Fluent-Code Style
+/// Credits to Gerhard Barteling, https://www.plccoder.com/fluent-code/
+/// ]]></ST>
+    </Implementation>
+    <Method Name="Append" Id="{b3b45765-d71c-4d56-90b8-c50d58446151}">
+      <Declaration><![CDATA[METHOD PUBLIC Append : I_WStringBuilder // Append text to the current build string.
+VAR_INPUT
+	text : WSTRING; // Text to append to current build string
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wsString := WCONCAT(wsString, text);
+Append := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendAny" Id="{bea5cc92-4bef-4929-886d-033759815e97}">
+      <Declaration><![CDATA[METHOD PUBLIC AppendAny : I_WStringBuilder // Append text to the current build string.
+VAR_INPUT
+	value : ANY; // Value to append to current build string
+END_VAR
+VAR
+	pSTR	: POINTER TO STRING;
+	pWSTR	: POINTER TO WSTRING;
+	pBOOL	: POINTER TO BOOL;
+	pBYTE	: POINTER TO BYTE;
+	pWORD	: POINTER TO WORD;
+	pDWORD	: POINTER TO DWORD;
+	pLWORD	: POINTER TO LWORD;
+	pSINT	: POINTER TO SINT;
+	pINT	: POINTER TO INT;
+	pDINT	: POINTER TO DINT;
+	pLINT	: POINTER TO LINT;
+	pUSINT	: POINTER TO USINT;
+	pUINT	: POINTER TO UINT;
+	pUDINT	: POINTER TO UDINT;
+	pULINT	: POINTER TO ULINT;
+	pREAL	: POINTER TO REAL;
+	pLREAL	: POINTER TO LREAL;
+	pTIME	: POINTER TO TIME;
+	pLTIME	: POINTER TO LTIME;
+	pDATE	: POINTER TO DATE;
+	pDT		: POINTER TO DT;
+	pTOD	: POINTER TO TOD;
+	pENUM	: POINTER TO ENUM;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE Value.TypeClass OF
+	__SYSTEM.TYPE_CLASS.TYPE_STRING: 
+		pSTR := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pSTR^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_WSTRING:
+		pWSTR := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pWSTR^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_BOOL:
+		pBOOL := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pBOOL^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_BYTE:
+		pBYTE := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pBYTE^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_WORD:
+		pWORD := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pWORD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_DWORD:
+		pDWORD := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pDWORD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LWORD:
+		pLWORD := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pLWORD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_SINT:
+		pSINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pSINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_INT:
+		pINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_DINT:
+		pDINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pDINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LINT:
+		pLINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pLINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_USINT:
+		pUSINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pUSINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_UINT:
+		pUINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pUINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_UDINT:
+		pUDINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pUDINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_ULINT:
+		pULINT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pULINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_REAL:
+		pREAL := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pREAL^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LREAL:
+		pLREAL := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pLREAL^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_TIME:
+		pTIME := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pTIME^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LTIME:
+		pLTIME := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pLTIME^));
+	
+	__SYSTEM.TYPE_CLASS.TYPE_DATE:
+		pDATE := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pDATE^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_DATEANDTIME:
+		pDT := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pDT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_TIMEOFDAY:
+		pTOD := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pTOD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_ENUM: // does not work!
+		pENUM := value.pValue;
+		wsString := WCONCAT(wsString, TO_WSTRING(pENUM^));
+
+END_CASE
+
+AppendAny := THIS^;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Clear" Id="{6ca360e2-d100-4d94-a185-3ee3c8b90f1a}">
+      <Declaration><![CDATA[METHOD PUBLIC Clear : I_WStringBuilder // Clear the current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wsString := "";
+Clear := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Insert" Id="{083a8376-25fb-4694-b39f-42c331c15edc}">
+      <Declaration><![CDATA[METHOD PUBLIC Insert : I_WStringBuilder
+VAR_INPUT
+	text	 : WSTRING;	// Text to append to current build string
+	position : INT;		// Insert position (Index)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wsString := Tc2_Standard.WINSERT(wsString, text, position);
+Insert := THIS^;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{553cec55-7c26-449c-80b7-21b45f2a5b04}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : I_WStringBuilder //Reset current build string to an empty string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wsString := "";
+Reset := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set" Id="{81c04b7d-f762-4d91-8867-94d2d15499f9}">
+      <Declaration><![CDATA[METHOD PUBLIC Set : I_WStringBuilder
+VAR_INPUT
+	text : WSTRING; //Text to append to current build string
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wsString := text;
+Set := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ToString" Id="{54bfc993-e241-48ac-bd19-dc21a20febf3}">
+      <Declaration><![CDATA[METHOD PUBLIC ToString : T_MaxString // Returns current build string.
+VAR
+	str	  : T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[WSTRING_TO_STRING2(ADR(str), ADR(wsString), SIZEOF(str));
+ToString := str;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ToWString" Id="{955ea42f-d877-4333-b052-521c325421b2}">
+      <Declaration><![CDATA[METHOD PUBLIC ToWString : WSTRING // Returns current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ToWString := wsString;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_WStringBuilder">
+      <LineId Id="1" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.Append">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.AppendAny">
+      <LineId Id="1" Count="97" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.Clear">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.Insert">
+      <LineId Id="1" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.Reset">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.Set">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.ToString">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_WStringBuilder.ToWString">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_FormatString" Id="{094edad2-808e-4b5e-9920-ea4de8c02573}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_FormatString : String
+VAR_INPUT
+	sInput,
+	sPrefix		:STRING;
+	nLenght		:INT;
+END_VAR
+VAR
+	nPosition	:INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nPosition := FIND(sInput,sPrefix);
+F_FormatString := LEFT(sInput,(nPosition + nLenght));]]></ST>
+    </Implementation>
+    <LineIds Name="F_FormatString">
+      <LineId Id="7" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

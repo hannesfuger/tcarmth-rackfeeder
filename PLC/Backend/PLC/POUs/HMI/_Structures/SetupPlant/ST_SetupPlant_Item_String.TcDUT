@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_SetupPlant_Item_String" Id="{efd46d42-0205-4749-a2fd-8f2d24dedb46}">
+    <Declaration><![CDATA[TYPE ST_SetupPlant_Item_String :
+STRUCT
+	stGroup					:ST_Text;	
+	stStation				:ST_Text;
+	stName					:ST_Text;
+	stSet					:ST_Text;
+	stGet					:ST_Text;	
+	stState					:ST_Text;		
+	stUserLevel				:ST_Text;
+	stDataType				:ST_Text;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

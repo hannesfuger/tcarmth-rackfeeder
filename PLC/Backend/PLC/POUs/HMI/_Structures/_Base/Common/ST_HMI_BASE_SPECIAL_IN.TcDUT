@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_BASE_SPECIAL_IN" Id="{4e3408f6-bbb8-4e33-a820-4b3d39baf44c}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_SPECIAL_IN:
+STRUCT
+	stButton_LedTest				: ST_HMI_BUTTON_IN;
+	stButton_CloseHmi				: ST_HMI_BUTTON_IN;
+	stButton_SetSystemTime			: ST_HMI_BUTTON_IN;
+	stButton_Eplan					: ST_HMI_BUTTON_IN;
+	stButton_Calculator				: ST_HMI_BUTTON_IN;
+	stButton_KeyenceAutoIdNetwNav	: ST_HMI_BUTTON_IN;
+	stButton_KeyenceIv2Nav			: ST_HMI_BUTTON_IN;
+	stButton_CleanScreen			: ST_HMI_BUTTON_IN;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

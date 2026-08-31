@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Name>Drive Manager 2</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{dffb577b-3450-42b2-b197-a0180631cf8d}</ProjectGuid>
+    <TcPath>
+    </TcPath>
+    <AssemblyName>TwinCAT Drive Manager 2 Project1</AssemblyName>
+    <RootNamespace>TwinCAT Drive Manager 2 Project1</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="OvenDoor_A_B %28AX5206-0000-0215%29.tcdmdrv">
+      <SubType>Content</SubType>
+      <IoItemPathName>TIID^Device 3 (EtherCAT)^OvenDoor_A_B (AX5206-0000-0215)</IoItemPathName>
+    </Content>
+    <Content Include="Rackfeeder_Teleskop %28AX5203-0000-0215%29.tcdmdrv">
+      <SubType>Content</SubType>
+      <IoItemPathName>TIID^Device 3 (EtherCAT)^Rackfeeder_Teleskop (AX5203-0000-0215)</IoItemPathName>
+    </Content>
+    <Content Include="RackFeeder_X_Y %28AX5206-0000-0215%29.tcdmdrv">
+      <SubType>Content</SubType>
+      <IoItemPathName>TIID^Device 3 (EtherCAT)^RackFeeder_X_Y (AX5206-0000-0215)</IoItemPathName>
+    </Content>
+    <Content Include="RackFeeder_X_Y %28AX5206-0000-0215%29.tcdmdrv" />
+  </ItemGroup>
+</Project>

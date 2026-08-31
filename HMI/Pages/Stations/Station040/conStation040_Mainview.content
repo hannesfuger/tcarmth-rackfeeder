@@ -1,0 +1,6 @@
+<div id="conStation040_Mainview" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-top-unit="%" data-tchmi-left-unit="%">
+<div id="TcaCarrierEdit_3" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-target-user-control="TcaItems/TcaCarrier/TcaCarrierService.usercontrol" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="50" data-tchmi-width-unit="%" data-tchmi-data="%s%ADS.PLC1.Plant.stSt040IStorage.Pallet1._data%/s%" data-tchmi-config="%s%ADS.PLC1.Plant.stSt040IStorage.Pallet1._config%/s%">
+</div>
+<div id="TcaCarrierEdit_4" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="50" data-tchmi-left-unit="%" data-tchmi-target-user-control="TcaItems/TcaCarrier/TcaCarrierService.usercontrol" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="50" data-tchmi-width-unit="%" data-tchmi-data="%s%ADS.PLC1.Plant.stSt040IStorage.Pallet2._data%/s%" data-tchmi-config="%s%ADS.PLC1.Plant.stSt040IStorage.Pallet2._config%/s%">
+</div>
+</div>

@@ -1,0 +1,1386 @@
+<div id="Desktop" data-tchmi-type="TcHmi.Controls.System.TcHmiView" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width-mode="Content" data-tchmi-min-width="100" data-tchmi-min-width-unit="%" data-tchmi-height-mode="Content" data-tchmi-min-height="100" data-tchmi-min-height-unit="%" data-tchmi-height="100" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="1920" data-tchmi-creator-viewport-height="1080" data-tchmi-zindex="1">
+
+
+<script data-tchmi-target-attribute="data-tchmi-adataitems" type="application/json">[
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  },
+  {
+    "bYesNo": false,
+    "eDataType": 0,
+    "eRecipeMode": 0,
+    "eUserLevel": 0,
+    "fValue": 0.0,
+    "fValueMax": 0.0,
+    "fValueMin": 0.0,
+    "nValue": null,
+    "sValue": "",
+    "stGroup": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stIndex": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stName": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "stUnit": {
+      "nNameId": 0,
+      "wsName": "",
+      "wsNameId": ""
+    },
+    "tValue": "PT1S"
+  }
+]</script>
+
+<div id="Region_Footer" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left-unit="%" data-tchmi-top="90" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-target-content="Base_HMI/Base/Footer/conMainFooter.content" data-tchmi-zindex="1" data-tchmi-left="0" data-tchmi-creator-locked="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+
+</div>
+
+<div id="Region_Main" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="6" data-tchmi-top-unit="%" data-tchmi-zindex="0" data-tchmi-target-content="Pages/Main/conPlantControlMain.content" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-width="100" data-tchmi-height="84" data-tchmi-creator-locked="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-creator-visibility="Visible" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onTargetContentReplaced",
+    "actions": [
+      {
+        "objectType": "Condition",
+        "active": true,
+        "parts": [
+          {
+            "if": [
+              {
+                "compare1": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:framework#/definitions/ContentPath",
+                  "symbolExpression": "%ctx%owner::TargetContent%/ctx%"
+                },
+                "compare2": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:framework#/definitions/ContentPath",
+                  "symbolExpression": "%i%PageHistorie[0]%/i%"
+                },
+                "compareOperator": "!=",
+                "logic": null
+              }
+            ],
+            "then": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%i%ActualPage%/i%",
+                "value": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/String",
+                  "symbolExpression": "%ctx%owner::TargetContent%/ctx%"
+                },
+                "asyncWait": true
+              },
+              {
+                "objectType": "ActionTemplate",
+                "active": true,
+                "templateName": "SaveNavHistory",
+                "fnParams": [],
+                "asyncWait": true
+              },
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stIn::sCurrentPage%/s%",
+                "value": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/String",
+                  "symbolExpression": "%i%ActualPage%/i%"
+                },
+                "asyncWait": true
+              },
+              {
+                "objectType": "Function",
+                "active": true,
+                "fn": "TcHmi.Functions.Pxxx_Name_HMI.F_SwitchGlobalLocalNavVisible",
+                "fnParams": [],
+                "asyncWait": true
+              }
+            ]
+          },
+          {
+            "else": []
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%s%PLC1.HMI.stHmiTc3::stOut::sSetTargetPage%/s%",
+    "actions": [
+      {
+        "objectType": "Condition",
+        "active": true,
+        "parts": [
+          {
+            "if": [
+              {
+                "compare1": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/STRING(80)",
+                  "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stOut::sSetTargetPage%/s%"
+                },
+                "compare2": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/STRING(80)",
+                  "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stIn::sSetTargetPageConfirm%/s%"
+                },
+                "compareOperator": "!=",
+                "logic": null
+              }
+            ],
+            "then": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stIn::sSetTargetPageConfirm%/s%",
+                "value": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/String",
+                  "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stOut::sSetTargetPage%/s%"
+                },
+                "asyncWait": true
+              },
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%ctx%owner::TargetContent%/ctx%",
+                "value": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/String",
+                  "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stOut::sSetTargetPage%/s%"
+                },
+                "asyncWait": true
+              }
+            ]
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="UcPopup" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="33" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucPopup.usercontrol" data-tchmi-top="30" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-stpopuptohmi="%s%PLC1.HMI.stHmiTc3::stOut::stPopup%/s%" data-tchmi-stpopupfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stPopup|BindingMode=TwoWay%/s%">
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%s%PLC1.HMI.stHmiTc3::stOut::stPopup::bVisible%/s%",
+    "actions": [
+      {
+        "objectType": "Condition",
+        "active": true,
+        "parts": [
+          {
+            "if": [
+              {
+                "compare1": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/String",
+                  "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stOut::stPopup::bVisible%/s%"
+                },
+                "compare2": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/String",
+                  "value": "True"
+                },
+                "compareOperator": "==",
+                "logic": null
+              }
+            ],
+            "then": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%ctx%owner::Visibility%/ctx%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:framework#/definitions/Visibility",
+                  "value": "Visible"
+                },
+                "asyncWait": true
+              },
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%ctx%owner::Zindex%/ctx%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/UDINT",
+                  "value": 10
+                },
+                "asyncWait": true
+              }
+            ]
+          },
+          {
+            "else": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%ctx%owner::Visibility%/ctx%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:framework#/definitions/Visibility",
+                  "value": "Collapsed"
+                },
+                "asyncWait": true
+              },
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%ctx%owner::Zindex%/ctx%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/UDINT",
+                  "value": -10
+                },
+                "asyncWait": true
+              }
+            ]
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="TcHmiRegion_NumPad" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="250" data-tchmi-height-unit="px" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="800" data-tchmi-top-unit="px" data-tchmi-width="250" data-tchmi-width-unit="px" data-tchmi-target-content="Base_HMI/Base/Keyboards/Numpad.content" data-tchmi-visibility="Collapsed">
+</div>
+<div id="TcHmiHeader_2" data-tchmi-type="TcHmi.Controls.BaseTemplate.TcHmiHeader" data-tchmi-height="6" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%">
+<script data-tchmi-target-attribute="data-tchmi-header-items" type="application/json">
+[
+  {
+    "accessRights": [],
+    "altText": "ASMA",
+    "classList": [],
+    "image": "%tr%ASMA_Logo%/tr%",
+    "itemAlign": "Left",
+    "itemType": "Image",
+    "minWidth": 128,
+    "minWidthUnit": "px",
+    "prefHeight": 220.0,
+    "prefHeightUnit": "px",
+    "prefWidth": 700.0,
+    "prefWidthUnit": "px",
+    "priority": "2",
+    "targetContent": "",
+    "targetRegion": ""
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "itemAlign": "Left",
+    "itemType": "Text",
+    "minWidth": 128,
+    "minWidthUnit": "px",
+    "prefHeight": 95,
+    "prefHeightUnit": "px",
+    "prefWidth": 288,
+    "prefWidthUnit": "px",
+    "priority": "1",
+    "targetContent": "",
+    "targetRegion": "",
+    "text": "Application Name"
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "filter": [
+      {
+        "path": "domain",
+        "comparator": "==",
+        "value": "TcHmiEventLogger"
+      },
+      {
+        "logic": "OR"
+      },
+      {
+        "path": "domain",
+        "comparator": "==",
+        "value": "TcHmiAlarm"
+      }
+    ],
+    "itemAlign": "Right",
+    "itemType": "EventLine",
+    "messageFormat": [
+      {
+        "name": "timeRaised"
+      },
+      {
+        "text": " | "
+      },
+      {
+        "name": "domain"
+      },
+      {
+        "text": " | "
+      },
+      {
+        "name": "text"
+      }
+    ],
+    "minWidth": 288,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 600,
+    "prefWidthUnit": "px",
+    "priority": "5",
+    "sorting": [
+      {
+        "name": "timeRaised",
+        "order": "Descending"
+      }
+    ],
+    "targetContent": "Base_HMI/Base/Notification/conNotification.content",
+    "targetRegion": "%ctrl%Region_Main%/ctrl%",
+    "textOverflow": "Ellipsis"
+  },
+  {
+    "accessRights": [],
+    "allowLogout": true,
+    "allowSwitchUser": false,
+    "classList": [],
+    "itemAlign": "Right",
+    "itemType": "UserManagement",
+    "minWidth": 176,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 288,
+    "prefWidthUnit": "px",
+    "priority": "3"
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "itemAlign": "Right",
+    "itemType": "LocalizationSelect",
+    "localizationMapping": [
+      {
+        "code": "de",
+        "text": "German"
+      },
+      {
+        "code": "de-DE",
+        "text": "German (Germany)"
+      },
+      {
+        "code": "en",
+        "text": "English"
+      },
+      {
+        "code": "en-US",
+        "text": "English (United States)"
+      }
+    ],
+    "minWidth": 160,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 560,
+    "prefWidthUnit": "px",
+    "priority": "3"
+  },
+  {
+    "accessRights": [],
+    "classList": [],
+    "itemAlign": "Right",
+    "itemType": "Time",
+    "minWidth": 96,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 128,
+    "prefWidthUnit": "px",
+    "priority": "4",
+    "timeDisplayLayout": "TimeDateMultiLine"
+  },
+  {
+    "accessRights": [],
+    "adsRuntime": "PLC1",
+    "classList": [],
+    "iconWidth": 48,
+    "iconWidthUnit": "px",
+    "itemAlign": "Right",
+    "itemType": "AdsState",
+    "minWidth": 96,
+    "minWidthUnit": "px",
+    "prefHeight": 48,
+    "prefHeightUnit": "px",
+    "prefWidth": 160,
+    "prefWidthUnit": "px",
+    "priority": "3",
+    "serverDomain": "ADS",
+    "serverInterval": 500,
+    "textPosition": "Left"
+  }
+]
+</script>
+
+</div>
+<div id="FrameworkPrj1Control_1" data-tchmi-type="TcHmi.Controls.FrameworkPrj1.FrameworkPrj1Control" cellheight="40" cellwidth="40" cols="5" data-tchmi-height="318" data-tchmi-height-unit="px" data-tchmi-left="1195" data-tchmi-left-unit="px" data-tchmi-top="150" data-tchmi-top-unit="px" data-tchmi-width="370" data-tchmi-width-unit="px" rows="5" spacingx="10" spacingy="10">
+</div>
+</div>

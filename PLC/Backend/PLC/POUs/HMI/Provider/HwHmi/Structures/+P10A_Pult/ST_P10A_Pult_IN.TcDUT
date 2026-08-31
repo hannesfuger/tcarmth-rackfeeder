@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_P10A_Pult_IN" Id="{2e132864-8e02-49eb-a746-c16352310d66}">
+    <Declaration><![CDATA[TYPE ST_P10A_Pult_IN :
+STRUCT
+	bUmlegen	: BOOL; // Umlegen; DT-WH, 2FDI-NO; P10A-51SJ5
+	bAufstellen	: BOOL; // Aufstellen; DT-WH, 2FDI-NO; P10A-51SJ7
+	bHakenpos	: BOOL; // Hakenposition Anfahren; LDT-BU, 2FDI-NO, 1DO; P10A-51SJ3
+	bRichtungL	: BOOL; // Wickelrichtung Links; LDT-WH, 1DI-NO, 1DO; P10A-21SJ1
+	bRichtungR	: BOOL; // Wickelrichtung Rechts; LDT-WH, 1DI-NO, 1DO; P10A-21SJ2
+	bJogP		: BOOL; // Tippen Vor; DT-WH, 2FDI-NO; P10A-52SJ1
+	bJogN		: BOOL; // Tippen Zurück; DT-BK, 2FDI-NO; P10A-52SJ3
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

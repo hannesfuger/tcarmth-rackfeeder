@@ -1,0 +1,24 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-adataitems",
+      "displayName": "aDataItems",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ARRAY_0..50_OF-ST_Data_Item_String",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "aDataItems",
+      "propertySetterName": "setADataItems",
+      "propertyGetterName": "getADataItems",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.744.4/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

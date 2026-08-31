@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Text_List_Components" Id="{30fcb036-4e81-4513-9499-5e6d53a02d6b}">
+    <Declaration><![CDATA[TYPE ST_Text_List_Components :
+STRUCT
+	// Mettler Scale
+	stText_MettlerACT305_DeviceError	: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Mettler_scale_device_rror",
+											wsName:= "Mettler scale device error");	
+	stText_MettlerACT305_WatchdError	: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Mettler_scale_watchdog_error",
+											wsName:= "Mettler scale watchdog error");	
+
+
+	// Axis Driver
+	stText_AxisUi_PosDirectionWarn		: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_Pos_Dir_Locked",
+											wsName:= "Positive Richtung durch Freigabesignal gesperrt");	
+	stText_AxisUi_NegDirectionWarn		: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_Neg_Dir_Locked",
+											wsName:= "Negative Richtung durch Freigabesignal gesperrt");	
+	
+	stText_Axis_DriveNotReady			: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_DriveNotReady",
+											wsName:= "Antrieb nicht bereit");	
+	stText_Axis_SafetyError				: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_SafetyError",
+											wsName:= "Safety Fehler -> Reset");	
+	stText_Axis_MovingNotReleased		: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_MovingNotReleased",
+											wsName:= "Fahrfreigabe nicht vorhanden");	
+	stText_Axis_TargetOutOfArea			: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_TargetOutOfArea",
+											wsName:= "Zielposition ausserhalb Bereich");	
+	stText_Axis_HwNotReady				: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_HwNotReady",
+											wsName:= "Antriebshardware nicht bereit");
+	stText_Axis_FbError					: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_FbError",
+											wsName:= "FB-FehlerNr");
+	stText_Axis_NcError					: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_NcError",
+											wsName:= "Nc-FehlerNr");
+	stText_Axis_HwError					: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Axis_HwError",
+											wsName:= "HW-FehlerNr");
+
+	// Sensor
+	stText_Sensor_NotOK_True					: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Sensor_NotOKTrue",
+											wsName:= "Sensor nicht Belegt");
+											
+	stText_Sensor_NotOK_False					: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Sensor_NotOKFalse",
+											wsName:= "Sensor nicht Frei");											
+											
+	stText_Sensor_Free					: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Sensor_Free",
+											wsName:= "Frei");
+	stText_Sensor_Proven				: ST_Text := (
+											nNameId:= 1,
+											wsNameId:= "Sensor_Proven",
+											wsName:= "Belegt");
+															
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

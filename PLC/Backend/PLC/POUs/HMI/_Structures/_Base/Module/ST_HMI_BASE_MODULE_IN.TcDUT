@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_BASE_MODULE_IN" Id="{3c26b524-b2a3-4fa7-83de-49e62e3ed964}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_MODULE_IN EXTENDS ST_HMI_BASE_CONTROL_IN:
+STRUCT
+	stButtonNavigation	: ST_HMI_BUTTON_IN;
+	iStepchain			: INT; //ToDo: iStepchain HMI -> PLC STATION!?!?! (mapping missing)
+	stManual			: ST_HMI_BASE_MODULE_MANUAL_IN;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

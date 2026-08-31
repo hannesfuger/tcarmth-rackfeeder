@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_CONTROL_SETTING_OUT" Id="{c5b570ba-9569-4355-b083-404db17828da}">
+    <Declaration><![CDATA[TYPE ST_HMI_CONTROL_SETTING_OUT :
+STRUCT
+	stControlSetting_Plant		: ST_HMI_CONTROL_SETTING_ITEM_OUT;
+	stControlSetting_Product	: ST_HMI_CONTROL_SETTING_ITEM_OUT;
+	stControlSetting_Production	: ST_HMI_CONTROL_SETTING_ITEM_OUT;
+
+	stSettingViewPlant			: ARRAY[0..E_PlantSettings.ePlantSetting_nMaxIdx] OF ST_Data_Item_String;
+	stSettingViewProduct		: ARRAY[0..E_ProductSettings.eProductSettings_nMaxIdx] OF ST_Data_Item_String;
+	stSettingViewProduction		: ARRAY[0..E_ProductionSettings.eProductionSettings_nMaxIdx] OF ST_Data_Item_String;	
+
+	astSettingModules			: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_HMI_CONTROL_SETTING_MODULE_OUT;
+	astSettingStations			: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_HMI_CONTROL_SETTING_STATION_OUT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

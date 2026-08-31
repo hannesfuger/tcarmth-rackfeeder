@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Log_Add" Id="{5f3a261b-d000-4689-b64c-e32e3ca19761}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Log_Add : STRING
+VAR_INPUT
+	sString		: STRING;
+END_VAR
+VAR_IN_OUT
+	sTemp		: STRING;
+	sLog1_100	: ARRAY[0..100] OF STRING;
+END_VAR
+VAR
+	ii 			: INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF sTemp = sString THEN
+	RETURN;
+END_IF
+
+FOR ii := 0 TO 99 DO
+	sLog1_100[ii + 1] := sLog1_100[ii];
+END_FOR
+
+sLog1_100[0] := sString;
+sTemp := sString;
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_Log_Add">
+      <LineId Id="20" Count="2" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="38" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

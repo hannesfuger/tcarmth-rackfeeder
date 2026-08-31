@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Monitoring_Module" Id="{05882d8f-108a-43ac-a492-6a0bf00d86d3}">
+    <Declaration><![CDATA[TYPE ST_Monitoring_Module EXTENDS ST_Monitoring_Base :
+STRUCT
+	astMonitoring		: ARRAY[0..CONST.iMaxIdxMonitoring] OF ST_Data_Item;
+	astMonitoringView	: ARRAY[0..CONST.iMaxIdxMonitoring] OF ST_Data_Item_String;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

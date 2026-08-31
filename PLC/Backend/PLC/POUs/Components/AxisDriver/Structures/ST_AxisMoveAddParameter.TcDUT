@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_AxisMoveAddParameter" Id="{e5700111-fe35-47be-9f4b-05d534d0547e}">
+    <Declaration><![CDATA[/// Axis move additive parameter strucure
+TYPE ST_AxisMoveAddParameter EXTENDS ST_AxisMoveParameter :
+STRUCT
+	/// Distance
+	fDistance: LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

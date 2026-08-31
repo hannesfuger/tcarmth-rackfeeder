@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="eTcaCarrierLayout" Id="{79b55d49-ef51-4dd5-9342-bb36d3007c7b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+TYPE eTcaCarrierLayout :
+(
+	undefined := 0,
+	Layout1,
+	Layout2,
+	Layout3,
+	Layout4,
+	Layout5,
+	Bulk
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

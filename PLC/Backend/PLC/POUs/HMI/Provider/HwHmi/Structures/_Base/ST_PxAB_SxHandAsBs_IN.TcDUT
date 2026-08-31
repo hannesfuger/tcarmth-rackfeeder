@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_PxAB_SxHandAsBs_IN" Id="{40bd4e57-dfeb-4b7a-8e65-c3f6c02488d2}">
+    <Declaration><![CDATA[TYPE ST_PxAB_SxHandAsBs_IN :
+STRUCT
+	//bEs			: BOOL; // Handbediengerät Sx AS/BS - ES
+	//bConfirm		: BOOL; // Zustimmung
+	//bS4			: BOOL; // res
+	//bS5			: BOOL; // res
+	bAngleP			: BOOL; // Winkelverstellung Auf; Taste 6
+	//bS7			: BOOL; // res
+	//bS8			: BOOL; // res
+	bAngleN			: BOOL; // Winkelverstellung Ab; Taste 9
+	bStpZust01		: BOOL; // Zustellung Schrittweite 0,1mm; Taste 10
+	bStpZust001		: BOOL; // Zustellung Schrittweite 0,01mm; Taste 11
+	bStpZust0001	: BOOL; // Zustellung Schrittweite 0,001mm; Taste 12
+	bZustP			: BOOL; // Zustellung +; Taste 13
+	bTravL			: BOOL; // Traversierung links; Taste 14
+	
+	bResetError		: BOOL; // reset error
+	
+	bTravR			: BOOL; // Traversierung rechts; Taste 16
+	bZustN			: BOOL; // Zustellung -; Taste 17
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

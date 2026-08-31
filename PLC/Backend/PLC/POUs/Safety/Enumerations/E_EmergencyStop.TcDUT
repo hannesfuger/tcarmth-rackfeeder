@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_EmergencyStop" Id="{29f0e0a0-1760-44a9-b60a-10d4b0ba5b4b}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE E_EmergencyStop :
+(
+	eEmergencyStop_none := 0,
+	eEmergencyStop_1 := 1,		// ES1
+	eEmergencyStop_2 := 2,		// ES2
+
+	eEmergencyStop_nMaxIdx	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

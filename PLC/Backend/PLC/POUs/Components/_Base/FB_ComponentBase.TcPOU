@@ -1,0 +1,364 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_ComponentBase" Id="{c18f24bd-a664-4b00-87c6-35388a9e2c13}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Abstract base FB for components
+{attribute 'enable_dynamic_creation' := ''}
+{attribute 'reflection' := ''}
+FUNCTION_BLOCK FB_ComponentBase IMPLEMENTS ITFComponent
+VAR
+	ii				: INT;
+	/// Unique ID of this instance (cam be used as index: P_ComponentPool.aComponents[iID]...)
+	iId				: INT;
+	/// component type
+	eTyp			: E_ComponentType;
+	/// component active flag
+	bActive			: BOOL;
+	/// component state
+	eState			: E_ComponentState;
+	// Logger
+	ILog			: I_Logger;
+	/// path of this FB (e.g. for log: P_ComponentPool.fbVirtualMaster)	
+    {attribute 'instance-path'} 
+    {attribute 'noinit'}
+    {attribute 'hide'} 
+	sPath			: STRING;
+	// object id
+	wsObjectId		: WSTRING;
+
+	/// component name
+	stName			: ST_Text;
+	/// component name
+	sBMK			: STRING;
+	/// clear text info
+	//aSClearText		: ARRAY[0..eLanguage_maxIdx] OF T_MaxString;
+	aSClearText		: ST_Text;//T_MaxString;
+	
+	/// last error debug info
+	sLastError		: T_MaxString;
+	
+	// event handler & source info
+	IEvent			: I_EventHandler;
+	TcSourceInfo	: FB_TcSourceInfo;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// Abstract base FB for components
+/// TP/www.rmth.at/11.2014
+/// ]]></ST>
+    </Implementation>
+    <Folder Name="Log" Id="{d60d0229-345b-4f21-a527-897b071ec85e}" />
+    <Folder Name="Properties" Id="{d39cf9c1-a479-4c65-8832-30628ef67dbc}" />
+    <Property Name="Active" Id="{ad08f73b-d076-4ffc-a47f-109b9002f3f0}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Get's or set's a value indicating whether this component is active or not.
+{attribute 'monitoring':='call'}
+PROPERTY Active : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{36bc5417-a1df-428f-8558-ccd48ad6e7b2}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Active := bActive;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{91a00653-11d6-478d-b972-77e3e4eb2ccf}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bActive := Active;
+aSClearText := F_CreateDynTextDefaultS(SEL(bActive, 'INACTIVE!', 'ACTIVE!'));]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="AddLogErr" Id="{1fa04579-53a4-4bf7-9485-fed4b63a80f6}" FolderPath="Log\">
+      <Declaration><![CDATA[METHOD PROTECTED AddLogErr
+VAR_INPUT
+	sLog : T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk
+IF ILog = 0 THEN
+	RETURN;
+END_IF
+
+ILog.AddLog(sLog, WSTRING_TO_STRING(stName.wsName), E_LogLevel.eLogLevel_err);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddLogInf" Id="{8f5dc2d6-63af-4a66-8788-1150161b9ec3}" FolderPath="Log\">
+      <Declaration><![CDATA[METHOD PROTECTED AddLogInf
+VAR_INPUT
+	sLog : T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk
+IF ILog = 0 THEN
+	RETURN;
+END_IF
+
+ILog.AddLog(sLog, WSTRING_TO_STRING(stName.wsName), E_LogLevel.eLogLevel_info);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddLogWrn" Id="{c5dba76f-883c-47df-a4a3-7f425d74ab1f}" FolderPath="Log\">
+      <Declaration><![CDATA[METHOD PROTECTED AddLogWrn
+VAR_INPUT
+	sLog : T_MaxString;
+END_VAR
+VAR
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk
+IF ILog = 0 THEN
+	RETURN;
+END_IF
+
+ILog.AddLog(sLog, WSTRING_TO_STRING(stName.wsName), E_LogLevel.eLogLevel_warn);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="BMK" Id="{3e8ee465-5189-4f2f-9d15-0d6a660f5497}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY BMK : STRING
+]]></Declaration>
+      <Get Name="Get" Id="{40debf0c-a597-4287-8751-5255603a498d}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BMK := sBMK;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{522db787-61e2-4748-b40e-ae4b76e7df74}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[sBMK := BMK;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ClearText" Id="{56ead6a6-eff4-4858-8e9e-da8349489d0c}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+{attribute 'monitoring':='call'}
+PROPERTY ClearText : WSTRING(255)
+]]></Declaration>
+      <Get Name="Get" Id="{b9a876a4-0bf3-4831-bd3b-742033eed1fc}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ClearText := aSClearText.wsName;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ID" Id="{7adf225e-7442-4f77-874e-8de91565912f}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Unique component ID (cam be used as index: P_ComponentPool.aComponents[eID]...)
+{attribute 'monitoring':='call'}
+PROPERTY ID : INT
+]]></Declaration>
+      <Get Name="Get" Id="{eb2f488e-56f2-446e-be23-411ca4a9afe8}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ID := iId;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{41b198fd-6b73-4b90-8815-72b41bb70ddf}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[iId := ID;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="LastError" Id="{06cb7fc4-a4a0-4ce5-a61e-ff39359d5455}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+{attribute 'monitoring':='call'}
+PROPERTY LastError : T_MaxString
+]]></Declaration>
+      <Get Name="Get" Id="{ef08fc9c-dbad-4e89-a344-91a0bff8ac28}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LastError := sLastError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Logger" Id="{a0145483-d535-4972-887d-7acf62e3e91b}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Logger : I_Logger
+]]></Declaration>
+      <Set Name="Set" Id="{d2c457c0-a0fd-4903-ad9e-bc9cdf318121}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ILog := Logger;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="M_InitComponentBase" Id="{08a1113d-250e-48ea-9ee2-595e5c1dfb97}">
+      <Declaration><![CDATA[METHOD M_InitComponentBase : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set up default logger and event handler
+ILog := Services.ILog;
+IEvent := Services.fbEventHandler;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_InitComponentBaseEx" Id="{d65de655-88e1-4cce-aad2-28b5a41d4593}">
+      <Declaration><![CDATA[METHOD M_InitComponentBaseEx : BOOL
+VAR_INPUT
+	ILogger			: I_Logger;
+	IEventHandler	: I_EventHandler;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ILog := ILogger;
+IEvent := IEventHandler;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Name" Id="{97507556-cbd6-4656-a4b4-7ef03ea2ff1e}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Name : ST_Text
+]]></Declaration>
+      <Get Name="Get" Id="{0e45fe35-49fc-47f1-97fe-c7f0eb7a6261}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := stName;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{46008dd6-890e-4fe4-a735-05ed8de2d0f7}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[stName := Name;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="NameString" Id="{dd0a9030-a1e1-4242-b530-80defac285f6}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY PUBLIC NameString : WSTRING(255)]]></Declaration>
+      <Get Name="Get" Id="{1b227500-9a9a-4849-b566-94665e2acf34}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[NameString := stName.wsName;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ObjectId" Id="{6151cd1a-ec0a-4780-962a-396a138c611b}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ObjectId : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{99d3fba7-71a7-4d81-9b75-f46e5870f58d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ObjectId := wsObjectId;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Path" Id="{f15c3da9-69b6-42be-b750-91438e4fc191}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Path : String]]></Declaration>
+      <Get Name="Get" Id="{54b2c794-d6e0-472b-8241-5b86ba340b29}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Path := sPath;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RefsValid" Id="{89a3ca2b-9a2f-4d2d-a33a-74f607804482}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY RefsValid : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a66b32cb-c14f-48dc-873e-71a5d161ca8b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RefsValid := IEvent <> 0;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{7800391a-478c-4265-bd45-1c25f898c8f4}">
+      <Declaration><![CDATA[/// Reset component logic
+{attribute 'object_name' := 'Reset'}
+METHOD Reset
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// abstract base logic reset
+
+sLastError := sEmpty;
+
+// default: set state to ready
+eState := E_ComponentState.eComponentState_ready;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{04530f9f-040a-4517-8bda-6e0d48f73e41}">
+      <Declaration><![CDATA[/// Run component logic
+{attribute 'object_name' := 'Run'}
+METHOD Run : E_ComponentState
+VAR
+	ii : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// abstract base logic run
+
+wsObjectId := TO_WSTRING( F_CutInstancePath(sPath) );
+
+// only rdy state may lead to run
+IF eState = E_ComponentState.eComponentState_ready THEN
+	eState := E_ComponentState.eComponentState_running;
+END_IF
+
+Run := eState;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{d68fb6ae-0af8-44c3-bb4d-32b1388481b9}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+{attribute 'monitoring':='call'}
+PROPERTY State : E_ComponentState
+]]></Declaration>
+      <Get Name="Get" Id="{f34831ab-8558-4954-8527-8fd474b2d71e}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[State := eState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="StateToString" Id="{bffb55f1-1ef3-4369-ab66-e92ce785efbd}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Get's value representing the component state.
+{attribute 'monitoring':='call'}
+PROPERTY StateToString : STRING
+]]></Declaration>
+      <Get Name="Get" Id="{a3e43248-1732-4fcc-9614-52c3ff99ce09}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CASE eState OF
+
+	eComponentState_none :
+		StateToString := 'undefiniert';
+	/// Component is resetting
+	eComponentState_resetting:
+		StateToString := 'wird zurückgesetzt';
+	/// Component is ready
+	eComponentState_ready:
+		StateToString := 'ist bereit';
+	/// Component is running
+	eComponentState_running:
+		StateToString := 'wird ausgeführt';
+	/// Component has error
+	eComponentState_error:
+		StateToString := 'ist fehlerhaft';
+
+END_CASE]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Typ" Id="{987dd2cf-7ace-4cc4-856e-8b41f907e2c3}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Typ : E_ComponentType]]></Declaration>
+      <Get Name="Get" Id="{4aca47e7-510b-43f6-9b4f-e58faabf961a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Typ := eTyp;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

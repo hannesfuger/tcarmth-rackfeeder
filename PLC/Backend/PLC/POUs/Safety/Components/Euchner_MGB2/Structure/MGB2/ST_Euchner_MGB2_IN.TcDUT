@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MGB2_IN" Id="{1f20c683-013e-469f-84f8-721324988a4b}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MGB2_IN :
+STRUCT
+	///LM_D_RUN | Diagnose Runmode
+	bLM_D_RUN: BOOL;
+	///LM_I_SK | nicht sicherer Eingang Tür- und Riegelstellung
+	bLM_I_SK: BOOL;
+	///LM_I_UK | nicht sicherer Eingang Zuhaltungsüberwachung
+	bLM_I_UK: BOOL;
+	///LM_E_SM1 | Fehlermeldebit für Submodul 1
+	bLM_E_SM1: BOOL;
+	///LM_E_SM1 | Fehlermeldebit für Submodul 1
+	bLM_E_SM2: BOOL;
+	///LM_E_ER | Fehlermeldebit für Fluchtentriegelung
+	bLM_E_ER: BOOL;
+	///LM_E_G | Fehlermeldebit allgemeiner Modulfehler
+	bLM_E_G: BOOL;
+	///LM_I_OD | nicht sicherer Eingang Türstellung
+	bLM_I_OD: BOOL;
+	///LM_I_OT | nicht sicherer Eingang Riegelzunge
+	bLM_I_OT: BOOL;
+	///LM_I_OL | nicht sicherer Eingang Zuhaltung
+	bLM_I_OL: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

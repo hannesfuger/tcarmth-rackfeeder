@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="I_WStringBuilder" Id="{0f839401-1630-4a3e-a354-b4183d910e4d}">
+    <Declaration><![CDATA[INTERFACE I_WStringBuilder
+]]></Declaration>
+    <Method Name="Append" Id="{5b84f2fa-9eec-4818-bf9a-f51c532cd7a8}">
+      <Declaration><![CDATA[METHOD PUBLIC Append : I_WStringBuilder // Append text to the current build string.
+VAR_INPUT
+	text : WSTRING; // Text to append to current build string
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="AppendAny" Id="{50962844-dc96-48a9-b96c-61ff3cc1c883}">
+      <Declaration><![CDATA[METHOD PUBLIC AppendAny : I_WStringBuilder // Append text to the current build string.
+VAR_INPUT
+	value : ANY; // Value to append to current build string
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="Clear" Id="{903947cc-da45-4cd9-af83-c56af290984c}">
+      <Declaration><![CDATA[METHOD PUBLIC Clear : I_WStringBuilder // Clear the current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Insert" Id="{94c543e0-a320-4fb2-9549-d1d34717fad1}">
+      <Declaration><![CDATA[METHOD PUBLIC Insert : I_WStringBuilder
+VAR_INPUT
+	text	 : WSTRING;	// Text to append to current build string
+	position : INT;		// Insert position (Index)
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Reset" Id="{20e30e21-ada1-4315-84a6-d144832187ac}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : I_WStringBuilder //Reset current build string to an empty string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Set" Id="{2e011a06-200f-43a2-a244-031e632cb2af}">
+      <Declaration><![CDATA[METHOD PUBLIC Set : I_WStringBuilder
+VAR_INPUT
+	text : WSTRING; //Text to append to current build string
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="ToString" Id="{efa1d400-49a7-4909-be91-503ebc03e687}">
+      <Declaration><![CDATA[METHOD PUBLIC ToString : T_MaxString // Returns current build string.
+]]></Declaration>
+    </Method>
+    <Method Name="ToWString" Id="{f9a5695d-b4a1-46ef-8fbd-162f35afc064}">
+      <Declaration><![CDATA[METHOD PUBLIC ToWString : WSTRING // Returns current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

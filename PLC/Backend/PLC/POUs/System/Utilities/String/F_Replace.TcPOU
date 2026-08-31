@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Replace" Id="{bc2cd2d9-5a7c-4421-8368-d99a6888382b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Replace : STRING(255)
+VAR_INPUT
+	sInputText		:STRING(255);
+	sSearchText		:STRING(255);
+	sReplaceText	:STRING(255);
+END_VAR
+VAR
+	idxFnd			:INT;
+	iLength			:INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[idxFnd := FIND(sInputText, sSearchText);
+iLength := LEN(sSearchText);
+
+IF idxFnd > 0 THEN
+	F_Replace := REPLACE(sInputText, sReplaceText, iLength, idxFnd);
+ELSE
+	F_Replace := sInputText;
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_Replace">
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Device_Ui" Id="{703bc960-3d47-42d9-81e1-f6fab43f7048}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Device_Ui EXTENDS FB_ManualUiBase
+VAR_INPUT
+	// enable value input in hmi
+	bValueVisible			: BOOL;
+	stValueText				: ST_Text;
+	
+	/// Eingänge zum Bedienen von Visu
+	bManualOn				: BOOL;
+	bManualOff				: BOOL;
+END_VAR
+VAR_IN_OUT
+	// device reference
+	fbDevice		: FB_Device;
+	// hmi control IN
+	stHMIControlIn	: ST_HMI_MANUAL_DEVICE_IN;
+	// hmi control OUT
+	stHMIControlOut	: ST_HMI_MANUAL_DEVICE_OUT;		
+END_VAR
+VAR_OUTPUT
+	diColorSelectedItem: UDINT;
+	/// 0=Undefiniert
+	/// 1=Fehler
+	iState: INT;
+	diColorState	: UDINT;
+	sState			: STRING;
+	stState			: ST_Text;	
+	/// 0=Off; 
+	/// 1=On; 
+	/// 2=Undefiniert... 
+
+	///Darstellung der Controls für das Object 
+	///0=Unsichtbar
+	///1=Sichtbar Unselektiert
+	///2=Sichtbar Selektiert	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[stName := fbDevice.stName;
+
+IF (diSelectedObjectIndex = diObjectIndex) AND bEnableManual THEN
+	bManualActive := TRUE;
+	stHMIControlOut.bVisible := TRUE;
+	stHMIControlOut.stObjectName := fbDevice.stName;
+	stHMIControlOut.bValueVisible := bValueVisible;
+	stHMIControlOut.stValueText := stValueText;
+	stHMIControlOut.stButtonOn.stName := CONST.stTextListGlobal.stText_On;
+	stHMIControlOut.stButtonOff.stName := CONST.stTextListGlobal.stText_Off;
+
+	IF stHMIControlIn.stButtonOn.bClick THEN
+		fbDevice.M_On();
+	ELSIF stHMIControlIn.stButtonOff.bClick THEN
+		fbDevice.M_Off();
+	END_IF
+	fbDevice.Value := stHMIControlIn.fValue;
+
+	stHMIControlOut.stButtonOn.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonOff.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	IF fbDevice.stOut.bRun THEN
+		stHMIControlOut.stButtonOn.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);
+	END_IF
+	
+	stHMIControlOut.stState	:= 	stState;
+ELSIF bManualActive THEN
+	bManualActive := FALSE;
+	stHMIControlOut.bVisible := FALSE;
+END_IF
+
+IF bManualOn THEN
+	fbDevice.M_On();
+END_IF
+
+IF bManualOff THEN
+	fbDevice.M_Off();
+END_IF
+
+IF fbDevice.stOut.bRun THEN
+	stState := stTextListGlobal.stText_On;
+ELSE
+	stState := stTextListGlobal.stText_Off;	
+END_IF
+
+A_StateMapping();]]></ST>
+    </Implementation>
+    <Action Name="A_StateMapping" Id="{27016113-3486-4f08-b4e9-f4007e36a6a9}">
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(stStateObject) THEN
+	RETURN;
+END_IF
+
+// state mapping
+stStateObject.stState := stState;
+stStateObject.nIndexColor := diColorSelectedItem;]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="FB_Device_Ui">
+      <LineId Id="844" Count="1" />
+      <LineId Id="597" Count="0" />
+      <LineId Id="791" Count="0" />
+      <LineId Id="598" Count="1" />
+      <LineId Id="785" Count="1" />
+      <LineId Id="600" Count="7" />
+      <LineId Id="727" Count="0" />
+      <LineId Id="608" Count="7" />
+      <LineId Id="788" Count="2" />
+      <LineId Id="616" Count="15" />
+      <LineId Id="409" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device_Ui.A_StateMapping">
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

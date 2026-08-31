@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="E_TestCaseState" Id="{08ac3741-d33f-4de4-bbd3-f7c6c5da5f96}">
+    <Declaration><![CDATA[/// Enumeration of all possible test case states
+TYPE E_TestCaseState :
+(
+	/// Test case state not set
+	eTestCaseState_none := 0,
+	/// Test case ready
+	eTestCaseState_ready,
+	/// Test case is running
+	eTestCaseState_running,
+	/// Test case finished
+	eTestCaseState_finished,
+	/// Test case error (execution error)
+	eTestCaseState_error
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

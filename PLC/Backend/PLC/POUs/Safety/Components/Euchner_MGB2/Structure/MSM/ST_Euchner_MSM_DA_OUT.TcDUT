@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MSM_DA_OUT" Id="{a108fdc7-1916-4577-8627-9da9a75ccd43}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MSM_DA_OUT :
+STRUCT
+	///SM_O_L2 | Led 2
+	bSM_O_L2: BOOL;
+	///SM_O_L1 | Led 1
+	bSM_O_L1: BOOL;
+	///SM_O_L2_B | Led 2 blink
+	bSM_O_L2_B: BOOL;
+	///SM_O_L1_B | Led 1 blink
+	bSM_O_L1_B: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

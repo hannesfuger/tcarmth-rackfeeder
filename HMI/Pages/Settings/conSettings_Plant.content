@@ -1,0 +1,13 @@
+<div id="conSettings_Plant" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-left-unit="%" data-tchmi-top-unit="%">
+
+<div id="UcSettings_Generel" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="94" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Settings/ucSettings.usercontrol" data-tchmi-top="6" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-stsettingscontroltohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stSettings::stControlSetting_Plant%/s%" data-tchmi-stsettingscontrolfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stSettings::stControlSetting_Plant%/s%" data-tchmi-adataitems="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stSettings::stSettingViewPlant%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+
+
+</div>
+
+<div id="TcHmiTextblock_Sitename_Settings_General" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="6.3" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%l%settingsplant%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center" data-tchmi-creator-locked="True" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+
+</div>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="F_TargetReached" Id="{014ac5bc-4af5-4f8d-b06a-1aab6b15304e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_TargetReached : BOOL
+VAR_INPUT
+	fCurrentPos: LREAL;
+	fTargetPos: LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_TargetReached := F_TargetWindowReached(fCurrentPos, fTargetPos, fEpsilon);]]></ST>
+    </Implementation>
+    <LineIds Name="F_TargetReached">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

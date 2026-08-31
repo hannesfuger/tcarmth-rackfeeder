@@ -1,0 +1,2077 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Diagnosis_History" Id="{c2dd2a01-5a60-44a1-b181-1026d00edeaa}" SpecialFunc="None">
+    <Declaration><![CDATA[/// provides ELM safety device diagnostic functions
+FUNCTION_BLOCK FB_Diagnosis_History
+VAR_INPUT
+	/// EtherCAT adress of the slave
+	nSlaveAddress: UINT;
+	/// ADS NET adress of the slave
+	stAdsAddr: AMSADDR;
+	/// current system time
+	dtNow: DT;
+END_VAR
+VAR_OUTPUT
+	/// slave and link state
+	stSlaveState: ST_EcSlaveStateBitsEx;
+	/// PAI info data: CPU usage, temperature, aso.
+	stPAIInfoData: ST_ELM3xxxPAIInfoData;
+	/// diag history data
+	stDiagHistory: ST_DiagHistory;
+	/// device time stamp in [ns] since power on
+	nDevieTimeStamp: ULINT;
+	/// device time stamp [DT]
+	dtUpTimeStamp: DT;
+	/// busy flag
+	bBusy: BOOL;
+	/// error flag
+	bError: BOOL;
+	nErrorId: UDINT;
+END_VAR
+VAR CONSTANT
+	/// CoE index PAI Info
+	nIdxPAIInfo: WORD := 16#F900;
+	/// Actual Time Stamp
+	nIdxActTimeStamp: WORD := 16#10F8;
+	/// Diag History
+	nIdxDiagHistory: WORD := 16#10F3;
+END_VAR
+VAR
+	/// CoE - Slave state
+	fbGetSlaveState: FB_EcGetSlaveState;
+	nStepGetState: INT;
+	tAutoUpdateSlaveState: TIME;
+	tonAutoUpdateSlaveState: TON;
+	/// CoE - PAI Info
+	fbCoeReadPAIInfo: FB_EcCoeSdoReadEx;
+	nStepGetPAIInfo: INT;
+	tAutoUpdatePAIInfo: TIME;
+	tonAutoUpdatePAIInfo: TON;
+	/// CoE - Diag History
+	fbEcCoeSdoReadEx: FB_EcCoeSdoReadEx;
+	nStepGetDiagHistory: INT;
+	tAutoUpdateDiagHistory: TIME;
+	tonAutoUpdateDiagHistory: TON;
+	/// auto update all
+	tAutoUpdateAll: TIME;
+	tonAutoUpdateAll: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// CoE - Slave state
+tonAutoUpdateSlaveState(IN := tAutoUpdateSlaveState > T#0S, PT := tAutoUpdateSlaveState);
+IF tonAutoUpdateSlaveState.Q THEN
+	tonAutoUpdateSlaveState(IN := FALSE);
+	nStepGetState := SEL(nStepGetState = 0, nStepGetState, 10);
+END_IF
+
+// CoE - PAI Info
+tonAutoUpdatePAIInfo(IN := tAutoUpdatePAIInfo > T#0S, PT := tAutoUpdatePAIInfo);
+IF tonAutoUpdatePAIInfo.Q THEN
+	tonAutoUpdatePAIInfo(IN := FALSE);
+	nStepGetPAIInfo := SEL(nStepGetPAIInfo = 0, nStepGetPAIInfo, 10);
+END_IF
+
+// CoE - Diag History
+tonAutoUpdateDiagHistory(IN := tAutoUpdateDiagHistory > T#0S, PT := tAutoUpdateDiagHistory);
+IF tonAutoUpdateDiagHistory.Q THEN
+	tonAutoUpdateDiagHistory(IN := FALSE);
+	nStepGetDiagHistory := SEL(nStepGetDiagHistory = 0, nStepGetDiagHistory, 10);
+END_IF
+
+// auto update all
+tonAutoUpdateAll(IN := tAutoUpdateAll > T#0S, PT := tAutoUpdateAll);
+IF tonAutoUpdateAll.Q THEN
+	tonAutoUpdateAll(IN := FALSE);
+	M_GetSlaveState();
+	M_GetPAIInfoData();
+	M_GetDiagHistory();
+END_IF
+
+// workflows
+M_WfGetSlaveState();
+M_WfGetPAIInfoData();
+M_WfGetDiagHistory();
+
+bBusy := nStepGetState > 0 OR nStepGetPAIInfo > 0 OR nStepGetDiagHistory > 0;]]></ST>
+    </Implementation>
+    <Method Name="M_DecodeDiagMessage" Id="{91fba068-19e1-479d-8978-5fac1eba01d7}">
+      <Declaration><![CDATA[/// decodes a ethercat device diag message
+/// 	return value: success state
+METHOD M_DecodeDiagMessage : BOOL
+VAR_INPUT
+	/// device type specification (for specific text ID mapping)
+	eDeviceType: E_HistoryDiagDevices := E_HistoryDiagDevices.EL19xx;
+	/// device up time stamp
+	dtUpTimeStamp: DT;
+END_VAR
+VAR_IN_OUT
+	/// device diag message (source)
+	stDm: ST_DiagMessage;
+	/// human readable message item (destination)
+	stMi: ST_MessageItem;
+END_VAR
+VAR
+	tTs: TIME;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// message time stamp
+tTs := F_EcDeviceTimeStampToTime(stDm.nTimeStamp);
+stMi.dtTimeStamp := dtUpTimeStamp + tTs;
+
+// msg prio
+stMi.nPriority.0 := stDm.nFlags.bInfo;
+stMi.nPriority.1 := stDm.nFlags.bWarning;
+stMi.nPriority.2 := stDm.nFlags.bError;
+stMi.nPriority.3 := stDm.nFlags.bReserved1;
+
+// msg text
+CASE eDeviceType OF
+	E_HistoryDiagDevices.EL19xx:
+		 M_ResolveEL19xxText(stDm.nTextID, stDm.aParameter, stMi.sMessage);
+	E_HistoryDiagDevices.EL29xx:
+		 M_ResolveEL29xxText(stDm.nTextID, stDm.aParameter, stMi.sMessage);
+	ELSE
+		stMi.sMessage := UINT_TO_STRING(stDm.nTextID);
+END_CASE
+
+M_DecodeDiagMessage := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetDiagHistory" Id="{d540f364-dd8a-4ff2-97be-4f9df2972190}">
+      <Declaration><![CDATA[/// triggers reading device diag history once
+/// 	return value: success state
+METHOD INTERNAL M_GetDiagHistory : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_GetDiagHistory := M_GetDiagHistoryEx(T#0S);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetDiagHistoryChanges" Id="{4b1c6d94-f384-4503-941a-6b56f948dca9}">
+      <Declaration><![CDATA[/// gets new or changed messages from diag history since last call of this method
+/// 	return value: success state
+METHOD M_GetDiagHistoryChanges : BOOL
+VAR_INPUT
+	/// device type specification (for specific text ID mapping)
+	eDeviceType: E_HistoryDiagDevices;
+END_VAR
+VAR_IN_OUT
+	/// diag history mirror (from last call)
+	stDiagHistMir: ST_DiagHistory;
+	/// diag history changes (result)
+	stMi: ARRAY[1..64] OF ST_MessageItem;
+END_VAR
+VAR
+	ii: INT;
+	jj: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// clear
+MEMSET(ADR(stMi), 0, SIZEOF(stMi));
+
+// detect new diag
+IF MEMCMP(ADR(stDiagHistMir), ADR(stDiagHistory), SIZEOF(stDiagHistMir)) = 0 THEN
+	RETURN;
+END_IF
+
+jj := 1;
+FOR ii := 1 TO 64 DO
+	IF stDiagHistory.DiagMessages[ii].nTextID > 0 THEN
+		IF MEMCMP(ADR(stDiagHistMir.DiagMessages[ii]), ADR(stDiagHistory.DiagMessages[ii]), SIZEOF(stDiagHistMir.DiagMessages[ii])) <> 0 THEN
+			M_DecodeDiagMessage(eDeviceType, dtUpTimeStamp, stDiagHistory.DiagMessages[ii], stMi[jj]);
+			jj := jj + 1;
+		END_IF
+	END_IF
+END_FOR
+
+MEMCPY(ADR(stDiagHistMir), ADR(stDiagHistory), SIZEOF(stDiagHistMir));
+M_GetDiagHistoryChanges := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetDiagHistoryEx" Id="{f68e2523-cbcb-4d7d-bd53-74296e54f7ab}">
+      <Declaration><![CDATA[/// triggers reading device diag history once or cyclic (if tAutoUpdate time > 0 specified)
+/// 	return value: success state
+METHOD INTERNAL M_GetDiagHistoryEx : BOOL
+VAR_INPUT
+	/// time for internal auto update (T#0S...auto update is off)
+	tAutoUpdate: TIME := TIME#0ms;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_GetDiagHistoryEx := (nStepGetDiagHistory = 0); // if idle..
+IF NOT M_GetDiagHistoryEx THEN
+	RETURN;
+END_IF
+
+tAutoUpdateDiagHistory := tAutoUpdate;
+nStepGetDiagHistory := 10;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetPAIInfoData" Id="{738d391d-ef47-4253-9e92-33103b72a2ba}">
+      <Declaration><![CDATA[/// triggers reading device PAIInfo once
+/// 	return value: success state
+METHOD INTERNAL M_GetPAIInfoData : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_GetPAIInfoData := M_GetPAIInfoDataEx(T#0s);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetPAIInfoDataEx" Id="{0a778c0a-6b49-447a-9d41-2d6a695183d3}">
+      <Declaration><![CDATA[/// triggers reading device PAIInfo once or cyclic (if tAutoUpdate time > 0 specified)
+/// 	return value: success state
+METHOD INTERNAL M_GetPAIInfoDataEx : BOOL
+VAR_INPUT
+	/// time for internal auto update (T#0S...auto update is off)
+	tAutoUpdate: TIME := TIME#0ms;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_GetPAIInfoDataEx := (nStepGetPAIInfo = 0); // if idle..
+IF NOT M_GetPAIInfoDataEx THEN
+	RETURN;
+END_IF
+
+tAutoUpdatePAIInfo := tAutoUpdate;
+nStepGetPAIInfo := 10;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetSlaveState" Id="{f9b7bc55-756d-4442-b915-ef0d22a61089}">
+      <Declaration><![CDATA[/// triggers reading device slave state once
+/// 	return value: success state
+METHOD INTERNAL M_GetSlaveState : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_GetSlaveState := M_GetSlaveStateEx(T#0S);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetSlaveStateEx" Id="{6f2ed95b-c0c9-4978-8f8d-17d580c2444f}">
+      <Declaration><![CDATA[/// triggers reading device slave state once or cyclic (if tAutoUpdate time > 0 specified)
+/// 	return value: success state
+METHOD INTERNAL M_GetSlaveStateEx : BOOL
+VAR_INPUT
+	/// time for internal auto update (T#0S...auto update is off)
+	tAutoUpdate: TIME := TIME#0ms;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_GetSlaveStateEx := (nStepGetState = 0); // if idle..
+IF NOT M_GetSlaveStateEx THEN
+	RETURN;
+END_IF
+
+tAutoUpdateSlaveState := tAutoUpdate;
+nStepGetState := 10;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{1d62f9d4-c7d6-4dfc-a530-c3d5803779dd}">
+      <Declaration><![CDATA[/// reset of error flag and error id
+/// 	return value: success state
+METHOD M_Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bError := FALSE;
+nErrorId := 0;
+M_Reset := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ResolveDiagPrmArgs" Id="{28970538-6a87-466f-9b14-e02f9de57568}">
+      <Declaration><![CDATA[/// resolves EC device diag parameter into T_Arg types for string formatting purposes
+/// 	return value: success state
+METHOD M_ResolveDiagPrmArgs : BOOL
+VAR_IN_OUT
+	aParameter: ARRAY[1..16] OF BYTE;
+	arArg: ARRAY[1..10] OF T_Arg;
+END_VAR
+VAR
+	ii: INT := 1;
+	jj: INT := 1;
+	nType: UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// resolve diag param
+WHILE (ii + 3) < 16 DO
+	MEMCPY(ADR(nType), ADR(aParameter[ii]), 2); // ii points to type, bit 0…11 = prm type (12..15 = 0)
+	ii := ii + 2; // now ii points to value
+	arArg[jj].pData := ADR(aParameter[ii]);
+	CASE nType OF
+		16#0001: // bool
+			arArg[jj].cbLen := 1;
+			arArg[jj].eType := E_ArgType.ARGTYPE_BOOL;
+		16#0002: // int8
+			arArg[jj].cbLen := 1;
+			arArg[jj].eType := E_ArgType.ARGTYPE_SINT;
+		16#0003: // int16
+			arArg[jj].cbLen := 2;
+			arArg[jj].eType := E_ArgType.ARGTYPE_INT;
+		16#0004: // int32
+			arArg[jj].cbLen := 4;
+			arArg[jj].eType := E_ArgType.ARGTYPE_DINT;
+		16#0005: // uint8
+			arArg[jj].cbLen := 1;
+			arArg[jj].eType := E_ArgType.ARGTYPE_USINT;
+		16#0006: // uint16
+			arArg[jj].cbLen := 2;
+			arArg[jj].eType := E_ArgType.ARGTYPE_UINT;
+		16#0007: // uint32
+			arArg[jj].cbLen := 4;
+			arArg[jj].eType := E_ArgType.ARGTYPE_UDINT;
+		16#0008: // real32
+			arArg[jj].cbLen := 4;
+			arArg[jj].eType := E_ArgType.ARGTYPE_REAL;
+		16#0011: // real64
+			arArg[jj].cbLen := 8;
+			arArg[jj].eType := E_ArgType.ARGTYPE_LREAL;
+		16#0015: // int64
+			arArg[jj].cbLen := 8;
+			arArg[jj].eType := E_ArgType.ARGTYPE_LARGE;
+		16#001B: // uint64
+			arArg[jj].cbLen := 8;
+			arArg[jj].eType := E_ArgType.ARGTYPE_ULARGE;
+	ELSE
+		EXIT; // no more prm
+	END_CASE
+	
+	ii := ii + UDINT_TO_INT(arArg[jj].cbLen); // now ii points to next type
+	jj := jj + 1; // next arg
+END_WHILE
+
+M_ResolveDiagPrmArgs := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ResolveEL19xxText" Id="{155fa8af-19d6-4f09-b749-b95e21390ff7}">
+      <Declaration><![CDATA[/// resolves EL19xx device text ID to clear text
+/// 	return value: success state
+METHOD M_ResolveEL19xxText : BOOL
+VAR_INPUT
+	nTextID: UINT;
+END_VAR
+VAR_IN_OUT
+	aParameter: ARRAY[1..16] OF BYTE;
+	sResult: T_MAXSTRING;
+END_VAR
+VAR
+	arArg: ARRAY[1..10] OF T_Arg;
+	fbFormat: FB_FormatString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// Messages extracted from Beckhoff EL19xx.xml (C:\TwinCAT\3.1\Config\Io\EtherCAT)
+/// FileVersion="2", EtherCAT device description update: 8.11.2021
+
+M_ResolveDiagPrmArgs(aParameter, arArg);
+
+// map text id
+CASE nTextID OF
+	16#0001: sResult := 'Primary MC: GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0002: sResult := 'Primary MC: GLOBAL_Shutdown with Code 0x%x and Additional Code 0x%x';
+	16#0003: sResult := 'Secondary MC: GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0004: sResult := 'Secondary MC: GLOBAL_Shutdown with Code 0x%x and Additional Code 0x%x';
+	16#0005: sResult := 'Primary MC: Stored GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0006: sResult := 'Secondary MC: Stored GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0007: sResult := 'Diag-Message-Overflow: %d messages got lost';
+	16#0008: sResult := 'Primary MC: the CRC of the FRAM Data was wrong (Diag-Code=%d)';
+	16#0009: sResult := 'Secondary MC: the CRC of the FRAM Data was wrong (Diag-Code=%d)';
+	16#0010: sResult := 'Reserved CfgData has to be zero st offset %d';
+	16#0011: sResult := 'The password is wrong';
+	16#0012: sResult := 'The user was not found';
+	16#0013: sResult := 'The CRC of the login data does not match';
+	16#0014: sResult := 'The serial number of the login data does not match';
+	16#0015: sResult := 'The login watchdog has been expired';
+	16#0016: sResult := 'The user was logged out before';
+	16#0017: sResult := 'The user has not sufficient access rights';
+	16#0018: sResult := 'The reserved area of the CfgData was not 0';
+	16#0019: sResult := 'The CRC of the CfgData was wrong';
+	16#001A: sResult := 'The user name is wrong at word offset 0x%x when changing the password';
+	16#001B: sResult := 'The requested number of users is too big';
+	16#001D: sResult := 'The user update flags are wrong at word offset 0x%x when changing the password';
+	16#001E: sResult := 'The wrong user (user %d) is logged in when changing the password (user %d found in the received data)';
+	16#0021: sResult := 'the maximum Global-Shutdown counter was exceeded in the Vendor Data (maximu value: %d, actual value: %d)';
+	16#0030: sResult := 'Sync Manager 2 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0031: sResult := 'Sync Manager 3 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0032: sResult := 'Sync Manager 4 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0033: sResult := 'Sync Manager 5 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0034: sResult := 'Sync Manager 2 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0035: sResult := 'Sync Manager 3 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0036: sResult := 'Sync Manager 4 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0037: sResult := 'Sync Manager 5 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0038: sResult := 'Sync Manager %d Settings (Offset 4-7) are invalid, expected values = 0x%x, 0x%x';
+	16#0044: sResult := 'Sync Manager 6 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0045: sResult := 'Sync Manager 7 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0048: sResult := 'Sync Manager 6 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0049: sResult := 'Sync Manager 7 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0101: sResult := 'Primary MC: Completed RAM TEST: Starttime: 0x%x and Stoptime: 0x%x . The calculated timediff is 0x%x.';
+	16#0102: sResult := 'Secondary MC: Completed RAM TEST: Starttime: 0x%x and Stoptime: 0x%x . The calculated timediff is 0x%x.';
+	16#0103: sResult := 'C1 MCTEST Info: Arg1: 0x%x, Arg2: 0x%x, Arg3: 0x%x.';
+	16#0104: sResult := 'C2 MCTEST Info: Arg1: 0x%x, Arg2: 0x%x, Arg3: 0x%x.';
+	16#0115: sResult := 'Controller %d:  Maximum temperature exceeded. Temperature is 0x%x, should be &lt;= 0x%x.';
+	16#0116: sResult := 'Controller %d:  Minimum temperature alert. Temperature is 0x%x, should be &gt;= 0x%x.';
+	16#0117: sResult := 'Controller %d: Temperautre difference too high. Difference is %d, should be &lt;= %d.';
+	16#0118: sResult := 'Controller %d:  Maximum voltage alert (Partner_VCC). Voltage is 0x%x, should be &lt;= 0x%x.';
+	16#0119: sResult := 'Controller %d:  Minimum voltage alert (Partner_VCC). Voltage is 0x%x, should be &gt;= 0x%x.';
+	16#011A: sResult := 'Controller %d:  Maximum voltage alert (ECAT_VCC). Voltage is 0x%x, should be &lt;= 0x%x.';
+	16#011B: sResult := 'Controller %d:  Minimum voltage alert (ECAT_VCC). Voltage is 0x%x, should be &gt;= 0x%x.';
+	16#011E: sResult := 'Controller %d:  Timer Tick Difference is too high. Difference is 0x%x, should be &gt;= 0x%x.';
+	16#011F: sResult := 'Controller %d:  Minimum value alert (Individual ADC Check). Channel parameter = %d. Actual value is 0x%x.';
+	16#0120: sResult := 'Controller %d:  Maximum value alert (Individual ADC Check). Channel parameter = %d. Actual value is 0x%x.';
+	16#0121: sResult := 'Module Shutdown due to minimum  value alert (Individual ADC Check). Channel parameter = %d.';
+	16#1000: sResult := 'The size of the safe User Parameter is too small (%d), the expected size is %d';
+	16#1001: sResult := 'The Vendor-ID (%d) is unequal the expected value of %d';
+	16#1002: sResult := 'The Product-Code (%d) is unequal the expected value of %d';
+	16#1003: sResult := 'The reserved data of the SafeOut User Parameter of module %d at byte offset 0x%x has to be 0';
+	16#1004: sResult := 'The reserved data of the SafeIn User Parameter of module %d at byte offset 0x%x has to be 0';
+	16#1005: sResult := 'The standard outputs of module %d should be enabled but the Sync-Manager 6 is not configured or enabled correctly';
+	16#1006: sResult := 'The FASTSTDOUT mode of the standard outputs of module %d is not supported';
+	16#1007: sResult := 'The SAFEOUT-Module-Number (%d) for the ExternalPulseDetection of the SAFEIN-Module %d is wrong, the allowed range is 1-%d';
+	16#1008: sResult := 'The SAFEOUT-Channel-Number (%d) for the ExternalPulseDetection of the SAFEIN-Module %d is wrong, the allowed range is 1-%d';
+	16#1009: sResult := 'The Bumper-Mode %d is not supported for SAFEIN-Module %d';
+	16#100A: sResult := 'The version of the Product-Code (0x%x) is unequal the expected value of 0x%x';
+	16#1010: sResult := 'The default Project CRC is wrong, the received value is 0x%x';
+	16#1020: sResult := 'The watchdog for the Standard Outputs was expired';
+	16#1030: sResult := 'The size of the safe User Parameter is too big (%d), the expected size is %d';
+	16#15C1: sResult := 'SAFEIN-Module %d: Module Fault due to Fault Link';
+	16#2001: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state CONNECTION';
+	16#2002: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state CONNECTION';
+	16#2003: sResult := 'The %d. connection has received an invalid FSoE-ConnID in state CONNECTION';
+	16#2004: sResult := 'The %d. connection has received an invalid FSoE-CRC in state CONNECTION';
+	16#2005: sResult := 'The FSoE-Watchdog of the %d. connection has been expired in state CONNECTION';
+	16#2006: sResult := 'On the %d. connection the received  FSoE-Address (0x%x) does not match with the expected FSoE-Address (0x%x)';
+	16#2007: sResult := 'On the %d. connection the received connection data do not match with the sent values';
+	16#200E: sResult := 'A Module fault was detected on the %d. connection in state CONNECTION';
+	16#2011: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 1 was received which means that the communication partner has received an invalid FSoE-Cmd';
+	16#2012: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 2 was received which means that the communication partner has received an unknown FSoE-Cmd';
+	16#2013: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 3 was received which means that the communication partner has received an invalid FSoE-ConnID';
+	16#2014: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 4 was received which means that the communication partner has received an invalid FSoE-CRC';
+	16#2015: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 5 was received which means that the FSoE-Watchdog has been expired in  the communication partner';
+	16#2016: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 6 was received which means that the communication partner has received an invalid FSoE-Address';
+	16#2017: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 7 was received which means that the communication partner has received connection data do not match with the sent values';
+	16#2018: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 8 was received which means that the communication partner has received an invalid communication parameter length';
+	16#2019: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 9 was received which means that the communication partner has received an invalid FSoE Watchdog';
+	16#201A: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 10 was received which means that the communication partner has received an invalid application parameter length';
+	16#201B: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 11 was received which means that the communication partner has received invalid application parameter data';
+	16#201C: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 12 was received';
+	16#201D: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 13 was received';
+	16#201E: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 14 was received which means that the communication partner has detected a module fault';
+	16#201F: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 0x%x was received';
+	16#2041: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state PARAMETER';
+	16#2042: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state PARAMETER';
+	16#2043: sResult := 'The %d. connection has received an invalid FSoE-ConnID in state PARAMETER';
+	16#2044: sResult := 'The %d. connection has received an invalid FSoE-CRC in state PARAMETER';
+	16#2045: sResult := 'The FSoE-Watchdog of the %d. connection has been expired in state PARAMETER';
+	16#2047: sResult := 'On the %d. connection the received parameter data do not match with the sent values';
+	16#2048: sResult := 'On the %d. connection the received communication parameter length (%d) does not match with the expected value of 2';
+	16#2049: sResult := 'On the %d. connection the received FSoE Watchdog (%d) is outside the allowed area from 2 to 60000';
+	16#204A: sResult := 'On the %d. connection the received application parameter length (%d) is unequal  the expected length of %d';
+	16#204B: sResult := 'On the %d. connection the received application parameter data are wrong';
+	16#204E: sResult := 'A Module fault was detected on the %d. connection in state PARAMETER';
+	16#2051: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 1 was received which means that the communication partner has received an invalid FSoE-Cmd';
+	16#2052: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 2 was received which means that the communication partner has received an unknown FSoE-Cmd';
+	16#2053: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 3 was received which means that the communication partner has received an invalid FSoE-ConnID';
+	16#2054: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 4 was received which means that the communication partner has received an invalid FSoE-CRC';
+	16#2055: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 5 was received which means that the FSoE-Watchdog has been expired in  the communication partner';
+	16#2056: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 6 was received which means that the communication partner has received an invalid FSoE-Address';
+	16#2057: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 7 was received which means that the communication partner has received connection data do not match with the sent values';
+	16#2058: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 8 was received which means that the communication partner has received an invalid communication parameter length';
+	16#2059: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 9 was received which means that the communication partner has received an invalid FSoE Watchdog';
+	16#205A: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 10 was received which means that the communication partner has received an invalid application parameter length';
+	16#205B: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 11 was received which means that the communication partner has received invalid application parameter data';
+	16#205C: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 12 was received';
+	16#205D: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 13 was received';
+	16#205E: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 14 was received which means that the communication partner has detected a module fault';
+	16#205F: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 0x%x was received';
+	16#2061: sResult := 'On the %d. connection in state PARAMETER a wrong Command was received, which means that the Safe-Parameter size is wrong (Expected size: %d, Received size: %d)';
+	16#2081: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state DATA';
+	16#2082: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state DATA';
+	16#2083: sResult := 'The %d. connection has received an invalid FSoE-ConnID in state DATA';
+	16#2084: sResult := 'The %d. connection has received an invalid FSoE-CRC in state DATA';
+	16#2085: sResult := 'The FSoE-Watchdog of the %d. connection has been expired in state DATA';
+	16#208D: sResult := 'The FailSafeData command was received on the %d. connection in state DATA';
+	16#208E: sResult := 'A Module fault was detected on the %d. connection in state DATA';
+	16#2091: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 1 was received which means that the communication partner has received an invalid FSoE-Cmd';
+	16#2092: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 2 was received which means that the communication partner has received an unknown FSoE-Cmd';
+	16#2093: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 3 was received which means that the communication partner has received an invalid FSoE-ConnID';
+	16#2094: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 4 was received which means that the communication partner has received an invalid FSoE-CRC';
+	16#2095: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 5 was received which means that the FSoE-Watchdog has been expired in  the communication partner';
+	16#2096: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 6 was received which means that the communication partner has received an invalid FSoE-Address';
+	16#2097: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 7 was received which means that the communication partner has received connection data do not match with the sent values';
+	16#2098: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 8 was received which means that the communication partner has received an invalid communication parameter length';
+	16#2099: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 9 was received which means that the communication partner has received an invalid FSoE Watchdog';
+	16#209A: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 10 was received which means that the communication partner has received an invalid application parameter length';
+	16#209B: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 11 was received which means that the communication partner has received invalid application parameter data';
+	16#209C: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 12 was received';
+	16#209D: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 13 was received';
+	16#209E: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 14 was received which means that the communication partner has detected a module fault';
+	16#209F: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 0x%x was received';
+	16#20C1: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state SHUTDOWN';
+	16#20C2: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state SHUTDOWN';
+	16#20C4: sResult := 'The %d. connection has received an invalid FSoE-CRC in state SHUTDOWN';
+	16#20E3: sResult := 'The %d. connection has received the invalid FSoE-ConnID 0 in state SESSION';
+	16#2101: sResult := 'On the %d. connection the PROFIsafe-Slave reports a communication error';
+	16#2102: sResult := 'On the %d. connection the PROFIsafe-Slave reports a watchdog error';
+	16#2103: sResult := 'On the %d. connection the PROFIsafe-Slave reports a device fault';
+	16#2104: sResult := 'On the %d. connection a CRC2-Error was detected locally on the PROFIsafe Host';
+	16#2105: sResult := 'On the %d. connection the Watchdog has been expired locally on the PROFIsafe Host';
+	16#2114: sResult := 'On the %d. connection a CRC2-Error was detected locally on the PROFIsafe Slave';
+	16#2115: sResult := 'On the %d. connection the Watchdog has been expired locally on the PROFIsafe Slave';
+	16#2117: sResult := 'On the %d. connection the Bit 7 of the F_Control is reset, which is not allowed on a PROFIsafe Slave connection with the same message size for inputs and outputs';
+	16#211C: sResult := 'On the %d. connection the PROFIsafe Slave has been restarted locally';
+	16#3000: sResult := 'The received number of groups (%d) was too big, the maximum allowed value is %d';
+	16#3001: sResult := 'The received number of FBs (%d) was too big, the maximum allowed value is %d';
+	16#3002: sResult := 'The received number of Connections (%d) was too big, the maximum allowed value is %d';
+	16#3003: sResult := 'The received number of Output Mappings was too big, the maximum allowed value is %d';
+	16#3004: sResult := 'The received number of Input Mappings was too big, the maximum allowed value is %d';
+	16#3005: sResult := 'The received size of Standard Inputs (%d) was too big, the maximum allowed value is %d';
+	16#3006: sResult := 'The received size of Standard Outputs (%d) was too big, the maximum allowed value is %d';
+	16#3007: sResult := 'The received number of Restore Slaves (%d) was too big, the maximum allowed value is %d';
+	16#3008: sResult := 'The SafeCfgData type was unexpected: %d found and %d expected';
+	16#3009: sResult := 'The SafeCfgData type 2 (Connection) was expected at offset %d';
+	16#300A: sResult := 'The SafeCfgData type 3 (FB) was expected at offset %d';
+	16#300B: sResult := 'The SafeCfgData type 15 (GAP) was expected at offset %d';
+	16#300C: sResult := 'The Bit-Mask in the SafeCfgData was wrong at offset %d';
+	16#300D: sResult := 'The address in the SafeCfgData was wrong at offset %d';
+	16#300E: sResult := 'The Signal number in the SafeCfgData was wrong at offset %d';
+	16#300F: sResult := 'The number of connections was wrong in the SafeCfgData of the Group at offset %d';
+	16#3010: sResult := 'The number of FBs was wrong in the SafeCfgData of the Group at offset %d';
+	16#3011: sResult := 'The size of the SafeCfgData was wrong at offset %d';
+	16#3012: sResult := 'The complete size of the SafeCfgData related to the Group %d was wrong';
+	16#3013: sResult := 'If the RUN-Signal should be mapped internally, it has to be activated at offset %d';
+	16#3014: sResult := 'The message size at offset %d is invalid';
+	16#3015: sResult := 'The connection parameter at offset %d is invalid';
+	16#3016: sResult := 'If the ERRACK-Signal should be mapped internally, it has to be activated at offset %d';
+	16#3017: sResult := 'The connection type at offset %d is invalid';
+	16#3018: sResult := 'The value at offset %d of the SafeCfgData  is invalid';
+	16#3019: sResult := 'The value at offset %d of the SafeCfgData  is invalid because at least one of the related signals is not active';
+	16#301A: sResult := 'The number of mappings (%d) is wrong because it is not the last Mapping SafeCfgData';
+	16#301B: sResult := 'The Safe Logic Cfg Data were downloaded in the wrong download state (%d)';
+	16#301C: sResult := 'The number of mappings (%d) is too great in the Mapping SafeCfgData';
+	16#301D: sResult := 'The Mapping-Size in the SafeCfgData was wrong at offset %d';
+	16#301E: sResult := 'A Group-Input Mapping was expected at offset %d';
+	16#301F: sResult := 'A Connection-Input Mapping was expected at offset %d';
+	16#3020: sResult := 'A FB-Input Bit-Mapping was expected at offset %d';
+	16#3021: sResult := 'A FB-Input Byte-Mapping was expected at offset %d';
+	16#3022: sResult := 'No more mapping was expected at offset %d';
+	16#3023: sResult := 'Invalid Safe User Parameter size at byte offset 0x%x (Found=%d, Expected=%d)';
+	16#3024: sResult := 'The SafeCfgData type 4 (Safe User Parameter) was expected at offset %d';
+	16#3025: sResult := 'The download of the Input Mapping Cfg Data was refused because %d groups were missing in the Safe Logic Cfg Data';
+	16#3026: sResult := 'The download of the Input Mapping Cfg Data was refused because %d connections were missing in the Safe Logic Cfg Data';
+	16#3027: sResult := 'The download of the Input Mapping Cfg Data was refused because %d FBs were missing in the Safe Logic Cfg Data';
+	16#3028: sResult := 'At least one group has to be defined in the SafeCfgData';
+	16#3029: sResult := 'The download of the Input Mapping Cfg Data was refused because no safe Logic Cfg Data were downloaded before';
+	16#302A: sResult := 'The Subindex %d was expected to be downloaded';
+	16#302B: sResult := 'When loading CfgData a user has to be logged in before';
+	16#302C: sResult := 'The Input Mapping Cfg Data were downloaded in the wrong download state (%d)';
+	16#302D: sResult := 'The download of theSafe Logic CfgData is refused because  the old Safe Logic Cfg Data were not deleted before';
+	16#302E: sResult := 'The user was logged out before';
+	16#302F: sResult := 'The user has not sufficient access rights';
+	16#3030: sResult := 'The reserved area of the CfgData was not 0';
+	16#3031: sResult := 'The CRC of the CfgData was wrong';
+	16#3032: sResult := 'All needed CfgData pages were downloaded before, no more pages are expected';
+	16#3033: sResult := 'The mapping code buffer is too small for the mapping';
+	16#3034: sResult := 'The maximum allowed subindex is %d';
+	16#3035: sResult := 'The download of the Output Mapping Cfg Data was refused because %d mappings of the Input Mapping Cfg Data were missing';
+	16#3036: sResult := '%d input mappings of the groups were missing in the Input Mapping Cfg Data';
+	16#3037: sResult := '%d input mappings of the connections were missing in the Input Mapping Cfg Data';
+	16#3038: sResult := '%d input bit mappings of the FBs were missing in the Input Mapping Cfg Data';
+	16#3039: sResult := '%d input byte mappings of the FBs were missing in the Input Mapping Cfg Data';
+	16#303A: sResult := 'The Output Mapping Cfg Data were downloaded in the wrong download state (%d)';
+	16#303B: sResult := 'The mapping code buffer is too small for the local mapping';
+	16#303C: sResult := 'The download of the Safe Parameter was refused because no Output Mapping Cfg Data were downloaded before';
+	16#303D: sResult := 'The download of the Safe User Parameter was refused because %d mappings of the Output Mapping Cfg Data were missing';
+	16#303E: sResult := 'The Safe User Parameter Cfg Data were downloaded in the wrong download state (%d)';
+	16#303F: sResult := 'The download of the Activate Project Cfg Data was refused because no Safe User Parameter  Cfg Data were downloaded before';
+	16#3040: sResult := 'The download of the Activate Project Cfg Data was refused because %d bytes of the Safe Parameter Cfg Data were missing';
+	16#3041: sResult := 'The received activate code (0x%x) was wrong in the Project Cfg Data';
+	16#3042: sResult := 'The TwinSAFE Address (%d) in the Project Cfg Data does not match with the DIP switch (%d)';
+	16#3043: sResult := 'At least one Cfg Data page has to be defined in the Safe Logic Cfg Data';
+	16#3044: sResult := 'The maximum number (%d) of Cfg Data pages was exceeded in the Safe Logic Cfg Data';
+	16#3045: sResult := 'The received number of Safe Logic Cfg Data pages (%d) has exceeded the configured value at offset 0 of the Safe Logic Cfg Data (%d)';
+	16#3046: sResult := 'The download of the Input Mapping Cfg Data was refused because %d pages were missing in the Safe Logic Cfg Data';
+	16#3047: sResult := 'The Safe Logic Cfg Data CRC does not match in the Safe Project Cfg Data';
+	16#3048: sResult := 'When checking the Mapping Code a fault has detected at offset 0x%x';
+	16#3049: sResult := 'The Mapping Cfg Data CRC does not match in the Safe Project Cfg Data';
+	16#304A: sResult := 'The number of Input Mappings is too small in the Safe Project Cfg Data (Code-Offset=0x%x)';
+	16#304B: sResult := 'The number of Output Mappings is too small in the Safe Project Cfg Data (Code-Offset=0x%x)';
+	16#304C: sResult := 'The number of Input Mappings is too great in the Safe Project Cfg Data, (%d mappings too much, Code-Offset=0x%x)';
+	16#304D: sResult := 'The number of Output Mappings is too great in the Safe Project Cfg Data, (%d mappings too much, Code-Offset=0x%x)';
+	16#304E: sResult := 'The maximum number (%d) of Cfg Data pages was exceeded in the Safe User Parameter Cfg Data';
+	16#304F: sResult := 'At least one Cfg Data page has to be defined in the Safe User Parameter Cfg Data';
+	16#3050: sResult := 'The Safe User Parameter Cfg Data CRC does not match in the Safe Project Cfg Data';
+	16#3052: sResult := 'The caluculated local process image size (%d) exceeded the maximum local process image size of %d';
+	16#3053: sResult := 'The Activate Project Cfg Data were downloaded in the wrong download state (%d)';
+	16#3054: sResult := 'The Delete Project Cfg Data were downloaded in the wrong download state (%d)';
+	16#3055: sResult := 'The TwinSAFE Address (%d) does not match with the DIP switch (%d) in the Delete Project Cfg Data';
+	16#3056: sResult := 'The Delete Code (%d) is too high in the Delete Project Cfg Data';
+	16#3057: sResult := 'Unexpected connection index in the Safe User Parameter Cfg Data at byte offset 0x%x';
+	16#3058: sResult := 'The received number of Local Safety Inputs (%d) was wrong, the expected value is %d';
+	16#3059: sResult := 'The received number of Local Safety Outputs (%d) was wrong, the expected value is %d';
+	16#305A: sResult := 'The received number of Local Standard Inputs (%d) was wrong, the expected value is %d';
+	16#305B: sResult := 'The received number of Local Standard Outputs (%d) was wrong, the expected value is %d';
+	16#305C: sResult := 'The received Safety Input Message size at word offset 15 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#305D: sResult := 'The received Safety Output Message size at word offset 16 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#305E: sResult := 'The received Safety Input size at word offset 7 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#305F: sResult := 'The received Safety Output size at word offset 8 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3060: sResult := 'The received PROFIsafe Input Message size at word offset 9 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3061: sResult := 'The received PROFIsafe Output Message size at word offset 10 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3062: sResult := 'At word offset 0x%x the configured number of CRCs of %d exceeds the maximum number of CRCs (%d)';
+	16#3064: sResult := 'The received FB Analog Input size at word offset 13 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3065: sResult := 'The received FB Analog Output size at word offset 14 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3066: sResult := 'The received Connection Status Data size at word offset 21 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3067: sResult := 'The received FB Status Data size at word offset 22 of  the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3068: sResult := 'The number of active signals in the FB is invalid at offset %d';
+	16#3069: sResult := 'The local map code size in the FB is invalid at offset %d';
+	16#306A: sResult := 'The analog output size in the Group Cfg Data is invalid at offset %d';
+	16#306B: sResult := 'The analog output offset in the Group Cfg Data is invalid at offset %d';
+	16#306C: sResult := 'The received FB Analog Output size at word offset 14 of  the Safe Logic Cfg Data (%d) is unequal the calculated value over all the Group Cfg Data (%d)';
+	16#306D: sResult := 'The caluculated end of the analog output area (%d) is unequal the calculated analog output offset over all the Group Cfg Data (%d)';
+	16#306E: sResult := 'The value of the FB Cfg Data at offset %d is invalid';
+	16#306F: sResult := 'At least one FB input has to be deactivated in this operation mode at offset %d';
+	16#3070: sResult := 'At least the level of one FB input is wrong in this operation mode at offset %d';
+	16#3071: sResult := 'The value of the FB Cfg Data at word offset %d is invalid in this operation mode';
+	16#3072: sResult := 'The number (%d) of Cfg Data pages was exceeded in the Info Data Cfg Data at offset 0';
+	16#3073: sResult := 'The received number of FBs (%d) at word offset 1 was unequal the configured number of FBs of %d';
+	16#3074: sResult := 'The received FB Status Data Size (%d) in the Info Data Map Cfg Data at byte offset %d is unequal the calculated FB Status Data size of %d';
+	16#3075: sResult := 'The received FB Diag Data Size (%d) in the Info Data Map Cfg Data at byte offset %d is unequal the calculated FB Diag Data size of %d';
+	16#3076: sResult := 'The received number of Connections (%d) in the Info Data Cfg Data at word offset %d was unequal the configured number of connections of %d';
+	16#3077: sResult := 'The received Connection Type (%d) in the Info Data Map Cfg Data at byte offset %d is unequal the configured Connection Type of %d';
+	16#3078: sResult := 'The FB Diag Data Map in the Info Data Map Cfg Data was wrong at byte offset %d (bit 7=1 and bit 6=0 is not allowed)';
+	16#3079: sResult := 'The received number of Groups (%d) in the Info Data Cfg Data at word offset %d was unequal the configured number of Groups of %d';
+	16#307A: sResult := 'The FB-Type is unknown at offet 0x%x';
+	16#307B: sResult := 'The value at offset %d of the SafeCfgData  is too great';
+	16#307C: sResult := 'The value at offset %d of the SafeCfgData  is too small';
+	16#307D: sResult := 'FB-Muting: if SequentialInputs is TRUE, all MuteIn signals have to be active at offset 0x%x';
+	16#307E: sResult := 'The type of the analog inputs has to be the same at offet 0x%x';
+	16#307F: sResult := 'The received size of the local safe user parameter (%d) was wrong, the expected size is %d';
+	16#3080: sResult := 'The value at offset %d of the SafeCfgData is invalid in combination with the value %d words before in the SafeCfgData';
+	16#3081: sResult := 'The received size of the FB Parameter Data at word offset 25 of the Safe Logic Cfg Data (%d) is unequal the calculated value of  %d';
+	16#3082: sResult := 'The FB-Type in the Change FB Parameter Data (FB %d) is unequal, the expected FB-type is %d';
+	16#3083: sResult := 'The size in the Change FB Parameter Data (FB %d) is unequal, the expected size is %d';
+	16#3084: sResult := 'The Setting Mode of the FB CAMMON (FB %d) in the Change FB Parameter Data is not activated';
+	16#3085: sResult := 'The actual Logic State (%d) is unequal RUN (1) when changing FB Parameter Data';
+	16#3086: sResult := 'The FB-Number (%d) in the Change FB Parameter Data is invalid';
+	16#3087: sResult := 'The FRAM data size (%d) has exceeded, the maximum allowed value is %d';
+	16#3094: sResult := 'The size 0 is not allowed for the safe user parameter at word offset %d';
+	16#3095: sResult := 'The download of the Activate Project Cfg Data was refused because no Output Mapping Cfg Data were downloaded before';
+	16#3096: sResult := 'The download of the Activate Project Cfg Data was refused because %d mappings of the Output Mapping Cfg Data were missing';
+	16#3097: sResult := 'The re-converted FB-Mapping-Code was not matching to the FB Cfg Data (FB: %d, Code-Address: 0x%x, Offset: 0x%x)';
+	16#3098: sResult := 'a destination was mapped twice in the bit mapping code (page: 0x%x, Code-Address: 0x%x)';
+	16#3099: sResult := 'a destination was mapped twice in the byte mapping code (Page: 0x%x, Code-Address: 0x%x)';
+	16#309A: sResult := 'the number of groups was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309B: sResult := 'the number of FBs was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309C: sResult := 'the number of Connections was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309D: sResult := 'the number of Standard Inputs was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309E: sResult := 'the number of Standard Outputs was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309F: sResult := 'the FSoE message size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A0: sResult := 'the FSoE safe user parameter size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A1: sResult := 'the PROFIsafe message size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A2: sResult := 'the EtherCAT Output size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A3: sResult := 'the EtherCAT Input size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A4: sResult := 'the EtherCAT Output size was exceeded in the project (calculated value: %d, maximum value: %d)';
+	16#30A5: sResult := 'the EtherCAT Input size was exceeded in the project (calculated value: %d, maximum value: %d)';
+	16#30A6: sResult := 'when re-converting the local FB mapping code (FB %d) the analog destination address was below the minimum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30A7: sResult := 'when re-converting the local FB mapping code (FB %d) the analog destination address was above the maximum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30A8: sResult := 'when re-converting the local FB mapping code (FB %d) the destination address was not found (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30A9: sResult := 'when re-converting the local FB mapping code (FB %d) the digital destination address was below the minimum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30AA: sResult := 'when re-converting the local FB mapping code (FB %d) the digital destination address was above the maximum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30AB: sResult := 'when re-converting the local FB mapping code (FB %d) the generated mapping data size was wrong (Code-Offset: 0x%x)';
+	16#30AC: sResult := 'the Project CRC in the Activate Project Cfg Data was wrong';
+	16#30AD: sResult := 'when re-converting the local FB mapping code the source bit address was wrong (FB: %d, Code-Offset: 0x%x)';
+	16#30AE: sResult := 'when re-converting the local FB mapping code the source byte address was wrong (FB: %d, Code-Offset: 0x%x)';
+	16#30B1: sResult := 'wrong subindex order when reading the input mapping cfg data, the expected subindex is %d';
+	16#30B2: sResult := 'subindex exceeded when reading the cfg data';
+	16#30B3: sResult := 'the offset in the Replacement Values cfg data is wrong in the Group cfg data at word-offset 0x%x';
+	16#30B4: sResult := 'the deactivation mode passivate is enabled and the number of connections is unequal 1 in the Group cfg data at word-offset 0x%x';
+	16#30B5: sResult := 'the RUN-signal has to be active in the Group cfg data at word-offset 0x%x';
+	16#30B6: sResult := 'in the Change FB-Parameter (FB %d) the FB-type %d is not supported';
+	16#30B7: sResult := 'the Subindex exceeds the number of connections (%d) when writing the PROFIsafe F-Parameter';
+	16#30B8: sResult := 'the Connection-Type %d does not support PROFIsafe F-Parameter';
+	16#30B9: sResult := 'the Subindex exceeds the number of connections (%d) when writing the Store Slave Project CRC Parameter';
+	16#30BA: sResult := 'the Connection-Type %d does not support Store Slave Project CRC Parameter';
+	16#30BB: sResult := 'if there are no Muting sensors behind the AOPD, the Backwards-Mode and optional Check of the OSSD inputs are not allowed';
+	16#30BC: sResult := 'when optional Check of the OSSD inputs is activated, the Sequential Inputs mode has to be activated too';
+	16#30BD: sResult := 'The number of Connections (%d) is unequal the calculated number of connections over all groups (%d)';
+	16#30BE: sResult := 'The number of FBs (%d) is unequal the calculated number of FBs over all groups (%d)';
+	16#30BF: sResult := 'The caluculated local near process image size (%d) exceeded the maximum near local process image size of %d';
+	16#30C0: sResult := 'the EtherCAT Output size was exceeded in the connection cfg data at word offset 0x%x (calculated value: %d, maximum value: %d)';
+	16#30C1: sResult := 'the EtherCAT Input size was exceeded in the connection cfg data at word offset 0x%x (calculated value: %d, maximum value: %d)';
+	16#30C2: sResult := 'the reserved bits in the flags of the Vendor Data were set (actual value: 0x%x, reserved flags: 0x%x)';
+	16#30C3: sResult := 'FB CAMMON: if the Setting Mode is enabled, at least one position marker has to be configured in the cfg data';
+	16#30C4: sResult := 'Connection Type is not supported at word-offset 0x%x of the cfg data';
+	16#30C5: sResult := 'writing the PROFIsafe F-Parameter is not allowed in this logic state (%d), the logic state has to be 1 (RUN)';
+	16#30C6: sResult := 'The ConnId 0x%x is used at least twice';
+	16#30C7: sResult := 'The PROFIsafe Address 0x%x is used at least twice';
+	16#30C8: sResult := 'The FSoE Address 0x%x is used at least twice';
+	16#30C9: sResult := 'The TwinSAFE SC type %d is used at least twice';
+	16#30CA: sResult := 'The TwinSAFE SC CRC 0x%x is used at least twice';
+	16#30CB: sResult := 'The Connection Index %d in a FB Connection Shutdown is used at least twice';
+	16#30CC: sResult := 'It is not allowed that the number of FBs and the number of Connections is zero inside the Group Cfg Data';
+	16#30CD: sResult := 'the storing of the Store Slave Project CRC Parameter is not supported in connection %d';
+	16#30CE: sResult := 'The received size of Safety Input Messages (%d) was too big, the maximum allowed value is %d';
+	16#30CF: sResult := 'The received size of Safety Output Messages (%d) was too big, the maximum allowed value is %d';
+	16#30D0: sResult := 'The received size of PROFIsafe Input Messages (%d) was too big, the maximum allowed value is %d';
+	16#30D1: sResult := 'The received size of PROFIsafe Output Messages (%d) was too big, the maximum allowed value is %d';
+	16#30D2: sResult := 'The Restore Mode is supported on a TwinSAFE SC connection at word-offset 0x%x';
+	16#30D3: sResult := 'The FB %d (Connection Shutdown) is assigned to a non FSoE-connection';
+	16#30D4: sResult := 'The download of the TwinSAFE IO-Project failed because %d FBs are configured (no FBs allowed)';
+	16#30D5: sResult := 'When the TwinSAFE-Address in the Project Cfg data should be used, it has to be uneual zero';
+	16#30D6: sResult := 'When the TwinSAFE-Address in the Project Cfg data should be used, the DIP-switch has to be zero (0x%x found)';
+	16#30D7: sResult := 'Read aborted because of invalid code buffer offset (Calculated=0x%x, Expected=0x%x)';
+	16#30D8: sResult := 'Invalid Safe User Parameter Offset at word offset 0x%x (Calculated=0x%x, Expected=0x%x)';
+	16#30D9: sResult := 'The Standard Inputs Size of zero is not allowed';
+	16#30DA: sResult := 'The download of the Replacement Values is not allowed after the download before (download state=%d)';
+	16#30DB: sResult := 'The Info Data Map Cfg Data were downloaded in the wrong download state (%d)';
+	16#30DC: sResult := 'The offset for the safety-Timer has to be inside the safety Output Area from 0x%x to 0x%x';
+	16#30DD: sResult := 'The safety input size of connection %d is zero offset, the Safety Inputs cannot be mapped at byte offset 0x%x of Info Data Map Cfg Data';
+	16#30DE: sResult := 'The safety output size of connection %d is zero, the Safety Outputs cannot be mapped at byte offset 0x%x of Info Data Map Cfg Data';
+	16#30DF: sResult := 'No more safe user parameter expected at byte-offset 0x%x of the Safe User Parameter Cfg Data';
+	16#30E0: sResult := 'The TwinSAFE Address 0 is not allowed in the Project Cfg Data';
+	16#30E1: sResult := 'The download of the TwinSAFE IO-Project failed because %d Groups are configured (only 1 Group allowed)';
+	16#30E2: sResult := 'The download of the Delete Project Cfg Data is not allowed in this state (%d)';
+	16#30E3: sResult := 'The destination bit address (0x%x, Bit %d) already exists in the same mapping code';
+	16#30E4: sResult := 'Local Inputs cannot be mapped in the Info data because no local inputs are existing';
+	16#30E5: sResult := 'Local Outputs cannot be mapped in the Info data because no local outputs are existing';
+	16#30E6: sResult := 'The destination bit address (0x%x, Bit %d) already exists in the same mapping code';
+	16#30E7: sResult := 'the input mapping cfg data has to be read before the output mapping cfg data';
+	16#30E8: sResult := 'wrong subindex order when reading the mapping cfg data, the expected subindex is %d';
+	16#30E9: sResult := 'when reading the input mapping cfg data, it has to be started with subindex 1';
+	16#30EA: sResult := 'invalid CRC when checking the Page %d of the Safe Logic Cfg Data';
+	16#30EB: sResult := 'invalid CRC when checking the Page %d of the Safe User Parameter Cfg Data';
+	16#30EC: sResult := 'invalid CRC when checking the Page %d of the Replacement values Cfg Data';
+	16#3100: sResult := 'No groups defined when trying to activate or deactive groups';
+	16#3101: sResult := 'The reserved bits are set in value %d at offset %d when trying to activate or deactive groups';
+	16#3102: sResult := 'The operation mode at offset %d is not supported when trying to activate or deactive groups';
+	16#3103: sResult := 'The deactiving of groups is not enabled for any group so no replacement values should be downloaded';
+	16#3104: sResult := 'The maximum number (%d) of Cfg Data pages was exceeded in the Replacement Values Cfg Data';
+	16#3105: sResult := 'Invalid FB output size size at offset %d of the Replacement Values Cfg Data';
+	16#3106: sResult := 'Unexpected groupindex in the Replacement values Cfg Data at offset 0x%x';
+	16#3107: sResult := 'The download of the Activate Project Cfg Data was refused because %d bytes of the Replacement Values Cfg Data were missing';
+	16#3108: sResult := 'To activate the Group %d the user has to logged in with access rights Bit 0-15 unequal 0 that the Safe Logic Program will be stopped when logging in';
+	16#3109: sResult := 'No more definitions of individual replace values for analog FB Outputs in case of Group State unequal RUN are expected at offset %d';
+	16#310A: sResult := 'The offset in the definitions of individual replace values for analog FB Outputs in case of Group State unequal RUN was wrong at offset %d';
+	16#310B: sResult := 'The source process image offset of the Cyclic FRAM Data is outside the FB analog input area at offset %d';
+	16#310C: sResult := 'The source process image offset of the Cyclic FRAM Data has to even at offset %d';
+	16#310D: sResult := 'The size of the Cyclic FRAM Data was exceeding at offset %d';
+	16#310E: sResult := 'The received size of the Cyclic FRAM Data at word offset 24 of the Safe Logic Cfg Data (%d) is unequal the calculated value of  %d';
+	16#310F: sResult := 'The size of the Cyclic FRAM CfgData in the GroupCfgData was not dividable by 4 at offset %d';
+	16#3110: sResult := 'The offset of the Cyclic FRAM Data in the GroupCfgData was wrong at offset %d';
+	16#3111: sResult := 'The value of %d at offset %d is not allowed when trying to activate or deactive groups';
+	16#3113: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The TDC2UpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#3114: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The TDCUpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#3115: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDCLowerLimit (plus maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#3116: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of BDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDCLowerLimit (%d)';
+	16#3117: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of BDCUpperLimit (%d) is smaller or equal the configured value of 180� (plus maximum position jitter) (%d)';
+	16#3118: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of BDCLowerLimit (plus maximum position jitter) (%d) is grealer or equal the configured value of 180� (%d)';
+	16#3119: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of OverrunMax (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#311A: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of OverrunMax (%d)';
+	16#311B: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC1UpperLimit (plus the maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#311C: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC1LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC1UpperLimit (5d)';
+	16#311D: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC2LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#311E: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC2UpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC2LowerLimit (%d)';
+	16#311F: sResult := 'The maximum size of the Replacement Values was exceeded at Word-Offset 0x%x of the Group Cfg Data';
+	16#3120: sResult := 'If no deactivation mode is enabled the offset of the replacement values shall be zero at Word-Offset 0x%x of the Group Cfg Data';
+	16#3121: sResult := 'No more replacement values expected at byte-offset 0x%x of the Replacement Values Cfg Data';
+	16#3200: sResult := 'The PROFIsafe-protocol is not supported on this device';
+	16#3201: sResult := 'The F_ParVersion in the F_Prm_Flag2 of the F-Parameter at Word-Offset 0x%x is unequal 1 (PROFIsafe V2)';
+	16#3202: sResult := 'The F_CRC1 of the F-Parameter at Word-Offset 0x%x is wrong';
+	16#3203: sResult := 'The F_CRC_Length in the F_Prm_Flag1 of the F-Parameter is wrong at Word-Offset 0x%x, the expected value is 0 (3 Bytes CRC2)';
+	16#3206: sResult := 'The I-Parameter CRC in the F-Parameter is wrong at Word-Offset 0x%x';
+	16#3207: sResult := 'The F_Block_ID in the F_Prm_Flag2 of the F-Parameter is wrong at Word-Offset 0x%x, the expected value is 0 (No F_iPar_CRC, no F_WD_Time 2) or 1 (F_iPar_CRC, no F_WD_Time 2)';
+	16#3208: sResult := 'The F_Source_Address in the F-Parameter at Word-Offset 0x%x is outside the allowed area of 1-0xFFFE';
+	16#3209: sResult := 'The F_Destination_Address in the F-Parameter at Word-Offset 0x%x is outside the allowed area of 1-0xFFFE';
+	16#320A: sResult := 'The F_WD_Time in the F-parameter at Word-Offset 0x%x is outside the allowed range from 2-60000';
+	16#320B: sResult := 'The F_Destination_Address in the F-Parameter at Word-Offset 0x%x is wrong, the expected value is %d';
+	16#3300: sResult := 'The State OPERATIONAL was left in Restore Mode';
+	16#3301: sResult := 'Only %d CRCs were matching  in Restore Mode';
+	16#3302: sResult := 'The CRC of the Activate Project Cfg Data in Restore Mode does not match, the expected value was 0x%x';
+	16#3303: sResult := 'No RestoreMode Slaves configured when trying to start the Restore Mode';
+	16#3304: sResult := 'The CRC of the User List Cfg Data was not matching in Restore Mode, the expected value was 0x%x';
+	16#3305: sResult := 'The download of the User List Cfg Data is not activated in Restore Mode';
+	16#3306: sResult := 'The download of the User List Cfg Data in Restore-Mode is not allowed in the state %d';
+	16#3307: sResult := 'The activation of the TwinSAFE Restore Project is not allowed in the state %d';
+	16#3308: sResult := 'The Restore Mode is not supported in EtherCAT state 0x%x';
+	16#3310: sResult := 'The FSoE-Slave on the %d. connection is in Restore-Mode';
+	16#3311: sResult := 'The FSoE-Master on the %d. connection is in Restore-Mode';
+	16#3400: sResult := 'The %d. group has no more errors';
+	16#3401: sResult := 'The Analog Input at word offset %d of the analog input process image has expired maximum allowed deviation to the last stored value, received value: %d, last stored value: %d';
+	16#3402: sResult := 'The Wait-Com-Error-Timeout has not been expired when the group %d should be deactivated in passivate mode';
+	16#3403: sResult := 'A module fault happened in group %d';
+	16#3404: sResult := 'The assigned connection reported an error when the group %d was deactivated in passivate mode';
+	16#3405: sResult := 'The connection has been successfully restarted when the group %d was deactivated in passivate mode';
+	16#3410: sResult := 'All groups will enter the ERROR-state because the safe logic program has been restarted';
+	16#3411: sResult := 'All groups will enter the ERROR-state because the CRC of the Change Group Activation Data was wrong';
+	16#3412: sResult := 'All groups will enter the ERROR-state because the CRC of the Change FB Parameter Data was wrong';
+	16#3413: sResult := 'All groups will enter the ERROR-state because the CRC of the Project CRC Data was wrong';
+	16#3414: sResult := 'All groups will enter the ERROR-state because the CRC of the Power-On Analog Value Check Data was wrong';
+	16#3415: sResult := 'The TwinSAFE Logic Program was not loaded on C1 because of an inconsistency';
+	16#3416: sResult := 'The TwinSAFE Logic Program was not loaded on C2 because of an inconsistency';
+	16#3420: sResult := 'No more EtherCAT size error (EtherCAT Output Size=%d, EtherCAT Input Size=%d)';
+	16#3421: sResult := 'The EtherCAT Output Data sizes of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3422: sResult := 'The EtherCAT Input Data sizes of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3423: sResult := 'The EtherCAT Output Data sizes for PROFIsafe of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3424: sResult := 'The EtherCAT Input Data sizes for PROFIsafe of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3425: sResult := 'The needed EtherCAT Process data buffer size (%d) exceeded the maximum available size of %d';
+	16#3501: sResult := 'On the %d. connection the changeable FSoE Address of %d already exists';
+	16#3502: sResult := 'On the %d. connection the changeable FSoE Address is zero';
+	16#3800: sResult := 'FB %d (ESTOP): An EDM-fault (0x%x) was detected in state SAFE';
+	16#3802: sResult := 'FB %d (ESTOP): An EDM-fault (0x%x) was detected in state RESET';
+	16#3803: sResult := 'FB %d (ESTOP): An EDM-fault (0x%x) was detected in state START';
+	16#3804: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual EStopIn-values are 0x%x';
+	16#3806: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state RESET, the actual EStopIn-values are 0x%x';
+	16#3807: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state START, the actual EStopIn-values are 0x%x';
+	16#3809: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state DELAYOUT, the actual EStopIn-values are 0x%x';
+	16#380F: sResult := 'FB %d (ESTOP): At least one activated EDM-Input was not reset in RUN when the EDM Reset time had been expired (Diag-Code=0x%x)';
+	16#3810: sResult := 'FB %d (MON): An EDM-fault (0x%x) was detected in state SAFE';
+	16#3812: sResult := 'FB %d (MON): An EDM-fault (0x%x) was detected in state RESET';
+	16#3813: sResult := 'FB %d (MON): An EDM-fault (0x%x) was detected in state START';
+	16#3814: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual MonIn/Secure-values are 0x%x';
+	16#3816: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state RESET, the actual MonIn/Secure-values are 0x%x';
+	16#3817: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state START, the actual MonIn/Secure-values are 0x%x';
+	16#3818: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state RUN, the actual MonIn/Secure-values are 0x%x';
+	16#3819: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state DELAYOUT, the actual MonIn/Secure-values are 0x%x';
+	16#381A: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state FUNCTEST, the actual MonIn/Secure-values are 0x%x';
+	16#381F: sResult := 'FB %d (MON): At least one activated EDM-Input was not reset in RUN when the EDM Reset time had been expired (Diag-Code=0x%x)';
+	16#3820: sResult := 'FB %d (TWOHAND): A Disc-Group-fault (0x%x) was detected in state 1BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#3821: sResult := 'FB %d (TWOHAND): A Disc-Group-fault (0x%x) was detected in state 2BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#3823: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual TwoHandIn-values are 0x%x';
+	16#3825: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state RESET, the actual TwoHandIn-values are 0x%x';
+	16#382B: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state 1BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#382C: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state 2BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#382D: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state RELEASE, the actual TwoHandIn-values are 0x%x';
+	16#3830: sResult := 'FB %d (OPMODE): An DiscTime-Fault (0x%x) was detected, the actual OpIn-values are 0x%x';
+	16#3831: sResult := 'FB %d (OPMODE): An Input-Fault was detected in state RESET, the actual OpIn-values are 0x%x';
+	16#3840: sResult := 'FB %d (EDM): The SwitchOn-Time had been expired';
+	16#3841: sResult := 'FB %d (EDM): The SwitchOff-Time had been expired';
+	16#3853: sResult := 'FB %d (CS): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual Deactivate-values are 0x%x';
+	16#3855: sResult := 'FB %d (CS): An DiscTime-Fault (0x%x) was detected in state RESET, the actual Deactivate-values are 0x%x';
+	16#3881: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state RUN, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3883: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3885: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state RESET, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3888: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state DELAYOUT, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3889: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING1, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388A: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING2, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388B: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING3, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388C: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING4, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388D: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING5, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388E: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING6, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388F: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING7, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3890: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING8, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3891: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING9, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3892: sResult := 'FB %d (MUTING): State RUN, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3893: sResult := 'FB %d (MUTING): State RUN, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3894: sResult := 'FB %d (MUTING): State MUTING1, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3895: sResult := 'FB %d (MUTING): State MUTING1, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3896: sResult := 'FB %d (MUTING): State MUTING2, MutingEnable is set and the MuteIn-signals before the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3897: sResult := 'FB %d (MUTING): State MUTING2, MutingEnable is set and the MuteIn-signals after the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3898: sResult := 'FB %d (MUTING): State MUTING3, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3899: sResult := 'FB %d (MUTING): State MUTING3, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389A: sResult := 'FB %d (MUTING): State MUTING3, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389B: sResult := 'FB %d (MUTING): State MUTING4, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389C: sResult := 'FB %d (MUTING): State MUTING4, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389D: sResult := 'FB %d (MUTING): State MUTING5, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389E: sResult := 'FB %d (MUTING): State MUTING5, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389F: sResult := 'FB %d (MUTING): State MUTING5, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A0: sResult := 'FB %d (MUTING): State MUTING6, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A1: sResult := 'FB %d (MUTING): State MUTING6, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A2: sResult := 'FB %d (MUTING): State MUTING7, MutingEnable is set and the MuteIn-signals before the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A3: sResult := 'FB %d (MUTING): State MUTING7, MutingEnable is set and the MuteIn-signals after the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A4: sResult := 'FB %d (MUTING): State MUTING8, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A5: sResult := 'FB %d (MUTING): State MUTING8, Sequential Inputs=TRUE, CheckOssdOptional=TRUE: MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A6: sResult := 'FB %d (MUTING): State MUTING8, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A7: sResult := 'FB %d (MUTING): State MUTING8, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A8: sResult := 'FB %d (MUTING): State MUTING9, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A9: sResult := 'FB %d (MUTING): State MUTING9, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38AA: sResult := 'FB %d (MUTING): State MUTING5, Sequential Inputs=TRUE, MuteIn3 and MuteIn4 are deactive: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38AB: sResult := 'FB %d (MUTING): State MUTING6, Sequential Inputs=TRUE, MuteIn3 and MuteIn4 are deactive: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38AC: sResult := 'FB %d (MUTING): State MUTING1, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38B0: sResult := 'FB %d (MUTING): At least one activated EDM-Input was not reset in RUN when the EDM Reset time had been expired (Diag-Code=0x%x)';
+	16#38C1: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING1 (Digital Inputs=0x%x)';
+	16#38C2: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING2 (Digital Inputs=0x%x)';
+	16#38C3: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING3 (Digital Inputs=0x%x)';
+	16#38C4: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING4 (Digital Inputs=0x%x)';
+	16#38C5: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING5 (Digital Inputs=0x%x)';
+	16#38C6: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING6 (Digital Inputs=0x%x)';
+	16#38C7: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING7 (Digital Inputs=0x%x)';
+	16#38C8: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING8 (Digital Inputs=0x%x)';
+	16#38C9: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING9 (Digital Inputs=0x%x)';
+	16#4001: sResult := 'FB %d (CAMMON): The TDC2UpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#4002: sResult := 'FB %d (CAMMON): The Position (%d) is bigger than the maximum position (plus the maximum position jitter) (%d)';
+	16#4003: sResult := 'FB %d (CAMMON): The input OverrunCAM was FALSE in the top dead center area, the actual position is %d';
+	16#4004: sResult := 'FB %d (CAMMON): The input OverrunCAM changed from FALSE to TRUE outside the area between BDCUpperLimit and TDCLowerLimit, the actual position is %d';
+	16#4005: sResult := 'FB %d (CAMMON): The input OverrunCAM was TRUE in the area between OverrunMax and BDCUpperLimit, the actual position is %d';
+	16#4006: sResult := 'FB %d (CAMMON): The input OverrunCAM changed from TRUE to FALSE outside the area between OverrunMax and BDCLowerLimit, the actual position is %d';
+	16#4007: sResult := 'FB %d (CAMMON): The input UpwardsCAM was FALSE in the area between BDCUpperLimit and TDCLowerLimit, the actual position is %d';
+	16#4008: sResult := 'FB %d (CAMMON): The input UpwardsCAM changed from FALSE to TRUE outside the area between BDCLowerLimit and TDCLowerLimit, the actual position is %d';
+	16#4009: sResult := 'FB %d (CAMMON): The input UpwardsCAM changed from TRUE to FALSE outside the area between TDCLowerLimit and OverrunMax, the actual position is %d';
+	16#400A: sResult := 'FB %d (CAMMON): The Position was moving while waiting for a rising edge of the input Reset in the state MOVE-STOP';
+	16#400B: sResult := 'FB %d (CAMMON): The Position was moving while waiting for a falling edge of the input Reset in the state MOVE-START';
+	16#400C: sResult := 'FB %d (CAMMON): The Position %d in the area between OverrunMax and BDCLowerLimit was detected in the state MOVE-UP';
+	16#400D: sResult := 'FB %d (CAMMON): The Position has left the top dead center while wating for a stop, the actual position is %d';
+	16#400E: sResult := 'FB %d (CAMMON): The Position has been changed negative';
+	16#400F: sResult := 'FB %d (CAMMON): The input UpwardsCAM was TRUE in the area between OverrunMax and BDCLowerLimit';
+	16#4010: sResult := 'FB %d (CAMMON): The Position has a circle overflow in Pendulum Mode, actual position=%d, last position=%d';
+	16#4011: sResult := 'FB %d (CAMMON): The Position has moved while waiting for a rising edge of the input Reset in Pendulum Mode, actual position=%d, compare position=%d';
+	16#4012: sResult := 'FB %d (CAMMON): The Input BackwardsMove is TRUE while the Position is between 180� and 360�, the actual position is %d';
+	16#4013: sResult := 'FB %d (CAMMON): The Input BackwardsMove is TRUE while the moving is clockwise';
+	16#4014: sResult := 'FB %d (CAMMON): The Position has moved while waiting for a falling edge of the input Reset in Pendulum Mode, actual position=%d, last position=%d';
+	16#4015: sResult := 'FB %d (CAMMON): The value of TDCLowerLimit (plus maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#4016: sResult := 'FB %d (CAMMON): The value of BDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDCLowerLimit (%d)';
+	16#4017: sResult := 'FB %d (CAMMON): The value of BDCUpperLimit (%d) is smaller or equal the configured value of 180� (plus maximum position jitter) (%d)';
+	16#4018: sResult := 'FB %d (CAMMON): The value of BDCLowerLimit (plus maximum position jitter) (%d) is greater or equal the configured value of 180� (%d)';
+	16#4019: sResult := 'FB %d (CAMMON): The value of OverrunMax (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#401A: sResult := 'FB %d (CAMMON): The value of TDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of OverrunMax (%d)';
+	16#401B: sResult := 'FB %d (CAMMON): The value of TDC1UpperLimit (plus the maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#401C: sResult := 'FB %d (CAMMON): The value of TDC1LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC1UpperLimit (5d)';
+	16#401D: sResult := 'FB %d (CAMMON): The value of TDC2LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#401E: sResult := 'FB %d (CAMMON): The value of TDC2UpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC2LowerLimit (%d)';
+	16#401F: sResult := 'FB %d (CAMMON): The input PressStarted is TRUE and the position did not move after the PressStartedDelayTime';
+	16#4020: sResult := 'FB %d (CAMMON): The input PressStarted is TRUE and the position has stopped after moving before';
+	16#4021: sResult := 'FB %d (CAMMON): The input PressStarted is TRUE and the position has not moved enough, the actual position is %d, the compare position is %d';
+	16#4022: sResult := 'FB %d (CAMMON), Pendulum Mode: The Position has changed contra clockwise while moving up clockwise (actual Position=%d, old Position=%d)';
+	16#4023: sResult := 'FB %d (CAMMON), Pendulum Mode: The Position has changed clockwise while moving up contra clockwise (actual Position=%d, old Position=%d)';
+	16#4024: sResult := 'FB %d (CAMMON): The Position was moving while waiting for a falling edge of the input Reset in the state WAIT-FOR_RESET';
+	16#4025: sResult := 'FB %d (CAMMON): The TDCUpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#4080: sResult := 'FB %d (ADD/SUB): an underflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#4081: sResult := 'FB %d (ADD/SUB): an overflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#4088: sResult := 'FB %d (SPEED): an underflow was detected, actual Position=%d, old Position=%d';
+	16#4089: sResult := 'FB %d (SPEED): an overflow was detected, actual Position=%d, old Position=%d';
+	16#4090: sResult := 'FB %d (LIMIT): the minimum value (%d) is bigger than than the maximum value (%d)';
+	16#4098: sResult := 'FB %d (COMPARE): an underflow was detected on CompOut (%d), the minimum allowed value is %d';
+	16#4099: sResult := 'FB %d (COMPARE): an overflow was detected on CompOut (%d), the maximum allowed value is %d';
+	16#40A0: sResult := 'FB %d (MUL): an underflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40A1: sResult := 'FB %d (MUL): an overflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40A8: sResult := 'FB %d (DIV): an underflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40A9: sResult := 'FB %d (DIV): an overflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40B0: sResult := 'FB %d (SCALE): an underflow was detected, AnalogIn=%d';
+	16#40B1: sResult := 'FB %d (SCALE): an overflow was detected, AnalogIn=%d';
+	16#40B2: sResult := 'FB %d (SCALE): an overflow was detected after multiplication, AnalogIn=%d';
+	16#40B3: sResult := 'FB %d (SCALE): an overflow was detected before division when rounding up the value, AnalogIn=%d';
+	16#40B8: sResult := 'FB %d (COUNT): an underflow was detected on ActValue (%d), the minimum allowed value is %d';
+	16#40B9: sResult := 'FB %d (COUNT): an overflow was detected on ActValue (%d), the maximum allowed value is %d';
+	16#40C0: sResult := 'FB %d (SLI): an underflow was detected on ActValue (%d), the minimum allowed value is %d';
+	16#40C1: sResult := 'FB %d (SLI): an overflow was detected on ActValue (%d), the maximum allowed value is %d';
+	16#40C8: sResult := 'FB %d (ENVELOPE): an underflow was detected on InValue (%d), the minimum allowed value is %d';
+	16#40C9: sResult := 'FB %d (ENVELOPE): an overflow was detected on InValue (%d), the maximum allowed value is %d';
+	16#40CA: sResult := 'FB %d (ENVELOPE): an overflow error was detected on InValue (%d), InValue+Offset is bigger than the maximum allowed value';
+	16#40CB: sResult := 'FB %d (ENVELOPE): the MaxTime was expired (InValue=%d)';
+	16#6009: sResult := 'SAFEOUT:Initial-Parameter: MultiplierDiagTestPulse has to be greater zero. ModuleNr:0x%x';
+	16#6010: sResult := 'SAFEOUT:Initial-Parameter: Number of Modules incorrect. ModuleNr:0x%x, Parameter:0x%x';
+	16#6011: sResult := 'SAFEOUT:Initial-Parameter: Number of Channels incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6012: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis active Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6013: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis inactive Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6014: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback active Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6015: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis active Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6016: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback inactive Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6017: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis inactive Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6018: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6019: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis inactive Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601A: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601B: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601C: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback inactive Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601D: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis inactive Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601E: sResult := 'SAFEOUT:Setup Hardware Fault: Module Switch. ReturnData:0x%x, ReturnState:0x%x';
+	16#601F: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis active Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6020: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis inactive Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6021: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback active Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6022: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis active Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6023: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback inactive Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6024: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis inactive Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6025: sResult := 'SAFEOUT:Setup Hardware Fault: Channel Switch. ReturnData:0x%x, ReturnState:0x%x';
+	16#6026: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6027: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis inactive Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6028: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6029: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#602A: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback inactive Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#602B: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis inactive Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6030: sResult := 'SAFEOUT:The Feedback of the active Module Switch is wrong. Module:0x%x';
+	16#6031: sResult := 'SAFEOUT:The Feedback of the inactive Module Switch is wrong. Module:0x%x';
+	16#6032: sResult := 'SAFEOUT:The Feedback of the active Channel Switch is wrong. Module:0x%x / Channel:0x%x';
+	16#6033: sResult := 'SAFEOUT:The Feedback of the inactive Channel Switch is wrong. Module:0x%x / Channel:0x%x';
+	16#6040: sResult := 'SAFEOUT:Diagnosis Test: Common Fault  Module:0x%x / DiagChannel:0x%x';
+	16#6041: sResult := 'SAFEOUT:Diagnosis Test: Unknown State local ModuleState:0x%x';
+	16#6042: sResult := 'SAFEOUT:Diagnosis Test: Unknown State other ModuleState:0x%x';
+	16#6050: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Module Switch is wrong (Step1 - check current state). Module:0x%x';
+	16#6051: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Module Switch is wrong (Step1 - check current state). Module:0x%x';
+	16#6052: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Channel Switch is wrong (Step1 - check current state). Module:0x%x / DiagChannel:0x%x';
+	16#6053: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Channel Switch is wrong (Step1 - check current state). Module:0x%x / DiagChannel:0x%x';
+	16#6060: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Module Switch is wrong (Step2 - check test pulse). Module:0x%x';
+	16#6061: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Module Switch is wrong (Step2 - check test pulse). Module:0x%x';
+	16#6062: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Channel Switch is wrong (Step2 - check test pulse). Module:0x%x / DiagChannel:0x%x';
+	16#6063: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Channel Switch is wrong (Step2 - check test pulse). Module:0x%x / DiagChannel:0x%x';
+	16#6080: sResult := 'SAFEOUT:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#6081: sResult := 'SAFEOUT:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#6082: sResult := 'SAFEOUT:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#6083: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6084: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6085: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6086: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6090: sResult := 'SAFEOUT:Module Switch FeedbackTest ViolationCounter incremented, Outputs active. Module:0x%x, Info:0x%x.';
+	16#6091: sResult := 'SAFEOUT:Module Switch FeedbackTest ViolationCounter incremented, Outputs inactive. Module:0x%x, Info:0x%x.';
+	16#6092: sResult := 'SAFEOUT:Channel Switch FeedbackTest ViolationCounter incremented, Outputs active. Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6093: sResult := 'SAFEOUT:Channel Switch FeedbackTest ViolationCounter incremented, Outputs inactive. Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6094: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step1 - check current state). Module:0x%x, Info:0x%x.';
+	16#6095: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step1 - check current state). Module:0x%x, Info:0x%x.';
+	16#6096: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step1 - check current state). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6097: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step1 - check current state). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6098: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step2 - check test pulse). Module:0x%x, Info:0x%x.';
+	16#6099: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step2 - check test pulse). Module:0x%x, Info:0x%x.';
+	16#609A: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step2 - check test pulse). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#609B: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step2 - check test pulse). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#60A0: sResult := 'SAFEOUT:Sercom Fault 0. Cmd/State:0x%x';
+	16#60A1: sResult := 'SAFEOUT:Sercom Fault 1. Cmd/State:0x%x';
+	16#60B0: sResult := 'SAFEOUT:Unknown Sercom Command Request 1. Cmd/State:0x%x';
+	16#60B1: sResult := 'SAFEOUT:Unknown Sercom Command Answer 1. Cmd/State:0x%x';
+	16#60B2: sResult := 'SAFEOUT:Unknown Sercom Command Request 2. Cmd/State:0x%x';
+	16#60B3: sResult := 'SAFEOUT:Unknown Sercom Command Answer 2. Cmd/State:0x%x';
+	16#60C0: sResult := 'SAFEOUT:Module Switch too fast Switching OFF detected Fault (see technical data). Module:0x%x';
+	16#60C1: sResult := 'SAFEOUT:Channel Switch too fast Switching OFF detected Fault (see technical data). Module:0x%x / Channel:0x%x';
+	16#60C2: sResult := 'SAFEOUT:Module Switch too fast Switching ON detected Fault (see technical data). Module:0x%x';
+	16#60C3: sResult := 'SAFEOUT:Channel Switch too fast Switching ON detected Fault (see technical data). Module:0x%x / Channel:0x%x';
+	16#60C4: sResult := 'SAFEOUT:Module Error Acknowledge is not possible. Module:0x%x';
+	16#60E0: sResult := 'SAFEOUT:HAL Read Fault. ReturnData:0x%x';
+	16#60E1: sResult := 'SAFEOUT:Init Fault. Module:0x%x';
+	16#8009: sResult := 'SAFEIN:Initial-Parameter: MultiplierDiagTestPulse has to be greater zero. ModuleNr:0x%x';
+	16#8010: sResult := 'SAFEIN:Initial-Parameter: Number of Modules incorrect. ModuleNr:0x%x, Parameter:0x%x';
+	16#8011: sResult := 'SAFEIN:Initial-Parameter: Number of Channels incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#8018: sResult := 'SAFEIN:Initial-Parameter: Number of Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#801B: sResult := 'SAFEIN:Initial-Parameter: Number of Feedback Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#8025: sResult := 'SAFEIN:Setup Hardware Fault: Channel Switch. ReturnData:0x%x, ReturnState:0x%x';
+	16#8026: sResult := 'SAFEIN:Setup Hardware Fault: Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#8029: sResult := 'SAFEIN:Setup Hardware Fault: Feedback Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#8040: sResult := 'SAFEIN:Diagnosis Test: Common Fault  Module:0x%x / DiagChannel:0x%x';
+	16#8041: sResult := 'SAFEIN:Diagnosis Test: Unknown State local ModuleState:0x%x';
+	16#8042: sResult := 'SAFEIN:Diagnosis Test: Unknown State Other ModuleState:0x%x';
+	16#8043: sResult := 'SAFEIN Pulse Detection: Wrong pulse was detected at . Module:0x%x / DiagChannel:0x%x';
+	16#8044: sResult := 'SAFEIN Pulse Detection: Detected pulse from Module:0x%x / DiagChannel:0x%x';
+	16#8052: sResult := 'SAFEIN:Diagnosis Test: Feedback in Step1 active Channel is wrong. Module:0x%x / DiagChannel:0x%x';
+	16#8062: sResult := 'SAFEIN:Diagnosis Test: Feedback in Step2 active Channel is wrong. Module:0x%x / DiagChannel:0x%x';
+	16#8080: sResult := 'SAFEIN:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#8081: sResult := 'SAFEIN:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#8084: sResult := 'SAFEIN:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#8085: sResult := 'SAFEIN:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#8086: sResult := 'SAFEIN:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#8096: sResult := 'SAFEIN:DiagnosisTest ViolationCounter incremented, Inputs active (Step1 - check current state). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#809A: sResult := 'SAFEIN:DiagnosisTest ViolationCounter incremented, Inputs active (Step2 - check test pulse). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#80A0: sResult := 'SAFEIN:Sercom Fault 0. Cmd/State:0x%x';
+	16#80A1: sResult := 'SAFEIN:Sercom Fault 1. Cmd/State:0x%x';
+	16#80B0: sResult := 'SAFEIN:Unknown Sercom Command Request 1. Cmd/State:0x%x';
+	16#80B1: sResult := 'SAFEIN:Unknown Sercom Command Answer 1. Cmd/State:0x%x';
+	16#80B2: sResult := 'SAFEIN:Unknown Sercom Command Request 2. Cmd/State:0x%x';
+	16#80B3: sResult := 'SAFEIN:Unknown Sercom Command Answer 2. Cmd/State:0x%x';
+	16#80C0: sResult := 'SAFEIN:Error Acknowledge is not possible. Module:0x%x';
+	16#80C1: sResult := 'SAFEIN:Diagnosis Test: Implausible Inputs detected. Module:0x%x';
+	16#80C2: sResult := 'SAFEIN:Diagnosis Test: Implausible Inputs detected (INFO). Parameter1:0x%x / Parameter2:0x%x';
+	16#80E0: sResult := 'SAFEIN:Init HAL Fault.ReturnState:0x%x';
+	16#80E1: sResult := 'SAFEIN:Init Fault. Module:0x%x';
+	16#80F0: sResult := 'SAFEIN: Testpulse is parametrized but not enabled (Diag Testpulse for Inputs active). Module:0x%x / Channel:0x%x';
+	16#80F1: sResult := 'SAFEIN: Testpulse is parametrized but not enabled (Diag TestPulse active). Module:0x%x / Channel:0x%x';
+	16#80F2: sResult := 'SAFEIN: Testfilter-Time too long. Parameter1:0x%x / Parameter2:0x%x';
+	16#80F3: sResult := 'SAFEIN: Inputfilter-Time too short. Parameter1:0x%x / Parameter2:0x%x';
+	16#80F4: sResult := 'SAFEIN: Wrong parameters detected for Module:0x%x / Channel:0x%x. Please check parameters!';		
+	ELSE 
+		sResult := UINT_TO_STRING(nTextID);
+END_CASE
+
+fbFormat(sFormat := sResult, 
+		arg1 := arArg[1],
+		arg2 := arArg[2], 
+		arg3 := arArg[3], 
+		arg4 := arArg[4], 
+		arg5 := arArg[5], 
+		arg6 := arArg[6], 
+		arg7 := arArg[7], 
+		arg8 := arArg[8], 
+		arg9 := arArg[9], 
+		arg10 := arArg[10], 
+		sOut => sResult);
+
+M_ResolveEL19xxText := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ResolveEL29xxText" Id="{ea1a2f5c-8322-47c9-95d3-18a98d4dad78}">
+      <Declaration><![CDATA[/// resolves EL29xx device text ID to clear text
+/// 	return value: success state
+METHOD M_ResolveEL29xxText : BOOL
+VAR_INPUT
+	nTextID: UINT;
+END_VAR
+VAR_IN_OUT
+	aParameter: ARRAY[1..16] OF BYTE;
+	sResult: T_MAXSTRING;
+END_VAR
+VAR
+	arArg: ARRAY[1..10] OF T_Arg;
+	fbFormat: FB_FormatString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// Messages extracted from Beckhoff EL29xx.xml (C:\TwinCAT\3.1\Config\Io\EtherCAT)
+/// FileVersion="2", EtherCAT device description update: 8.11.2021
+
+M_ResolveDiagPrmArgs(aParameter, arArg);
+
+// map text id
+CASE nTextID OF
+	16#0001: sResult := 'Primary MC: GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0002: sResult := 'Primary MC: GLOBAL_Shutdown with Code 0x%x and Additional Code 0x%x';
+	16#0003: sResult := 'Secondary MC: GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0004: sResult := 'Secondary MC: GLOBAL_Shutdown with Code 0x%x and Additional Code 0x%x';
+	16#0005: sResult := 'Primary MC: Stored GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0006: sResult := 'Secondary MC: Stored GLOBAL_Fault with Code 0x%x and Additional Code 0x%x';
+	16#0007: sResult := 'Diag-Message-Overflow: %d messages got lost';
+	16#0008: sResult := 'Primary MC: the CRC of the FRAM Data was wrong (Diag-Code=%d)';
+	16#0009: sResult := 'Secondary MC: the CRC of the FRAM Data was wrong (Diag-Code=%d)';
+	16#0010: sResult := 'Reserved CfgData has to be zero st offset %d';
+	16#0011: sResult := 'The password is wrong';
+	16#0012: sResult := 'The user was not found';
+	16#0013: sResult := 'The CRC of the login data does not match';
+	16#0014: sResult := 'The serial number of the login data does not match';
+	16#0015: sResult := 'The login watchdog has been expired';
+	16#0016: sResult := 'The user was logged out before';
+	16#0017: sResult := 'The user has not sufficient access rights';
+	16#0018: sResult := 'The reserved area of the CfgData was not 0';
+	16#0019: sResult := 'The CRC of the CfgData was wrong';
+	16#001A: sResult := 'The user name is wrong at word offset 0x%x when changing the password';
+	16#001B: sResult := 'The requested number of users is too big';
+	16#001D: sResult := 'The user update flags are wrong at word offset 0x%x when changing the password';
+	16#001E: sResult := 'The wrong user (user %d) is logged in when changing the password (user %d found in the received data)';
+	16#0021: sResult := 'the maximum Global-Shutdown counter was exceeded in the Vendor Data (maximum value: %d, actual value: %d)';
+	16#0030: sResult := 'Sync Manager 2 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0031: sResult := 'Sync Manager 3 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0032: sResult := 'Sync Manager 4 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0033: sResult := 'Sync Manager 5 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0034: sResult := 'Sync Manager 2 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0035: sResult := 'Sync Manager 3 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0036: sResult := 'Sync Manager 4 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0037: sResult := 'Sync Manager 5 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0038: sResult := 'Sync Manager %d Settings (Offset 4-7) are invalid, expected values = 0x%x, 0x%x';
+	16#0044: sResult := 'Sync Manager 6 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0045: sResult := 'Sync Manager 7 Address (0x%x) is invalid, minimum value = 0x%x, maximum value = 0x%x';
+	16#0048: sResult := 'Sync Manager 6 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0049: sResult := 'Sync Manager 7 Size (%d) is invalid, minimum value = %d, maximum value = %d';
+	16#0101: sResult := 'Primary MC: Completed RAM TEST: Starttime: 0x%x and Stoptime: 0x%x . The calculated timediff is 0x%x.';
+	16#0102: sResult := 'Secondary MC: Completed RAM TEST: Starttime: 0x%x and Stoptime: 0x%x . The calculated timediff is 0x%x.';
+	16#0103: sResult := 'C1 MCTEST Info: Arg1: 0x%x, Arg2: 0x%x, Arg3: 0x%x.';
+	16#0104: sResult := 'C2 MCTEST Info: Arg1: 0x%x, Arg2: 0x%x, Arg3: 0x%x.';
+	16#0115: sResult := 'Controller %d: Maximum temperature exceeded. Temperature is 0x%x, should be &lt;= 0x%x.';
+	16#0116: sResult := 'Controller %d: Minimum temperature alert. Temperature is 0x%x, should be &gt;= 0x%x.';
+	16#0117: sResult := 'Controller %d: Temperature difference too high. Difference is %d, should be &lt;= %d.';
+	16#0118: sResult := 'Controller %d: Maximum voltage alert (Partner_VCC). Voltage is 0x%x, should be &lt;= 0x%x.';
+	16#0119: sResult := 'Controller %d: Minimum voltage alert (Partner_VCC). Voltage is 0x%x, should be &gt;= 0x%x.';
+	16#011A: sResult := 'Controller %d: Maximum voltage alert (ECAT_VCC). Voltage is 0x%x, should be &lt;= 0x%x.';
+	16#011B: sResult := 'Controller %d: Minimum voltage alert (ECAT_VCC). Voltage is 0x%x, should be &gt;= 0x%x.';
+	16#011E: sResult := 'Controller %d: Timer Tick Difference is too high. Difference is 0x%x, should be &gt;= 0x%x.';
+	16#011F: sResult := 'Controller %d: Minimum value alert (Individual ADC Check). Channel parameter = %d. Actual value is 0x%x.';
+	16#0120: sResult := 'Controller %d: Maximum value alert (Individual ADC Check). Channel parameter = %d. Actual value is 0x%x.';
+	16#0121: sResult := 'Module Shutdown due to minimum value alert (Individual ADC Check). Channel parameter = %d.';
+	16#1000: sResult := 'The size of the safe User Parameter is too small (%d), the expected size is %d';
+	16#1001: sResult := 'The Vendor-ID (%d) is unequal the expected value of %d';
+	16#1002: sResult := 'The Product-Code (%d) is unequal the expected value of %d';
+	16#1003: sResult := 'The reserved data of the SafeOut User Parameter of module %d at byte offset 0x%x has to be 0';
+	16#1004: sResult := 'The reserved data of the SafeIn User Parameter of module %d at byte offset 0x%x has to be 0';
+	16#1005: sResult := 'The standard outputs of module %d should be enabled but the Sync-Manager 6 is not configured or enabled correctly';
+	16#1006: sResult := 'The FASTSTDOUT mode of the standard outputs of module %d is not supported';
+	16#1007: sResult := 'The SAFEOUT-Module-Number (%d) for the ExternalPulseDetection of the SAFEIN-Module %d is wrong, the allowed range is 1-%d';
+	16#1008: sResult := 'The SAFEOUT-Channel-Number (%d) for the ExternalPulseDetection of the SAFEIN-Module %d is wrong, the allowed range is 1-%d';
+	16#1009: sResult := 'The Bumper-Mode %d is not supported for SAFEIN-Module %d';
+	16#100A: sResult := 'The version of the Product-Code (0x%x) is unequal the expected value of 0x%x';
+	16#1010: sResult := 'The default Project CRC is wrong, the received value is 0x%x';
+	16#1020: sResult := 'The watchdog for the Standard Outputs was expired';
+	16#1030: sResult := 'The size of the safe User Parameter is too big (%d), the expected size is %d';
+	16#15A1: sResult := 'SAFEOUT-Module %d: Module Fault due to Fault Link';
+	16#2001: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state CONNECTION';
+	16#2002: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state CONNECTION';
+	16#2003: sResult := 'The %d. connection has received an invalid FSoE-ConnID in state CONNECTION';
+	16#2004: sResult := 'The %d. connection has received an invalid FSoE-CRC in state CONNECTION';
+	16#2005: sResult := 'The FSoE-Watchdog of the %d. connection has been expired in state CONNECTION';
+	16#2006: sResult := 'On the %d. connection the received FSoE-Address (0x%x) does not match with the expected FSoE-Address (0x%x)';
+	16#2007: sResult := 'On the %d. connection the received connection data do not match with the sent values';
+	16#200E: sResult := 'A Module fault was detected on the %d. connection in state CONNECTION';
+	16#2011: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 1 was received which means that the communication partner has received an invalid FSoE-Cmd';
+	16#2012: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 2 was received which means that the communication partner has received an unknown FSoE-Cmd';
+	16#2013: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 3 was received which means that the communication partner has received an invalid FSoE-ConnID';
+	16#2014: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 4 was received which means that the communication partner has received an invalid FSoE-CRC';
+	16#2015: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 5 was received which means that the FSoE-Watchdog has been expired in the communication partner';
+	16#2016: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 6 was received which means that the communication partner has received an invalid FSoE-Address';
+	16#2017: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 7 was received which means that the communication partner has received connection data do not match with the sent values';
+	16#2018: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 8 was received which means that the communication partner has received an invalid communication parameter length';
+	16#2019: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 9 was received which means that the communication partner has received an invalid FSoE Watchdog';
+	16#201A: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 10 was received which means that the communication partner has received an invalid application parameter length';
+	16#201B: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 11 was received which means that the communication partner has received invalid application parameter data';
+	16#201C: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 12 was received';
+	16#201D: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 13 was received';
+	16#201E: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 14 was received which means that the communication partner has detected a module fault';
+	16#201F: sResult := 'On the %d. connection in state CONNECTION a FSoE-Reset with Error-Code 0x%x was received';
+	16#2041: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state PARAMETER';
+	16#2042: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state PARAMETER';
+	16#2043: sResult := 'The %d. connection has received an invalid FSoE-ConnID in state PARAMETER';
+	16#2044: sResult := 'The %d. connection has received an invalid FSoE-CRC in state PARAMETER';
+	16#2045: sResult := 'The FSoE-Watchdog of the %d. connection has been expired in state PARAMETER';
+	16#2047: sResult := 'On the %d. connection the received parameter data do not match with the sent values';
+	16#2048: sResult := 'On the %d. connection the received communication parameter length (%d) does not match with the expected value of 2';
+	16#2049: sResult := 'On the %d. connection the received FSoE Watchdog (%d) is outside the allowed area from 2 to 60000';
+	16#204A: sResult := 'On the %d. connection the received application parameter length (%d) is unequal the expected length of %d';
+	16#204B: sResult := 'On the %d. connection the received application parameter data are wrong';
+	16#204E: sResult := 'A Module fault was detected on the %d. connection in state PARAMETER';
+	16#2051: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 1 was received which means that the communication partner has received an invalid FSoE-Cmd';
+	16#2052: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 2 was received which means that the communication partner has received an unknown FSoE-Cmd';
+	16#2053: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 3 was received which means that the communication partner has received an invalid FSoE-ConnID';
+	16#2054: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 4 was received which means that the communication partner has received an invalid FSoE-CRC';
+	16#2055: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 5 was received which means that the FSoE-Watchdog has been expired in the communication partner';
+	16#2056: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 6 was received which means that the communication partner has received an invalid FSoE-Address';
+	16#2057: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 7 was received which means that the communication partner has received connection data do not match with the sent values';
+	16#2058: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 8 was received which means that the communication partner has received an invalid communication parameter length';
+	16#2059: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 9 was received which means that the communication partner has received an invalid FSoE Watchdog';
+	16#205A: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 10 was received which means that the communication partner has received an invalid application parameter length';
+	16#205B: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 11 was received which means that the communication partner has received invalid application parameter data';
+	16#205C: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 12 was received';
+	16#205D: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 13 was received';
+	16#205E: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 14 was received which means that the communication partner has detected a module fault';
+	16#205F: sResult := 'On the %d. connection in state PARAMETER a FSoE-Reset with Error-Code 0x%x was received';
+	16#2061: sResult := 'On the %d. connection in state PARAMETER a wrong Command was received, which means that the Safe-Parameter size is wrong (Expected size: %d, Received size: %d)';
+	16#2081: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state DATA';
+	16#2082: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state DATA';
+	16#2083: sResult := 'The %d. connection has received an invalid FSoE-ConnID in state DATA';
+	16#2084: sResult := 'The %d. connection has received an invalid FSoE-CRC in state DATA';
+	16#2085: sResult := 'The FSoE-Watchdog of the %d. connection has been expired in state DATA';
+	16#208D: sResult := 'The FailSafeData command was received on the %d. connection in state DATA';
+	16#208E: sResult := 'A Module fault was detected on the %d. connection in state DATA';
+	16#2091: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 1 was received which means that the communication partner has received an invalid FSoE-Cmd';
+	16#2092: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 2 was received which means that the communication partner has received an unknown FSoE-Cmd';
+	16#2093: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 3 was received which means that the communication partner has received an invalid FSoE-ConnID';
+	16#2094: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 4 was received which means that the communication partner has received an invalid FSoE-CRC';
+	16#2095: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 5 was received which means that the FSoE-Watchdog has been expired in the communication partner';
+	16#2096: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 6 was received which means that the communication partner has received an invalid FSoE-Address';
+	16#2097: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 7 was received which means that the communication partner has received connection data do not match with the sent values';
+	16#2098: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 8 was received which means that the communication partner has received an invalid communication parameter length';
+	16#2099: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 9 was received which means that the communication partner has received an invalid FSoE Watchdog';
+	16#209A: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 10 was received which means that the communication partner has received an invalid application parameter length';
+	16#209B: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 11 was received which means that the communication partner has received invalid application parameter data';
+	16#209C: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 12 was received';
+	16#209D: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 13 was received';
+	16#209E: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 14 was received which means that the communication partner has detected a module fault';
+	16#209F: sResult := 'On the %d. connection in state DATA a FSoE-Reset with Error-Code 0x%x was received';
+	16#20C1: sResult := 'The %d. connection has received an invalid FSoE-Cmd in state SHUTDOWN';
+	16#20C2: sResult := 'The %d. connection has received an unknown FSoE-Cmd in state SHUTDOWN';
+	16#20C4: sResult := 'The %d. connection has received an invalid FSoE-CRC in state SHUTDOWN';
+	16#20E3: sResult := 'The %d. connection has received the invalid FSoE-ConnID 0 in state SESSION';
+	16#2101: sResult := 'On the %d. connection the PROFIsafe-Slave reports a communication error';
+	16#2102: sResult := 'On the %d. connection the PROFIsafe-Slave reports a watchdog error';
+	16#2103: sResult := 'On the %d. connection the PROFIsafe-Slave reports a device fault';
+	16#2104: sResult := 'On the %d. connection a CRC2-Error was detected locally on the PROFIsafe Host';
+	16#2105: sResult := 'On the %d. connection the Watchdog has been expired locally on the PROFIsafe Host';
+	16#2114: sResult := 'On the %d. connection a CRC2-Error was detected locally on the PROFIsafe Slave';
+	16#2115: sResult := 'On the %d. connection the Watchdog has been expired locally on the PROFIsafe Slave';
+	16#2117: sResult := 'On the %d. connection the Bit 7 of the F_Control is reset, which is not allowed on a PROFIsafe Slave connection with the same message size for inputs and outputs';
+	16#211C: sResult := 'On the %d. connection the PROFIsafe Slave has been restarted locally';
+	16#3000: sResult := 'The received number of groups (%d) was too big, the maximum allowed value is %d';
+	16#3001: sResult := 'The received number of FBs (%d) was too big, the maximum allowed value is %d';
+	16#3002: sResult := 'The received number of Connections (%d) was too big, the maximum allowed value is %d';
+	16#3003: sResult := 'The received number of Output Mappings was too big, the maximum allowed value is %d';
+	16#3004: sResult := 'The received number of Input Mappings was too big, the maximum allowed value is %d';
+	16#3005: sResult := 'The received size of Standard Inputs (%d) was too big, the maximum allowed value is %d';
+	16#3006: sResult := 'The received size of Standard Outputs (%d) was too big, the maximum allowed value is %d';
+	16#3007: sResult := 'The received number of Restore Slaves (%d) was too big, the maximum allowed value is %d';
+	16#3008: sResult := 'The SafeCfgData type was unexpected: %d found and %d expected';
+	16#3009: sResult := 'The SafeCfgData type 2 (Connection) was expected at offset %d';
+	16#300A: sResult := 'The SafeCfgData type 3 (FB) was expected at offset %d';
+	16#300B: sResult := 'The SafeCfgData type 15 (GAP) was expected at offset %d';
+	16#300C: sResult := 'The Bit-Mask in the SafeCfgData was wrong at offset %d';
+	16#300D: sResult := 'The address in the SafeCfgData was wrong at offset %d';
+	16#300E: sResult := 'The Signal number in the SafeCfgData was wrong at offset %d';
+	16#300F: sResult := 'The number of connections was wrong in the SafeCfgData of the Group at offset %d';
+	16#3010: sResult := 'The number of FBs was wrong in the SafeCfgData of the Group at offset %d';
+	16#3011: sResult := 'The size of the SafeCfgData was wrong at offset %d';
+	16#3012: sResult := 'The complete size of the SafeCfgData related to the Group %d was wrong';
+	16#3013: sResult := 'If the RUN-Signal should be mapped internally, it has to be activated at offset %d';
+	16#3014: sResult := 'The message size at offset %d is invalid';
+	16#3015: sResult := 'The connection parameter at offset %d is invalid';
+	16#3016: sResult := 'If the ERRACK-Signal should be mapped internally, it has to be activated at offset %d';
+	16#3017: sResult := 'The connection type at offset %d is invalid';
+	16#3018: sResult := 'The value at offset %d of the SafeCfgData is invalid';
+	16#3019: sResult := 'The value at offset %d of the SafeCfgData is invalid because at least one of the related signals is not active';
+	16#301A: sResult := 'The number of mappings (%d) is wrong because it is not the last Mapping SafeCfgData';
+	16#301B: sResult := 'The Safe Logic Cfg Data were downloaded in the wrong download state (%d)';
+	16#301C: sResult := 'The number of mappings (%d) is too great in the Mapping SafeCfgData';
+	16#301D: sResult := 'The Mapping-Size in the SafeCfgData was wrong at offset %d';
+	16#301E: sResult := 'A Group-Input Mapping was expected at offset %d';
+	16#301F: sResult := 'A Connection-Input Mapping was expected at offset %d';
+	16#3020: sResult := 'A FB-Input Bit-Mapping was expected at offset %d';
+	16#3021: sResult := 'A FB-Input Byte-Mapping was expected at offset %d';
+	16#3022: sResult := 'No more mapping was expected at offset %d';
+	16#3023: sResult := 'Invalid Safe User Parameter size at byte offset 0x%x (Found=%d, Expected=%d)';
+	16#3024: sResult := 'The SafeCfgData type 4 (Safe User Parameter) was expected at offset %d';
+	16#3025: sResult := 'The download of the Input Mapping Cfg Data was refused because %d groups were missing in the Safe Logic Cfg Data';
+	16#3026: sResult := 'The download of the Input Mapping Cfg Data was refused because %d connections were missing in the Safe Logic Cfg Data';
+	16#3027: sResult := 'The download of the Input Mapping Cfg Data was refused because %d FBs were missing in the Safe Logic Cfg Data';
+	16#3028: sResult := 'At least one group has to be defined in the SafeCfgData';
+	16#3029: sResult := 'The download of the Input Mapping Cfg Data was refused because no safe Logic Cfg Data were downloaded before';
+	16#302A: sResult := 'The Subindex %d was expected to be downloaded';
+	16#302B: sResult := 'When loading CfgData a user has to be logged in before';
+	16#302C: sResult := 'The Input Mapping Cfg Data were downloaded in the wrong download state (%d)';
+	16#302D: sResult := 'The download of theSafe Logic CfgData is refused because the old Safe Logic Cfg Data were not deleted before';
+	16#302E: sResult := 'The user was logged out before';
+	16#302F: sResult := 'The user has not sufficient access rights';
+	16#3030: sResult := 'The reserved area of the CfgData was not 0';
+	16#3031: sResult := 'The CRC of the CfgData was wrong';
+	16#3032: sResult := 'All needed CfgData pages were downloaded before, no more pages are expected';
+	16#3033: sResult := 'The mapping code buffer is too small for the mapping';
+	16#3034: sResult := 'The maximum allowed subindex is %d';
+	16#3035: sResult := 'The download of the Output Mapping Cfg Data was refused because %d mappings of the Input Mapping Cfg Data were missing';
+	16#3036: sResult := '%d input mappings of the groups were missing in the Input Mapping Cfg Data';
+	16#3037: sResult := '%d input mappings of the connections were missing in the Input Mapping Cfg Data';
+	16#3038: sResult := '%d input bit mappings of the FBs were missing in the Input Mapping Cfg Data';
+	16#3039: sResult := '%d input byte mappings of the FBs were missing in the Input Mapping Cfg Data';
+	16#303A: sResult := 'The Output Mapping Cfg Data were downloaded in the wrong download state (%d)';
+	16#303B: sResult := 'The mapping code buffer is too small for the local mapping';
+	16#303C: sResult := 'The download of the Safe Parameter was refused because no Output Mapping Cfg Data were downloaded before';
+	16#303D: sResult := 'The download of the Safe User Parameter was refused because %d mappings of the Output Mapping Cfg Data were missing';
+	16#303E: sResult := 'The Safe User Parameter Cfg Data were downloaded in the wrong download state (%d)';
+	16#303F: sResult := 'The download of the Activate Project Cfg Data was refused because no Safe User Parameter Cfg Data were downloaded before';
+	16#3040: sResult := 'The download of the Activate Project Cfg Data was refused because %d bytes of the Safe Parameter Cfg Data were missing';
+	16#3041: sResult := 'The received activate code (0x%x) was wrong in the Project Cfg Data';
+	16#3042: sResult := 'The TwinSAFE Address (%d) in the Project Cfg Data does not match with the DIP switch (%d)';
+	16#3043: sResult := 'At least one Cfg Data page has to be defined in the Safe Logic Cfg Data';
+	16#3044: sResult := 'The maximum number (%d) of Cfg Data pages was exceeded in the Safe Logic Cfg Data';
+	16#3045: sResult := 'The received number of Safe Logic Cfg Data pages (%d) has exceeded the configured value at offset 0 of the Safe Logic Cfg Data (%d)';
+	16#3046: sResult := 'The download of the Input Mapping Cfg Data was refused because %d pages were missing in the Safe Logic Cfg Data';
+	16#3047: sResult := 'The Safe Logic Cfg Data CRC does not match in the Safe Project Cfg Data';
+	16#3048: sResult := 'When checking the Mapping Code a fault has detected at offset 0x%x';
+	16#3049: sResult := 'The Mapping Cfg Data CRC does not match in the Safe Project Cfg Data';
+	16#304A: sResult := 'The number of Input Mappings is too small in the Safe Project Cfg Data (Code-Offset=0x%x)';
+	16#304B: sResult := 'The number of Output Mappings is too small in the Safe Project Cfg Data (Code-Offset=0x%x)';
+	16#304C: sResult := 'The number of Input Mappings is too great in the Safe Project Cfg Data, (%d mappings too much, Code-Offset=0x%x)';
+	16#304D: sResult := 'The number of Output Mappings is too great in the Safe Project Cfg Data, (%d mappings too much, Code-Offset=0x%x)';
+	16#304E: sResult := 'The maximum number (%d) of Cfg Data pages was exceeded in the Safe User Parameter Cfg Data';
+	16#304F: sResult := 'At least one Cfg Data page has to be defined in the Safe User Parameter Cfg Data';
+	16#3050: sResult := 'The Safe User Parameter Cfg Data CRC does not match in the Safe Project Cfg Data';
+	16#3052: sResult := 'The calculated local process image size (%d) exceeded the maximum local process image size of %d';
+	16#3053: sResult := 'The Activate Project Cfg Data were downloaded in the wrong download state (%d)';
+	16#3054: sResult := 'The Delete Project Cfg Data were downloaded in the wrong download state (%d)';
+	16#3055: sResult := 'The TwinSAFE Address (%d) does not match with the DIP switch (%d) in the Delete Project Cfg Data';
+	16#3056: sResult := 'The Delete Code (%d) is too high in the Delete Project Cfg Data';
+	16#3057: sResult := 'Unexpected connection index in the Safe User Parameter Cfg Data at byte offset 0x%x';
+	16#3058: sResult := 'The received number of Local Safety Inputs (%d) was wrong, the expected value is %d';
+	16#3059: sResult := 'The received number of Local Safety Outputs (%d) was wrong, the expected value is %d';
+	16#305A: sResult := 'The received number of Local Standard Inputs (%d) was wrong, the expected value is %d';
+	16#305B: sResult := 'The received number of Local Standard Outputs (%d) was wrong, the expected value is %d';
+	16#305C: sResult := 'The received Safety Input Message size at word offset 15 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#305D: sResult := 'The received Safety Output Message size at word offset 16 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#305E: sResult := 'The received Safety Input size at word offset 7 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#305F: sResult := 'The received Safety Output size at word offset 8 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3060: sResult := 'The received PROFIsafe Input Message size at word offset 9 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3061: sResult := 'The received PROFIsafe Output Message size at word offset 10 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3062: sResult := 'At word offset 0x%x the configured number of CRCs of %d exceeds the maximum number of CRCs (%d)';
+	16#3063: sResult := 'The received SafeUserParameterSizeInFrame (%d) was wrong, the expected value is %d';
+	16#3064: sResult := 'The received FB Analog Input size at word offset 13 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3065: sResult := 'The received FB Analog Output size at word offset 14 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3066: sResult := 'The received Connection Status Data size at word offset 21 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3067: sResult := 'The received FB Status Data size at word offset 22 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3068: sResult := 'The number of active signals in the FB is invalid at offset %d';
+	16#3069: sResult := 'The local map code size in the FB is invalid at offset %d';
+	16#306A: sResult := 'The analog output size in the Group Cfg Data is invalid at offset %d';
+	16#306B: sResult := 'The analog output offset in the Group Cfg Data is invalid at offset %d';
+	16#306C: sResult := 'The received FB Analog Output size at word offset 14 of the Safe Logic Cfg Data (%d) is unequal the calculated value over all the Group Cfg Data (%d)';
+	16#306D: sResult := 'The calculated end of the analog output area (%d) is unequal the calculated analog output offset over all the Group Cfg Data (%d)';
+	16#306E: sResult := 'The value of the FB Cfg Data at offset %d is invalid';
+	16#306F: sResult := 'At least one FB input has to be deactivated in this operation mode at offset %d';
+	16#3070: sResult := 'At least the level of one FB input is wrong in this operation mode at offset %d';
+	16#3071: sResult := 'The value of the FB Cfg Data at word offset %d is invalid in this operation mode';
+	16#3072: sResult := 'The number (%d) of Cfg Data pages was exceeded in the Info Data Cfg Data at offset 0';
+	16#3073: sResult := 'The received number of FBs (%d) at word offset 1 was unequal the configured number of FBs of %d';
+	16#3074: sResult := 'The received FB Status Data Size (%d) in the Info Data Map Cfg Data at byte offset %d is unequal the calculated FB Status Data size of %d';
+	16#3075: sResult := 'The received FB Diag Data Size (%d) in the Info Data Map Cfg Data at byte offset %d is unequal the calculated FB Diag Data size of %d';
+	16#3076: sResult := 'The received number of Connections (%d) in the Info Data Cfg Data at word offset %d was unequal the configured number of connections of %d';
+	16#3077: sResult := 'The received Connection Type (%d) in the Info Data Map Cfg Data at byte offset %d is unequal the configured Connection Type of %d';
+	16#3078: sResult := 'The FB Diag Data Map in the Info Data Map Cfg Data was wrong at byte offset %d (bit 7=1 and bit 6=0 is not allowed)';
+	16#3079: sResult := 'The received number of Groups (%d) in the Info Data Cfg Data at word offset %d was unequal the configured number of Groups of %d';
+	16#307A: sResult := 'The FB-Type is unknown at offset 0x%x';
+	16#307B: sResult := 'The value at offset %d of the SafeCfgData is too great';
+	16#307C: sResult := 'The value at offset %d of the SafeCfgData is too small';
+	16#307D: sResult := 'FB-Muting: if SequentialInputs is TRUE, all MuteIn signals have to be active at offset 0x%x';
+	16#307E: sResult := 'The type of the analog inputs has to be the same at offset 0x%x';
+	16#307F: sResult := 'The received size of the local safe user parameter (%d) was wrong, the expected size is %d';
+	16#3080: sResult := 'The value at offset %d of the SafeCfgData is invalid in combination with the value %d words before in the SafeCfgData';
+	16#3081: sResult := 'The received size of the FB Parameter Data at word offset 25 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#3082: sResult := 'The FB-Type in the Change FB Parameter Data (FB %d) is unequal, the expected FB-type is %d';
+	16#3083: sResult := 'The size in the Change FB Parameter Data (FB %d) is unequal, the expected size is %d';
+	16#3084: sResult := 'The Setting Mode of the FB CAMMON (FB %d) in the Change FB Parameter Data is not activated';
+	16#3085: sResult := 'The actual Logic State (%d) is unequal RUN (1) when changing FB Parameter Data';
+	16#3086: sResult := 'The FB-Number (%d) in the Change FB Parameter Data is invalid';
+	16#3087: sResult := 'The FRAM data size (%d) has exceeded, the maximum allowed value is %d';
+	16#3088: sResult := 'The Safe User Parameter in the Change FB Parameter Data are not supported';
+	16#3089: sResult := 'The size (%d) of the Change FB Parameter Data is too small, %d bytes are expected';
+	16#308A: sResult := 'The type (%d) of the Safe User Parameter in the Change FB Parameter Data is wrong';
+	16#308B: sResult := 'The size (%d) of the Safe User Parameter in the Change FB Parameter Data is wrong, the expected size is %d';
+	16#308C: sResult := 'The offset of the Cyclic FRAM Data was wrong at offset %d';
+	16#308D: sResult := 'No Local Input bytes configured for Extended Info Data Mapping';
+	16#308E: sResult := 'No Local Output bytes configured for Extended Info Data Mapping';
+	16#308F: sResult := 'Too much Local Input bytes configured for Info Data, only 31 bytes are allowed';
+	16#3090: sResult := 'Too much Local Output bytes configured for Info Data, only 31 bytes are allowed';
+	16#3094: sResult := 'The size 0 is not allowed for the safe user parameter at word offset %d';
+	16#3095: sResult := 'The download of the Activate Project Cfg Data was refused because no Output Mapping Cfg Data were downloaded before';
+	16#3096: sResult := 'The download of the Activate Project Cfg Data was refused because %d mappings of the Output Mapping Cfg Data were missing';
+	16#3097: sResult := 'The re-converted FB-Mapping-Code was not matching to the FB Cfg Data (FB: %d, Code-Address: 0x%x, Offset: 0x%x)';
+	16#3098: sResult := 'a destination was mapped twice in the bit mapping code (page: 0x%x, Code-Address: 0x%x)';
+	16#3099: sResult := 'a destination was mapped twice in the byte mapping code (Page: 0x%x, Code-Address: 0x%x)';
+	16#309A: sResult := 'the number of groups was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309B: sResult := 'the number of FBs was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309C: sResult := 'the number of Connections was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309D: sResult := 'the number of Standard Inputs was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309E: sResult := 'the number of Standard Outputs was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#309F: sResult := 'the FSoE message size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A0: sResult := 'the FSoE safe user parameter size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A1: sResult := 'the PROFIsafe message size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A2: sResult := 'the EtherCAT Output size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A3: sResult := 'the EtherCAT Input size was exceeded in the Vendor Data (actual value: %d, minimum: %d, maximum: %d)';
+	16#30A4: sResult := 'the EtherCAT Output size was exceeded in the project (calculated value: %d, maximum value: %d)';
+	16#30A5: sResult := 'the EtherCAT Input size was exceeded in the project (calculated value: %d, maximum value: %d)';
+	16#30A6: sResult := 'when re-converting the local FB mapping code (FB %d) the analog destination address was below the minimum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30A7: sResult := 'when re-converting the local FB mapping code (FB %d) the analog destination address was above the maximum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30A8: sResult := 'when re-converting the local FB mapping code (FB %d) the destination address was not found (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30A9: sResult := 'when re-converting the local FB mapping code (FB %d) the digital destination address was below the minimum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30AA: sResult := 'when re-converting the local FB mapping code (FB %d) the digital destination address was above the maximum value (Code-Offset: 0x%x, Data-Offset: 0x%x)';
+	16#30AB: sResult := 'when re-converting the local FB mapping code (FB %d) the generated mapping data size was wrong (Code-Offset: 0x%x)';
+	16#30AC: sResult := 'the Project CRC in the Activate Project Cfg Data was wrong';
+	16#30AD: sResult := 'when re-converting the local FB mapping code the source bit address was wrong (FB: %d, Code-Offset: 0x%x)';
+	16#30AE: sResult := 'when re-converting the local FB mapping code the source byte address was wrong (FB: %d, Code-Offset: 0x%x)';
+	16#30B1: sResult := 'wrong subindex order when reading the input mapping cfg data, the expected subindex is %d';
+	16#30B2: sResult := 'subindex exceeded when reading the cfg data';
+	16#30B3: sResult := 'the offset in the Replacement Values cfg data is wrong in the Group cfg data at word-offset 0x%x';
+	16#30B4: sResult := 'the deactivation mode passivate is enabled and the number of connections is unequal 1 in the Group cfg data at word-offset 0x%x';
+	16#30B5: sResult := 'the RUN-signal has to be active in the Group cfg data at word-offset 0x%x';
+	16#30B6: sResult := 'in the Change FB-Parameter (FB %d) the FB-type %d is not supported';
+	16#30B7: sResult := 'the Subindex exceeds the number of connections (%d) when writing the PROFIsafe F-Parameter';
+	16#30B8: sResult := 'the Connection-Type %d does not support PROFIsafe F-Parameter';
+	16#30B9: sResult := 'the Subindex exceeds the number of connections (%d) when writing the Store Slave Project CRC Parameter';
+	16#30BA: sResult := 'the Connection-Type %d does not support Store Slave Project CRC Parameter';
+	16#30BB: sResult := 'if there are no Muting sensors behind the AOPD, the Backwards-Mode and optional Check of the OSSD inputs are not allowed';
+	16#30BC: sResult := 'when optional Check of the OSSD inputs is activated, the Sequential Inputs mode has to be activated too';
+	16#30BD: sResult := 'The number of Connections (%d) is unequal the calculated number of connections over all groups (%d)';
+	16#30BE: sResult := 'The number of FBs (%d) is unequal the calculated number of FBs over all groups (%d)';
+	16#30BF: sResult := 'The calculated local near process image size (%d) exceeded the maximum near local process image size of %d';
+	16#30C0: sResult := 'the EtherCAT Output size was exceeded in the connection cfg data at word offset 0x%x (calculated value: %d, maximum value: %d)';
+	16#30C1: sResult := 'the EtherCAT Input size was exceeded in the connection cfg data at word offset 0x%x (calculated value: %d, maximum value: %d)';
+	16#30C2: sResult := 'the reserved bits in the flags of the Vendor Data were set (actual value: 0x%x, reserved flags: 0x%x)';
+	16#30C3: sResult := 'FB CAMMON: if the Setting Mode is enabled, at least one position marker has to be configured in the cfg data';
+	16#30C4: sResult := 'Connection Type is not supported at word-offset 0x%x of the cfg data';
+	16#30C5: sResult := 'writing the PROFIsafe F-Parameter is not allowed in this logic state (%d), the logic state has to be 1 (RUN)';
+	16#30C6: sResult := 'The ConnId 0x%x is used at least twice';
+	16#30C7: sResult := 'The PROFIsafe Address 0x%x is used at least twice';
+	16#30C8: sResult := 'The FSoE Address 0x%x is used at least twice';
+	16#30C9: sResult := 'The TwinSAFE SC type %d is used at least twice';
+	16#30CA: sResult := 'The TwinSAFE SC CRC 0x%x is used at least twice';
+	16#30CB: sResult := 'The Connection Index %d in a FB Connection Shutdown is used at least twice';
+	16#30CC: sResult := 'It is not allowed that the number of FBs and the number of Connections is zero inside the Group Cfg Data';
+	16#30CD: sResult := 'the storing of the Store Slave Project CRC Parameter is not supported in connection %d';
+	16#30CE: sResult := 'The received size of Safety Input Messages (%d) was too big, the maximum allowed value is %d';
+	16#30CF: sResult := 'The received size of Safety Output Messages (%d) was too big, the maximum allowed value is %d';
+	16#30D0: sResult := 'The received size of PROFIsafe Input Messages (%d) was too big, the maximum allowed value is %d';
+	16#30D1: sResult := 'The received size of PROFIsafe Output Messages (%d) was too big, the maximum allowed value is %d';
+	16#30D2: sResult := 'The Restore Mode is supported on a TwinSAFE SC connection at word-offset 0x%x';
+	16#30D3: sResult := 'The FB %d (Connection Shutdown) is assigned to a non FSoE-connection';
+	16#30D4: sResult := 'The download of the TwinSAFE IO-Project failed because %d FBs are configured (no FBs allowed)';
+	16#30D5: sResult := 'When the TwinSAFE-Address in the Project Cfg data should be used, it has to be unequal zero';
+	16#30D6: sResult := 'When the TwinSAFE-Address in the Project Cfg data should be used, the DIP-switch has to be zero (0x%x found)';
+	16#30D7: sResult := 'Read aborted because of invalid code buffer offset (Calculated=0x%x, Expected=0x%x)';
+	16#30D8: sResult := 'Invalid Safe User Parameter Offset at word offset 0x%x (Calculated=0x%x, Expected=0x%x)';
+	16#30D9: sResult := 'The Standard Inputs Size of zero is not allowed';
+	16#30DA: sResult := 'The download of the Replacement Values is not allowed after the download before (download state=%d)';
+	16#30DB: sResult := 'The Info Data Map Cfg Data were downloaded in the wrong download state (%d)';
+	16#30DC: sResult := 'The offset for the safety-Timer has to be inside the safety Output Area from 0x%x to 0x%x';
+	16#30DD: sResult := 'The safety input size of connection %d is zero offset, the Safety Inputs cannot be mapped at byte offset 0x%x of Info Data Map Cfg Data';
+	16#30DE: sResult := 'The safety output size of connection %d is zero, the Safety Outputs cannot be mapped at byte offset 0x%x of Info Data Map Cfg Data';
+	16#30DF: sResult := 'No more safe user parameter expected at byte-offset 0x%x of the Safe User Parameter Cfg Data';
+	16#30E0: sResult := 'The TwinSAFE Address 0 is not allowed in the Project Cfg Data';
+	16#30E1: sResult := 'The download of the TwinSAFE IO-Project failed because %d Groups are configured (only 1 Group allowed)';
+	16#30E2: sResult := 'The download of the Delete Project Cfg Data is not allowed in this state (%d)';
+	16#30E3: sResult := 'The destination bit address (0x%x, Bit %d) already exists in the same mapping code';
+	16#30E4: sResult := 'Local Inputs cannot be mapped in the Info data because no local inputs are existing';
+	16#30E5: sResult := 'Local Outputs cannot be mapped in the Info data because no local outputs are existing';
+	16#30E6: sResult := 'The destination bit address (0x%x, Bit %d) already exists in the same mapping code';
+	16#30E7: sResult := 'the input mapping cfg data has to be read before the output mapping cfg data';
+	16#30E8: sResult := 'wrong subindex order when reading the mapping cfg data, the expected subindex is %d';
+	16#30E9: sResult := 'when reading the input mapping cfg data, it has to be started with subindex 1';
+	16#30EA: sResult := 'invalid CRC when checking the Page %d of the Safe Logic Cfg Data';
+	16#30EB: sResult := 'invalid CRC when checking the Page %d of the Safe User Parameter Cfg Data';
+	16#30EC: sResult := 'invalid CRC when checking the Page %d of the Replacement values Cfg Data';
+	16#3100: sResult := 'No groups defined when trying to activate or deactivate groups';
+	16#3101: sResult := 'The reserved bits are set in value %d at offset %d when trying to activate or deactivate groups';
+	16#3102: sResult := 'The operation mode at offset %d is not supported when trying to activate or deactivate groups';
+	16#3103: sResult := 'The deactivation of groups is not enabled for any group so no replacement values should be downloaded';
+	16#3104: sResult := 'The maximum number (%d) of Cfg Data pages was exceeded in the Replacement Values Cfg Data';
+	16#3105: sResult := 'Invalid FB output size size at offset %d of the Replacement Values Cfg Data';
+	16#3106: sResult := 'Unexpected groupindex in the Replacement values Cfg Data at offset 0x%x';
+	16#3107: sResult := 'The download of the Activate Project Cfg Data was refused because %d bytes of the Replacement Values Cfg Data were missing';
+	16#3108: sResult := 'To activate the Group %d the user has to logged in with access rights Bit 0-15 unequal 0 that the Safe Logic Program will be stopped when logging in';
+	16#3109: sResult := 'No more definitions of individual replace values for analog FB Outputs in case of Group State unequal RUN are expected at offset %d';
+	16#310A: sResult := 'The offset in the definitions of individual replace values for analog FB Outputs in case of Group State unequal RUN was wrong at offset %d';
+	16#310B: sResult := 'The source process image offset of the Cyclic FRAM Data is outside the FB analog input area at offset %d';
+	16#310C: sResult := 'The source process image offset of the Cyclic FRAM Data has to even at offset %d';
+	16#310D: sResult := 'The size of the Cyclic FRAM Data was exceeding at offset %d';
+	16#310E: sResult := 'The received size of the Cyclic FRAM Data at word offset 24 of the Safe Logic Cfg Data (%d) is unequal the calculated value of %d';
+	16#310F: sResult := 'The size of the Cyclic FRAM CfgData in the GroupCfgData was not dividable by 4 at offset %d';
+	16#3110: sResult := 'The offset of the Cyclic FRAM Data in the GroupCfgData was wrong at offset %d';
+	16#3111: sResult := 'The value of %d at offset %d is not allowed when trying to activate or deactivate groups';
+	16#3113: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The TDC2UpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#3114: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The TDCUpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#3115: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDCLowerLimit (plus maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#3116: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of BDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDCLowerLimit (%d)';
+	16#3117: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of BDCUpperLimit (%d) is smaller or equal the configured value of 180� (plus maximum position jitter) (%d)';
+	16#3118: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of BDCLowerLimit (plus maximum position jitter) (%d) is greater or equal the configured value of 180� (%d)';
+	16#3119: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of OverrunMax (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#311A: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of OverrunMax (%d)';
+	16#311B: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC1UpperLimit (plus the maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#311C: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC1LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC1UpperLimit (5d)';
+	16#311D: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC2LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#311E: sResult := 'FB CAMMON (Word-Offset 0x%x of the CfgData): The value of TDC2UpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC2LowerLimit (%d)';
+	16#311F: sResult := 'The maximum size of the Replacement Values was exceeded at Word-Offset 0x%x of the Group Cfg Data';
+	16#3120: sResult := 'If no deactivation mode is enabled the offset of the replacement values shall be zero at Word-Offset 0x%x of the Group Cfg Data';
+	16#3121: sResult := 'No more replacement values expected at byte-offset 0x%x of the Replacement Values Cfg Data';
+	16#3200: sResult := 'The PROFIsafe-protocol is not supported on this device';
+	16#3201: sResult := 'The F_ParVersion in the F_Prm_Flag2 of the F-Parameter at Word-Offset 0x%x is unequal 1 (PROFIsafe V2)';
+	16#3202: sResult := 'The F_CRC1 of the F-Parameter at Word-Offset 0x%x is wrong';
+	16#3203: sResult := 'The F_CRC_Length in the F_Prm_Flag1 of the F-Parameter is wrong at Word-Offset 0x%x, the expected value is 0 (3 Bytes CRC2)';
+	16#3206: sResult := 'The I-Parameter CRC in the F-Parameter is wrong at Word-Offset 0x%x';
+	16#3207: sResult := 'The F_Block_ID in the F_Prm_Flag2 of the F-Parameter is wrong at Word-Offset 0x%x, the expected value is 0 (No F_iPar_CRC, no F_WD_Time 2) or 1 (F_iPar_CRC, no F_WD_Time 2)';
+	16#3208: sResult := 'The F_Source_Address in the F-Parameter at Word-Offset 0x%x is outside the allowed area of 1-0xFFFE';
+	16#3209: sResult := 'The F_Destination_Address in the F-Parameter at Word-Offset 0x%x is outside the allowed area of 1-0xFFFE';
+	16#320A: sResult := 'The F_WD_Time in the F-parameter at Word-Offset 0x%x is outside the allowed range from 2-60000';
+	16#320B: sResult := 'The F_Destination_Address in the F-Parameter at Word-Offset 0x%x is wrong, the expected value is %d';
+	16#3210: sResult := 'The PROFIsafe I-Parameter are only valid for a TwinSAFEIO Safety Project';
+	16#3211: sResult := 'The CRC3 (iPar-CRC) is wrong, received: 0x%x, expected  0x%x';
+	16#3212: sResult := 'The checking of the Safe User Parameter (I-Parameter) was not successful';
+	16#3300: sResult := 'The State OPERATIONAL was left in Restore Mode';
+	16#3301: sResult := 'Only %d CRCs were matching in Restore Mode';
+	16#3302: sResult := 'The CRC of the Activate Project Cfg Data in Restore Mode does not match, the expected value was 0x%x';
+	16#3303: sResult := 'No RestoreMode Slaves configured when trying to start the Restore Mode';
+	16#3304: sResult := 'The CRC of the User List Cfg Data was not matching in Restore Mode, the expected value was 0x%x';
+	16#3305: sResult := 'The download of the User List Cfg Data is not activated in Restore Mode';
+	16#3306: sResult := 'The download of the User List Cfg Data in Restore-Mode is not allowed in the state %d';
+	16#3307: sResult := 'The activation of the TwinSAFE Restore Project is not allowed in the state %d';
+	16#3308: sResult := 'The Restore Mode is not supported in EtherCAT state 0x%x';
+	16#3310: sResult := 'The FSoE-Slave on the %d. connection is in Restore-Mode';
+	16#3311: sResult := 'The FSoE-Master on the %d. connection is in Restore-Mode';
+	16#3400: sResult := 'The %d. group has no more errors';
+	16#3401: sResult := 'The Analog Input at word offset %d of the analog input process image has expired maximum allowed deviation to the last stored value, received value: %d, last stored value: %d';
+	16#3402: sResult := 'The Wait-Com-Error-Timeout has not been expired when the group %d should be deactivated in passivate mode';
+	16#3403: sResult := 'A module fault happened in group %d';
+	16#3404: sResult := 'The assigned connection reported an error when the group %d was deactivated in passivate mode';
+	16#3405: sResult := 'The connection has been successfully restarted when the group %d was deactivated in passivate mode';
+	16#3410: sResult := 'All groups will enter the ERROR-state because the safe logic program has been restarted';
+	16#3411: sResult := 'All groups will enter the ERROR-state because the CRC of the Change Group Activation Data was wrong';
+	16#3412: sResult := 'All groups will enter the ERROR-state because the CRC of the Change FB Parameter Data was wrong';
+	16#3413: sResult := 'All groups will enter the ERROR-state because the CRC of the Project CRC Data was wrong';
+	16#3414: sResult := 'All groups will enter the ERROR-state because the CRC of the Power-On Analog Value Check Data was wrong';
+	16#3415: sResult := 'The TwinSAFE Logic Program was not loaded on C1 because of an inconsistency';
+	16#3416: sResult := 'The TwinSAFE Logic Program was not loaded on C2 because of an inconsistency';
+	16#3420: sResult := 'No more EtherCAT size error (EtherCAT Output Size=%d, EtherCAT Input Size=%d)';
+	16#3421: sResult := 'The EtherCAT Output Data sizes of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3422: sResult := 'The EtherCAT Input Data sizes of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3423: sResult := 'The EtherCAT Output Data sizes for PROFIsafe of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3424: sResult := 'The EtherCAT Input Data sizes for PROFIsafe of the Safety Logic Program (%d) and the EtherCAT Configuration (%d) are unequal';
+	16#3425: sResult := 'The needed EtherCAT Process data buffer size (%d) exceeded the maximum available size of %d';
+	16#3501: sResult := 'On the %d. connection the changeable FSoE Address of %d already exists';
+	16#3502: sResult := 'On the %d. connection the changeable FSoE Address is zero';
+	16#3800: sResult := 'FB %d (ESTOP): An EDM-fault (0x%x) was detected in state SAFE';
+	16#3802: sResult := 'FB %d (ESTOP): An EDM-fault (0x%x) was detected in state RESET';
+	16#3803: sResult := 'FB %d (ESTOP): An EDM-fault (0x%x) was detected in state START';
+	16#3804: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual EStopIn-values are 0x%x';
+	16#3806: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state RESET, the actual EStopIn-values are 0x%x';
+	16#3807: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state START, the actual EStopIn-values are 0x%x';
+	16#3809: sResult := 'FB %d (ESTOP): An DiscTime-Fault (0x%x) was detected in state DELAYOUT, the actual EStopIn-values are 0x%x';
+	16#380F: sResult := 'FB %d (ESTOP): At least one activated EDM-Input was not reset in RUN when the EDM Reset time had been expired (Diag-Code=0x%x)';
+	16#3810: sResult := 'FB %d (MON): An EDM-fault (0x%x) was detected in state SAFE';
+	16#3812: sResult := 'FB %d (MON): An EDM-fault (0x%x) was detected in state RESET';
+	16#3813: sResult := 'FB %d (MON): An EDM-fault (0x%x) was detected in state START';
+	16#3814: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual MonIn/Secure-values are 0x%x';
+	16#3816: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state RESET, the actual MonIn/Secure-values are 0x%x';
+	16#3817: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state START, the actual MonIn/Secure-values are 0x%x';
+	16#3818: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state RUN, the actual MonIn/Secure-values are 0x%x';
+	16#3819: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state DELAYOUT, the actual MonIn/Secure-values are 0x%x';
+	16#381A: sResult := 'FB %d (MON): An DiscTime-Fault (0x%x) was detected in state FUNCTEST, the actual MonIn/Secure-values are 0x%x';
+	16#381F: sResult := 'FB %d (MON): At least one activated EDM-Input was not reset in RUN when the EDM Reset time had been expired (Diag-Code=0x%x)';
+	16#3820: sResult := 'FB %d (TWOHAND): A Disc-Group-fault (0x%x) was detected in state 1BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#3821: sResult := 'FB %d (TWOHAND): A Disc-Group-fault (0x%x) was detected in state 2BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#3823: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual TwoHandIn-values are 0x%x';
+	16#3825: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state RESET, the actual TwoHandIn-values are 0x%x';
+	16#382B: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state 1BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#382C: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state 2BUTTON, the actual TwoHandIn-values are 0x%x';
+	16#382D: sResult := 'FB %d (TWOHAND): An DiscTime-Fault (0x%x) was detected in state RELEASE, the actual TwoHandIn-values are 0x%x';
+	16#3830: sResult := 'FB %d (OPMODE): An DiscTime-Fault (0x%x) was detected, the actual OpIn-values are 0x%x';
+	16#3831: sResult := 'FB %d (OPMODE): An Input-Fault was detected in state RESET, the actual OpIn-values are 0x%x';
+	16#3840: sResult := 'FB %d (EDM): The SwitchOn-Time had been expired';
+	16#3841: sResult := 'FB %d (EDM): The SwitchOff-Time had been expired';
+	16#3853: sResult := 'FB %d (CS): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual Deactivate-values are 0x%x';
+	16#3855: sResult := 'FB %d (CS): An DiscTime-Fault (0x%x) was detected in state RESET, the actual Deactivate-values are 0x%x';
+	16#3881: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state RUN, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3883: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state SAFE, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3885: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state RESET, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3888: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state DELAYOUT, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3889: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING1, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388A: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING2, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388B: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING3, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388C: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING4, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388D: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING5, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388E: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING6, the actual MuteIn/OssdIn-values are 0x%x';
+	16#388F: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING7, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3890: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING8, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3891: sResult := 'FB %d (MUTING): An DiscTime-Fault (0x%x) was detected in state MUTING9, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3892: sResult := 'FB %d (MUTING): State RUN, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3893: sResult := 'FB %d (MUTING): State RUN, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3894: sResult := 'FB %d (MUTING): State MUTING1, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3895: sResult := 'FB %d (MUTING): State MUTING1, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3896: sResult := 'FB %d (MUTING): State MUTING2, MutingEnable is set and the MuteIn-signals before the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3897: sResult := 'FB %d (MUTING): State MUTING2, MutingEnable is set and the MuteIn-signals after the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3898: sResult := 'FB %d (MUTING): State MUTING3, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#3899: sResult := 'FB %d (MUTING): State MUTING3, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389A: sResult := 'FB %d (MUTING): State MUTING3, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389B: sResult := 'FB %d (MUTING): State MUTING4, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389C: sResult := 'FB %d (MUTING): State MUTING4, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389D: sResult := 'FB %d (MUTING): State MUTING5, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389E: sResult := 'FB %d (MUTING): State MUTING5, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#389F: sResult := 'FB %d (MUTING): State MUTING5, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A0: sResult := 'FB %d (MUTING): State MUTING6, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A1: sResult := 'FB %d (MUTING): State MUTING6, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A2: sResult := 'FB %d (MUTING): State MUTING7, MutingEnable is set and the MuteIn-signals before the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A3: sResult := 'FB %d (MUTING): State MUTING7, MutingEnable is set and the MuteIn-signals after the AOPD are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A4: sResult := 'FB %d (MUTING): State MUTING8, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A5: sResult := 'FB %d (MUTING): State MUTING8, Sequential Inputs=TRUE, CheckOssdOptional=TRUE: MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A6: sResult := 'FB %d (MUTING): State MUTING8, Sequential Inputs=TRUE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A7: sResult := 'FB %d (MUTING): State MUTING8, Sequential Inputs=FALSE: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A8: sResult := 'FB %d (MUTING): State MUTING9, MutingEnable is set and the OssdIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38A9: sResult := 'FB %d (MUTING): State MUTING9, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38AA: sResult := 'FB %d (MUTING): State MUTING5, Sequential Inputs=TRUE, MuteIn3 and MuteIn4 are inactive: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38AB: sResult := 'FB %d (MUTING): State MUTING6, Sequential Inputs=TRUE, MuteIn3 and MuteIn4 are inactive: MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38AC: sResult := 'FB %d (MUTING): State MUTING1, MutingEnable is set and the MuteIn-signals are invalid, the actual MuteIn/OssdIn-values are 0x%x';
+	16#38B0: sResult := 'FB %d (MUTING): At least one activated EDM-Input was not reset in RUN when the EDM Reset time had been expired (Diag-Code=0x%x)';
+	16#38C1: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING1 (Digital Inputs=0x%x)';
+	16#38C2: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING2 (Digital Inputs=0x%x)';
+	16#38C3: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING3 (Digital Inputs=0x%x)';
+	16#38C4: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING4 (Digital Inputs=0x%x)';
+	16#38C5: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING5 (Digital Inputs=0x%x)';
+	16#38C6: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING6 (Digital Inputs=0x%x)';
+	16#38C7: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING7 (Digital Inputs=0x%x)';
+	16#38C8: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING8 (Digital Inputs=0x%x)';
+	16#38C9: sResult := 'FB %d (MUTING): The Max-Muting-Time had been expired in state MUTING9 (Digital Inputs=0x%x)';
+	16#4001: sResult := 'FB %d (CAMMON): The TDC2UpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#4002: sResult := 'FB %d (CAMMON): The Position (%d) is bigger than the maximum position (plus the maximum position jitter) (%d)';
+	16#4003: sResult := 'FB %d (CAMMON): The input OverrunCAM was FALSE in the top dead center area, the actual position is %d';
+	16#4004: sResult := 'FB %d (CAMMON): The input OverrunCAM changed from FALSE to TRUE outside the area between BDCUpperLimit and TDCLowerLimit, the actual position is %d';
+	16#4005: sResult := 'FB %d (CAMMON): The input OverrunCAM was TRUE in the area between OverrunMax and BDCUpperLimit, the actual position is %d';
+	16#4006: sResult := 'FB %d (CAMMON): The input OverrunCAM changed from TRUE to FALSE outside the area between OverrunMax and BDCLowerLimit, the actual position is %d';
+	16#4007: sResult := 'FB %d (CAMMON): The input UpwardsCAM was FALSE in the area between BDCUpperLimit and TDCLowerLimit, the actual position is %d';
+	16#4008: sResult := 'FB %d (CAMMON): The input UpwardsCAM changed from FALSE to TRUE outside the area between BDCLowerLimit and TDCLowerLimit, the actual position is %d';
+	16#4009: sResult := 'FB %d (CAMMON): The input UpwardsCAM changed from TRUE to FALSE outside the area between TDCLowerLimit and OverrunMax, the actual position is %d';
+	16#400A: sResult := 'FB %d (CAMMON): The Position was moving while waiting for a rising edge of the input Reset in the state MOVE-STOP';
+	16#400B: sResult := 'FB %d (CAMMON): The Position was moving while waiting for a falling edge of the input Reset in the state MOVE-START';
+	16#400C: sResult := 'FB %d (CAMMON): The Position %d in the area between OverrunMax and BDCLowerLimit was detected in the state MOVE-UP';
+	16#400D: sResult := 'FB %d (CAMMON): The Position has left the top dead center while waiting for a stop, the actual position is %d';
+	16#400E: sResult := 'FB %d (CAMMON): The Position has been changed negative';
+	16#400F: sResult := 'FB %d (CAMMON): The input UpwardsCAM was TRUE in the area between OverrunMax and BDCLowerLimit';
+	16#4010: sResult := 'FB %d (CAMMON): The Position has a circle overflow in Pendulum Mode, actual position=%d, last position=%d';
+	16#4011: sResult := 'FB %d (CAMMON): The Position has moved while waiting for a rising edge of the input Reset in Pendulum Mode, actual position=%d, compare position=%d';
+	16#4012: sResult := 'FB %d (CAMMON): The Input BackwardsMove is TRUE while the Position is between 180� and 360�, the actual position is %d';
+	16#4013: sResult := 'FB %d (CAMMON): The Input BackwardsMove is TRUE while the moving is clockwise';
+	16#4014: sResult := 'FB %d (CAMMON): The Position has moved while waiting for a falling edge of the input Reset in Pendulum Mode, actual position=%d, last position=%d';
+	16#4015: sResult := 'FB %d (CAMMON): The value of TDCLowerLimit (plus maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#4016: sResult := 'FB %d (CAMMON): The value of BDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDCLowerLimit (%d)';
+	16#4017: sResult := 'FB %d (CAMMON): The value of BDCUpperLimit (%d) is smaller or equal the configured value of 180� (plus maximum position jitter) (%d)';
+	16#4018: sResult := 'FB %d (CAMMON): The value of BDCLowerLimit (plus maximum position jitter) (%d) is greater or equal the configured value of 180� (%d)';
+	16#4019: sResult := 'FB %d (CAMMON): The value of OverrunMax (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#401A: sResult := 'FB %d (CAMMON): The value of TDCUpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of OverrunMax (%d)';
+	16#401B: sResult := 'FB %d (CAMMON): The value of TDC1UpperLimit (plus the maximum position jitter) (%d) is bigger or equal the configured position of 360� (%d)';
+	16#401C: sResult := 'FB %d (CAMMON): The value of TDC1LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC1UpperLimit (5d)';
+	16#401D: sResult := 'FB %d (CAMMON): The value of TDC2LowerLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of BDCLowerLimit (%d)';
+	16#401E: sResult := 'FB %d (CAMMON): The value of TDC2UpperLimit (plus twice the maximum position jitter) (%d) is bigger or equal the value of TDC2LowerLimit (%d)';
+	16#401F: sResult := 'FB %d (CAMMON): The input PressStarted is TRUE and the position did not move after the PressStartedDelayTime';
+	16#4020: sResult := 'FB %d (CAMMON): The input PressStarted is TRUE and the position has stopped after moving before';
+	16#4021: sResult := 'FB %d (CAMMON): The input PressStarted is TRUE and the position has not moved enough, the actual position is %d, the compare position is %d';
+	16#4022: sResult := 'FB %d (CAMMON), Pendulum Mode: The Position has changed contra clockwise while moving up clockwise (actual Position=%d, old Position=%d)';
+	16#4023: sResult := 'FB %d (CAMMON), Pendulum Mode: The Position has changed clockwise while moving up contra clockwise (actual Position=%d, old Position=%d)';
+	16#4024: sResult := 'FB %d (CAMMON): The Position was moving while waiting for a falling edge of the input Reset in the state WAIT-FOR_RESET';
+	16#4025: sResult := 'FB %d (CAMMON): The TDCUpperLimit (%d) is lower or equal than the maximum position jitter (%d)';
+	16#4080: sResult := 'FB %d (ADD/SUB): an underflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#4081: sResult := 'FB %d (ADD/SUB): an overflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#4088: sResult := 'FB %d (SPEED): an underflow was detected, actual Position=%d, old Position=%d';
+	16#4089: sResult := 'FB %d (SPEED): an overflow was detected, actual Position=%d, old Position=%d';
+	16#4090: sResult := 'FB %d (LIMIT): the minimum value (%d) is bigger than the maximum value (%d)';
+	16#4098: sResult := 'FB %d (COMPARE): an underflow was detected on CompOut (%d), the minimum allowed value is %d';
+	16#4099: sResult := 'FB %d (COMPARE): an overflow was detected on CompOut (%d), the maximum allowed value is %d';
+	16#40A0: sResult := 'FB %d (MUL): an underflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40A1: sResult := 'FB %d (MUL): an overflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40A8: sResult := 'FB %d (DIV): an underflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40A9: sResult := 'FB %d (DIV): an overflow was detected, AnalogIn1=%d, AnalogIn2=%d';
+	16#40B0: sResult := 'FB %d (SCALE): an underflow was detected, AnalogIn=%d';
+	16#40B1: sResult := 'FB %d (SCALE): an overflow was detected, AnalogIn=%d';
+	16#40B2: sResult := 'FB %d (SCALE): an overflow was detected after multiplication, AnalogIn=%d';
+	16#40B3: sResult := 'FB %d (SCALE): an overflow was detected before division when rounding up the value, AnalogIn=%d';
+	16#40B8: sResult := 'FB %d (COUNT): an underflow was detected on ActValue (%d), the minimum allowed value is %d';
+	16#40B9: sResult := 'FB %d (COUNT): an overflow was detected on ActValue (%d), the maximum allowed value is %d';
+	16#40C0: sResult := 'FB %d (SLI): an underflow was detected on ActValue (%d), the minimum allowed value is %d';
+	16#40C1: sResult := 'FB %d (SLI): an overflow was detected on ActValue (%d), the maximum allowed value is %d';
+	16#40C8: sResult := 'FB %d (ENVELOPE): an underflow was detected on InValue (%d), the minimum allowed value is %d';
+	16#40C9: sResult := 'FB %d (ENVELOPE): an overflow was detected on InValue (%d), the maximum allowed value is %d';
+	16#40CA: sResult := 'FB %d (ENVELOPE): an overflow error was detected on InValue (%d), InValue+Offset is bigger than the maximum allowed value';
+	16#40CB: sResult := 'FB %d (ENVELOPE): the MaxTime was expired (InValue=%d)';
+	16#6009: sResult := 'SAFEOUT:Initial-Parameter: MultiplierDiagTestPulse has to be greater zero. ModuleNr:0x%x';
+	16#6010: sResult := 'SAFEOUT:Initial-Parameter: Number of Modules incorrect. ModuleNr:0x%x, Parameter:0x%x';
+	16#6011: sResult := 'SAFEOUT:Initial-Parameter: Number of Channels incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6012: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis active Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6013: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis inactive Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6014: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback active Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6015: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis active Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6016: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback inactive Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6017: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis inactive Module incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6018: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#6019: sResult := 'SAFEOUT:Initial-Parameter: Number of Diagnosis inactive Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601A: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601B: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601C: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback inactive Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601D: sResult := 'SAFEOUT:Initial-Parameter: Number of Feedback Diagnosis inactive Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#601E: sResult := 'SAFEOUT:Setup Hardware Fault: Module Switch. ReturnData:0x%x, ReturnState:0x%x';
+	16#601F: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis active Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6020: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis inactive Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6021: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback active Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6022: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis active Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6023: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback inactive Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6024: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis inactive Module. ReturnData:0x%x, ReturnState:0x%x';
+	16#6025: sResult := 'SAFEOUT:Setup Hardware Fault: Channel Switch. ReturnData:0x%x, ReturnState:0x%x';
+	16#6026: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6027: sResult := 'SAFEOUT:Setup Hardware Fault: Diagnosis inactive Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6028: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6029: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#602A: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback inactive Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#602B: sResult := 'SAFEOUT:Setup Hardware Fault: Feedback Diagnosis inactive Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#6030: sResult := 'SAFEOUT:The Feedback of the active Module Switch is wrong. Module:0x%x';
+	16#6031: sResult := 'SAFEOUT:The Feedback of the inactive Module Switch is wrong. Module:0x%x';
+	16#6032: sResult := 'SAFEOUT:The Feedback of the active Channel Switch is wrong. Module:0x%x / Channel:0x%x';
+	16#6033: sResult := 'SAFEOUT:The Feedback of the inactive Channel Switch is wrong. Module:0x%x / Channel:0x%x';
+	16#6040: sResult := 'SAFEOUT:Diagnosis Test: Common Fault Module:0x%x / DiagChannel:0x%x';
+	16#6041: sResult := 'SAFEOUT:Diagnosis Test: Unknown State local ModuleState:0x%x';
+	16#6042: sResult := 'SAFEOUT:Diagnosis Test: Unknown State other ModuleState:0x%x';
+	16#6050: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Module Switch is wrong (Step1 - check current state). Module:0x%x';
+	16#6051: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Module Switch is wrong (Step1 - check current state). Module:0x%x';
+	16#6052: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Channel Switch is wrong (Step1 - check current state). Module:0x%x / DiagChannel:0x%x';
+	16#6053: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Channel Switch is wrong (Step1 - check current state). Module:0x%x / DiagChannel:0x%x';
+	16#6060: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Module Switch is wrong (Step2 - check test pulse). Module:0x%x';
+	16#6061: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Module Switch is wrong (Step2 - check test pulse). Module:0x%x';
+	16#6062: sResult := 'SAFEOUT:Diagnosis Test: Feedback active Channel Switch is wrong (Step2 - check test pulse). Module:0x%x / DiagChannel:0x%x';
+	16#6063: sResult := 'SAFEOUT:Diagnosis Test: Feedback inactive Channel Switch is wrong (Step2 - check test pulse). Module:0x%x / DiagChannel:0x%x';
+	16#6080: sResult := 'SAFEOUT:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#6081: sResult := 'SAFEOUT:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#6082: sResult := 'SAFEOUT:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#6083: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6084: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6085: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6086: sResult := 'SAFEOUT:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#6090: sResult := 'SAFEOUT:Module Switch FeedbackTest ViolationCounter incremented, Outputs active. Module:0x%x, Info:0x%x.';
+	16#6091: sResult := 'SAFEOUT:Module Switch FeedbackTest ViolationCounter incremented, Outputs inactive. Module:0x%x, Info:0x%x.';
+	16#6092: sResult := 'SAFEOUT:Channel Switch FeedbackTest ViolationCounter incremented, Outputs active. Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6093: sResult := 'SAFEOUT:Channel Switch FeedbackTest ViolationCounter incremented, Outputs inactive. Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6094: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step1 - check current state). Module:0x%x, Info:0x%x.';
+	16#6095: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step1 - check current state). Module:0x%x, Info:0x%x.';
+	16#6096: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step1 - check current state). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6097: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step1 - check current state). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#6098: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step2 - check test pulse). Module:0x%x, Info:0x%x.';
+	16#6099: sResult := 'SAFEOUT:Module Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step2 - check test pulse). Module:0x%x, Info:0x%x.';
+	16#609A: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs active (Step2 - check test pulse). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#609B: sResult := 'SAFEOUT:Channel Switch DiagnosisTest ViolationCounter incremented, Outputs inactive (Step2 - check test pulse). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#60A0: sResult := 'SAFEOUT:Sercom Fault 0. Cmd/State:0x%x';
+	16#60A1: sResult := 'SAFEOUT:Sercom Fault 1. Cmd/State:0x%x';
+	16#60B0: sResult := 'SAFEOUT:Unknown Sercom Command Request 1. Cmd/State:0x%x';
+	16#60B1: sResult := 'SAFEOUT:Unknown Sercom Command Answer 1. Cmd/State:0x%x';
+	16#60B2: sResult := 'SAFEOUT:Unknown Sercom Command Request 2. Cmd/State:0x%x';
+	16#60B3: sResult := 'SAFEOUT:Unknown Sercom Command Answer 2. Cmd/State:0x%x';
+	16#60C0: sResult := 'SAFEOUT:Module Switch too fast Switching OFF detected Fault (see technical data). Module:0x%x';
+	16#60C1: sResult := 'SAFEOUT:Channel Switch too fast Switching OFF detected Fault (see technical data). Module:0x%x / Channel:0x%x';
+	16#60C2: sResult := 'SAFEOUT:Module Switch too fast Switching ON detected Fault (see technical data). Module:0x%x';
+	16#60C3: sResult := 'SAFEOUT:Channel Switch too fast Switching ON detected Fault (see technical data). Module:0x%x / Channel:0x%x';
+	16#60C4: sResult := 'SAFEOUT:Module Error Acknowledge is not possible. Module:0x%x';
+	16#60E0: sResult := 'SAFEOUT:HAL Read Fault. ReturnData:0x%x';
+	16#60E1: sResult := 'SAFEOUT:Init Fault. Module:0x%x';
+	16#8009: sResult := 'SAFEIN:Initial-Parameter: MultiplierDiagTestPulse has to be greater zero. ModuleNr:0x%x';
+	16#8010: sResult := 'SAFEIN:Initial-Parameter: Number of Modules incorrect. ModuleNr:0x%x, Parameter:0x%x';
+	16#8011: sResult := 'SAFEIN:Initial-Parameter: Number of Channels incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#8018: sResult := 'SAFEIN:Initial-Parameter: Number of Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#801B: sResult := 'SAFEIN:Initial-Parameter: Number of Feedback Diagnosis active Channel incorrect. Parameter0:0x%x, Parameter1:0x%x, Parameter2:0x%x';
+	16#8025: sResult := 'SAFEIN:Setup Hardware Fault: Channel Switch. ReturnData:0x%x, ReturnState:0x%x';
+	16#8026: sResult := 'SAFEIN:Setup Hardware Fault: Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#8029: sResult := 'SAFEIN:Setup Hardware Fault: Feedback Diagnosis active Channel. ReturnData:0x%x, ReturnState:0x%x';
+	16#8040: sResult := 'SAFEIN:Diagnosis Test: Common Fault Module:0x%x / DiagChannel:0x%x';
+	16#8041: sResult := 'SAFEIN:Diagnosis Test: Unknown State local ModuleState:0x%x';
+	16#8042: sResult := 'SAFEIN:Diagnosis Test: Unknown State Other ModuleState:0x%x';
+	16#8043: sResult := 'SAFEIN Pulse Detection: Wrong pulse was detected at . Module:0x%x / DiagChannel:0x%x';
+	16#8044: sResult := 'SAFEIN Pulse Detection: Detected pulse from Module:0x%x / DiagChannel:0x%x';
+	16#8052: sResult := 'SAFEIN:Diagnosis Test: Feedback in Step1 active Channel is wrong. Module:0x%x / DiagChannel:0x%x';
+	16#8062: sResult := 'SAFEIN:Diagnosis Test: Feedback in Step2 active Channel is wrong. Module:0x%x / DiagChannel:0x%x';
+	16#8080: sResult := 'SAFEIN:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#8081: sResult := 'SAFEIN:Diagnosis Test:VendorData. ID: 0x%x Module:0x%x';
+	16#8084: sResult := 'SAFEIN:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#8085: sResult := 'SAFEIN:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#8086: sResult := 'SAFEIN:Diagnosis Test:VendorData. Channel: 0x%x Module:0x%x';
+	16#8096: sResult := 'SAFEIN:DiagnosisTest ViolationCounter incremented, Inputs active (Step1 - check current state). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#809A: sResult := 'SAFEIN:DiagnosisTest ViolationCounter incremented, Inputs active (Step2 - check test pulse). Module:0x%x, Channel:0x%x, Info:0x%x.';
+	16#80A0: sResult := 'SAFEIN:Sercom Fault 0. Cmd/State:0x%x';
+	16#80A1: sResult := 'SAFEIN:Sercom Fault 1. Cmd/State:0x%x';
+	16#80B0: sResult := 'SAFEIN:Unknown Sercom Command Request 1. Cmd/State:0x%x';
+	16#80B1: sResult := 'SAFEIN:Unknown Sercom Command Answer 1. Cmd/State:0x%x';
+	16#80B2: sResult := 'SAFEIN:Unknown Sercom Command Request 2. Cmd/State:0x%x';
+	16#80B3: sResult := 'SAFEIN:Unknown Sercom Command Answer 2. Cmd/State:0x%x';
+	16#80C0: sResult := 'SAFEIN:Error Acknowledge is not possible. Module:0x%x';
+	16#80C1: sResult := 'SAFEIN:Diagnosis Test: Implausible Inputs detected. Module:0x%x';
+	16#80C2: sResult := 'SAFEIN:Diagnosis Test: Implausible Inputs detected (INFO). Parameter1:0x%x / Parameter2:0x%x';
+	16#80E0: sResult := 'SAFEIN:Init HAL Fault.ReturnState:0x%x';
+	16#80E1: sResult := 'SAFEIN:Init Fault. Module:0x%x';
+	16#80F0: sResult := 'SAFEIN: Testpulse is parametrized but not enabled (Diag Testpulse for Inputs active). Module:0x%x / Channel:0x%x';
+	16#80F1: sResult := 'SAFEIN: Testpulse is parametrized but not enabled (Diag TestPulse active). Module:0x%x / Channel:0x%x';
+	16#80F2: sResult := 'SAFEIN: Testfilter-Time too long. Parameter1:0x%x / Parameter2:0x%x';
+	16#80F3: sResult := 'SAFEIN: Inputfilter-Time too short. Parameter1:0x%x / Parameter2:0x%x';
+	16#80F4: sResult := 'SAFEIN: Wrong parameters detected for Module:0x%x / Channel:0x%x. Please check parameters!';
+	ELSE 
+		sResult := UINT_TO_STRING(nTextID);
+END_CASE
+
+fbFormat(sFormat := sResult, 
+		arg1 := arArg[1],
+		arg2 := arArg[2], 
+		arg3 := arArg[3], 
+		arg4 := arArg[4], 
+		arg5 := arArg[5], 
+		arg6 := arArg[6], 
+		arg7 := arArg[7], 
+		arg8 := arArg[8], 
+		arg9 := arArg[9], 
+		arg10 := arArg[10], 
+		sOut => sResult);
+		
+M_ResolveEL29xxText := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_StartPolling" Id="{29843b7c-f816-4618-bdc0-fe722b21d1b0}">
+      <Declaration><![CDATA[/// start auto updating all
+/// 	return value: success state
+METHOD M_StartPolling : BOOL
+VAR_INPUT
+	/// time for internal auto update (T#0S...auto update is off)
+	tAutoUpdate: TIME := TIME#0ms;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_StopPolling();
+tAutoUpdateAll := tAutoUpdate;
+M_StartPolling := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_StopPolling" Id="{dc25d589-6952-49e5-b1d7-ffe731e8253f}">
+      <Declaration><![CDATA[/// stop auto updating all
+/// 	return value: success state
+METHOD M_StopPolling : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[tAutoUpdateAll := T#0S;
+tAutoUpdateSlaveState := T#0S;
+tAutoUpdatePAIInfo := T#0S;
+tAutoUpdateDiagHistory := T#0S;
+M_StopPolling := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_UpdateError" Id="{a8f9fcee-7f59-4d05-ac32-01438ddff87e}">
+      <Declaration><![CDATA[/// updates the error flag and id
+/// 	return value: summary error
+METHOD PRIVATE M_UpdateError : BOOL
+VAR_INPUT
+	bErr: BOOL;
+	nId: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bErr THEN
+	bError := TRUE;
+	nErrorId := nId;
+END_IF
+
+M_UpdateError := bError;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_WfGetDiagHistory" Id="{ee413f30-788f-4dff-8fbf-4d4719293334}">
+      <Declaration><![CDATA[METHOD PRIVATE M_WfGetDiagHistory : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// workflow read diag
+CASE nStepGetDiagHistory OF
+	0: // idle
+	
+	10: // start reading actual time stamp
+		fbEcCoeSdoReadEx.nIndex := nIdxActTimeStamp;
+		fbEcCoeSdoReadEx.nSubIndex := 0;
+		fbEcCoeSdoReadEx.pDstBuf := ADR(nDevieTimeStamp);
+		fbEcCoeSdoReadEx.cbBufLen := SIZEOF(nDevieTimeStamp);
+		fbEcCoeSdoReadEx.bExecute := TRUE;
+		nStepGetDiagHistory := 20;
+		
+	20: // wait reading actual time stamp completed
+		fbEcCoeSdoReadEx.bExecute := FALSE;
+		IF NOT fbEcCoeSdoReadEx.bBusy THEN
+			IF NOT fbEcCoeSdoReadEx.bError THEN
+				dtUpTimeStamp := dtNow - F_EcDeviceTimeStampToTime(nDevieTimeStamp);
+			END_IF			
+			M_UpdateError(fbEcCoeSdoReadEx.bError, fbEcCoeSdoReadEx.nErrId);
+			nStepGetDiagHistory := 30;
+		END_IF
+		
+	30:  // start reading diag
+		fbEcCoeSdoReadEx.nIndex := nIdxDiagHistory;
+		fbEcCoeSdoReadEx.nSubIndex := 1;
+		fbEcCoeSdoReadEx.pDstBuf := ADR(stDiagHistory);
+		fbEcCoeSdoReadEx.cbBufLen := SIZEOF(stDiagHistory);
+		fbEcCoeSdoReadEx.bExecute := TRUE;
+		nStepGetDiagHistory := 40;
+		
+	40: // wait reading diag completed
+		fbEcCoeSdoReadEx.bExecute := FALSE;
+		IF NOT fbEcCoeSdoReadEx.bBusy THEN
+			M_UpdateError(fbEcCoeSdoReadEx.bError, fbEcCoeSdoReadEx.nErrId);
+			nStepGetDiagHistory := 0;
+		END_IF
+END_CASE
+
+fbEcCoeSdoReadEx(
+	sNetId := F_CreateAmsNetId(stAdsAddr.netId), 
+	nSlaveAddr := nSlaveAddress,
+	bCompleteAccess := TRUE);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_WfGetPAIInfoData" Id="{7b5079dc-3156-4c17-9efb-310e10f5cf19}">
+      <Declaration><![CDATA[METHOD PRIVATE M_WfGetPAIInfoData : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// workflow read PAI info
+CASE nStepGetPAIInfo OF
+	0: // idle
+	
+	10: // start reading PAI info
+		fbCoeReadPAIInfo.bExecute := TRUE;
+		nStepGetPAIInfo:=20;
+		
+	20: // wait reading PAI info completed
+		fbCoeReadPAIInfo.bExecute := FALSE;
+		IF NOT fbCoeReadPAIInfo.bBusy THEN
+			M_UpdateError(fbCoeReadPAIInfo.bError, fbCoeReadPAIInfo.nErrId);
+			nStepGetPAIInfo := 0;
+		END_IF
+END_CASE
+
+fbCoeReadPAIInfo(
+	sNetId:= F_CreateAmsNetId(stAdsAddr.netId), 
+	nSlaveAddr:= nSlaveAddress, 
+	nSubIndex:= 1, 
+	nIndex:= nIdxPAIInfo, 
+	pDstBuf:= ADR(stPAIInfoData), 
+	cbBufLen:= SIZEOF(stPAIInfoData),
+	bCompleteAccess:= TRUE);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_WfGetSlaveState" Id="{79c36f20-b180-4508-b3a2-829d8999e6b1}">
+      <Declaration><![CDATA[METHOD PRIVATE M_WfGetSlaveState : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// workflow read slave state
+CASE nStepGetState OF
+	0: // idle
+	
+	10: // start reading actual slave state
+		fbGetSlaveState.bExecute := TRUE;
+		nStepGetState := 20;
+		
+	20: // wait reading actual slave state completed
+		fbGetSlaveState.bExecute := FALSE;
+		IF NOT fbGetSlaveState.bBusy THEN
+			M_UpdateError(fbGetSlaveState.bError, fbGetSlaveState.nErrId);
+			IF NOT fbGetSlaveState.bError THEN
+				stSlaveState := F_ConvSlaveStateToBitsEx(fbGetSlaveState.state);
+			END_IF			
+			nStepGetState := 0;				
+		END_IF
+END_CASE
+
+fbGetSlaveState(
+	sNetId := F_CreateAmsNetId(stAdsAddr.netId), 
+	nSlaveAddr := nSlaveAddress);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Diagnosis_History">
+      <LineId Id="3" Count="34" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_DecodeDiagMessage">
+      <LineId Id="3" Count="19" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_GetDiagHistory">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_GetDiagHistoryChanges">
+      <LineId Id="3" Count="18" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_GetDiagHistoryEx">
+      <LineId Id="3" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_GetPAIInfoData">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_GetPAIInfoDataEx">
+      <LineId Id="3" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_GetSlaveState">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_GetSlaveStateEx">
+      <LineId Id="3" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_Reset">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_ResolveDiagPrmArgs">
+      <LineId Id="3" Count="46" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_ResolveEL19xxText">
+      <LineId Id="3" Count="726" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_ResolveEL29xxText">
+      <LineId Id="3" Count="739" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_StartPolling">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_StopPolling">
+      <LineId Id="3" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_UpdateError">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_WfGetDiagHistory">
+      <LineId Id="3" Count="40" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_WfGetPAIInfoData">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Diagnosis_History.M_WfGetSlaveState">
+      <LineId Id="3" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

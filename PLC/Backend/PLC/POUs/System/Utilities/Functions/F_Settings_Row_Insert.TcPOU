@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Settings_Row_Insert" Id="{c59076d0-6c22-4b45-995a-5a3cc4ca7c93}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Settings_Row_Insert : BOOL
+VAR_IN_OUT
+	aSettings	: ARRAY[*] OF ST_Data_Item; /// settings structure
+END_VAR
+VAR_INPUT
+	nPlace				:INT;
+	//stGroup				:ST_Text;
+	//stName				:ST_Text;
+	//stUnit				:ST_Text;
+	//eDataType			:E_DataType;
+END_VAR
+VAR
+	nn	: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (nPlace < LOWER_BOUND(aSettings,1)) OR (nPlace > UPPER_BOUND(aSettings,1)) THEN
+	RETURN;
+END_IF
+
+//Check Array Size
+
+FOR nn:= (UPPER_BOUND(aSettings,1)-1) TO  MAX(LOWER_BOUND(aSettings,1),nPlace) by -1 DO
+	MEMCPY(ADR(aSettings[nn+1]),ADR(aSettings[nn]),SIZEOF(aSettings[nn+1])); (*set  zero*)		
+END_FOR
+MEMSET(ADR(aSettings[nPlace]),0,SIZEOF(aSettings[nPlace])); (*set  zero*)]]></ST>
+    </Implementation>
+    <LineIds Name="F_Settings_Row_Insert">
+      <LineId Id="21" Count="8" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

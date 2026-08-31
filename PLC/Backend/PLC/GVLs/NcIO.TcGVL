@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="NcIO" Id="{1afc5cd7-143e-47e6-a413-a6fe34f5a2e8}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	{attribute 'contextName' := 'PlcTask'}
+//	{attribute 'TcNcAxis' := 'AxisTest'}
+//	stAxisTest					: AXIS_REF;
+//	{attribute 'contextName' := 'PlcTask'}
+//	stAxisTestIO				: ST_AxisIO;
+
+//  virtual master	
+	stAxis_VirtualMaster		: AXIS_REF;
+	stAxis_VirtualMaster_IO		: ST_AxisIO;
+
+//  ST010 OvenA	
+	stAxis_ST010_OvenA			: AXIS_REF;
+	stAxis_ST010_OvenA_IO		: ST_AxisIO;
+	
+	stAxis_ST010_OvenACh1		: AXIS_REF;
+	stAxis_ST010_OvenACh1_IO	: ST_AxisIO;
+	
+	stAxis_ST010_OvenACh2		: AXIS_REF;
+	stAxis_ST010_OvenACh2_IO	: ST_AxisIO;
+	
+//  ST020 OvenB
+	stAxis_ST020_OvenB			: AXIS_REF;
+	stAxis_ST020_OvenB_IO		: ST_AxisIO;
+	
+	stAxis_ST020_OvenBCh1		: AXIS_REF;
+	stAxis_ST020_OvenBCh1_IO	: ST_AxisIO;
+	
+	stAxis_ST020_OvenBCh2		: AXIS_REF;
+	stAxis_ST020_OvenBCh2_IO	: ST_AxisIO;
+	
+//  ST030 Handling
+	stAxis_ST030_AxisX			: AXIS_REF;
+	stAxis_ST030_AxisX_IO		: ST_AxisIO;
+	
+	stAxis_ST030_AxisY			: AXIS_REF;
+	stAxis_ST030_AxisY_IO		: ST_AxisIO;
+	
+	stAxis_ST030_AxisZ			: AXIS_REF;
+	stAxis_ST030_AxisZ_IO		: ST_AxisIO;
+	
+//  ST040 Storage
+	stAxis_ST040_Axis1			: AXIS_REF;
+	stAxis_ST040_Axis1_IO		: ST_AxisIO;
+	
+	stAxis_ST040_Axis2			: AXIS_REF;
+	stAxis_ST040_Axis2_IO		: ST_AxisIO;
+	
+
+	stAxisDummy					: AXIS_REF;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

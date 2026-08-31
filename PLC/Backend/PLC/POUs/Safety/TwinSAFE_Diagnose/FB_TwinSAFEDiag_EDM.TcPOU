@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TwinSAFEDiag_EDM" Id="{db58a599-ceae-4646-b1e6-af357c8543ef}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'hide_all_locals'}
+FUNCTION_BLOCK FB_TwinSAFEDiag_EDM
+VAR_INPUT
+	wsFunctionBlockText		: WSTRING;
+	stIn					: ST_SafetyDiagInfo;
+END_VAR
+VAR_OUTPUT
+	bError					: BOOL;
+	stErrorText				: ST_Text;
+	stErrorTextAdd			: ST_Text;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Reset 
+bError := FALSE;
+stErrorText := stEmptyText;
+stErrorTextAdd := stEmptyText;
+
+(*	DIAG:
+	Bit 0: Switch OFF Timer Timeout
+	Bit 1: Switch ON Timer Timeout	*)
+IF stIn.uintDiag.0 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_TimerSwitchOffTimeout;
+	stErrorTextAdd := F_CreateDynTextDefault(wsFunctionBlockText);
+
+ELSIF stIn.uintDiag.1 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_TimerSwitchOnTimeout;
+	stErrorTextAdd := F_CreateDynTextDefault(wsFunctionBlockText);
+(*	STATE
+	2: State STOP
+	4: State ERROR
+	5: State RESET
+	14: State MON_OFF
+	15: State MON_ON	*)
+ELSIF stIn.uintDiag = 4 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_UnknownError;
+	stErrorTextAdd := F_CreateDynTextDefault(wsFunctionBlockText);
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_TwinSAFEDiag_EDM">
+      <LineId Id="193" Count="26" />
+      <LineId Id="87" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

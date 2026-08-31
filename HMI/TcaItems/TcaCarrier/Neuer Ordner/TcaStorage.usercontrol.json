@@ -1,0 +1,59 @@
+{
+  "parameters": [
+    {
+      "allowSymbolExpressionsInObject": false,
+      "defaultValue": 5,
+      "requiredOnCompile": false,
+      "bindable": false,
+      "propertySetterName": "setIntvar",
+      "propertyGetterName": "getIntvar",
+      "refTo": "",
+      "name": "data-tchmi-intvar",
+      "displayName": "intvar",
+      "visible": false,
+      "type": "tchmi:general#/definitions/INT",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "intvar"
+    },
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setRow",
+      "propertyGetterName": "getRow",
+      "refTo": "",
+      "name": "data-tchmi-row",
+      "displayName": "row",
+      "visible": true,
+      "type": "tchmi:general#/definitions/INT",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "row"
+    },
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setColumn",
+      "propertyGetterName": "getColumn",
+      "refTo": "",
+      "name": "data-tchmi-column",
+      "displayName": "column",
+      "visible": true,
+      "type": "tchmi:general#/definitions/INT",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "column"
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../Packages/Beckhoff.TwinCAT.HMI.Framework.14.2.110/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

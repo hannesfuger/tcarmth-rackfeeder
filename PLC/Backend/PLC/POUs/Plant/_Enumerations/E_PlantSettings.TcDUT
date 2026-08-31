@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_PlantSettings" Id="{e682ea70-043f-4c42-a072-806ae51532db}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+{attribute 'to_string'}
+{attribute 'to_wstring'}
+TYPE E_PlantSettings :
+(
+	//ePlant_Settings_none := 0,
+	ePlantSetting_RecipeName,		// Name of the recipe
+	ePlantSetting_RecipeComment,	// Comment
+	ePlantSetting_PlantName,		// Plant name
+	ePlantSetting_PlantNumber,		// Plant number
+	
+	//ePlantSetting_OvenHgPickUpDepthZ,	// Einfahrtiefe HG - Oven Z-Achse
+	//
+	//ePlantSetting_StorageHgSafetyDistZ,	// Sicherheitsabstand HG - Storage Z-Achse
+	//
+	//ePlantSetting_StorageOffsetUpY,	// HG-Offset oberhalb der Storage-Palette in Y-Richtung [mm]
+	//ePlantSetting_StorageOffsetDnY, // HG-Offset unterhalb der Storage-Palette in Y-Richtung [mm]
+	
+	/// has to be set to last index for array bounds!
+	ePlantSetting_nMaxIdx	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

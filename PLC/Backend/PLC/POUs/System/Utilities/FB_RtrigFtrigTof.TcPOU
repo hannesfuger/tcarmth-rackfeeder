@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_RtrigFtrigTof" Id="{82a2dd45-e3d3-40b2-ad85-35f6594cebfb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC FB_RtrigFtrigTof
+VAR_INPUT
+	bIn : BOOL;
+	tPt : TIME := T#0S;
+END_VAR
+VAR_OUTPUT
+	// rising trigger bIn
+	bRq : BOOL;
+	// falling trigger after tPt
+	bFq : BOOL;
+END_VAR
+VAR
+	fbTof : TOF;
+	rtrig : R_TRIG;
+	ftrig : F_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbTof(IN:= bIn, PT := tPt);
+rtrig(CLK := fbTof.Q, Q => bRq);
+ftrig(CLK := fbTof.Q, Q => bFq);]]></ST>
+    </Implementation>
+    <LineIds Name="FB_RtrigFtrigTof">
+      <LineId Id="15" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

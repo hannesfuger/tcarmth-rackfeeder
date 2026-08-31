@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_Safety_Actor" Id="{1f594c4f-542c-44ba-a2bd-2d9a23e5eefc}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE E_Safety_Actor :
+(
+	eSafety_Actor_none := 0,										(* Sicherheit | Rückmeldung | Xxx *)
+	eSafety_Actor_NotHalt,
+	eSafety_Actor_Freigabeventil_Area1,
+	eSafety_Actor_NotHalt_Extern,
+
+(*Maximum*)
+	eSafety_Actor_nMaxIdx
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

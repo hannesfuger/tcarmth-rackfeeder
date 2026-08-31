@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_UserControl_Manual_Device_ToHmi" Id="{6c4faed2-5c05-480d-818f-ca5a63556d1c}">
+    <Declaration><![CDATA[TYPE ST_UserControl_Manual_Device_ToHmi :
+STRUCT
+	bVisible 		: BOOL;
+	stObjectName	: ST_Text;
+	stState			: ST_Text;
+	stOn,
+	stOff			: ST_HMI_BUTTON_OUT;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

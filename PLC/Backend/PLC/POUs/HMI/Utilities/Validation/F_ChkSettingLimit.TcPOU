@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_ChkSettingLimit" Id="{63b09c62-063e-4425-9d42-3b7500743b4c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ChkSettingLimit : BOOL
+VAR_INPUT
+	nValue		: INT;
+	fValue		: LREAL;
+END_VAR
+VAR_IN_OUT
+	stSetting 	: ST_Data_Item;
+END_VAR
+VAR_OUTPUT
+	stInfo 		: ST_Text;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE stSetting.eDataType OF
+	E_DataType.eDataType_int,
+	E_DataType.eDataType_time_ms:
+		F_ChkSettingLimit := F_ChkSettingLimitN(nValue, stSetting, stInfo => stInfo);
+ELSE
+		F_ChkSettingLimit := F_ChkSettingLimitF(fValue, stSetting, stInfo => stInfo);
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="F_ChkSettingLimit">
+      <LineId Id="147" Count="0" />
+      <LineId Id="155" Count="1" />
+      <LineId Id="153" Count="1" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="134" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

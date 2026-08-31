@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_MODULE_STATIONS_INFO" Id="{d4ef48cc-9a85-4e71-a7e2-f21711285973}">
+    <Declaration><![CDATA[// info struct for module stations
+TYPE ST_MODULE_STATIONS_INFO :
+STRUCT
+	bStation_All_Auto 			: BOOL;
+	bStation_Any_Manual 		: BOOL;
+	bStation_Any_Step 			: BOOL;
+	bStation_Any_Error 			: BOOL;	
+	bStation_Any_Warning 		: BOOL;	
+	bStation_Any_Info 			: BOOL;	
+	
+	bStation_All_Started 		: BOOL;
+	bStation_All_Stopped		: BOOL;
+	bStation_All_InHome 		: BOOL;
+	bStation_Any_Homing 		: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

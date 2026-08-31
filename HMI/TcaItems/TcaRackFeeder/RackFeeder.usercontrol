@@ -1,0 +1,6 @@
+<div id="RackFeeder" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="500" data-tchmi-creator-viewport-height="500">
+<div id="Storage_5" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="14" data-tchmi-height-unit="px" data-tchmi-left="%f%%pp%RackFeeder::fbAxisLift::Position%/pp%*100/%pp%RackFeeder::fEndposLift%/pp%%/f%" data-tchmi-left-unit="px" data-tchmi-target-user-control="Items/WorkpieceCarrierThumb.usercontrol" data-tchmi-width="100" data-tchmi-width-unit="px" data-tchmi-carrier="%pp%RackFeeder::Carrier%/pp%" data-tchmi-top="">
+
+
+</div>
+</div>

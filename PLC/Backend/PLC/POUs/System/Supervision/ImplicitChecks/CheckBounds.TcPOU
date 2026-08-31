@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CheckBounds" Id="{4909ba71-acf1-4751-90ca-8897514b75c2}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Implicitly generated code : DO NOT EDIT!!!
+/// CheckBounds is used to check for range overflows
+{attribute 'check_bounds' := ''}
+{attribute 'no_check' := ''}
+FUNCTION CheckBounds : DINT
+VAR_INPUT
+	index: DINT;
+	lower: DINT;
+	upper: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// align bounds 
+CheckBounds := MIN(upper, MAX(lower, index));
+
+// if index changed, report error
+IF CheckBounds <> index THEN
+	Services.fbEventHandler.Select(TC_Events.CodeEventClass.ErrorEvent)
+						   .ArgSetString('check bounds')
+						   .Raise();
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="CheckBounds">
+      <LineId Id="25" Count="4" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

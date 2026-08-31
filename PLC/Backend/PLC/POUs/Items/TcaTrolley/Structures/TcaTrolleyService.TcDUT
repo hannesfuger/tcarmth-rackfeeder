@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaTrolleyService" Id="{2bac8508-f511-42e9-9c54-e2afb1919f2e}">
+    <Declaration><![CDATA[TYPE TcaTrolleyService :
+STRUCT
+	DisableCarriers		: BOOL;
+	EnableCarriers		: BOOL;
+	FillWithEmptyCarriers : BOOL;
+	FillWithFinishedCarriers : BOOL;
+	FillWithInitialCarriers : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,6 @@
+<div id="conPlcState" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-width-unit="%" data-tchmi-height-unit="%">
+<div id="TcHmiAdsState" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiAdsState" data-tchmi-ads-runtime="PLC1" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-server-interval="500" data-tchmi-top="1" data-tchmi-top-unit="%" data-tchmi-width="10" data-tchmi-width-unit="%">
+</div>
+<div id="TcHmiEcDiagnostics" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiEcDiagnostics" data-tchmi-allow-zoom-and-pan="true" data-tchmi-device="Device1" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="12" data-tchmi-left-unit="%" data-tchmi-toolbox-reset-view="true" data-tchmi-top="1" data-tchmi-top-unit="%" data-tchmi-width="85" data-tchmi-width-unit="%">
+</div>
+</div>

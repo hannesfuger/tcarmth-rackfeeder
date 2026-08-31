@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_User_Management" Id="{ca1f3bd2-a10a-4190-a0b7-ed7adb1981b9}">
+    <Declaration><![CDATA[{attribute 'pack_mode' := '1'}
+TYPE ST_User_Management :
+STRUCT
+	sName 				: STRING;
+	sPassword			: STRING;
+	iUserLevel			: E_User_Level;
+	stUserLevelName		: ST_Text;
+	iUserLevelMin		: INT;
+	iUserLevelMax		: INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

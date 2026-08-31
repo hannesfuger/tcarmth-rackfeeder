@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_MANUAL_AXIS_ITEM" Id="{44292beb-42c5-4fe1-9035-b97a86baf38d}">
+    <Declaration><![CDATA[TYPE ST_HMI_MANUAL_AXIS_ITEM :
+STRUCT
+	stName	: ST_Text;
+	fPos	: REAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

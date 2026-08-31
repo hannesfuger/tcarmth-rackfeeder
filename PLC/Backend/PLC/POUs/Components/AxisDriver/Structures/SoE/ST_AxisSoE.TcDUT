@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_AxisSoE" Id="{ef677e6d-ce41-4129-91ce-768489364938}">
+    <Declaration><![CDATA[TYPE ST_AxisSoE :
+STRUCT
+	// command
+	eCmd		: E_SoECommand;
+	
+	// SoE FB's 
+	fbSoEWrite	: FB_SoEWrite;
+	fbSoECmd 	: FB_SoEExecuteCommand;
+	
+	// helper var's
+	nStep		: INT;
+	fRealValue	: REAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_OR_REF_EX" Id="{caae6390-40ff-47bf-87c8-b8e466592888}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_OR_REF_EX : BOOL
+VAR_IN_OUT
+	bValueRoot		: BOOL;	
+END_VAR
+VAR_INPUT
+	bValueCombine	: BOOL;
+	bInitialize		: BOOL;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF bInitialize THEN
+	bValueRoot := FALSE;
+END_IF
+
+F_OR_REF(bValueRoot, bValueCombine);]]></ST>
+    </Implementation>
+    <LineIds Name="F_OR_REF_EX">
+      <LineId Id="25" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

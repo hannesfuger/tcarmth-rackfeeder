@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_DefaultHmiToPlc" Id="{cfbd9816-9fa4-48cb-8127-0d184a8a3994}">
+    <Declaration><![CDATA[TYPE ST_DefaultHmiToPlc :
+STRUCT
+	// default HMI items	
+	bStart			: BOOL;
+	bStop, bFastStop: BOOL;
+	bReset			: BOOL;
+	bStep			: BOOL;
+	bHome			: BOOL;
+	
+	bOpModeManual	: BOOL;
+	bOpModeAuto		: BOOL;
+	bOpModeStep		: BOOL;
+	
+	eSafetyOpMode	: E_Opmode;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

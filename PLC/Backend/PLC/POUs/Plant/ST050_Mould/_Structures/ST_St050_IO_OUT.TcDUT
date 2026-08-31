@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St050_IO_OUT" Id="{8b034bd6-ef14-468a-be4a-ccea041a0e30}">
+    <Declaration><![CDATA[TYPE ST_St050_IO_OUT :
+STRUCT
+	aToEngelRaw	: ARRAY[0..41] OF BYTE;
+	bReleaseSafetyGate : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

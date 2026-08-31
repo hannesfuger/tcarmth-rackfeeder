@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_M001_Interface" Id="{7a95c9fb-c0b7-4d72-b6d6-fa0bcabbfcb4}">
+    <Declaration><![CDATA[TYPE ST_M001_Interface :
+STRUCT
+	bRunCycle,
+	bEmptyPlant : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

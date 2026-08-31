@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <POU Name="FB_TestCase02SystemInfo" Id="{20397163-36d4-4f07-8842-e82b1faefbc1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TestCase02SystemInfo EXTENDS FB_TestCaseBase
+VAR
+	stTestPlcSystemInfo: ST_PlcSystemInfo;
+	bTestOk : BOOL := TRUE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Run" Id="{f59daa76-0a62-46d1-9d08-73b12c64713f}">
+      <Declaration><![CDATA[{attribute 'object_name' := 'Run'}
+METHOD Run : E_TestCaseState
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init state in base
+Run := SUPER^.Run();
+IF Run <> E_TestCaseState.eTestCaseState_running THEN
+	RETURN;
+END_IF
+
+// test
+stTestPlcSystemInfo := Statics.stPlcSystemInfo;
+
+// update result and state
+IF bTestOk THEN
+	eResult := E_TestResult.eTestResult_ok; //check stTestPlcSystemInfo
+	eState := E_TestCaseState.eTestCaseState_finished;
+END_IF
+
+Run := eState;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TestCase02SystemInfo">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestCase02SystemInfo.Run">
+      <LineId Id="3" Count="14" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

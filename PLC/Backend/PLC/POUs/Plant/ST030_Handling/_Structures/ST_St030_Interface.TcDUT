@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St030_Interface" Id="{d3dea9ee-10a2-4175-8107-e48607b63e7a}">
+    <Declaration><![CDATA[TYPE ST_St030_Interface :
+STRUCT
+	bEnable,
+	bEnableOvenAxis,
+
+	bReqestOvenA,			// request entry to stations
+	bReqestOvenA_ChkIndex,
+	bReqestOvenB,
+	bReqestOvenB_ChkIndex,
+	bReqestStorage,
+	bReqestStorage_ChkIndex	: BOOL;	
+	
+	// current pallet on GH
+	Pallet			: TcaCarrier;
+	Source			: E_Station;
+	
+	// active / requested HG command
+	CommandRequest	: ST_St030_Command;
+	ActiveCommand	: ST_St030_Command;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

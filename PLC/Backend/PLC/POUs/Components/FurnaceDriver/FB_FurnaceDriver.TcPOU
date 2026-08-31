@@ -1,0 +1,581 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_FurnaceDriver" Id="{df4cfe96-c890-474a-ab02-1af8259d790a}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Exhaustion driver.
+FUNCTION_BLOCK FB_FurnaceDriver EXTENDS FB_ComponentBase
+
+VAR CONSTANT
+	nFurnanceScheduleItems		: INT := 7;
+END_VAR
+
+VAR
+	/// IO structure
+	stIn 				: REFERENCE TO ST_FurnaceIn;
+	stOut 				: REFERENCE TO ST_FurnaceOut;
+	
+	/// fb
+	fbTmpCtrl			: FB_CTRL_TempController;
+	
+	/// Sequences
+	eSequenceId			: E_FurnaceSeq;
+	
+	nStep				: INT;
+	
+	// private var's
+	stCTRLParameter		: ST_CTRL_TempCtrlParameter;
+	stPIDParameter		: ST_CTRL_ParaController;
+	
+	fTemperature		: LREAL;
+	fSlope				: LREAL;
+	fInitial			: LREAL;
+	bkpAlarmSupp		: DWORD;	
+	eCTRL_Mode 			: E_CTRL_MODE := E_CTRL_MODE.eCTRL_MODE_IDLE; 	(*   eCTRL_MODE_TUNE  ;*)
+	bTuned				: BOOL;	
+	rtOverheat			: R_TRIG;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// Furnace driver.
+/// Hannes Fuger / asma.at / 12.2015
+///]]></ST>
+    </Implementation>
+    <Folder Name="_Sequences" Id="{15e43052-4e1c-4d49-9a2c-7574bd8d971f}" />
+    <Folder Name="Factory" Id="{5f5aba3e-a1f3-4194-b0a2-97d9992f8fc6}" />
+    <Folder Name="Properties" Id="{3fcf4e10-8afd-4e61-8c01-6f6c0bb2d2ff}" />
+    <Method Name="_AUTO" Id="{ab0a856b-f237-41f2-90a5-37ebdc922f92}" FolderPath="_Sequences\">
+      <Declaration><![CDATA[METHOD PRIVATE _AUTO 
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE nStep OF
+	
+0	:	// switch to Active mode
+		eCTRL_Mode := E_CTRL_MODE.eCTRL_MODE_ACTIVE;
+		stCtrlParameter.bSelCtrlParameterSet := TRUE;
+						
+		IF fbTmpCtrl.eCtrlState = e_Ctrl_state.eCTRL_STATE_ACTIVE THEN
+			nStep := 99;
+		END_IF			
+
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="_HAND" Id="{93473d4b-fa71-4766-b2fb-caf5a289959a}" FolderPath="_Sequences\">
+      <Declaration><![CDATA[METHOD _HAND
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE nStep OF
+	
+0	:	// switch to Active mode
+		eCTRL_Mode := E_CTRL_MODE.eCTRL_MODE_MANUAL;
+		stCtrlParameter.bSelCtrlParameterSet := TRUE;
+							
+		IF fbTmpCtrl.eCtrlState = e_Ctrl_state.eCTRL_STATE_MANUAL THEN
+			nStep := 99;
+		END_IF	
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="_OFF" Id="{70411660-9978-45d2-8761-3acd9077b52d}" FolderPath="_Sequences\">
+      <Declaration><![CDATA[METHOD _OFF
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE nStep OF
+	
+0	:	// switch to Active mode
+		eCTRL_Mode := E_CTRL_MODE.eCTRL_MODE_IDLE;
+							
+		IF fbTmpCtrl.eCtrlState = e_Ctrl_state.eCTRL_STATE_IDLE THEN
+			nStep := 99;
+		END_IF	
+			
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="_TUNE" Id="{72a47a8a-78bf-4933-9c29-e0ae8e12a6d4}" FolderPath="_Sequences\">
+      <Declaration><![CDATA[METHOD _TUNE
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE nStep OF
+	
+0	:	// switch to Tune mode
+		eCTRL_Mode := E_CTRL_MODE.eCTRL_MODE_TUNE;
+		// Alarme ausstellen
+		bkpAlarmSupp := stCTRLParameter.dwAlarmSupp;
+		stCtrlParameter.bSelCtrlParameterSet := FALSE;
+		
+		IF fbTmpCtrl.eCtrlState = e_Ctrl_state.eCTRL_STATE_TUNING THEN
+			nStep := 10;
+		END_IF
+
+10	:	IF fbTmpCtrl.eCtrlState = e_Ctrl_state.eCTRL_STATE_TUNED THEN
+			nStep := 20;
+		END_IF
+			
+20	:	stPIDParameter := fbTmpCtrl.sParaControllerInternal;
+		stCtrlParameter.bSelCtrlParameterSet := TRUE;
+		fbTmpCtrl.eCtrlMode := E_CTRL_MODE.eCTRL_MODE_PASSIVE;
+		eSequenceId := eFurnaceSeq_none;
+		
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="CtrlParameter" Id="{5ba5e275-66f0-4ac4-bb3c-e0e41b334dc7}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY CtrlParameter : REFERENCE TO ST_CTRL_TempCtrlParameter]]></Declaration>
+      <Get Name="Get" Id="{b1078f90-47d2-4e40-8181-4cd01f8313e5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ctrlParameter REF= stCTRLParameter;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{7ac777df-5e71-45fb-b943-4c7234cd5d1d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[stCTRLParameter := ctrlParameter;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="CtrlState" Id="{7b528ec4-2a57-4b52-be8f-7eb1a5522606}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY CtrlState : E_CTRL_STATE]]></Declaration>
+      <Get Name="Get" Id="{9c128053-db52-489c-9017-98a587e105ff}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CtrlState := fbTmpCtrl.eCtrlState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Error" Id="{a6fb5259-44c8-4233-9b5c-15d618fa190f}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Error : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a5a6b4f4-9eed-4da5-850d-b9d1e45b1108}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Error := fbTmpCtrl.bError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ErrorId" Id="{ac5eb9ba-a671-4f81-9d36-22e6d2832106}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ErrorId : E_CTRL_ERRORCODES]]></Declaration>
+      <Get Name="Get" Id="{c9ec9be4-dbf3-4c32-94aa-a76b53ac1817}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ErrorId := fbTmpCtrl.eErrorId;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FB_init" Id="{afedea7a-7512-43e6-b175-acf863c0af2e}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[eTyp := E_ComponentType.eComponentType_Furnace;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Heating" Id="{9b0dde32-d804-4570-8f87-05316dffcd6e}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Heating : E_HeatingState]]></Declaration>
+      <Get Name="Get" Id="{c66180d6-e3e0-4818-9735-f9d76c4719b7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Heating := E_HeatingState.eHeatingState_none;
+
+IF Mode = eFurnaceSeq_Auto AND ((NOT SelPointAutoTwo AND SetPointAuto <> 0) OR (SelPointAutoTwo AND SetPointAutoTwo <> 0)) THEN
+	Heating := E_HeatingState.eHeatingState_on;	
+ELSIF  Mode = eFurnaceSeq_Hand AND SetPointManual <> 0 THEN
+	Heating := E_HeatingState.eHeatingState_on;
+ELSE
+	Heating := E_HeatingState.eHeatingState_off;	
+END_IF]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="HeatingMode" Id="{7b25d03b-c3d7-447b-9181-1229edcf64ee}">
+      <Declaration><![CDATA[METHOD HeatingMode
+VAR_INPUT
+	eMode				: E_FurnaceSeq;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[eSequenceId := eMode;
+nStep := 0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="LoadCtrlParam" Id="{36310657-5d69-4ef5-8e68-4a1c21c01233}" FolderPath="Factory\">
+      <Declaration><![CDATA[METHOD LoadCtrlParam
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//stCtrlParameter	:= CtrlParameter;
+	
+(* general parameters ***************************************************************)
+stCtrlParameter.iMode					:= 1										;	(* 1=heating, 2=cooling, 3=heating&cooling *)
+stCtrlParameter.iReactionOnFailure		:= eCTRL_ReactionOnFailure_NoFailure	;	(* 0=controller off, 1=manual op, 2=yMin, 3=yMax *)
+
+stCtrlParameter.bSelCtrlParameterSet	:= FALSE									;	(* FALSE = internal set, TRUE = external set *)
+	                                                                                
+stCtrlParameter.dwAlarmSupp				:= 16#0000EFFF								;	(* alarm suppression *)
+stCtrlParameter.tCtrlCycleTime			:= T#1000MS									;	(* controller cycle time *)
+stCtrlParameter.tTaskCycleTime			:= T#10MS									;	(* plc task cycle time *)
+		                                                                            
+(* tuning parameters ****************************************************************)         
+stCtrlParameter.iTuningMode				:= 1										;	(* only heating, only cooling, first heating then cooling or vice versa *)
+	                                                                                
+stCtrlParameter.tTuneStabilisation		:= T#20S									;	(* wait for a stable system *)
+	                                                                                
+stCtrlParameter.fEndTunePercentHeating	:= 80.0										;	(* switch to closed loop control when X > 0.8*W *)
+stCtrlParameter.fYTuneHeating			:= 100.0									;	(* step change while tuning operation *)
+stCtrlParameter.fYStableHeating			:= 0.0										;	(* tuning operation *)
+	                                                                                
+stCtrlParameter.fEndTunePercentCooling	:= 20.0										;	(* switch to closed loop control when X < 0.2*W *)
+stCtrlParameter.fYTuneCooling			:= 0.0										;	(* step change while tuning operation *)
+stCtrlParameter.fYStableCooling			:= 0.0										;	(* tuning operation *)
+stCtrlParameter.fScalingFactor			:= 1.0										;	(* Scaling factor for KP heating/cooling *)
+		                                                                            
+(* setpoint parameters **************************************************************)         
+stCtrlParameter.fWMin					:= 0.0										;	(* lower limit *)
+stCtrlParameter.fWMax					:= 200.0									;	(* upper limit *)
+	                                                                                
+(* start up *************************************************************************)                                                                      
+stCtrlParameter.bEnableSoftStart		:= FALSE									;	(* FALSE = no soft start, TRUE = soft start *)
+stCtrlParameter.bEnableRamping			:= FALSE									;	(* FALSE = no ramping, TRUE = ramping *)
+	                                                                                
+stCtrlParameter.fWStartUp				:= 0.0										;	(* soft start plateau setpoint *)
+stCtrlParameter.tStartUp				:= T#0MS									;	(* soft start waiting time*)
+stCtrlParameter.bStartUpRamping			:= FALSE									;	(* enable ramping while start up phase *)
+stCtrlParameter.fWStartUpVeloPos		:= 1.0										;	(* max gradient for increasing setpoint in start up phase*)
+stCtrlParameter.fWStartUpVeloNeg		:= 1.0										;	(* max gradient for decreasing setpoint in start up phase *)
+	                                                                                
+stCtrlParameter.fWVeloPos				:= 1.0										;	(* max gradient for increasing setpoint *)
+stCtrlParameter.fWVeloNeg				:= 1.0										;	(* max gradient for decreasing setpoint *)	
+	                                                                                
+(* actual value parameters **********************************************************)         
+stCtrlParameter.bFilter 				:= FALSE                                    ;
+stCtrlParameter.tFilter					:= T#0S                                     ;
+		                                                                            
+(* deadband parameters **************************************************************)         
+stCtrlParameter.bDeadband				:= FALSE                                    ;
+stCtrlParameter.fEDeadband				:= 0.0										;	
+		                                                                            
+(* control value parameters *********************************************************)         
+stCtrlParameter.fYMin					:= 0.0										;	(* lower limit *)
+stCtrlParameter.fYMax					:= 100.0									;	(* upper limit *)
+stCtrlParameter.fYManual				:= 0.0									 	;	(* manual operation*)
+stCtrlParameter.fYOnFailure				:= 0.0										;	(* control value on failure *)
+	                                                                                ;
+stCtrlParameter.tPWMCycleTime			:= T#5S										;	(* PWM: period *)
+stCtrlParameter.tPWMMinOffTime			:= T#0S										;	(* PWM: min off time *)
+stCtrlParameter.tPWMMinOnTime			:= T#0S										;	(* PWM: min on time *)
+stCtrlParameter.tPWMWaitingTime			:= T#0S										;	(* PWM: min waiting time *) (* not yet implemented !!!!*)
+	                                                                                
+stCtrlParameter.fYThresholdOff			:= 0.0										;	(* 3-Point: Off threshold *)
+stCtrlParameter.fYThresholdOn			:= 0.0										;	(* 3-Point: On threshold *)
+	                                                                                
+stCtrlParameter.nCyclesForSwitchOver	:= 100                                      ;
+	                                                                                
+(* controller settings **************************************************************)         
+stCtrlParameter.bEnablePreController 	:= FALSE									;	(* enable precontroller *)
+stCtrlParameter.bEnableZones 			:= FALSE									;	(* enable zone around setpoint with open loop control *)
+stCtrlParameter.bEnableCVFilter 		:= FALSE									;	(* enable filter for CV (type see iFilterType) *)
+stCtrlParameter.iFilterType 			:= eCTRL_FilterType_FIRSTORDER			 	;	(* filtertype of CV filter *)
+stCtrlParameter.iControllerType 		:= eCTRL_ControllerType_PID					;	(* used controller normally PID *)
+			
+(* min max temperatures	*************************************************************)
+stCtrlParameter.TempLow					:= -5.0										;
+stCtrlParameter.TempLowLow				:= -10.0                                    ;
+stCtrlParameter.TempHigh				:= 5.0                                      ;
+stCtrlParameter.TempHighHigh			:= 10.0                                     ;
+stCtrlParameter.TempAbsoluteHigh		:= 200.0                                    ;
+stCtrlParameter.TempAbsoluteLow			:= 0.0	                                    ;
+		                                                                            
+(* internal tuning parameters *******************************************************)                                                    
+stCtrlParameter.fTuneKp					:= 0.5                                      ;
+stCtrlParameter.fTuneTn					:= 3                                     	;
+stCtrlParameter.fTuneTv					:= 1                                     	;
+stCtrlParameter.fTuneTd					:= 0.25                                     ;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Mode" Id="{d1d0fda5-3119-4d21-9105-8b426f4f5217}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Mode : E_FurnaceSeq]]></Declaration>
+      <Get Name="Get" Id="{f0985339-f217-4881-9c24-7a63cea563ff}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF  (nStep = 99) THEN
+	Mode := eSequenceId;
+ELSE
+	Mode := E_FurnaceSeq.eFurnaceSeq_none;
+END_IF]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PIDParameter" Id="{5df29ac3-88ec-4af3-afec-7b49438d8c63}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY PIDParameter : REFERENCE TO ST_CTRL_ParaController]]></Declaration>
+      <Get Name="Get" Id="{2500007c-e491-49c2-a4d5-ee1d7a389d95}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PIDParameter REF= stPIDParameter;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{76d9b48f-c9ed-4f25-b3fb-594629381c17}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[stPIDParameter := PIDParameter;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Reset" Id="{0d22e609-bfd7-4238-9163-b44359003fb7}">
+      <Declaration><![CDATA[/// Reset component logic
+{attribute '' := ''}
+{attribute 'object_name' := 'Reset'}
+METHOD Reset
+
+VAR
+	eOldMode			: E_FurnaceSeq;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// base logic run
+SUPER^.Reset();
+
+eSequenceId := E_FurnaceSeq.eFurnaceSeq_none;
+nStep := 0;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{2a2498bd-0a6e-4bf4-9d40-11c6b3021309}">
+      <Declaration><![CDATA[/// Run component logic
+{attribute 'object_name' := 'Run'}
+METHOD Run : E_ComponentState
+VAR
+	CtrlParameter			: ST_CTRL_TempCtrlParameter;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// base logic run
+Run := SUPER^.Run();
+
+// Sequencer 
+SeqRun();
+
+// convert Temperature
+fTemperature := fSlope * INT_TO_LREAL(stIn.nTemperature) + fInitial;
+
+// TemperatureCtrl
+fbTmpCtrl(
+		eCtrlMode				:= eCTRL_Mode, 
+		//bSelSetpoint			:= FALSE, 
+		//fW1						:= 120, 
+		//fW2						:= 120, 
+		fX						:= fTemperature, 
+		//fYManual				:= , 
+		bOpenThermocouple		:= FALSE, 
+		bReverseThermocouple	:= FALSE, 
+		bBackVoltage			:= FALSE, 
+		bLeakage				:= FALSE, 
+		bShortCircuit			:= FALSE, 
+		bOpenCircuit			:= FALSE, 
+		sParaControllerExternal	:= stPIDParameter, 
+		sControllerParameter	:= stCTRLParameter, 
+		);
+
+// Analog output		
+stOut.bPWMSignal := fbTmpCtrl.bYPWMPos;
+
+// Choose set of controller parameters
+//IF fbTmpCtrl.eCtrlState = eCTRL_STATE_TUNED THEN
+//	eCTRL_Mode := eCTRL_MODE_ACTIVE;	
+//END_IF
+
+IF fbTmpCtrl.eCtrlState = e_Ctrl_state.eCTRL_STATE_ERROR THEN
+	// todo: error
+END_IF
+
+rtOverheat.CLK := NOT stin.bOverheat;
+rtOverheat();		
+
+IF rtOverheat.Q THEN
+//	WriteError(E_Event.eEvent_none, CONCAT(sName, ': Überhitzungsschutz'));
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="SelPointAutoTwo" Id="{14d02790-22eb-4c2d-af42-80c405abf856}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY SelPointAutoTwo : BOOL]]></Declaration>
+      <Get Name="Get" Id="{aad6a56b-837f-4928-af7c-a81b4fb3d20e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SelPointAutoTwo := fbTmpCtrl.bSelSetpoint;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{743c2d28-07a7-4350-a39a-a1ab777951a5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbTmpCtrl.bSelSetpoint := SelPointAutoTwo;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="SeqRun" Id="{8568ac87-243b-4b03-83c4-d4c777d80bec}" FolderPath="_Sequences\">
+      <Declaration><![CDATA[METHOD SeqRun
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE eSequenceId OF
+
+	eFurnaceSeq_hand:
+		THIS^._HAND();
+		
+	eFurnaceSeq_auto:
+		THIS^._AUTO();
+	
+	eFurnaceSeq_tune:
+		THIS^._TUNE();
+		
+	eFurnaceSeq_off:
+		THIS^._OFF();
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="SetPointAuto" Id="{17c94859-44db-4b07-85a6-ca42ed65bbb8}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY SetPointAuto : LREAL]]></Declaration>
+      <Get Name="Get" Id="{43084900-ad39-4a5d-9b95-c6378f154d3e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SetPointAuto := fbTmpCtrl.fW1;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{bcd23364-1547-496c-8726-a9595401900d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbTmpCtrl.fW1 := SetPointAuto;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="SetPointAutoTwo" Id="{9a28cb3a-4707-47a7-93df-7fa4c6afb4d3}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY SetPointAutoTwo : LREAL]]></Declaration>
+      <Get Name="Get" Id="{6cbc7349-f81a-4ed9-a69d-77d8ec9de5bd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SetPointAutoTwo := fbTmpCtrl.fW2;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{abf01d86-b9c4-4c5d-9c47-9e8c72e0e4a1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbTmpCtrl.fW2 := SetPointAutoTwo;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="SetPointManual" Id="{abaf391b-e312-48c0-a7e8-c97114bbc6ff}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY SetPointManual : LREAL]]></Declaration>
+      <Get Name="Get" Id="{b4b94000-3f26-4591-a26a-2f78cb65583a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SetPointManual := fbTmpCtrl.fYManual;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1c5202a1-e9ff-4aa4-98fc-b9f5f8deaa83}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbTmpCtrl.fYManual := SetPointManual;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="SetReferences" Id="{4d1e0e41-5586-454f-8003-39af9c1cbe89}" FolderPath="Factory\">
+      <Declaration><![CDATA[/// Set IO reference
+{attribute 'object_name' := 'SetReferences'}
+METHOD SetReferences
+VAR_IN_OUT
+	/// IO structure
+	stRefIO 	: ST_FurnaceIO;
+END_VAR
+
+VAR
+	ptIn 	: POINTER TO ST_FurnaceIn;
+	ptOut 	: POINTER TO ST_FurnaceOut;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ptIn := ADR(stRefIO.stIn);
+ptOut := ADR(stRefIO.stOut);
+
+stIn REF= ptIn^;
+stOut REF= ptOut^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetupTempSensor" Id="{e3929ce6-6e18-44ee-a5da-cafc30b8160d}" FolderPath="Factory\">
+      <Declaration><![CDATA[METHOD SetupTempSensor
+VAR_INPUT	
+	nAnalogIn1		: INT;
+	nValue1			: LREAL;
+
+	nAnalogIn2		: INT;
+	nValue2			: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fSlope:= (nValue1 - nValue2) / (nAnalogIn1 - nAnalogIn2);
+fInitial := nValue1 - (fSlope * nAnalogIn1);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Temperature" Id="{9ffaff0d-0c3b-4d0e-bd62-52049f80f2a7}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Temperature : LREAL]]></Declaration>
+      <Get Name="Get" Id="{0704244b-30ca-41c7-ad44-82fd824fe461}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Temperature := fTemperature;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

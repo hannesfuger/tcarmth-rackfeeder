@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_DefaultEventClasses" Id="{accd1050-8a50-4afd-818c-0c8ad6b06666}">
+    <Declaration><![CDATA[TYPE ST_DefaultEventClasses :
+STRUCT
+	Info,
+	Warning,
+	Error : TcEventEntry;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

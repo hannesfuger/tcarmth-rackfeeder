@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_StringBuilder" Id="{f6c623e3-6650-47c4-8267-be052fdcc150}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_StringBuilder IMPLEMENTS I_StringBuilder
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+    sString : T_MaxString;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[///
+/// String Builder Fluent-Code Style
+/// Credits to Gerhard Barteling, https://www.plccoder.com/fluent-code/
+/// ]]></ST>
+    </Implementation>
+    <Method Name="Append" Id="{98263a46-57d1-445b-a9e6-07c234b95617}">
+      <Declaration><![CDATA[METHOD PUBLIC Append : I_StringBuilder // Append text to the current build string.
+VAR_IN_OUT CONSTANT
+	text : T_MaxString; // Text to append to current build string
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sString := Concat(sString, text);
+Append := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendAny" Id="{3687860d-f606-4d9b-878a-fce6f3851c8e}">
+      <Declaration><![CDATA[METHOD PUBLIC AppendAny : I_StringBuilder // Append text to the current build string.
+VAR_INPUT
+	value : ANY; // Value to append to current build string
+END_VAR
+VAR
+	pSTR	: POINTER TO STRING;
+	pWSTR	: POINTER TO WSTRING;
+	pBOOL	: POINTER TO BOOL;
+	pBYTE	: POINTER TO BYTE;
+	pWORD	: POINTER TO WORD;
+	pDWORD	: POINTER TO DWORD;
+	pLWORD	: POINTER TO LWORD;
+	pSINT	: POINTER TO SINT;
+	pINT	: POINTER TO INT;
+	pDINT	: POINTER TO DINT;
+	pLINT	: POINTER TO LINT;
+	pUSINT	: POINTER TO USINT;
+	pUINT	: POINTER TO UINT;
+	pUDINT	: POINTER TO UDINT;
+	pULINT	: POINTER TO ULINT;
+	pREAL	: POINTER TO REAL;
+	pLREAL	: POINTER TO LREAL;
+	pTIME	: POINTER TO TIME;
+	pLTIME	: POINTER TO LTIME;
+	pDATE	: POINTER TO DATE;
+	pDT		: POINTER TO DT;
+	pTOD	: POINTER TO TOD;
+	pENUM	: POINTER TO ENUM;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE value.TypeClass OF
+	__SYSTEM.TYPE_CLASS.TYPE_STRING: 
+		pSTR := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pSTR^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_WSTRING:
+		pWSTR := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pWSTR^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_BOOL:
+		pBOOL := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pBOOL^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_BYTE:
+		pBYTE := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pBYTE^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_WORD:
+		pWORD := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pWORD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_DWORD:
+		pDWORD := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pDWORD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LWORD:
+		pLWORD := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pLWORD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_SINT:
+		pSINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pSINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_INT:
+		pINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_DINT:
+		pDINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pDINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LINT:
+		pLINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pLINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_USINT:
+		pUSINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pUSINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_UINT:
+		pUINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pUINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_UDINT:
+		pUDINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pUDINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_ULINT:
+		pULINT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pULINT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_REAL:
+		pREAL := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pREAL^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LREAL:
+		pLREAL := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pLREAL^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_TIME:
+		pTIME := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pTIME^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_LTIME:
+		pLTIME := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pLTIME^));
+	
+	__SYSTEM.TYPE_CLASS.TYPE_DATE:
+		pDATE := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pDATE^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_DATEANDTIME:
+		pDT := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pDT^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_TIMEOFDAY:
+		pTOD := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pTOD^));
+		
+	__SYSTEM.TYPE_CLASS.TYPE_ENUM: // does not work!
+		pENUM := value.pValue;
+		sString:= CONCAT(sString, TO_STRING(pENUM^));
+
+END_CASE
+
+AppendAny := THIS^;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendWs" Id="{82bf48f0-baca-40e3-a421-0c41e894ca7a}">
+      <Declaration><![CDATA[METHOD PUBLIC AppendWs : I_StringBuilder
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR
+VAR
+	str	  : STRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[WSTRING_TO_STRING2(ADR(str), ADR(value), SIZEOF(str));
+sString := Concat(sString, str);
+AppendWs := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Clear" Id="{04d4a980-ca20-438d-9330-d6e5ead2e010}">
+      <Declaration><![CDATA[METHOD PUBLIC Clear : I_StringBuilder // Clear the current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sString := '';
+Clear := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Insert" Id="{413af146-8218-4df2-84c1-55843a3ff1e9}">
+      <Declaration><![CDATA[METHOD PUBLIC Insert : I_StringBuilder
+VAR_INPUT
+	text	 : T_MaxString;	// Text to append to current build string
+	position : INT;			// Insert position (Index)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sString := Tc2_Standard.INSERT(sString, text, position);
+Insert := THIS^;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{977c83dc-9bb1-4472-88af-b602b08e2929}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : I_StringBuilder //Reset current build string to an empty string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sString := '';
+Reset := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set" Id="{0121fd7a-64e6-4a13-b124-948cdecaa50e}">
+      <Declaration><![CDATA[METHOD PUBLIC Set : I_StringBuilder
+VAR_INPUT
+	text : T_MaxString; //Text to append to current build string
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sString := text;
+Set := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetWs" Id="{d969c08d-e4de-445e-a0b6-ffc30c94060e}">
+      <Declaration><![CDATA[METHOD PUBLIC SetWs : I_StringBuilder
+VAR_IN_OUT CONSTANT
+	value : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SetWs := Clear().AppendWs(value);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ToString" Id="{e5d149c5-c228-4eaf-b72b-b926526c614a}">
+      <Declaration><![CDATA[METHOD PUBLIC ToString : T_MaxString // Returns current build string.
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ToString := sString;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_StringBuilder">
+      <LineId Id="1" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.Append">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.AppendAny">
+      <LineId Id="1" Count="97" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.AppendWs">
+      <LineId Id="1" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.Clear">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.Insert">
+      <LineId Id="1" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.Reset">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.Set">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.SetWs">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StringBuilder.ToString">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

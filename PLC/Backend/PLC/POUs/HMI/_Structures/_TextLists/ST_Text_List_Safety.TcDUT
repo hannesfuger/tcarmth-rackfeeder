@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Text_List_Safety" Id="{d6d9965a-784e-4314-bec4-331322b87b8b}">
+    <Declaration><![CDATA[TYPE ST_Text_List_Safety :
+STRUCT
+	stText_Safety				: ST_Text := (
+									wsNameId:= "Safety",
+									wsName:= "Sicherheit");
+									
+	// Safety Messages
+	stText_Safety_Grp_Error		: ST_Text := (
+									wsNameId:= "Safety_group_Error",
+									wsName:= "Fehler Safety-Gruppe");
+	stText_Safety_GrpFB_Error	: ST_Text := (
+									wsNameId:= "Safety_group_FB Error",
+									wsName:= "Safety-Gruppe FB Fehler");
+	stText_Safety_GrpCom_Error	: ST_Text := (
+									wsNameId:= "Safety_group_Other_Error",
+									wsName:= "Safety-Gruppe Fehler");
+	stText_Safety_GrpOthError	: ST_Text := (
+									wsNameId:= "Safety_group_COM_Error",
+									wsName:= "Safety-Gruppe COM Fehler");
+	stText_Safety_Error			: ST_Text := (
+									wsNameId:= "Safety_Error",
+									wsName:= "Safety Fehler");
+	stText_Safety_ES			: ST_Text := (
+									wsNameId:= "Emergency_stop",
+									wsName:= "NOT-HALT");
+	stText_Safety_Door			: ST_Text := (
+									wsNameId:= "Safety_Door",
+									wsName:= "Safety Tür");
+	stText_Safety_DoorOpen		: ST_Text := (
+									wsNameId:= "Safety_door_open",
+									wsName:= "Safety Tür offen");
+	stText_Safety_CloseDoor		: ST_Text := (
+									wsNameId:= "Close_safety_door",
+									wsName:= "Safety Tür schließen");
+	stText_Safety_HW_Error		: ST_Text := (
+									wsNameId:= "Safety_HW_Error",
+									wsName:= "Safety Hardware Fehler");
+	stText_Safety_FB_Error		: ST_Text := (
+									wsNameId:= "Safety_FB_Error",
+									wsName:= "Safety FB Fehler");
+	stText_Safety_FB_Warning	: ST_Text := (
+									wsNameId:= "Safety_FB_Warning",
+									wsName:= "Safety FB Warnung");
+	stText_Safety_EDM_Error		: ST_Text := (
+									wsNameId:= "Safety_EDM_error",
+									wsName:= "Safety EDM Fehler");
+	stText_Safety_Discrepancy_Warning : ST_Text := (
+									wsNameId:= "Safety_discrepancy_warning",
+									wsName:= "Safety Diskrepanz Warnung (Button losgelassen)");
+	stText_Safety_Discrepancy_Error : ST_Text := (
+									wsNameId:= "Safety_discrepancy_error",
+									wsName:= "Safety Diskrepanz Fehler");
+	stText_Safety_2Hand_Error		: ST_Text := (
+									wsNameId:= "Safety_2hand_error",
+									wsName:= "Safety 2-Hand Fehler");
+							
+		
+	stText_Safety_Error_Diagnosis : ST_Text := (
+									wsNameId:= "Error_diagnosis",
+									wsName:= "Fehler in Diagnose");
+									
+	stText_Safety_Error_SensortestInput : ST_Text := (
+									wsNameId:= "Error_sensortest_input",
+									wsName:= "Fehler Sensortest Eingang");
+									
+	stText_Safety_Error_FirstInputPair : ST_Text := (
+									wsNameId:= "Error_first_input_pair",
+									wsName:= "Fehler erstes Eingangspaar");
+									
+	stText_Safety_Error_SecondInputPair : ST_Text := (
+									wsNameId:= "Error_second_input_pair",
+									wsName:= "Fehler zweites Eingangspaar");
+									
+	stText_Safety_Error_ExternalSupplyOutput : ST_Text := (
+									wsNameId:= "Error_external_supply_output",
+									wsName:= "Fehler externe Versorgung Ausgang");
+									
+	stText_Safety_Error_OpenLoadOutput : ST_Text := (
+									wsNameId:= "Error_OpenLoad_output",
+									wsName:= "Fehler keine Last am Ausgang");
+									
+	stText_Safety_Error_FieldVoltageToHigh : ST_Text := (
+									wsNameId:= "Error_field_voltage_to_high",
+									wsName:= "Fehler Feldspannung zu hoch");
+									
+	stText_Safety_Error_FieldVoltageToLow : ST_Text := (
+									wsNameId:= "Error_field_voltage_to_low",
+									wsName:= "Fehler Feldspannung zu niedrig");
+									
+									
+	stText_Safety_Error_Temperature : ST_Text := (
+									wsNameId:= "Error_temperature",
+									wsName:= "Fehler Temperatur");
+									
+	stText_Safety_Error_OutputTerminal : ST_Text := (
+									wsNameId:= "Error_output_terminal",
+									wsName:= "Fehler Ausgangs-Terminal");
+									
+									
+	stText_Safety_TimerSwitchOnTimeout	: ST_Text := (
+									wsNameId:= "Safety_Timer_Switch_On_Timeout",
+									wsName:= "Timer 'Switch On' Timeout");
+								
+	stText_Safety_TimerSwitchOffTimeout	: ST_Text := (
+									wsNameId:= "Safety_Timer_Switch_Off_Timeout",
+									wsName:= "Timer 'Switch Off' Timeout");
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

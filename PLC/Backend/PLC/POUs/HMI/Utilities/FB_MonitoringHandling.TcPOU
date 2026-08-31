@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_MonitoringHandling" Id="{273b1093-11b3-4579-88e7-ed4da12c4efa}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MonitoringHandling
+VAR_INPUT
+	nDigits				: INT; //number of digits after decimal point
+END_VAR
+VAR_IN_OUT
+	stMonitoring		: ARRAY[*] OF ST_Data_Item;
+	stMonitoringView	: ARRAY[*] OF ST_Data_Item_String;
+END_VAR
+VAR_OUTPUT
+	
+END_VAR
+VAR
+	ii, nLb, nUb		: DINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// clear MonitoringView
+nLb := LOWER_BOUND(stMonitoringView, 1);
+nUb := UPPER_BOUND(stMonitoringView, 1);
+FOR ii := nLb TO nUb DO
+	MEMSET(ADR(stMonitoringView[ii]), 0, SIZEOF(stMonitoringView[ii]));
+END_FOR
+
+// write MonitoringView
+nLb := MAX(nLb, LOWER_BOUND(stMonitoring, 1));
+nUb := MIN(nUb, UPPER_BOUND(stMonitoring, 1));
+FOR ii := nLb TO nUb DO
+
+	stMonitoringView[ii].stGroup := stMonitoring[ii].stGroup;
+	stMonitoringView[ii].stName := stMonitoring[ii].stName;
+	stMonitoringView[ii].stUnit := stMonitoring[ii].stUnit;
+	
+	IF (stMonitoring[ii].stName.wsName = "" AND stMonitoring[ii].stName.wsNameId = "") THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="";	
+	ELSIF stMonitoring[ii].eDataType = E_DataType.eDataType_None THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="none";	
+	ELSIF stMonitoring[ii].eDataType = E_DataType.eDataType_bool THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="bool";
+	ELSIF  stMonitoring[ii].eDataType = E_DataType.eDataType_int THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="int";
+	ELSIF  stMonitoring[ii].eDataType = E_DataType.eDataType_lreal THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="lreal";
+	ELSIF  stMonitoring[ii].eDataType = E_DataType.eDataType_time_ms THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="time_ms";
+	ELSIF  stMonitoring[ii].eDataType = E_DataType.eDataType_time_s THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="time_s";		
+	ELSIF  stMonitoring[ii].eDataType = E_DataType.eDataType_wstring THEN
+		stMonitoringView[ii].stDataType.wsName := stMonitoringView[ii].stDataType.wsNameId :="wstring";
+	END_IF
+	
+	IF (stMonitoring[ii].stName.wsName = "" AND stMonitoring[ii].stName.wsNameId = "") THEN
+		stMonitoringView[ii].stValue.wsName := stMonitoringView[ii].stValue.wsNameId :="";
+	ELSIF stMonitoring[ii].eDataType = E_DataType.eDataType_bool THEN
+		IF stMonitoring[ii].bValue THEN
+			stMonitoringView[ii].stValue.wsName := stMonitoringView[ii].stValue.wsNameId :="true";
+		ELSE
+			stMonitoringView[ii].stValue.wsName := stMonitoringView[ii].stValue.wsNameId :="false";
+		END_IF
+	ELSIF stMonitoring[ii].eDataType = E_DataType.eDataType_int THEN
+		stMonitoringView[ii].stValue.wsName := TO_WSTRING(stMonitoring[ii].nValue);
+	ELSIF stMonitoring[ii].eDataType = E_DataType.eDataType_lreal THEN
+		stMonitoringView[ii].stValue.wsName := TO_WSTRING(LREAL_TO_FMTSTR(stMonitoring[ii].fValue,nDigits,FALSE));
+	ELSIF stMonitoring[ii].eDataType = E_DataType.eDataType_wstring THEN
+		stMonitoringView[ii].stValue.wsName := TO_WSTRING(stMonitoring[ii].sValue);
+	ELSIF stMonitoring[ii].eDataType = E_DataType.eDataType_time_ms THEN
+		stMonitoringView[ii].stValue.wsName := TO_WSTRING(stMonitoring[ii].tValue);
+	END_IF
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="FB_MonitoringHandling">
+      <LineId Id="158" Count="2" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="100" Count="3" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="104" Count="40" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

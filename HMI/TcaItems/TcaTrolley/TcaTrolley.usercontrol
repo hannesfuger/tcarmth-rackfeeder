@@ -1,0 +1,255 @@
+<div id="TcaTrolley_1" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="900" data-tchmi-creator-viewport-height="2000" data-tchmi-zindex="3">
+
+<div id="TcaTrolleyPopup" data-tchmi-type="TcHmi.Controls.System.TcHmiPopup" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-target-file-host-keep-alive="False" data-tchmi-header-text="Carrier" data-tchmi-target-file-host-preload="False" data-tchmi-movable="False" data-tchmi-restore-bounds="False" data-tchmi-modal="True" data-tchmi-zindex="2">
+
+<script data-tchmi-target-attribute="data-tchmi-target-file" type="application/json">
+{
+  "path": "TcaItems/TcaCarrier/TcaCarrierService.usercontrol",
+  "attributes": {
+    "data-tchmi-data": "%pp%_carrierData%/pp%",
+    "data-tchmi-config": "%pp%config::CarrierConfig%/pp%"
+  }
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-buttons" type="application/json">
+[
+  {
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaTrolleyPopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%TcaTrolleyPopup%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%pp%data%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%pp%_carrierData%/pp%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "write"
+          }
+        ],
+        "asyncWait": true
+      }
+    ],
+    "height": 30,
+    "keepPopupOpen": false,
+    "name": "ok",
+    "text": "OK",
+    "tooltip": "",
+    "width": 60
+  },
+  {
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaTrolleyPopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%TcaTrolleyPopup%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/Symbol_Of_ADS-PLC1.TcaTrolleyData",
+            "symbolExpression": "%pp%data%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/Symbol_Of_ADS-PLC1.TcaCarrierData",
+            "symbolExpression": "%pp%_carrierData%/pp%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "write"
+          }
+        ],
+        "asyncWait": true
+      }
+    ],
+    "height": 30,
+    "keepPopupOpen": true,
+    "name": "apply",
+    "text": "Übernehmen",
+    "tooltip": "",
+    "width": 60
+  },
+  {
+    "actions": [],
+    "height": 30,
+    "keepPopupOpen": false,
+    "name": "cancel",
+    "text": "Abbrechen",
+    "tooltip": "",
+    "width": 60
+  }
+]
+</script>
+</div>
+<div id="TcaTrolleyHost" data-tchmi-type="TcHmi.Controls.System.TcHmiHtmlHost" data-tchmi-zindex="1" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-left-unit="px" data-tchmi-top-unit="px" data-tchmi-width-unit="%" data-tchmi-width="100" data-tchmi-height-unit="%" data-tchmi-height="100" data-tchmi-left="0" data-tchmi-top="0">
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaTrolleyPopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%TcaTrolleyPopup%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/Symbol_Of_ADS-PLC1.TcaTrolleyData",
+            "symbolExpression": "%pp%data%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/Symbol_Of_ADS-PLC1.TcaCarrierData",
+            "symbolExpression": "%pp%_carrierData%/pp%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "open"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%pp%data%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaTrolleyRefresh",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%TcaTrolleyHost%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+            "symbolExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "console.log(\"REFRESH TROLLEY\");"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  },
+  {
+    "event": "%pp%config%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaTrolleyDraw",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiHtmlHost",
+            "symbolExpression": "%ctrl%TcaTrolleyHost%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%pp%config%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+            "symbolExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaTrolleyRefresh",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%TcaTrolleyHost%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+            "symbolExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "console.log(\"INIT TROLLEY\");"
+        ],
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="TcHmiImage_1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-src="Images/TcaTrolley.svg" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-creator-visibility="Visible">
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onInitialized",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctx%owner::Visibility%/ctx%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Hidden"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+</div>

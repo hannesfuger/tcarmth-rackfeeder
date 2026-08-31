@@ -1,0 +1,642 @@
+<div id="conOrderState" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-creator-viewport-width="1024" data-tchmi-creator-viewport-height="768">
+
+<div id="StationOverviewOrderState" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+<div id="OrderStateImage" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-src="Images/NoOrders.png">
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::nArticleImage%/s%",
+    "actions": [
+      {
+        "objectType": "SwitchCase",
+        "active": true,
+        "compare": {
+          "objectType": "Symbol",
+          "valueType": "tchmi:general#/definitions/UINT",
+          "symbolExpression": "%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::nArticleImage%/s%"
+        },
+        "cases": [
+          {
+            "caseValue": {
+              "objectType": "StaticValue",
+              "valueType": "tchmi:general#/definitions/UINT",
+              "value": 0
+            },
+            "actions": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%ctx%owner::Src%/ctx%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:framework#/definitions/Path",
+                  "value": "Images/NoOrders.png"
+                },
+                "asyncWait": true
+              }
+            ]
+          },
+          {
+            "caseValue": {
+              "objectType": "StaticValue",
+              "valueType": "tchmi:general#/definitions/UINT",
+              "value": 1
+            },
+            "actions": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%ctx%owner::Src%/ctx%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:framework#/definitions/Path",
+                  "value": "Images/Product/Scanner.png"
+                },
+                "asyncWait": true
+              }
+            ]
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div id="sOrderstateSitename" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="5" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%orderoverview%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="40" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-background-image-horizontal-alignment="Center" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+</div>
+<div id="OrderStateOrderData" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="50" data-tchmi-height-unit="%" data-tchmi-left="0.0" data-tchmi-left-unit="%" data-tchmi-top="50" data-tchmi-top-unit="%" data-tchmi-width="100.0" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+<div id="sOrderStateConstructionOrderNumber" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%l%constructionordernumber%/l%" data-tchmi-top="12.0" data-tchmi-top-unit="%" data-tchmi-width="53.9" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left">
+</div>
+<div id="OrderStateConstructionOrderNumber" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stConstructionOrderNumber%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="20.0" data-tchmi-top-unit="%" data-tchmi-width="39.4" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(112, 177, 248, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div id="sOrderStateOrderData" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="12.9" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%l%orderdata%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="55.8" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120">
+</div>
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "None"
+}
+</script>
+<div id="sOrderStateArticleName" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%l%articlename%/l%" data-tchmi-top="33.1" data-tchmi-top-unit="%" data-tchmi-width="53.9" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left">
+</div>
+<div id="OrderStateArticleName" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stArticleName%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="41.0" data-tchmi-top-unit="%" data-tchmi-width="64.6" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(112, 177, 248, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div id="sOrderStateArticleSize" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%l%construction_size%/l%" data-tchmi-top="54.2" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateArticleSize" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stArticleSize%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="62.0" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(112, 177, 248, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div id="sOrderStateArticleDesign" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="24.4" data-tchmi-left-unit="%" data-tchmi-text="%l%construction_design%/l%" data-tchmi-top="54.2" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateArticleDesign" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="24.4" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stArticleDesign%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="62.0" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(112, 177, 248, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div id="sOrderStateArticleNumberOfPoles" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="46.7" data-tchmi-left-unit="%" data-tchmi-text="%l%numberofpoles%/l%" data-tchmi-top="54.2" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateArticleNumberOfPoles" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="46.7" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stArticleNumberOfPoles%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="62.0" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(112, 177, 248, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div id="sOrderStateArticleCounterActual" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%l%counteractual%/l%" data-tchmi-top="75.1" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateArticleCounterActual" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stArticleCounterActual%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="84.9" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(123, 229, 54, 1)"
+}
+</script>
+</div>
+<div id="sOrderStateArticleCounterOpen" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="24.4" data-tchmi-left-unit="%" data-tchmi-text="%l%counterrequest%/l%" data-tchmi-top="75.1" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateArticleCounterOpen" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="24.4" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stArticleCounterOpen%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="84.9" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(241, 25, 25, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div id="sOrderStateArticlOrderPieces" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="8.0" data-tchmi-height-unit="%" data-tchmi-left="46.7" data-tchmi-left-unit="%" data-tchmi-text="%l%counterorder%/l%" data-tchmi-top="75.1" data-tchmi-top-unit="%" data-tchmi-width="22.4" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateArticleOrderPieces" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="46.7" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stArticleorderPieces%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="84.9" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(112, 177, 248, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div id="OrderStateOrderManagement" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="19.5" data-tchmi-height-unit="%" data-tchmi-left="73.3" data-tchmi-left-unit="%" data-tchmi-top="75.4" data-tchmi-top-unit="%" data-tchmi-width="24.2" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text="%l%ordermanagement%/l%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="px" data-tchmi-text-horizontal-alignment="Center">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "Station001_TcHmiButton_Settings001Plant.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/conSettings_Plant.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "TcHmiButton_SettingsPlant_10.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Order/conOrderManagement.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Order/conOrderManagement.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+</div>
+<div id="OrderStateRecipe" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="35" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "None"
+}
+</script>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="sOrderStateCurrentRecipe" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="36.0" data-tchmi-height-unit="%" data-tchmi-left="2.0" data-tchmi-left-unit="%" data-tchmi-text="%l%recipeactual%/l%" data-tchmi-top="-1.7" data-tchmi-top-unit="%" data-tchmi-width="58.2" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120">
+</div>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="OrderStateCurrentRecipe" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="36.7" data-tchmi-height-unit="%" data-tchmi-left="2.1" data-tchmi-left-unit="%" data-tchmi-top="47.0" data-tchmi-top-unit="%" data-tchmi-width="64.4" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stCurrentRecipe%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(112, 177, 248, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+</div>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="OrderStateRecipeManagement" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="58.7" data-tchmi-height-unit="%" data-tchmi-left="73.5" data-tchmi-left-unit="%" data-tchmi-top="25.7" data-tchmi-top-unit="%" data-tchmi-width="24.2" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text="%l%recipemanagement%/l%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="px" data-tchmi-text-horizontal-alignment="Center">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "Station001_TcHmiButton_Settings001Plant.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/conSettings_Plant.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "TcHmiButton_SettingsPlant_11.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/conRecipemanagement.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/conRecipemanagement.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+</div>
+<div id="OrderStateStatistics" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="30" data-tchmi-height-unit="%" data-tchmi-left="60" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="40" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+<div id="sOrderStateCounterOk" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="25.5" data-tchmi-height-unit="%" data-tchmi-left="3.3" data-tchmi-left-unit="%" data-tchmi-text="%l%ok%/l%" data-tchmi-top="12.8" data-tchmi-top-unit="%" data-tchmi-width="40.5" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateCounterOk" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="22.8" data-tchmi-height-unit="%" data-tchmi-left="58.0" data-tchmi-left-unit="%" data-tchmi-top="12.8" data-tchmi-top-unit="%" data-tchmi-width="35.4" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stCounterOk%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(123, 229, 54, 1)"
+}
+</script>
+</div>
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "None"
+}
+</script>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="sOrderStateStatistics" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="12.9" data-tchmi-height-unit="%" data-tchmi-left="3.3" data-tchmi-left-unit="%" data-tchmi-text="%l%statistics%/l%" data-tchmi-top="-0.4" data-tchmi-top-unit="%" data-tchmi-width="90.3" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120">
+</div>
+<div id="sOrderStateCounterNok" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="25.5" data-tchmi-height-unit="%" data-tchmi-left="3.3" data-tchmi-left-unit="%" data-tchmi-text="%l%nok%/l%" data-tchmi-top="38.6" data-tchmi-top-unit="%" data-tchmi-width="40.5" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="OrderStateCounterNok" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="22.8" data-tchmi-height-unit="%" data-tchmi-left="58.0" data-tchmi-left-unit="%" data-tchmi-top="38.6" data-tchmi-top-unit="%" data-tchmi-width="35.4" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="%" data-tchmi-is-enabled="false" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size="150" data-tchmi-background-image-vertical-alignment="Top" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stOrderState::stCounterNok%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+{
+  "color": "rgba(0, 0, 0, 1)"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(241, 25, 25, 1)"
+}
+</script>
+</div>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="MainTwoRegions_Region1_Content3_1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="26.7" data-tchmi-height-unit="%" data-tchmi-left="33.1" data-tchmi-left-unit="%" data-tchmi-top="67.6" data-tchmi-top-unit="%" data-tchmi-width="61.0" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text="%l%counter%/l%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px" data-tchmi-text-font-size-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "Station001_TcHmiButton_Settings001Plant.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/conSettings_Plant.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "TcHmiButton_SettingsPlant_10.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/conSettings_Plant.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "MainTwoRegions_Region1_Content1_1.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%MainTwoRegions1::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Order/conOrderState.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%Region_Main::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Counter/conCounter.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+</div>
+</div>
+</div>

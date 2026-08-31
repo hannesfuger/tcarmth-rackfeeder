@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_ProductionSettings" Id="{17e1b83e-7450-48fe-9bdb-08d55b7c02a2}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+{attribute 'to_string'}
+{attribute 'to_wstring'}
+TYPE E_ProductionSettings :
+(
+	//eProduction_Settings_none := 0,
+	eProductionSettings_Override,		// override
+	eProductionSettings_OrderNumber,	// order
+
+	/// has to be set to last index for array bounds!
+	eProductionSettings_nMaxIdx	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

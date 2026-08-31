@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_InitDynDataItem" Id="{e5e8d6af-4dc8-47c6-a061-350a400f66cf}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_InitDynDataItem : BOOL
+VAR_INPUT
+	nIndex				: INT;
+	wsIndex				: WSTRING;
+	stGroup				: ST_Text;
+	stTitle				: ST_Text;
+	stUnit				: ST_Text;	
+	eDataType			: E_DataType;	
+	fValueMin			: REAL;
+	fValueMax			: REAL;
+	// required user level, 0 = none
+	nRequiredUserLevel	: INT := 0;	
+	eRecipeMode			: E_RecipeMode;
+END_VAR
+VAR_IN_OUT
+	astItems			: ARRAY[*] OF ST_Data_Item;
+END_VAR
+VAR
+	nLb, nUb : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nLb := TO_INT(LOWER_BOUND(astItems, 1));
+nUb := TO_INT(UPPER_BOUND(astItems, 1));
+
+// chk
+IF nIndex < nLb OR nIndex > nUb THEN
+	RETURN;
+END_IF
+
+astItems[nIndex].stIndex.nNameId := nIndex;
+astItems[nIndex].stIndex.wsNameId := wsIndex;
+astItems[nIndex].stIndex.wsName := wsIndex;
+
+astItems[nIndex].stGroup := stGroup;
+astItems[nIndex].stName := stTitle;
+
+astItems[nIndex].eDataType := eDataType;
+astItems[nIndex].fValueMin := fValueMin;
+astItems[nIndex].fValueMax := fValueMax;
+astItems[nIndex].stUnit := stUnit;
+
+astItems[nIndex].eUserLevel := nRequiredUserLevel;
+
+astItems[nIndex].eRecipeMode := eRecipeMode;
+
+F_InitDynDataItem := TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="F_InitDynDataItem">
+      <LineId Id="41" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="46" Count="18" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="45" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

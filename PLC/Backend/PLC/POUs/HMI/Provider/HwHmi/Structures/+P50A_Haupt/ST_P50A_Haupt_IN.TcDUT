@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_P50A_Haupt_IN" Id="{856a4196-ef49-4d33-8836-e051c734dfbd}">
+    <Declaration><![CDATA[TYPE ST_P50A_Haupt_IN :
+STRUCT
+	bDoorOpn		: BOOL;	// Schutztüren Entriegeln, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-21SJ5
+	nOverride		: INT;	// Zustellung Geschwindigkeit, Poti Analog, BMK: +P50A-41SG1
+ 	bVorwHaerten	: BOOL;	// Vorwahl Härte-Generator, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-22SJ1
+	bVorwAnlassen	: BOOL;	// Vorwahl Anlass-Generator, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-22SJ2
+	bOnOffPolieren	: BOOL;	// Polierstation Start/Stopp, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-22SJ3
+	bSpOnOffS1		: BOOL;	// Spindel S1 Start/Stopp, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-22SJ5
+	bSpOnOffS2		: BOOL;	// Spindel S2 Start/Stopp, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-23SJ1
+	bSpOnOffS3		: BOOL;	// Spindel S3 Start/Stopp, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-23SJ5
+	bAutoOn			: BOOL;	// Automatik Ein, LDT-GN, 1DI-NO, 1DO, BMK: +P50A-21SJ2
+	
+	bDoorCls		: BOOL;	// Schutztüren Verriegeln, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-21SJ6
+	bSchlScheiZust	: BOOL;	// Schleifscheiben Zustellen, DT-WH, 1DI-NO, BMK: +P50A-21SJ7
+	bZustOnOffPol	: BOOL;	// Polierstation Zustellung, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-22SJ4
+	bZustOnOffS1	: BOOL;	// Spindel S1 Zustellung, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-22SJ6
+	bZustOnOffS2	: BOOL;	// Spindel S2 Zustellung, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-23SJ2
+	bZustOnOffS3	: BOOL;	// Spindel S3 Zustellung, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-23SJ6
+	bAutoOff		: BOOL;	// Automatik Aus, DT-RD, 1DI-NO, BMK: +P50A-21SJ3
+	
+	bSchlScheiWegst	: BOOL;	// Schleifscheiben Wegstellen, DT-WH, 1DI-NO, BMK: +P50A-21SJ8
+	bEnAutoKorrS1	: BOOL;	// Spindel S1 Autokorrektur Ein/Aus, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-22SJ7
+	bEnAutoKorrS2	: BOOL;	// Spindel S2 Autokorrektur Ein/Aus, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-23SJ3
+	bEnAutoKorrS3	: BOOL;	// Spindel S3 Autokorrektur Ein/Aus, LDT-WH, 1DI-NO, 1DO, BMK: +P50A-23SJ7
+	bEsQuit			: BOOL;	// Not-Halt Quittieren, LDT-BU, 1DI-NO, 1DO, BMK: +P50A-21SJ1
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

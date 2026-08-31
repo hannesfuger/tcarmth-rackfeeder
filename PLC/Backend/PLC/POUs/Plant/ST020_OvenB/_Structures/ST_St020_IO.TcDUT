@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St020_IO" Id="{3890ae1e-657d-4f56-bb3f-4df7e0f990d5}">
+    <Declaration><![CDATA[TYPE ST_St020_IO :
+STRUCT
+	stIn	AT%I* : ST_St020_IO_IN;
+	stOut	AT%Q* : ST_St020_IO_OUT;
+	stHeatingPlateIO : ST_FurnaceIO;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_HMI_PROVIDER_BASE" Id="{eb3b13ab-0697-40da-bd0e-8c1192b792bf}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC ABSTRACT FB_HMI_PROVIDER_BASE IMPLEMENTS ITF_HMI_PROVIDER
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	eProvider	: E_HMI_PROVIDER;
+	
+	stItfHmiIn	: REFERENCE TO ST_HMI_IN;
+	stItfHmiOut	: REFERENCE TO ST_HMI_OUT;
+	
+	bRequestManualControl,
+	bRequestRecipeMgmt,
+	bRequestSettingMgmt,
+	bRequestUserMgmt,
+	bMute		: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Methods" Id="{4371ce8a-2be0-45a5-b48d-5497abc89aa2}" />
+    <Folder Name="Properties" Id="{19560e8a-6f53-4c5f-9456-58c06c8dabc4}" />
+    <Property Name="ItfHmiIn" Id="{8b135c92-9e5a-4ab2-b5fd-c25b1745d8d6}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ItfHmiIn : REFERENCE TO ST_HMI_IN]]></Declaration>
+      <Get Name="Get" Id="{b891f3cc-a6f7-4957-ae98-f890cff48ca7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ItfHmiIn REF= stItfHmiIn;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ItfHmiOut" Id="{f4aa119e-6666-4149-af84-fef70564cbdf}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ItfHmiOut : REFERENCE TO ST_HMI_OUT]]></Declaration>
+      <Get Name="Get" Id="{5866c261-7b3f-4b0d-aa28-bba29b67a015}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ItfHmiOut REF= stItfHmiOut;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="M_Init" Id="{a4774064-60f7-454a-9e5f-5d827598134b}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[P_HMI_Controller.M_RegisterProvider(THIS^);
+M_Init := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{9562efb1-6147-494f-83ee-a33594a3d96d}" FolderPath="Methods\">
+      <Declaration><![CDATA[(* reset*)
+METHOD M_Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stItfHmiIn.stSpecial.stButton_LedTest.bClick := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Run" Id="{b599e4b7-dc6c-4993-b682-12468ee2a04f}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD M_Run : BOOL
+VAR
+	msg : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT RefsValid THEN
+	msg := CONCAT('HMI provider ref error, provider: ', TO_STRING(eProvider));
+	Services.fbEventHandler.Select(TC_Events.SystemEventClass.ErrorEvent).ArgSetString(msg).Raise();
+	RETURN;
+END_IF
+
+M_Run := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetReferencesBase" Id="{0ff96172-e091-4d24-a480-742ad33456ff}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD M_SetReferencesBase : BOOL
+VAR_IN_OUT
+	stHmiPrvIn	: ST_HMI_IN;
+	stHmiPrvOut	: ST_HMI_OUT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stItfHmiIn REF= stHmiPrvIn;
+stItfHmiOut REF= stHmiPrvOut;
+stItfHmiOut.stCommon REF= HMI.stHmi.stOut.stCommon; // same common out 4 all HMI provider, in order to save memory
+M_SetReferencesBase := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Mute" Id="{d75ff4f9-7601-4c81-9ef8-8ea6f6cf481f}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Mute : bool]]></Declaration>
+      <Get Name="Get" Id="{d487fae3-837d-49a4-a40b-538d2339b2b5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Mute := bMute;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Provider" Id="{4ea6dd9c-1e46-48cf-be6e-7e59c2bf8b4d}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Provider : E_HMI_PROVIDER
+]]></Declaration>
+      <Get Name="Get" Id="{8e5f494e-dd2f-43ab-8cfe-54151534583c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Provider := eProvider;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RefsValid" Id="{8239054e-eeb0-47bf-9ce3-424e994992d4}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY RefsValid : bool]]></Declaration>
+      <Get Name="Get" Id="{bd066d3e-c968-4cc6-971a-201385bd1eef}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RefsValid := __ISVALIDREF (stItfHmiIn) AND_THEN
+			 __ISVALIDREF (stItfHmiOut);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RequestManualControl" Id="{8f49d3cd-a26b-4750-b17d-cf255f6e839f}" FolderPath="Properties\">
+      <Declaration><![CDATA[(* HMI control request (Bedienhoheit)
+	set ti true, on any control request from the HMI provider (e.g.: watch IN struct)
+	reset will be done by HMI controller, on other provider request  *)
+{attribute 'monitoring':='call'}
+PROPERTY RequestManualControl : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{2e9b6ac1-1488-4140-a4b9-387b159c447c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RequestManualControl := bRequestManualControl;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c1b4e7f8-fd62-4efa-9b5d-72bff59ff4de}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bRequestManualControl := RequestManualControl;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RequestRecipeMgmt" Id="{7523044a-7388-4ac4-9d7c-e75c3cc23c4a}" FolderPath="Properties\">
+      <Declaration><![CDATA[(* HMI recipe control request (Bedienhoheit)  *)
+{attribute 'monitoring':='call'}
+PROPERTY RequestRecipeMgmt : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{6669e8ec-3ce8-4ea2-8125-f60aa98d485c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RequestRecipeMgmt := bRequestRecipeMgmt;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{d1660c92-acd3-4443-bd97-8d4e7c8fc4e7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bRequestRecipeMgmt := RequestRecipeMgmt;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RequestSettingMgmt" Id="{9a40c98e-d4fe-46f5-b48e-e1c994c8d2d8}" FolderPath="Properties\">
+      <Declaration><![CDATA[(* HMI recipe control request (Bedienhoheit)  *)
+{attribute 'monitoring':='call'}
+PROPERTY RequestSettingMgmt : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{2c21a599-0dd5-4e7e-921a-cfcbe6a2a409}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RequestSettingMgmt := bRequestSettingMgmt;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{366428d0-25e6-4864-b0d6-e762050abc23}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bRequestSettingMgmt := RequestSettingMgmt;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RequestUserMgmt" Id="{111e378e-f6b8-4f1e-9276-f72b13017db8}" FolderPath="Properties\">
+      <Declaration><![CDATA[(* HMI user management control request (Bedienhoheit)  *)
+{attribute 'monitoring':='call'}
+PROPERTY RequestUserMgmt : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{3d90ba8b-7e99-47d1-9ac4-f059769e3ae6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RequestUserMgmt := bRequestUserMgmt;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{13f9f8c7-c3c4-4344-a3c8-1afcd5e648f4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bRequestUserMgmt := RequestUserMgmt;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_HMI_PROVIDER_BASE">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.ItfHmiIn.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.ItfHmiOut.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.M_Init">
+      <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.M_Reset">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.M_Run">
+      <LineId Id="15" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.M_SetReferencesBase">
+      <LineId Id="19" Count="1" />
+      <LineId Id="37" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.Mute.Get">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.Provider.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RefsValid.Get">
+      <LineId Id="2" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestManualControl.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestManualControl.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestRecipeMgmt.Get">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestRecipeMgmt.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestSettingMgmt.Get">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestSettingMgmt.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestUserMgmt.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HMI_PROVIDER_BASE.RequestUserMgmt.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

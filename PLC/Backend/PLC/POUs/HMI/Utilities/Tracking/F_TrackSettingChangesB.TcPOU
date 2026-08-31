@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_TrackSettingChangesB" Id="{836ae16d-cbe0-4b90-9ab5-901d5f8fb1e3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_TrackSettingChangesB : BOOL
+VAR_INPUT
+	bValue		: BOOL;
+END_VAR
+VAR_IN_OUT
+	stSetting	: ST_Data_Item;
+	sChanges	: STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF stSetting.bValue <> bValue THEN
+	sChanges := Concat7(sChanges, '$N ', WSTRING_TO_STRING(stSetting.stName.wsName), ' ', TO_STRING(stSetting.bValue), ' -> ', TO_STRING(bValue));
+END_IF
+
+stSetting.bValue := bValue;
+F_TrackSettingChangesB := TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="F_TrackSettingChangesB">
+      <LineId Id="14" Count="4" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

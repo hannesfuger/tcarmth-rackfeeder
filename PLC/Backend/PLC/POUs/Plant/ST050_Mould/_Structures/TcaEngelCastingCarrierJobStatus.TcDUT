@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaEngelCastingCarrierJobStatus" Id="{c22eb47e-2aad-49c4-87dc-0e876c04b98c}">
+    <Declaration><![CDATA[TYPE TcaEngelCastingCarrierJobStatus :
+STRUCT
+	CarrierPresent : BOOL;						// TRUE wenn ein Werkstückträger abgelegt wurde
+	Carrier : TcaEngelCastingCarrierStatus;		// Status des Carriers der abgelegt wurde
+	Done : BOOL;								// Job wurde erfolgreich ausgeführt
+	Busy : BOOL;								// Job wird ausgeführt
+	Error : BOOL;								// Job endet mit Fehler
+	ErrorID : UINT;								// TODO: Welche unterschiedlichen Fehler sollen berücksichtigt werden? z.b: kein Blech, Ofentür offen, Wagen ist zum wechseln, ...								
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

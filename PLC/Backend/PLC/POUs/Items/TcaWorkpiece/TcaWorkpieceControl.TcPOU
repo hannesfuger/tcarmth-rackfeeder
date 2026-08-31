@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="TcaWorkpieceControl" Id="{7a3a8052-8b4f-43fb-bf0a-6fb508d60fc3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK TcaWorkpieceControl //EXTENDS TcoComponent
+
+VAR
+	_data	: REFERENCE TO TcaWorkpieceData;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT __ISVALIDREF(_data) THEN
+	RETURN;
+END_IF]]></ST>
+    </Implementation>
+    <Method Name="LogEntry" Id="{ec681048-0f45-44cf-a8a2-4a913d729acd}">
+      <Declaration><![CDATA[METHOD LogEntry : STRING;
+VAR_INPUT
+	Message : STRING;
+END_VAR
+
+VAR
+	tmpString		: STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(_data) THEN
+	RETURN;
+END_IF
+
+tmpString := concat(tmpString, DT_TO_STRING(Statics.dtNow));
+tmpString := concat(tmpString, ' | ');
+tmpString := concat(tmpString, Message);
+tmpString := Concat(tmpString, '$N');
+_data.Logging:=  TO_WSTRING(tmpString);
+
+LogEntry := tmpString;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ServiceMode" Id="{261f55b5-4855-4e5b-b149-564d319f62bb}">
+      <Declaration><![CDATA[{warning 'Methodenimplementierung hinzufügen'}
+(*~
+	<docu>
+		<summary>
+		    Custom service (manual, maintenance) logic.
+			This method must be implemented in derived class.
+		</summary>			
+	</docu>	
+~*)
+METHOD PROTECTED ServiceMode
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetEmpty" Id="{8089dd44-316b-4cf0-a33a-03b3af053741}">
+      <Declaration><![CDATA[METHOD INTERNAL SetEmpty : REFERENCE TO TcaWorkpieceControl
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(_data) THEN
+	RETURN;
+END_IF
+
+SetEmpty REF= THIS^;
+
+_data.CurrentStatus := eTcaWorkpieceStatus.undefined;
+_data.InitialStatus := eTcaWorkpieceStatus.undefined;
+_data.RequestStatus := eTcaWorkpieceStatus.undefined;
+
+_data.Logging:= "";
+_data.SerialNumber := '';
+_data.TimeStampChanged := Statics.dtNow;
+_data.Error := FALSE;
+_data.Exist := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetReference" Id="{24ecb886-55d6-47c5-8540-35d8543bb599}">
+      <Declaration><![CDATA[METHOD INTERNAL SetReference : REFERENCE TO TcaWorkpieceControl
+VAR_IN_OUT
+	Data : TcaWorkpieceData;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_Data REF= Data;
+
+SetReference REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetWorkpiece" Id="{a9ce676f-d3f8-4a3c-b2e8-07af14dcb4e6}">
+      <Declaration><![CDATA[METHOD INTERNAL SetWorkpiece : REFERENCE TO TcaWorkpieceControl
+VAR
+	InitialStatus	: eTcaWorkpieceStatus;
+	RequestStatus	: eTcaWorkpieceStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(_data) THEN
+	RETURN;
+END_IF
+
+SetWorkpiece REF= THIS^;
+
+_data.CurrentStatus := InitialStatus;
+_data.InitialStatus := InitialStatus;
+_data.RequestStatus := RequestStatus;
+
+_data.Exist := TRUE;
+_data.TimeStampChanged := Statics.dtNow;
+LogEntry('New Workpiece');]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

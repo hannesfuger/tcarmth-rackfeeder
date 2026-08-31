@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Euchner_MBM_HW_IN" Id="{29913b49-c924-4099-a327-4361a1051b60}">
+    <Declaration><![CDATA[TYPE ST_Euchner_MBM_HW_IN :
+STRUCT
+	///Hardware In
+	nByte0: USINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,503 @@
+<div id="UcTrolleyCmd" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="500" data-tchmi-creator-viewport-height="500">
+<div id="UcTrolleyCmd_UcPalletCmd" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-target-user-control="Pages/Stations/_Specific/UcPalletCmd.usercontrol" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-visibility="Collapsed" data-tchmi-bshowclosebutton="True" data-tchmi-stcmdwp="%pp%stCmdTr::PlCmd%/pp%" data-tchmi-zindex="3" data-tchmi-stwp="%pp%stTr::Pallets[0][0]%/pp%" data-tchmi-sinfo="Paletten" data-tchmi-stcmdpl="%pp%stCmdTr::PlCmd%/pp%" data-tchmi-stpl="%pp%stTr::Pallets[0][0]%/pp%" data-tchmi-palleteditorvisible="Collapsed">
+
+
+</div>
+<div id="UcTrolleyCmd_TcHmiContainer" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-visibility="Visible">
+<div id="UcTrolleyCmd_TcHmiRectangle" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiRectangle" data-tchmi-height="80" data-tchmi-height-unit="px" data-tchmi-left="10" data-tchmi-left-unit="px" data-tchmi-top="10" data-tchmi-top-unit="px" data-tchmi-width="80" data-tchmi-width-unit="px" data-tchmi-fill-color="%f%TcHmi.Functions.Pxxx_Name_HMI.F_TrolleytStateToColor(%pp%stTr%/pp%)%/f%">
+
+
+
+
+</div>
+<div id="UcTrolleyCmd_TcHmiSpinboxInput_X" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="40" data-tchmi-height-unit="px" data-tchmi-left="115" data-tchmi-left-unit="px" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="10" data-tchmi-top-unit="px" data-tchmi-width="70" data-tchmi-width-unit="px" data-tchmi-min-value="0" data-tchmi-max-value="6" data-tchmi-value="%pp%stCmdTr::PlIdxX|BindingMode=TwoWay%/pp%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="UcTrolleyCmd_TcHmiSpinboxInput_Y" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="40" data-tchmi-height-unit="px" data-tchmi-left="115" data-tchmi-left-unit="px" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="50" data-tchmi-top-unit="px" data-tchmi-width="70" data-tchmi-width-unit="px" data-tchmi-min-value="0" data-tchmi-max-value="8" data-tchmi-value="%pp%stCmdTr::PlIdxY|BindingMode=TwoWay%/pp%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="UcTrolleyCmd_TcHmiTextblock_X" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="40" data-tchmi-height-unit="px" data-tchmi-left="100" data-tchmi-left-unit="px" data-tchmi-text="X" data-tchmi-top="10" data-tchmi-top-unit="px" data-tchmi-width="15" data-tchmi-width-unit="px" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="UcTrolleyCmd_TcHmiTextblock_Y" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="40" data-tchmi-height-unit="px" data-tchmi-left="100" data-tchmi-left-unit="px" data-tchmi-text="Y" data-tchmi-top="50" data-tchmi-top-unit="px" data-tchmi-width="15" data-tchmi-width-unit="px" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="UcTrolleyCmd_TcHmiButton_PL_Edit" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="80" data-tchmi-height-unit="px" data-tchmi-left="195" data-tchmi-left-unit="px" data-tchmi-text="Palette
+. . ." data-tchmi-top="10" data-tchmi-top-unit="px" data-tchmi-width="80" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%UcTrolleyCmd_UcPalletCmd::PalletEditorVisible%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Visible"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%UcTrolleyCmd_UcPalletCmd::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Visible"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%UcTrolleyCmd_TcHmiContainer::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Collapsed"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.Pxxx_Name_HMI.F_PalletSelect",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:server#/definitions/ADS-PLC1.ST_St010_HMI_IN_OUT",
+            "symbolExpression": "%pp%stCmdTr%/pp%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%ctrl%UcTrolleyCmd::id%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%ctrl%UcTrolleyCmd_UcPalletCmd::id%/ctrl%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="UcTrolleyCmd_TcHmiGrid" data-tchmi-type="TcHmi.Controls.System.TcHmiGrid" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%">
+<script data-tchmi-target-attribute="data-tchmi-column-options" type="application/json">
+[
+  {
+    "maxWidthUnit": "px",
+    "minWidthUnit": "px",
+    "overflow": false,
+    "width": 0.5,
+    "widthMode": "Value",
+    "widthUnit": "factor"
+  },
+  {
+    "maxWidthUnit": "px",
+    "minWidthUnit": "px",
+    "overflow": false,
+    "width": 0.5,
+    "widthMode": "Value",
+    "widthUnit": "factor"
+  }
+]
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-row-options" type="application/json">
+[
+  {
+    "height": 0.14,
+    "heightMode": "Value",
+    "heightUnit": "factor",
+    "maxHeightUnit": "px",
+    "minHeightUnit": "px",
+    "overflow": false
+  },
+  {
+    "height": 0.14,
+    "heightMode": "Value",
+    "heightUnit": "factor",
+    "maxHeightUnit": "px",
+    "minHeightUnit": "px",
+    "overflow": false
+  },
+  {
+    "height": 0.14,
+    "heightMode": "Value",
+    "heightUnit": "factor",
+    "maxHeightUnit": "px",
+    "minHeightUnit": "px",
+    "overflow": false
+  },
+  {
+    "height": 0.14,
+    "heightMode": "Value",
+    "heightUnit": "factor",
+    "maxHeightUnit": "px",
+    "minHeightUnit": "px",
+    "overflow": false
+  },
+  {
+    "height": 0.14,
+    "heightMode": "Value",
+    "heightUnit": "factor",
+    "maxHeightUnit": "px",
+    "minHeightUnit": "px",
+    "overflow": false
+  },
+  {
+    "height": 0.14,
+    "heightMode": "Value",
+    "heightUnit": "factor",
+    "maxHeightUnit": "px",
+    "minHeightUnit": "px",
+    "overflow": false
+  },
+  {
+    "height": 0.14,
+    "heightMode": "Value",
+    "heightUnit": "factor",
+    "maxHeightUnit": "px",
+    "minHeightUnit": "px",
+    "overflow": false
+  }
+]
+</script>
+<div id="UcTrolleyCmd_TcHmiTextblock_Exists" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-text="Wagen vorhanden" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center">
+</div>
+<div id="UcTrolleyCmd_TcHmiCheckbox_Exists" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCheckbox" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="0" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="5" data-tchmi-left-unit="%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-is-read-only="True" data-tchmi-is-enabled="True" data-tchmi-state-symbol="%pp%stTr::TrolleyExists%/pp%">
+</div>
+<div id="UcTrolleyCmd_TcHmiTextblock_PalletExists" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-text="Paletten vorhanden" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="1">
+</div>
+<div id="UcTrolleyCmd_TcHmiTextblock_PartExists" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-text="Teile vorhanden" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="2">
+</div>
+<div id="UcTrolleyCmd_TcHmiTextblock_Tag" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-text="Tag" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="5">
+</div>
+<div id="UcTrolleyCmd_TcHmiTextblock_TsChanged" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-text="letzte Änderung" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="6">
+</div>
+<div data-tchmi-grid-column-index="1" id="UcTrolleyCmd_TcHmiTextblock_TagValue" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="5" data-tchmi-text="%pp%stTr::Tag%/pp%">
+</div>
+
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-cell-options" type="application/json">
+[
+  {
+    "backgroundImageHeightUnit": "px",
+    "backgroundImageHorizontalAlignment": "Center",
+    "backgroundImageVerticalAlignment": "Center",
+    "backgroundImageWidthUnit": "px",
+    "borderStyle": {
+      "left": "Solid",
+      "right": "Solid",
+      "top": "Solid",
+      "bottom": "Solid"
+    },
+    "borderWidth": {
+      "left": 1,
+      "right": 1,
+      "top": 1,
+      "bottom": 1,
+      "leftUnit": "px",
+      "rightUnit": "px",
+      "topUnit": "px",
+      "bottomUnit": "px"
+    }
+  }
+]
+</script>
+<div data-tchmi-grid-column-index="1" id="UcTrolleyCmd_TcHmiTextblock_TsChangedValue_" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="6" data-tchmi-text="%pp%stTr::TsChanged%/pp%">
+</div>
+<div id="UcTrolleyCmd_TcHmiButton_Exists_Edit" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="0" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="30" data-tchmi-left-unit="%" data-tchmi-text="%f%%pp%stTr::TrolleyExists%/pp% ? 'Reset!' : 'Set!'%/f%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="65" data-tchmi-width-unit="%" data-tchmi-word-wrap="True">
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "Condition",
+        "active": true,
+        "parts": [
+          {
+            "if": [
+              {
+                "compare1": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "symbolExpression": "%pp%stTr::TrolleyExists%/pp%"
+                },
+                "compare2": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "value": true
+                },
+                "compareOperator": "==",
+                "logic": null
+              }
+            ],
+            "then": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%pp%stCmdTr::Command%/pp%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:server#/definitions/ADS-PLC1.E_HMI_TR_CMD",
+                  "value": 2
+                },
+                "asyncWait": true
+              }
+            ]
+          },
+          {
+            "else": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%pp%stCmdTr::Command%/pp%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:server#/definitions/ADS-PLC1.E_HMI_TR_CMD",
+                  "value": 1
+                },
+                "asyncWait": true
+              }
+            ]
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="UcTrolleyCmd_TcHmiCheckbox_PalletExists" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCheckbox" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="1" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="5" data-tchmi-left-unit="%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-is-read-only="True" data-tchmi-is-enabled="True" data-tchmi-state-symbol="%pp%stTr::PalletExists%/pp%">
+</div>
+<div id="UcTrolleyCmd_TcHmiCheckbox_PartExists" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCheckbox" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="2" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="5" data-tchmi-left-unit="%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-is-read-only="True" data-tchmi-is-enabled="True" data-tchmi-state-symbol="%pp%stTr::PartExists%/pp%">
+</div>
+<div data-tchmi-grid-column-index="0" id="UcTrolleyCmd_TcHmiTextblock_HasEmptySlot" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-text="Leer-Slot vorhanden" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="3">
+</div>
+<div data-tchmi-grid-column-index="0" id="UcTrolleyCmd_TcHmiTextblock_HasEmptyPallet" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-text="Leer-Paletten vorhanden" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-grid-row-index="4">
+</div>
+<div id="UcTrolleyCmd_TcHmiCheckbox_HasEmptySlot" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCheckbox" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="3" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="40" data-tchmi-left-unit="%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-is-read-only="True" data-tchmi-is-enabled="True" data-tchmi-state-symbol="%pp%stTr::HasEmptySlot%/pp%">
+</div>
+<div id="UcTrolleyCmd_TcHmiCheckbox_HasEmptyPallet" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCheckbox" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="4" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="40.0" data-tchmi-left-unit="%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-is-read-only="True" data-tchmi-is-enabled="True" data-tchmi-state-symbol="%pp%stTr::HasEmptyPallet%/pp%">
+</div>
+<div id="UcTrolleyCmd_TcHmiButton_PalletExists_Edit" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="1" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="30" data-tchmi-left-unit="%" data-tchmi-text="%f%%pp%stTr::PalletExists%/pp% ? 'Set empty!' : 'Set full!'%/f%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="65" data-tchmi-width-unit="%" data-tchmi-word-wrap="True">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "Condition",
+        "active": true,
+        "parts": [
+          {
+            "if": [
+              {
+                "compare1": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "symbolExpression": "%pp%stTr::PalletExists%/pp%"
+                },
+                "compare2": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "value": true
+                },
+                "compareOperator": "==",
+                "logic": null
+              }
+            ],
+            "then": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%pp%stCmdTr::Command%/pp%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:server#/definitions/ADS-PLC1.E_HMI_TR_CMD",
+                  "value": 4
+                },
+                "asyncWait": true
+              }
+            ]
+          },
+          {
+            "else": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%pp%stCmdTr::Command%/pp%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:server#/definitions/ADS-PLC1.E_HMI_TR_CMD",
+                  "value": 3
+                },
+                "asyncWait": true
+              }
+            ]
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+<div id="UcTrolleyCmd_TcHmiButton_PartExists_Edit" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-grid-column-index="1" data-tchmi-grid-row-index="2" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="30" data-tchmi-left-unit="%" data-tchmi-text="%f%%pp%stTr::PartExists%/pp% ? 'Set empty!' : 'Set full!'%/f%" data-tchmi-top="10" data-tchmi-top-unit="%" data-tchmi-width="65" data-tchmi-width-unit="%" data-tchmi-word-wrap="True">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "Condition",
+        "active": true,
+        "parts": [
+          {
+            "if": [
+              {
+                "compare1": {
+                  "objectType": "Symbol",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "symbolExpression": "%pp%stTr::PartExists%/pp%"
+                },
+                "compare2": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:general#/definitions/BOOL",
+                  "value": true
+                },
+                "compareOperator": "==",
+                "logic": null
+              }
+            ],
+            "then": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%pp%stCmdTr::Command%/pp%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:server#/definitions/ADS-PLC1.E_HMI_TR_CMD",
+                  "value": 6
+                },
+                "asyncWait": true
+              }
+            ]
+          },
+          {
+            "else": [
+              {
+                "objectType": "WriteToSymbol",
+                "active": true,
+                "symbolExpression": "%pp%stCmdTr::Command%/pp%",
+                "value": {
+                  "objectType": "StaticValue",
+                  "valueType": "tchmi:server#/definitions/ADS-PLC1.E_HMI_TR_CMD",
+                  "value": 5
+                },
+                "asyncWait": true
+              }
+            ]
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+</div>
+
+
+</div>
+
+
+
+
+<div id="UcTrolleyCmd_TcHmiButton_Collapse" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="90" data-tchmi-left-unit="%" data-tchmi-text="x" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="10" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-zindex="5" data-tchmi-visibility="%ctrl%UcTrolleyCmd_UcPalletCmd::PalletEditorVisible%/ctrl%">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%UcTrolleyCmd_UcPalletCmd::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Collapsed"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%UcTrolleyCmd_UcPalletCmd::PalletEditorVisible%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Collapsed"
+        },
+        "asyncWait": true
+      },
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%UcTrolleyCmd_TcHmiContainer::Visibility%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/Visibility",
+          "value": "Visible"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+</div>
+
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+{
+  "color": "rgba(233, 250, 251, 1)"
+}
+</script>
+</div>

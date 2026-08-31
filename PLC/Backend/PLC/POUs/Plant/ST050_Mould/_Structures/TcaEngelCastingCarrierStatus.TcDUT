@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaEngelCastingCarrierStatus" Id="{eddc10cb-4c9b-40a6-8dbf-f5733c4dea1e}">
+    <Declaration><![CDATA[TYPE TcaEngelCastingCarrierStatus :
+STRUCT
+	CarrierId : UINT ; // ID vom Werkstückträger, Geometrischen Daten werden auf der Engel Steuerung verwaltet
+	CountMax : UINT ; // maximale Anzahl an Werkstücken die am Werkstückträger abgelegt werden können
+	CountUnfinished : UINT ; // Anzahl der nicht gegossenen Rohlinge am Werkstückträger
+	CountFinished : UINT ; // Anzahl der fertigen Werkstücke am Werkstückträger
+	CountEmpty : UINT ; // Anzahl der leeren Plätze am Werkstückträger
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_BASE_IN" Id="{08d62962-14b6-460e-afa8-d5255366f559}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_IN :
+STRUCT
+	stMain 			: ST_HMI_BASE_CONTROL_IN;
+	arrStModule		: ARRAY[0..E_Module.eModule_nMaxIdx] OF ST_HMI_BASE_Module_IN;
+	arrStStation	: ARRAY[0..E_Station.eStation_nMaxIdx] OF ST_HMI_BASE_STATION_IN;
+	
+	stRecipe 		: ST_HMI_RECIPE_IN;
+	stSettings 		: ST_HMI_CONTROL_SETTING_IN;
+	stSafety		: ST_HMI_SAFETY_IN;
+	stSpecial		: ST_HMI_BASE_SPECIAL_IN;
+	stUserMgmt		: ST_HMI_USER_MGMT_IN;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

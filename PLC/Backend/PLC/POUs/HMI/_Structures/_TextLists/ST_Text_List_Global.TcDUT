@@ -1,0 +1,1489 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Text_List_Global" Id="{ffa24edf-ba6e-4a7f-bc06-f5d64b1cc907}">
+    <Declaration><![CDATA[TYPE ST_Text_List_Global :
+STRUCT
+	stText_System				: ST_Text_List_System; //System Texte
+	stText_Empty				: ST_Text;
+	
+	//----------------------------------------------------------------------------------------------------
+	//language	
+	stText_EN				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "l_english",
+									wsName:= "English");
+
+	stText_DE				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "l_german",
+									wsName:= "Deutsch");
+
+	stText_BE				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "l_belarusisch",
+									wsName:= "Belarusisch");	
+									
+	stText_Null				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "",
+									wsName:= "");									
+									
+	//----------------------------------------------------------------------------------------------------
+	//Stepchains
+	
+	stText_Stepchain01				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain01",
+									wsName:= "step chain 01");
+	
+	stText_Stepchain02				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain02",
+									wsName:= "step chain 02");
+	
+	stText_Stepchain03				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain03",
+									wsName:= "step chain 03");
+									
+	stText_Stepchain04				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain04",
+									wsName:= "step chain 04");
+									
+	stText_Stepchain05				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain05",
+									wsName:= "step chain 05");
+									
+	stText_Stepchain06				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain06",
+									wsName:= "step chain 06");
+	
+	stText_Stepchain07				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain07",
+									wsName:= "step chain 07");
+					
+	stText_Stepchain08				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain08",
+									wsName:= "step chain 08");
+									
+	stText_Stepchain09				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain09",
+									wsName:= "step chain 09");
+									
+	stText_Stepchain10				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stepchain10",
+									wsName:= "step chain 10");
+									
+	//----------------------------------------------------------------------------------------------------
+	//user level
+	stText_UserLevel00				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevel00",
+									wsName:= "kein Benutzer");
+									
+	stText_UserLevel01				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevel01",
+									wsName:= "Bediener");
+									
+	stText_UserLevel02				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevel02",
+									wsName:= "Einsteller");
+
+	stText_UserLevel03				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevel03",
+									wsName:= "Instandhalter");
+
+	stText_UserLevel04				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevel04",
+									wsName:= "Reserve");
+
+	stText_UserLevel05				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevel05",
+									wsName:= "Administrator");
+									
+	stText_UserLevel06				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevel06",
+									wsName:= "Programmer");	
+
+	//----------------------------------------------------------------------------------------------------
+	//counter
+	stText_Counter_Reaction_None	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "none",
+									wsName:= "keine");
+
+	stText_Counter_Reaction_Info	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "info",
+									wsName:= "Info");
+
+	stText_Counter_Reaction_Warning	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "warning",
+									wsName:= "Warnung");
+									
+	stText_Counter_Reaction_Error	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "error",
+									wsName:= "Fehler");									
+
+	stText_Counter_Reaction_SerialError_Warning	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "serialerrorwarning",
+									wsName:= "Serienfehler Warnung");
+									
+	stText_Counter_Reaction_SerialError_Warning_Stop	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "serialerrorstop",
+									wsName:= "Serienfehler Stop");															
+									
+	//----------------------------------------------------------------------------------------------------
+	//units
+	stText_notextempty			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "",
+									wsName:= "");	
+	
+	stText_notext				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "notext",
+									wsName:= "notext");	
+									
+	stText_text					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "text",
+									wsName:= "text");	
+
+	stText_name					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "name",
+									wsName:= "name");									
+	
+	stText_percent				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "%",
+									wsName:= "%");								
+									
+	stText_n					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "n",
+									wsName:= "n");	
+
+	stText_bool					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "bool",
+									wsName:= "bool");
+									
+	stText_m					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "m",
+									wsName:= "m");
+	
+	stText_mm					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "mm",
+									wsName:= "mm");
+										
+	stText_cm					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "cm",
+									wsName:= "cm");
+									
+	stText_um					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "µm",
+									wsName:= "µm");
+
+	stText_Celsius_C			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "C°",
+									wsName:= "C°");
+
+	stText_time_ms				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "time_ms",
+									wsName:= "ms");
+									
+	stText_time_s				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "time_s",
+									wsName:= "s");
+
+	stText_time_m				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "time_min",
+									wsName:= "Min");
+
+	stText_time_h				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "time_hour",
+									wsName:= "Std");
+									
+	stText_time_day				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "time_day",
+									wsName:= "day");
+									
+	stText_time_week				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "time_week",
+									wsName:= "week");
+									
+	stText_time_year				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "time_year",
+									wsName:= "year");
+
+	stText_mms						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "velo_mms",
+									wsName:= "mm/s");
+
+	stText_mmpmin					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "velo_mm_min",
+									wsName:= "mm/min");									
+									
+	stText_mmin						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "velo_mmin",
+									wsName:= "m/min");
+									
+	stText_mps						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "velo_ms",
+									wsName:= "m/s");
+									
+	stText_degree					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "pos_grad",
+									wsName:= "°");
+									
+	stText_degreeCelsius			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "temp_gradC",
+									wsName:= "°C");
+									
+	stText_degreeS					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "velo_grads",
+									wsName:= "°/sec");	
+									
+	stText_degreeMin				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "velo_gradmin",
+									wsName:= "°/min");
+									
+	stText_gramm					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "gramm",
+									wsName:= "g");
+									
+	stText_kgramm					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "kilogramm",
+									wsName:= "kg");
+									
+	stText_umin						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "roundspermin",
+									wsName:= "U/min");
+									
+	stText_Hz						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "frequncy",
+									wsName:= "Hz");
+									
+	stText_us						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "roundspersec",
+									wsName:= "U/s");
+									
+	stText_Nm						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Nm",
+									wsName:= "Nm");	
+	
+	stText_Watt						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Watt",
+									wsName:= "W");	
+									
+	stText_Joule					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Joule",
+									wsName:= "J");	
+									
+	stText_Drehzahl					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "rotSpeed",
+									wsName:= "Drehzahl");
+									
+	stText_PlantSpeed				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "plantspeed",
+									wsName:= "Anlage Geschwindigkeit");	
+
+	stText_PlantSpeedOverride		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "plantspeedoverride",
+									wsName:= "Anlage Geschwindigkeit Override");
+
+	stText_Ok						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "ok",
+									wsName:= "Io");
+
+	stText_Nok						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "nok",
+									wsName:= "Nio");
+
+	stText_Yes						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "yes",
+									wsName:= "yes");
+
+	stText_No						: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "no",
+									wsName:= "no");	
+
+	stText_Tested					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "tested",
+									wsName:= "tested");
+
+	stText_NotTested					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "nottested",
+									wsName:= "not tested");
+									
+									
+	stText_Settings					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "settings",
+									wsName:= "Settings");
+									
+//----------------------------------------------------------------------------------------------------
+//general FBs (EC, ...)
+
+	stText_UnknownError			: ST_Text := (
+										wsNameId:= "unknownerror",
+										wsName:= "Unbekannter Fehler");
+
+	stText_CheckboundError			: ST_Text := (
+										wsNameId:= "checkbounderror",
+										wsName:= "Checkbound error");
+											
+	stText_EcGetSlaveIdentityErr	: ST_Text := (
+										wsNameId:= "ecgetslaveidentityerror",
+										wsName:= "Fehler bei Slave-Identifizierung");
+									
+	stText_EcGetSlaveNameErr		: ST_Text := (
+										wsNameId:= "ecgetslavenameerror",
+										wsName:= "Fehler bei Slave-Namenbestimmung");
+									
+	stText_EcGetAllSlaveAddrErr		: ST_Text := (
+										wsNameId:= "ecgetallslaveaddrerror",
+										wsName:= "Fehler bei Slave-Adressbestimmung");
+									
+	stText_EcCoeSdoReadErr			: ST_Text := (
+										wsNameId:= "eccoesdoreaderror",
+										wsName:= "Fehler beim Lesen EC COE SDO");
+										
+	stText_EcCoeHistoryDiag			: ST_Text := (
+										wsNameId:= "eccoehistorydiagerror",
+										wsName:= "Fehler beim Lesen EC COE Historie");
+										
+	stText_JobNotSupported			: ST_Text := (
+										wsNameId:= "stText_JobNotSupported",
+										wsName:= "Job nicht unterstützt");
+										
+	stText_TimeoutHandshake			: ST_Text := (
+										wsNameId:= "stText_TimeoutHandshake",
+										wsName:= "Timeout Handshake");
+			
+	stText_TimeoutCarrier			: ST_Text := (
+										wsNameId:= "stText_TimeoutCarrier",
+										wsName:= "Timeout WT");
+										
+	stText_TimeoutCncMachining		: ST_Text := (
+										wsNameId:= "stText_TimeoutCncMachining",
+										wsName:= "Timeout CNC Bearbeitung");
+										
+	stText_FixingCylinderNotHP			: ST_Text := (
+										wsNameId:= "stText_FixingCylinderNotHP",
+										wsName:= "Fixierzylinder nicht in GRST (HP)");
+										
+	stText_FixingCylinderNotWP			: ST_Text := (
+										wsNameId:= "stText_FixingCylinderNotWP",
+										wsName:= "Fixierzylinder nicht in AP");
+										
+	stText_GripperCylinderNotWP		: ST_Text := (
+										wsNameId:= "stText_GripperCylinderNotWP",
+										wsName:= "Greiferzylinder nicht in AP");
+										
+	stText_TimeoutReadRFID			: ST_Text := (
+										wsNameId:= "stText_TimeoutReadRFID",
+										wsName:= "Timeout RFID Lesekopf");
+										
+	stText_CarrierEmptyRfid			: ST_Text := (
+										wsNameId:= "stText_CarrierEmptyRfid",
+										wsName:= "WT RFID ist leer");
+										
+	stText_UnexpectedCarrier		: ST_Text := (
+										wsNameId:= "stText_UnexpectedCarrier",
+										wsName:= "Unerwarteter WT in Station");
+										
+	stText_CarrierBufferFull		: ST_Text := (
+										wsNameId:= "stText_CarrierBufferFull",
+										wsName:= "WT Buffer ist voll");
+										
+	stText_TrayBufferFull			: ST_Text := (
+										wsNameId:= "stText_TrayBufferFull",
+										wsName:= "Tray Puffer ist voll");
+										
+	stText_CarrierNotFound			: ST_Text := (
+										wsNameId:= "stText_CarrierNotFound",
+										wsName:= "WT nicht gefunden");
+										
+	stText_CarrierSuspect			: ST_Text := (
+										wsNameId:= "stText_CarrierSuspect",
+										wsName:= "WT unbekannt");
+										
+	stText_WrongPartStateNest1		: ST_Text := (
+										wsNameId:= "stText_WrongPartStateNest1",
+										wsName:= "Ungültiger Teilestatus in Nest 1");
+										
+	stText_MissingPartNest1			: ST_Text := (
+										wsNameId:= "stText_MissingPartNest1",
+										wsName:= "Fehlender Teil in Nest 1");
+										
+	stText_UnexpectedPartNest1		: ST_Text := (
+										wsNameId:= "stText_UnexpectedPartNest1",
+										wsName:= "Unerwarteter Teil in Nest 1");
+										
+	stText_WrongPartStateNest2		: ST_Text := (
+										wsNameId:= "stText_WrongPartStateNest2",
+										wsName:= "Ungültiger Teilestatus in Nest 2");
+										
+	stText_MissingPartNest2			: ST_Text := (
+										wsNameId:= "stText_MissingPartNest2",
+										wsName:= "Fehlender Teil in Nest 2");
+										
+	stText_UnexpectedPartNest2		: ST_Text := (
+										wsNameId:= "stText_UnexpectedPartNest2",
+										wsName:= "Unerwarteter Teil in Nest 2");
+										
+	stText_CrashDetection			: ST_Text := (
+										wsNameId:= "stText_CrashDetection",
+										wsName:= "Crash Sensor ausgelöst");
+										
+	stText_WrongPartStateRawPartEmco	: ST_Text := (
+										wsNameId:= "stText_WrongPartStateRawPartEmco",
+										wsName:= "Ungültiger Teilestatus Rohteil in EMCO");
+
+	stText_WrongPartStateFinishPartEmco	: ST_Text := (
+										wsNameId:= "stText_WrongPartStateFinishPartEmco",
+										wsName:= "Ungültiger Teilestatus Fertigteil in EMCO");
+									
+//----------------------------------------------------------------------------------------------------
+//objects
+											
+	stText_ObjectTypeAxis			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "objecttypeaxis",
+									wsName:= "objecttypeaxis");
+									
+	stText_ObjectTypeCylinder		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "objecttypecylinder",
+									wsName:= "objecttypecylinder");	
+									
+	stText_ObjectTypeDrive		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "objecttypedrive",
+									wsName:= "objecttypedrive");									
+
+	stText_ObjectTypeDevice		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "objecttypedevice",
+									wsName:= "objecttypedevice");
+
+	//----------------------------------------------------------------------------------------------------
+	//control
+	stText_On		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "on",
+									wsName:= "on");	
+									
+	stText_Off		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "off",
+									wsName:= "off");	
+	stText_GoTo		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "goto",
+									wsName:= "go to");	
+									
+	stText_JogPos		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jogpos",
+									wsName:= "jog pos");
+
+	stText_JogNeg		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jogneg",
+									wsName:= "jog neg");
+	
+	stText_Gear			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "gear",
+									wsName:= "gear");
+									
+	stText_RefReset		: ST_Text :=  (
+									nNameId:= 1,
+									wsNameId:= "refreset",
+									wsName:= "refreset");									
+									
+	stText_Brake		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "brake",
+									wsName:= "brake");	
+
+	stText_SetPos		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "setpos",
+									wsName:= "setpos");								
+
+	stText_Abspositioning		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "abspositioning",
+									wsName:= "abs positioning");
+									
+	stText_Jogpermanent		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jogpermanent",
+									wsName:= "jog permanent");
+
+	stText_Jog_0_001	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jog0_001",
+									wsName:= "jog 0.001");
+
+	stText_Jog_0_01	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jog0_01",
+									wsName:= "jog 0.01");
+
+	stText_Jog_0_1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jog0_1",
+									wsName:= "jog 0.1");
+
+	stText_Jog_1_0	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jog1_0",
+									wsName:= "jog 1.0");
+
+	stText_Jog_10_0	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "jog10_0",
+									wsName:= "jog 10.0");
+									
+	stText_Mode_StartStop	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modestartstop",
+									wsName:= "mode start stop");
+
+	stText_Mode_Jog	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modejog",
+									wsName:= "mode jog");									
+											
+	stText_Positive		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "positive",
+									wsName:= "positive");								
+
+	stText_Negative		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "negative",
+									wsName:= "negative");	
+
+	stText_Hp		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "hp",
+									wsName:= "hp");
+
+	stText_Mp		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "mp",
+									wsName:= "mp");									
+
+	stText_Wp		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "wp",
+									wsName:= "wp");	
+
+	stText_emptymodeactive	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emptymodeactive",
+									wsName:= "emptymodeactive");	
+
+	stText_logout		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "logout",
+									wsName:= "logout");	
+									
+	stText_login		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "login",
+									wsName:= "login");	
+									
+	stText_submit		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "submit",
+									wsName:= "submit");
+									
+	stText_password		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "password",
+									wsName:= "password");	
+									
+	stText_UserLevel_None		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevelnone",
+									wsName:= "none");
+
+	stText_UserLevel_Programmer	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevelprogrammer",
+									wsName:= "programmer");									
+									
+	stText_UserLevel_Admin	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userleveladmin",
+									wsName:= "admin");	
+
+	stText_UserLevel_Maintenance	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevelmaintenance",
+									wsName:= "maintenance");	
+
+	stText_UserLevel_Manager	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userlevelmanager",
+									wsName:= "manager");	
+
+	stText_UserLevel_Operator	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userleveloperator",
+									wsName:= "operator");								
+	//----------------------------------------------------------------------------------------------------
+	//Notification Groups
+	stText_NG_System				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "System_Messages",
+									wsName:= "System Messages");
+									
+	stText_NG_Hardware				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Hardware_Messages",
+									wsName:= "Hardware Messages");
+									
+	stText_NG_Safety				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Safety_Notifications",
+									wsName:= "Safety Notifications");
+									
+	stText_NG_Counter				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Counter_Notifications",
+									wsName:= "Counter Notifications");									
+									
+									
+	stText_NG_Modul001			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Modul001_Messages",
+									wsName:= "Modul001 Messages");	
+
+	stText_NG_Modul002			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Modul002_Messages",
+									wsName:= "Modul002 Messages");
+
+	stText_NG_Modul003			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Modul003_Messages",
+									wsName:= "Modul003 Messages");
+
+	stText_NG_Modul004			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Modul004_Messages",
+									wsName:= "Modul004 Messages");								
+
+	stText_NG_Stations				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Stations_Messages",
+									wsName:= "Stations Messages");
+									
+	//----------------------------------------------------------------------------------------------------
+	// Safety Messages
+	stText_Safety					: ST_Text_List_Safety;
+	//----------------------------------------------------------------------------------------------------
+	//Order	
+	stText_Order			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "order",
+									wsName:= "Auftrang");	
+									
+	stText_OrderNumber			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "ordernumber",
+									wsName:= "Auftrangsnummer");
+
+	//----------------------------------------------------------------------------------------------------
+	//Recipe
+	stText_Recipe_Mode_None		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "recipemode_none",
+									wsName:= "kein Rezept");
+
+	stText_Recipe_Mode_ToFrom	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "recipemode_tofrom",
+									wsName:= "Rezept <->");
+							
+	stText_000_Recipe			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "000_recipe",
+									wsName:= "000_recipe");										
+									
+	stText_Recipe				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "[recipe]",
+									wsName:= "[recipe]");	
+	stText_RecipeName			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "recipename",
+									wsName:= "Recipename");									
+
+	stText_RecipeComment		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "RecipeComment",
+									wsName:= "Comment");	
+
+	stText_Recipe_SaveError		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Recipe_SaveError",
+									wsName:= "Error saving recipe");	
+
+	stText_Recipe_LoadError		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Recipe_LoadError",
+									wsName:= "Error loading recipe");	
+
+	stText_Recipe_ListError		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Recipe_ListError",
+									wsName:= "Error list recipes");	
+
+	stText_Recipe_CopyError		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Recipe_CopyError",
+									wsName:= "Error copy recipe");	
+									
+	stText_Recipe_Loaded		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Recipe_Loaded",
+									wsName:= "Recipe loaded");	
+		
+	//----------------------------------------------------------------------------------------------------
+	//general	
+	stText_None			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "none",
+									wsName:= "none");
+						
+	stText_Supervision			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Supervision",
+									wsName:= "Supervision");
+
+	stText_Info			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "info",
+									wsName:= "info");
+			
+	stText_Warning			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "warning",
+									wsName:= "warning");
+
+	stText_Error			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "error",
+									wsName:= "error");						
+						
+	stText_Automatic		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "automatic",
+									wsName:= "automatic");	
+									
+	stText_Setup			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "setup",
+									wsName:= "setup");								
+									
+	stText_Auto				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "auto",
+									wsName:= "auto");
+
+	stText_Manual			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "manual",
+									wsName:= "manual");
+
+	stText_Step				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "step",
+									wsName:= "step");					
+
+	stText_DeactivateModule	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "deactivatemodule",
+									wsName:= "deactivatemodule");
+	
+	stText_DeactivateStation	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "deactivatestation",
+									wsName:= "deactivatestation");
+
+	stText_AutoHome				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "autohome",
+									wsName:= "auto home");	
+
+	stText_PartReleaseInCaseOfHp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "partreleaseincaseofhp",
+									wsName:= "part release in case of hp");									
+
+	stText_CounterLimitNok		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "counter limit nok",
+									wsName:= "counter limit nok");	
+									
+	stText_Save					: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "save",
+									wsName:= "save");
+									
+	stText_Autoreset				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "autoreset",
+									wsName:= "autoreset");
+	
+	stText_Userreset				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "userreset",
+									wsName:= "userreset");
+
+	//----------------------------------------------------------------------------------------------------	
+						
+	//----------------------------------------------------------------------------------------------------
+	
+	stText_PlantName				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "plantname",
+									wsName:= "plant name");
+	
+	stText_PlantNumber				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "plantnumber",
+									wsName:= "plant number");
+
+	stText_Plant_Absaugung_WachdogOn : ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "anlageM3absaugungwachdogein",
+									wsName:= "Anlage M3 Absaugung Wachdog ein");
+								
+	stText_Plant_Absaugung_WachdogOff : ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "anlageM3absaugungwachdogaus",
+									wsName:= "Anlage M3 Absaugung Wachdog aus");
+
+	stText_Plant_Absaugung_Nachlauf : ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "anlageM3absaugungnachlauf",
+									wsName:= "Anlage M3 Absaugung Nachlauf");									
+									
+
+	stText_product		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "product",
+									wsName:= "product");
+									
+	stText_productnumber		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "product_number",
+									wsName:= "product number");
+
+	stText_production	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "production",
+									wsName:= "production");
+									
+	stText_general			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "general",
+									wsName:= "general");	
+
+	stText_Z_Reserve			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Z-Reserve",
+									wsName:= "Z-Reserve");
+
+	//----------------------------------------------------------------------------------------------------
+	// HW Messages
+	stText_EtherCatMaster_Error	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "EtherCAT_Master_Error",
+									wsName:= "EtherCAT Master Error");	
+
+	stText_EtherCatBox_Error	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "EtherCAT_Box_Error",
+									wsName:= "EtherCAT Box Error");	
+	stText_EtherCatBox_OP_Error	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "EtherCAT_Box_OP_Error",
+									wsName:= "EtherCAT Box OP-State Error");	
+
+	stText_EtherCatSlave_Error	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "EtherCAT_Slave_Error",
+									wsName:= "EtherCAT Salve Error");	
+
+	stText_Profinet_Error		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Profinet_Error",
+									wsName:= "Profinet Error");	
+									
+	stText_NetGuard_Warn		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "NetGuard_Error",
+									wsName:= "NetGuard Error");	
+	stText_NetGuard_Error		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "NetGuard_Error",
+									wsName:= "NetGuard Error");	
+
+	stText_Cabinet_Warn			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Cabinet_Warn",
+									wsName:= "Cabinet Warning");	
+	stText_Cabinet_Error		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Cabinet_Error",
+									wsName:= "Cabinet Error");	
+	stText_Cabinet_Info		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "Cabinet_Info",
+									wsName:= "Cabinet Info");
+							
+	//----------------------------------------------------------------------------------------------------
+	// Component messages
+	stText_Comp					: ST_Text_List_Components;
+	
+	//----------------------------------------------------------------------------------------------------
+	//generel plant
+	stText_Drehwerkzeug			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "drehwerkzeug",
+									wsName:= "Drehwerkzeug");
+	
+	stText_Kontaktwerkzeug1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "kontaktwerkzeuglinks",
+									wsName:= "Kontaktwerkzeug links");
+									
+	stText_Kontaktwerkzeug2		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "kontaktwerkzeuglinks",
+									wsName:= "Kontaktwerkzeug rechts");	
+
+	stText_SchweisseinsatzAmboss		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "schweisseinsatzAmboss",
+									wsName:= "Schweisseinsatz Amboss");
+	stText_SchweisseinsatzEinsatz		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "schweisseinsatzEinsatz",
+									wsName:= "Schweisseinsatz Einsatz");									
+
+	stText_GreiferDatenReset	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "GripperDataReset",
+									wsName:= "Greifer Daten Löschen");
+									
+	stText_SetPosGs				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "setposgs",
+									wsName:= "Setze Position Gs");
+									
+	stText_SetPosMs				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "setposms",
+									wsName:= "Setze Position Ms");									
+
+	stText_SetPosWt				: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "setposwt",
+									wsName:= "Setze Position WT");
+
+	stText_SetPosAusgabeIo		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "setposausgabeio",
+									wsName:= "Setze Position Ausgabe Io");	
+
+	stText_SetPosAusgabeNio		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "setposnioausgabenio",
+									wsName:= "Setze Position Ausgabe Nio");								
+	
+	stText_BearbeitungStart: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "BearbeitungStart",
+									wsName:= "Start Bearbeitung");
+								
+	stText_BearbeitungDatenReset: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "workingdatareset",
+									wsName:= "Bearbeitung Daten Löschen");									
+
+	stText_KameraProgramm: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "camprogram",
+									wsName:= "Kamera Program");	
+	stText_ProgrammLaden: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "ProgrammLaden",
+									wsName:= "Programm Laden");	
+									
+	stText_KameraTrigger: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "camtrigger",
+									wsName:= "Kamera Trigger");								
+
+	//----------------------------------------------------------------------------------------------------
+	//safety									
+	stText_Emergencystop_A1P1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopa1p1",
+									wsName:= "Nothalt P1");	
+
+	stText_Emergencystop_A1P2	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopa1p2",
+									wsName:= "Nothalt P2");
+
+	stText_Emergencystop_M1P1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm1p1",
+									wsName:= "Nothalt M1 P1");
+									
+	stText_Emergencystop_M1P2	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm1p2",
+									wsName:= "Nothalt M1 P2");									
+
+	stText_Emergencystop_M2P1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm2p1",
+									wsName:= "Nothalt M2 P1");
+									
+	stText_Emergencystop_M3P1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm3p1",
+									wsName:= "Nothalt M3 P1");	
+
+	stText_Emergencystop_M3Laser1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm3laser1",
+									wsName:= "Nothalt M3 Laser 1");	
+
+	stText_Emergencystop_M3Laser2	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm3laser2",
+									wsName:= "Nothalt M3 Laser 2");
+
+	stText_Emergencystop_M3Laser3	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm3laser3",
+									wsName:= "Nothalt M3 Laser 3");								
+
+	stText_Emergencystop_M4P1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm4p1",
+									wsName:= "Nothalt M4 P1");
+									
+	stText_Emergencystop_M4P2	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "emergencystopm4p2",
+									wsName:= "Nothalt M4 P2");							
+	//----------------------------------------------------------------------------------------------------
+	//modul
+	stText_Modul1_Door1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modul1door1",
+									wsName:= "Modul 1 Tür 1");
+
+	stText_Modul1_Door2	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modul1door2",
+									wsName:= "Modul 1 Tür 2");
+
+	stText_Modul1_Door3	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modul1door3",
+									wsName:= "Modul 1 Tür 3");
+									
+	stText_Modul1_Door4	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modul1door4",
+									wsName:= "Modul 1 Tür 4");								
+									
+	stText_Modul1_Schott1	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modul1schott1",
+									wsName:= "Modul 1 Schott 1");	
+
+	stText_Modul1_Schott2	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "modul1schott2",
+									wsName:= "Modul 1 Schott 2");								
+							
+	//----------------------------------------------------------------------------------------------------
+	//stations
+	
+	stText_initialize_station	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "initialize_station",
+									wsName:= "initialize station");	
+									
+	stText_wait_for_start		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "wait_for_start",
+									wsName:= "wait for start");		
+
+	stText_cycle_start			: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "cycle_start",
+									wsName:= "cycle start");
+
+	stText_wait_station_in_hp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "wait_station_in_hp",
+									wsName:= "wait station in hp");	
+								
+	stText_station_not_in_hp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "station_not_in_hp",
+									wsName:= "station not in hp");
+
+	//-------------------------------------------
+	//stations
+	stText_M000_Name		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "M000_Module",
+									wsName:= "M000 Module");
+									
+	stText_M001_Name		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "M001_Machine",
+									wsName:= "M001 Machine");								
+						
+	
+	//-------------------------------------------
+	//stations
+									
+									
+
+	//-------------------------------------------
+	//stations 100
+	stText_ST100_Name			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100_roundtable",
+										wsName:= "ST100 Round Table");
+
+	stText_ST100_NameId		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "ST100",
+									wsName:= "ST100");
+
+	stText_ST100_Sequence	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "tt",
+									wsName:= "Rundtakttisch");
+											
+
+	stText_ST100_Axis			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100_Axis",
+										wsName:= "Achsen St100");		
+	stText_ST100_Drives			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100_Drives",
+										wsName:= "Antriebe St100");		
+	stText_ST100_Cyl			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100_Cyl",
+										wsName:= "Zylinder St100");		
+	stText_ST100_Sensor			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100_Sensor",
+										wsName:= "Sensoren St100");
+						
+	stText_ST100_Setting_RttSpeedAuto			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100_SettingTtSpeedAuto",
+										wsName:= "Setting St100 Speed Auto");
+										
+	stText_ST100_Setting_RttSpeedManual			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100_SettingTtSpeedManual",
+										wsName:= "Setting St100 Speed Manual");	
+
+	stText_ST100_TeileAmTransportsystem		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100TeileAmTransportsystem",
+										wsName:= "ST100 Teile am Transportsystem");	
+
+	stText_ST100_NioTeileAmTransportsystem		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100NioTeileAmTransportsystem",
+										wsName:= "ST100 Nio Teile am Transportsystem");	
+
+	stText_ST100_WorkstationActiveST001		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationActiveST001",
+										wsName:= "ST100 Workstation Active ST001");	
+
+	stText_ST100_WorkstationActiveST002		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationActiveST002",
+										wsName:= "ST100 Workstation Active ST002");	
+
+	stText_ST100_WorkstationActiveST003		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationActiveST003",
+										wsName:= "ST100 Workstation Active ST003");	
+
+	stText_ST100_WorkstationActiveST004		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationActiveST004",
+										wsName:= "ST100 Workstation Active ST004");	
+
+	stText_ST100_WorkstationActiveST005		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationActiveST005",
+										wsName:= "ST100 Workstation Active ST005");		
+
+	stText_ST100_WorkstationPassableST001		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationPassableST001",
+										wsName:= "ST100 Workstation Passable ST001");	
+
+	stText_ST100_WorkstationPassableST002		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationPassableST002",
+										wsName:= "ST100 Workstation Passable ST002");	
+
+	stText_ST100_WorkstationPassableST003		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationPassableST003",
+										wsName:= "ST100 Workstation Passable ST003");	
+
+	stText_ST100_WorkstationPassableST004		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationPassableST004",
+										wsName:= "ST100 Workstation Passable ST004");	
+
+	stText_ST100_WorkstationPassableST005		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationPassableST005",
+										wsName:= "ST100 Workstation Passable ST005");	
+
+	stText_ST100_WorkstationWorkEnableST001		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationWorkEnableST001",
+										wsName:= "ST100 Workstation WorkEnable ST001");	
+
+	stText_ST100_WorkstationWorkEnableST002		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationWorkEnableST002",
+										wsName:= "ST100 Workstation WorkEnable ST002");	
+
+	stText_ST100_WorkstationWorkEnableST003		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationWorkEnableST003",
+										wsName:= "ST100 Workstation WorkEnable ST003");	
+
+	stText_ST100_WorkstationWorkEnableST004		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationWorkEnableST004",
+										wsName:= "ST100 Workstation WorkEnable ST004");	
+
+	stText_ST100_WorkstationWorkEnableST005		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationWorkEnableST005",
+										wsName:= "ST100 Workstation WorkEnable ST005");	
+
+	stText_ST100_WorkstationTurnEnableST001		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationTurnEnableST001",
+										wsName:= "ST100 Workstation TurnEnable ST001");	
+
+	stText_ST100_WorkstationTurnEnableST002		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationTurnEnableST002",
+										wsName:= "ST100 Workstation TurnEnable ST002");	
+
+	stText_ST100_WorkstationTurnEnableST003		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationTurnEnableST003",
+										wsName:= "ST100 Workstation TurnEnable ST003");	
+
+	stText_ST100_WorkstationTurnEnableST004		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationTurnEnableST004",
+										wsName:= "ST100 Workstation TurnEnable ST004");	
+
+	stText_ST100_WorkstationTurnEnableST005		: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100WorkstationTurnEnableST005",
+										wsName:= "ST100 Workstation TurnEnable ST005");		
+
+	stText_ST100_Cycletime			: ST_Text := (
+										nNameId:= 1,
+										wsNameId:= "ST100Cycletime",
+										wsName:= "ST100 Cycletime");	
+			
+	//----------------------------------------------------------------------------------------------------
+	//axis
+	stText_AxisXWp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "axis_x_wp",
+									wsName:= "axis x wp");
+									
+	stText_AxisXHp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "axis_x_hp",
+									wsName:= "axis x hp");								
+
+	stText_AxisYWp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "axsis_y_wp",
+									wsName:= "axis y wp");
+
+	stText_AxisYHp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "axis_y_hp",
+									wsName:= "axis y hp");									
+									
+	stText_AxisZWp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "limit_axsis_Z_wp",
+									wsName:= "limit axsis Z wp");
+
+	stText_AxisZHp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "axis_z_hp",
+									wsName:= "axis z hp");
+
+								
+	//----------------------------------------------------------------------------------------------------
+	//messages
+	stText_AllOk	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "allok",
+									wsName:= "allok");
+									
+	stText_AxisZnotInHp	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "axis_z_not_in_hp",
+									wsName:= "axis z hp");
+
+	//----------------------------------------------------------------------------------------------------
+	//tc3hmi
+	stText_Home		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "home",
+									wsName:= "home");	
+	
+	stText_Start	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "start",
+									wsName:= "start");
+									
+	stText_Stop		: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "stop",
+									wsName:= "stop");
+									
+	stText_CycleStop: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "cyclestop",
+									wsName:= "cyclestop");									
+																		
+	stText_Reset	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "reset",
+									wsName:= "reset");	
+									
+	stText_OPM_Auto	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "opmauto",
+									wsName:= "opmauto");									
+									
+	stText_OPM_Manual	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "opmmanual",
+									wsName:= "opmmanual");									
+
+	stText_OPM_Step	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "opmstep",
+									wsName:= "opmstep");									
+
+	stText_NavUser	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "User",
+									wsName:= "User");
+	
+	stText_PlantLight	: ST_Text := (
+									nNameId:= 1,
+									wsNameId:= "plantlight",
+									wsName:= "Anlagenlicht");						
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

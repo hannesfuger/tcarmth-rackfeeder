@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Drive_Ui" Id="{d6f3723b-7bff-4336-8ae8-ef5f1b4d7574}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC FB_Drive_Ui EXTENDS FB_ManualUiBase
+VAR_INPUT
+	// Handbetrieb Rückwärts
+	bManual_Reverse				: BOOL;
+	/// Handbetrieb Vorwärts
+	bManual_Forward				: BOOL;
+	//	Stop
+	bManual_Stop				: BOOL;
+	//	Type Handmodus
+		// 1 = Tippen
+		// 2 = Speichern
+	iType						: INT;
+END_VAR
+VAR_IN_OUT
+	// drive reference
+	fbDrive				: FB_Drive;
+	// hmi control IN
+	stHMIControlIn			: ST_HMI_MANUAL_DRIVE_IN;
+	// hmi control OUT
+	stHMIControlOut			: ST_HMI_MANUAL_DRIVE_OUT;	
+END_VAR
+VAR_OUTPUT
+	diColorSelectedItem: UDINT;
+	/// 0=Undefiniert
+	/// 1=Fehler
+	iState: INT;
+	diColorState	: UDINT;
+	sState			: STRING;
+	stState			: ST_Text;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[stName := fbDrive.stName;
+
+fbDrive.diObjectIndex := diObjectIndex;
+fbDrive.diSelectedObjectIndex := diSelectedObjectIndex;
+fbDrive.bEnableManual := bEnableManual;
+//fbDrive.bManual_Reverse := bManual_Reverse;
+//fbDrive.bManual_Forward := bManual_Forward;
+//fbDrive.bManual_Stop := bManual_Stop;
+fbDrive.iType := iType;
+
+IF (diSelectedObjectIndex = diObjectIndex)AND (diObjectIndex <> 0) AND bEnableManual THEN
+	bManualActive := TRUE;
+	stHMIControlOut.bVisible := TRUE;
+	stHMIControlOut.stObjectName := fbDrive.stName;
+	stHMIControlOut.stButtonJogPos.stName := CONST.stTextListGlobal.stText_Positive;
+	stHMIControlOut.stButtonJogNeg.stName := CONST.stTextListGlobal.stText_Negative;
+	stHMIControlOut.stButtonStop.stName := CONST.stTextListGlobal.stText_Stop;
+	stHMIControlOut.aDriveModeName[0] :=  CONST.stTextListGlobal.stText_Mode_StartStop;
+	stHMIControlOut.aDriveModeName[1] :=  CONST.stTextListGlobal.stText_Mode_Jog;
+	
+	CASE stHMIControlIn.eJogMode OF
+		
+	E_Drive_JogMode.eJogMode_0 :
+			IF stHMIControlIn.stButtonStop.bClick THEN
+				fbDrive.M_Stop();
+			ELSIF stHMIControlIn.stButtonJogPos.bClick THEN
+				fbDrive.M_Start_Forward();
+			ELSIF stHMIControlIn.stButtonJogNeg.bClick THEN	
+				fbDrive.M_Start_Reverse();	
+			END_IF
+	E_Drive_JogMode.eJogMode_1 :
+		IF stHMIControlIn.stButtonJogPos.bClick THEN
+			fbDrive.M_Start_Forward();
+		ELSIF stHMIControlIn.stButtonJogNeg.bClick THEN	
+			fbDrive.M_Start_Reverse();	
+		ELSE
+			fbDrive.M_Stop();	
+		END_IF				
+	END_CASE
+	stHMIControlOut.stButtonJogPos.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonJogNeg.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	IF fbDrive.bDrive_Forward_Out THEN
+		stHMIControlOut.stButtonJogPos.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);	
+	END_IF
+	IF fbDrive.bDrive_Reverse_Out THEN
+		stHMIControlOut.stButtonJogNeg.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);	
+	END_IF	
+	
+	stHMIControlOut.stState	:= stState;	
+ELSIF bManualActive THEN
+	bManualActive := FALSE;
+	stHMIControlOut.bVisible := FALSE;
+END_IF
+
+iState := fbDrive.iStatus;
+
+CASE iState OF 
+	1:
+		sState:= TO_STRING( fbDrive.sErrText.wsName );
+		diColorState:= STATICS.stColor.Red;
+		stState.wsName := "error";
+		stState.wsNameId := "error";
+		stState.nNameId := 1;
+	2:
+		sState:= ('Stillstand OK');
+		diColorState:= STATICS.stColor.Gray;
+		stState.wsName := "notmoveing";
+		stState.wsNameId := "notmoveing";
+		stState.nNameId := 2;
+	3:
+		sState:= ('Betrieb Vorwärts');
+		diColorState:= STATICS.stColor.Green;
+		stState.wsName := "movepositive";
+		stState.wsNameId := "movepositive";
+		stState.nNameId := 3;
+	4:
+		sState:= ('Betrieb Rückwärts');
+		diColorState:= STATICS.stColor.Green;
+		stState.wsName := "movenegative";
+		stState.wsNameId := "movenegative";
+		stState.nNameId := 4;		
+				
+ELSE
+	sState:= (' Undefiniert ');	
+	diColorState:= STATICS.stColor.Orange;	
+	stState.wsName := "undifined";
+	stState.wsNameId := "undifined";
+	stState.nNameId := 0;
+END_CASE
+
+
+IF (diObjectIndex=diSelectedObjectIndex) THEN
+	diColorSelectedItem:=STATICS.stColor.LimeGreen;
+ELSE
+	diColorSelectedItem:=STATICS.stColor.Gray;	
+END_IF
+
+A_StateMapping();]]></ST>
+    </Implementation>
+    <Action Name="A_StateMapping" Id="{7363a03d-4aeb-4b89-aa91-e058541381a5}">
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(stStateObject) THEN
+	RETURN;
+END_IF
+
+// state mapping
+stStateObject.stState := stState;
+stStateObject.nIndexColor := diColorSelectedItem;
+//stStateObject.stValue.wsName := "mov/stp";]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Control_Start_Forward" Id="{326e6fd2-8321-4b39-b41b-9dbb062cd68c}">
+      <Declaration><![CDATA[METHOD Control_Start_Forward : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bEnableManual THEN
+	fbDrive.bManual_Reverse := FALSE;
+	fbDrive.bManual_Forward := TRUE;
+	fbDrive.bManual_Stop := FALSE;	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Control_Start_Reverse" Id="{019affbf-bb73-4a1a-91c9-987d97d3ff86}">
+      <Declaration><![CDATA[METHOD Control_Start_Reverse : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bEnableManual THEN
+	fbDrive.bManual_Reverse := TRUE;
+	fbDrive.bManual_Forward := FALSE;
+	fbDrive.bManual_Stop := FALSE;	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Control_Stop" Id="{d1aa0a41-3e4b-4561-a724-9b6abc7cfaaf}">
+      <Declaration><![CDATA[METHOD Control_Stop : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bEnableManual THEN
+	fbDrive.bManual_Reverse := FALSE;
+	fbDrive.bManual_Forward := FALSE;
+	fbDrive.bManual_Stop := TRUE;	
+END_If]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Drive_Ui">
+      <LineId Id="1123" Count="1" />
+      <LineId Id="891" Count="6" />
+      <LineId Id="1027" Count="0" />
+      <LineId Id="899" Count="0" />
+      <LineId Id="1075" Count="0" />
+      <LineId Id="900" Count="37" />
+      <LineId Id="1072" Count="2" />
+      <LineId Id="938" Count="44" />
+      <LineId Id="150" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive_Ui.A_StateMapping">
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive_Ui.Control_Start_Forward">
+      <LineId Id="4" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_Drive_Ui.Control_Start_Reverse">
+      <LineId Id="5" Count="3" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive_Ui.Control_Stop">
+      <LineId Id="5" Count="3" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

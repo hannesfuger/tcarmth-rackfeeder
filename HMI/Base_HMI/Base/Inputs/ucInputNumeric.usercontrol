@@ -1,0 +1,52 @@
+<div id="ucInputNumeric" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="200" data-tchmi-creator-viewport-height="40" data-tchmi-left-unit="%" data-tchmi-top-unit="%">
+
+<div id="Textbox_Input" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="100" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%f%%pp%Value%/pp%.toFixed(4)%/f%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "//Reference to UserControl\n    var _id = TcHmi.Symbol.readEx('%pp%Identifier%/pp%');\n    var _uc = TcHmi.Controls.get(_id);\n    \n// coordinates of the UserControl\n    var _top = _uc.getTop();\n    var _left = _uc.getLeft();\n    var _width = _uc.getWidth();\n    var _height = _uc.getHeight();\n    \n// coordinates of the Keyboard. Keyboard size (200 x 250) px\n    if (_left > 210) {\n        var __left = _left - 210;\n    } else {\n        __left = _left + _width + 10;\n    }\n    \n    if (_top > 200) {\n        var __top = _top + _hight - 100;\n    } else {\n        __top = _top + 100;\n    }    \n    \n//display the keyboard on position\n\n \n\n    $('#Region_Keyboard').animate({\n        left: __left + 'px',\n        top: __top + 'px'\n   });\n   \n   //$('#Region_Keyboard').style.visibility = \"visible\";\n    "
+        ],
+        "injectContextObject": false,
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onUserInteractionFinished",
+    "actions": [
+      {
+        "objectType": "JavaScript",
+        "active": true,
+        "sourceLines": [
+          "\nvar oldValue = TcHmi.Symbol.readEx('%pp%Value%/pp%').toFixed(4);\nvar newValue = TcHmi.Symbol.readEx('%ctrl%Textbox_Input::Text%/ctrl%');\nvar Max = TcHmi.Symbol.readEx('%pp%Max%/pp%');\nvar Min = TcHmi.Symbol.readEx('%pp%Min%/pp%');\n\n\tif (newValue > Max) {\n\t    TcHmi.Symbol.writeEx('%ctrl%Textbox_Input::Text%/ctrl%',oldValue);\n\t    alert('The entry exeeds the maximum value of ' + Max);\n\t} else if (newValue < Min) {\n\t    TcHmi.Symbol.writeEx('%ctrl%Textbox_Input::Text%/ctrl%',oldValue);\n\t    alert('The entry falls below the minimum value of ' + Min);\n\t} else {\n\t    TcHmi.Symbol.writeEx('%pp%Value%/pp%', newValue);\n\t//hide the keyboard\n\t    \n\t    \n\t\t\t//$('#Region_Keyboard').animate({\n\t    \t//top: '-400px'    \n\t    \t//});\n\t    \t//$('#Region_Keyboard').style.visibility = \"hidden\";\n\t};\n\t\n"
+        ],
+        "injectContextObject": false,
+        "asyncWait": true,
+        "waitMode": "Synchronous"
+      }
+    ]
+  }
+]</script>
+</div>
+
+</div>

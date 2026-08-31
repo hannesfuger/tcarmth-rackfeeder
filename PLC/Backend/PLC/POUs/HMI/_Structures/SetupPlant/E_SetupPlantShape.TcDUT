@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <DUT Name="E_SetupPlantShape" Id="{e40ad422-65dd-4bc4-b99b-97d5767fdf5e}">
+    <Declaration><![CDATA[TYPE E_SetupPlantShape :
+(
+	eSetupPlantShape_None := 0,
+	eSetupPlantShape_DreieckGruen,
+	eSetupPlantShape_DreieckRot,
+	
+	eSetupPlantShape_ViereckViolett := 11,
+	eSetupPlantShape_ViereckRosa,
+	
+	eSetupPlantShape_SechseckBlau := 21,
+	eSetupPlantShape_SechseckGelb,	
+	
+	eSetupPlantShape_KreisGruen := 31,
+	eSetupPlantShape_KreisRosa,	
+	
+	eSetupPlantShape_Max
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Diagnostic_EcDeviceState" Id="{521f43c6-1593-4734-8f55-2cafc7884e56}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Function convert EtherCat device state from a slave into an text
+FUNCTION F_Diagnostic_EcDeviceState : WSTRING(80)
+VAR_INPUT
+	/// Function input
+	nDeviceState			:BYTE;
+END_VAR
+VAR
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE nDeviceState OF
+	EC_DEVICE_STATE_INIT:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: INIT";
+		
+	EC_DEVICE_STATE_PREOP:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: Pre-Operational";
+		
+	EC_DEVICE_STATE_BOOTSTRAP:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: Bootstrap";
+		
+	EC_DEVICE_STATE_SAFEOP:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: Safe-Operational";
+		
+	EC_DEVICE_STATE_OP:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: Operational";
+		
+	EC_DEVICE_STATE_ERROR:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: Statemachine-error in slave";
+		
+	EC_DEVICE_STATE_INVALID_VPRS:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: Invalid VendorID, Productcode, revisionnumber or serialnumber";
+		
+	EC_DEVICE_STATE_INITCMD_ERROR:
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: INIT command error";
+		
+	ELSE 
+		F_Diagnostic_EcDeviceState := "EtherCat Device State: Undefined";
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="F_Diagnostic_EcDeviceState">
+      <LineId Id="14" Count="2" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

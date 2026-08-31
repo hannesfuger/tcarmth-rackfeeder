@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_HMI_CONTROL_REQUEST" Id="{42c54a19-ecfd-4883-a64d-3f2be5338dc3}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_HMI_CONTROL_REQUEST :
+(
+	Default,
+	RecipeMgmtRequest,
+	SettingMgmtRequest,
+	UserMgmtRequest
+);   	
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_CreateDynTextDefault" Id="{615e53cb-ab11-4cde-aeb2-762c4aa14925}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_CreateDynTextDefault : ST_Text
+VAR_INPUT
+	wsName	: WSTRING;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_CreateDynTextDefault.wsNameId := wsName;	
+F_CreateDynTextDefault.wsName := wsName;]]></ST>
+    </Implementation>
+    <LineIds Name="F_CreateDynTextDefault">
+      <LineId Id="21" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

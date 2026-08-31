@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_RtrigFtrig" Id="{2cd37571-fd4a-4532-bf6a-19e4578ef0be}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC FB_RtrigFtrig
+VAR_INPUT
+	bIn : BOOL;
+END_VAR
+VAR_OUTPUT
+	// rising trigger bIn
+	bRq : BOOL;
+	// falling trigger bIn
+	bFq : BOOL;
+END_VAR
+VAR
+	rtrig : R_TRIG;
+	ftrig : F_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[rtrig(CLK := bIn, Q => bRq);
+ftrig(CLK := bIn, Q => bFq);]]></ST>
+    </Implementation>
+    <LineIds Name="FB_RtrigFtrig">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

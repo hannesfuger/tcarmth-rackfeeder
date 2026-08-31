@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="IStation" Id="{ed10b873-c451-4f2c-b6d9-0f67ec9f036d}">
+    <Declaration><![CDATA[INTERFACE IStation EXTENDS ITFComponent]]></Declaration>
+    <Folder Name="Properties" Id="{86509b95-4464-4c8d-beda-e99b7df52817}" />
+    <Property Name="Cycles" Id="{df2f78d1-6592-4f04-9746-57cd0ad0ca75}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY PUBLIC Cycles : UDINT]]></Declaration>
+      <Get Name="Get" Id="{c8fa09a9-11de-4be6-956f-ac3385fb3a51}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{62d071ea-1526-4007-96d8-78af175e3a60}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="EmergencyStopOk" Id="{24baec5d-958f-4b27-9b98-398225b029c5}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY INTERNAL EmergencyStopOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{7823069e-22f1-4f14-9126-af40bcafe402}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{82d4b5c2-a43d-422d-b6c5-d5a3a9d4e926}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="Enable" Id="{2d9e41ab-ce85-4fce-a33b-d7a7b7867622}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY INTERNAL Enable : BOOL]]></Declaration>
+      <Get Name="Get" Id="{75face47-602c-457d-bbd3-d2f2ffa7ffa0}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{2ae55631-e9c4-4ee5-b266-466d0abab6f6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="EnableSummary" Id="{fedcc0a6-6baa-45dd-ba20-d348980e2684}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY INTERNAL EnableSummary : BOOL]]></Declaration>
+      <Get Name="Get" Id="{77e0ad3e-1fb1-4d01-b235-9d8a871fbce2}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="GetStepChainTest" Id="{54c59f48-a486-45f3-81e1-30746ad10eb2}">
+      <Declaration><![CDATA[METHOD PUBLIC GetStepChainTest : ST_Text
+VAR_INPUT
+	Index : INT; // step chain index
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Homing" Id="{5c6d88ef-cd89-4015-a30f-a1e82c5ae1ea}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC Homing : BOOL]]></Declaration>
+      <Get Name="Get" Id="{2cf21fb1-f51f-44dd-ad9f-d89b4539b888}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="InHome" Id="{b2c9ae7a-0319-4157-88ac-1d190d349304}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY InHome : BOOL]]></Declaration>
+      <Get Name="Get" Id="{3095b528-016c-4cbf-9e0c-d5b58f67422a}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="InitEvents" Id="{892863a8-997d-4c3b-9fbe-0765e5e665e9}">
+      <Declaration><![CDATA[METHOD PUBLIC InitEvents : IStation
+VAR_IN_OUT CONSTANT
+	infoEvent,
+	warnEvent,
+	errorEvent : TcEventEntry;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_Init" Id="{9ddf2dad-0e76-47d3-8a9e-08268cba2b1b}">
+      <Declaration><![CDATA[METHOD Public M_Init : IStation
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_InitEx" Id="{190d25fe-8225-4382-9eaf-74c80e5bc132}">
+      <Declaration><![CDATA[METHOD PUBLIC M_InitEx : IStation
+VAR_INPUT
+	ILogger			: I_Logger;
+	IEventHandler	: I_EventHandler;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_Run" Id="{16a72ca8-84c1-401f-91ac-cd621efe96b6}">
+      <Declaration><![CDATA[METHOD PUBLIC M_Run : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="OpMode" Id="{e941f092-d954-4e9f-93f6-753391a30799}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY OpMode : E_OpMode]]></Declaration>
+      <Get Name="Get" Id="{e6c3dd80-bbe2-4a2b-8bd3-49dd5e24090e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Parent" Id="{d5ae6973-39ac-432d-b7fd-5697ae93f86b}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Parent : E_Module]]></Declaration>
+      <Get Name="Get" Id="{27eec097-9a6d-463b-9660-b83b9fdfda4b}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RunCycle" Id="{19af4888-7374-488f-85ee-9e2c69d252f4}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY RunCycle : BOOL]]></Declaration>
+      <Get Name="Get" Id="{d58a1901-de49-4033-bc96-cec9c8edb3e6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{77cfb2b3-2b71-47eb-860c-8fb31e42f44e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="SafetyOk" Id="{d5b20798-6ba6-4877-bf52-ed0229d05ba6}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY INTERNAL SafetyOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{62e2141d-7aeb-41af-8cad-f6d986892473}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{8749f3bb-29b4-4f15-952c-4e0b03568d59}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="StateColor" Id="{d6380222-97c5-4d36-8ed8-95b6f72707b4}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY StateColor : DWORD]]></Declaration>
+      <Get Name="Get" Id="{ac95ad10-0631-4d34-ab7b-7c4a2085eefa}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Station" Id="{f2f98161-a714-42e2-9f86-7bb26731ca10}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY PUBLIC Station : E_Station]]></Declaration>
+      <Get Name="Get" Id="{fc595d0f-d3f2-4e0e-a70a-5df19d0469a4}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{7499d586-12de-4ee4-acf2-6701754f4005}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="Stopped" Id="{176c50f0-1e6c-4da6-b146-628e2a39bd3b}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Stopped : BOOL]]></Declaration>
+      <Get Name="Get" Id="{4d99a6bf-17a0-4d6c-9e24-a97122ae03b3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TextAuto" Id="{b2717c5c-85ab-4779-8f49-028bd2d8cdc6}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY TextAuto : ST_Text]]></Declaration>
+      <Get Name="Get" Id="{9743d117-8075-465b-ad14-ca3157ccad2e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TextHome" Id="{fd6dfcd4-b432-4d7a-93a6-3f7f416990b7}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY TextHome : ST_Text]]></Declaration>
+      <Get Name="Get" Id="{505112a3-7b9f-473a-b8ab-1d4bce695012}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TotalCycles" Id="{4a02650a-7224-4ead-b6f7-3545425eabf0}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY PUBLIC TotalCycles : UDINT]]></Declaration>
+      <Get Name="Get" Id="{a81f63f3-abce-4466-86b2-877102ef501d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

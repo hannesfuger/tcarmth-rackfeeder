@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_ControlCabinetOut" Id="{40006500-017c-4790-8730-9ef61a72b0a2}">
+    <Declaration><![CDATA[TYPE ST_ControlCabinetOut :
+STRUCT
+	// bLed_AmpelBlau    :BOOL;(*Led | Ampelsaeule | Blau | BMK: =P238+A1+E1-17U3 | Terminal: .: | Tc3Hmi *) 
+	// bLed_AmpelGruen    :BOOL;(*Led | Ampelsaeule | Gruen | BMK: =P238+A1+E1-17U3 | Terminal: .: | Tc3Hmi *) 
+	// bLed_AmpelGelb    :BOOL;(*Led | Ampelsaeule | Gelb | BMK: =P238+A1+E1-17U3 | Terminal: .: | Tc3Hmi *) 
+	// bLed_AmpelRot    :BOOL;(*Led | Ampelsaeule | Rot | BMK: =P238+A1+E1-17U3 | Terminal: .: | Tc3Hmi *) 
+
+	// =A01.K20
+	//stA01 : ST_ControlCabinet_A01_Out;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

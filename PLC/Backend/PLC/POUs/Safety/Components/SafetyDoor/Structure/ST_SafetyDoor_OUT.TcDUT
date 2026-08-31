@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyDoor_OUT" Id="{d860dde3-f4f9-4be1-9da5-d4620ec071dc}">
+    <Declaration><![CDATA[TYPE ST_SafetyDoor_OUT :
+STRUCT
+	bStartLight : BOOL;	
+	bStopLight : BOOL;	
+	bLockLight : BOOL;	
+	tsRestart : BOOL;    
+	tsLockCmd : BOOL;
+	tsLocked : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

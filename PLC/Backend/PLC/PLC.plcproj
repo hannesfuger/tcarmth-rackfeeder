@@ -1,0 +1,2069 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{a53ff323-4ed4-416f-9490-e483152b42bb}</ProjectGuid>
+    <SubObjectsSortedByName>True</SubObjectsSortedByName>
+    <Name>PLC</Name>
+    <ProgramVersion>3.1.4026.20</ProgramVersion>
+    <Application>{5a759d7d-a88c-4513-b558-4a71899410ca}</Application>
+    <TypeSystem>{dc3f2e80-3c44-42ee-a3b9-af23d91a8e62}</TypeSystem>
+    <Implicit_Task_Info>{8eeaace3-859e-4f2a-96a7-4b555777f26a}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{5cd1fede-07dc-4a25-9745-9a486f51c4d3}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{fd46789a-884e-4429-a4de-a4f4b182a685}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{6601a199-54ce-4ae5-bdde-98297d840974}</LibraryReferences>
+    <AutoUpdateVisuProfile>true</AutoUpdateVisuProfile>
+    <Released>false</Released>
+    <Company>RMTH GmbH</Company>
+    <ProjectVersion>0.1</ProjectVersion>
+    <Title>PSAT Nell1</Title>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Background\UnitTest\Enumerations\E_TestCaseState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\Enumerations\E_TestResult.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\Interfaces\ITestCase.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\P_UnitTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\Base\FB_TestCaseBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\FB_TestCase01FileLog.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\FB_TestCase02SystemInfo.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\FB_TestCase03Station.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\StationTest\FB_TestStation.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\StationTest\Structures\ST_TestStation_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\StationTest\Structures\ST_TestStation_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Background\UnitTest\TestCases\StationTest\Structures\ST_TestStation_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Configuration\ST_Configuration.TcDUT">
+      <SubType>Code</SubType>
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Compile>
+    <Compile Include="GVLs\CONST.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\GVL.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\HMI.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\IO.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\NcIO.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Safety.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Services.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Plant.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="PlcTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PlcTaskFast.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Enumerations\E_Axis.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Enumerations\E_GearMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Enumerations\E_JogDirection.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Enumerations\E_ManualMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Enumerations\E_MotionCommand.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Enumerations\E_Mover_XTS.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Enumerations\E_SoECommand.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\FB_AxisCoupleSync2.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\FB_AxisDriver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\FB_Axis_Ui.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Interfaces\ITFMotionComponent.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\AdditionalAxisIO\ST_AxisIn.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\AdditionalAxisIO\ST_AxisIO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\AdditionalAxisIO\ST_AxisOut.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\AdditionalAxisIO\ST_AxisVirtualIO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\SoE\ST_AxisSoE.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisDriverParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisGearInParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisGearOutParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisManager.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisTorqCtrlParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisGeneralParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisHaltParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisHomingParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisJogAccParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisJogParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisMoveAbsParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisMoveAddParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisMoveModParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisMoveParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisMoveRelParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisMoveVelParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisSetPosParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_AxisStopParameter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Structures\ST_HmiAxisManager.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\FB_AxisDistanceTrigger.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\FB_LimitSwitchRefSim.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\F_SpeedReached.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\F_SpeedWindowReached.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\F_TargetReached.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\F_TargetReachedOrHigher.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\F_TargetReachedOrLower.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\F_TargetWindowReached.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\AxisDriver\Utilities\F_TargetWindowReachedAxisRef.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\CylinderDriver\FB_Cylinder_Ui.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\Device\FB_Device.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\Device\FB_Device_Ui.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\Device\Structures\ST_DeviceIn.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\Device\Structures\ST_DeviceIO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\Device\Structures\ST_DeviceOut.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\DriveFu\FB_Drive.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\DriveFu\FB_Drive_Ui.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\DriveFu\FB_DriveFuAx_Ui.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\FurnaceDriver\Enumeration\E_FurnaceSeq.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\FurnaceDriver\Enumeration\E_HeatingState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\FurnaceDriver\FB_FurnaceDriver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\FurnaceDriver\Structures\ST_FurnaceIn.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\FurnaceDriver\Structures\ST_FurnaceIO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\FurnaceDriver\Structures\ST_FurnaceOut.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Base\FB_ComponentBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Base\FB_ManualUiBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Base\Interfaces\I_ManualUi.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Enumerations\E_ComponentState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Enumerations\E_Component.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Enumerations\E_ComponentType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Base\Interfaces\ITFComponent.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Structures\ST_Coordinate.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Structures\ST_Curve.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Structures\ST_Point.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Components\_Structures\ST_3DPoint.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Events\FB_EventHandler.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Events\Interfaces\I_EventHandler.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\FB_HMI_PROVIDER_HW.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\+P10A_Pult\ST_P10A_Pult_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\+P10A_Pult\ST_P10A_Pult_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\+P50A_Haupt\ST_P50A_Haupt_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\+P50A_Haupt\ST_P50A_Haupt_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\+P51A_EuchnerHandBedien\ST_P51A_EuchnerHandB_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\+P51A_EuchnerHandBedien\ST_P51A_EuchnerHandB_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\HMI_PROVIDER_HW_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\HMI_PROVIDER_HW_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\HMI_PROVIDER_HW_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\_Base\ST_PxAB_SxHandAsBs_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\HwHmi\Structures\_Base\ST_PxAB_SxHandAsBs_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\FB_HMI_Provider_TC3.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\Stations\ST_StationToTc3Hmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\Stations\ST_StationFromTc3Hmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\ST_FromTc3Hmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\ST_Header.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\ST_HMI_Tc3.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\ST_ToTc3Hmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\ST_ToTc3HmiConditionMonitoring.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\ST_ToTc3Hmi_Door.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\ST_ToTc3Hmi_EmergencyStop.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\DataGrid\ST_UserControlGrid_FromHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\DataGrid\ST_UserControlGrid_ToHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Axis\ST_UserControl_Manual_Axis_FromHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Axis\ST_UserControl_Manual_Axis_Item.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Axis\ST_UserControl_Manual_Axis_Item_String.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Axis\ST_UserControl_Manual_Axis_ToHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Cylinder\ST_UserControl_Manual_Cylinder_FromHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Cylinder\ST_UserControl_Manual_Cylinder_ToHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Device\ST_UserControl_Manual_Device_FromHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Device\ST_UserControl_Manual_Device_ToHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Drive\ST_UserControl_Manual_Drive_FromHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Drive\ST_UserControl_Manual_Drive_ToHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\SensorActor\ST_ToVisuSensorActor.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\_Base\FB_HMI_PROVIDER_BASE.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\_Enumerations\E_HMI_CONTROL_REQUEST.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\_Enumerations\E_HMI_PROVIDER.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Provider\_Interfaces\ITF_HMI_PROVIDER.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\DynTxt\F_CreateDynText.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\DynTxt\F_CreateDynTextDefault.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\DynTxt\F_CreateDynTextDefaultS.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\DynTxt\F_CreateDynTextEx.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\FB_CounterHandling.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\FB_MonitoringHandling.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\FB_ProviderRequestTrigger.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\F_AlarmPrioToText.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\F_AlarmPrioToHexColor.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\SettingsHandling\FB_SettingsHandling.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\SettingsHandling\F_SettingItemHandling.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\SettingsHandling\F_SettingItemHandlingB.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\SettingsHandling\F_SettingItemHandlingF.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\SettingsHandling\F_SettingItemHandlingI.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\SettingsHandling\F_SettingItemHandlingWs.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Tracking\F_TrackSettingChangesB.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Tracking\F_TrackSettingChangesF.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Tracking\F_TrackSettingChangesI.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Tracking\F_TrackSettingChangesT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Tracking\F_TrackSettingChangesWs.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Validation\F_ChkSettingLimit.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Validation\F_ChkSettingLimitF.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Validation\F_ChkSettingLimitN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\Validation\F_ChkSettingUserLevel.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\P_HMI_Controller.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_Axis_JogMode.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_DataType.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_Drive_JogMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_Language.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_ManualObjectControlMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_Popup.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_RecipeMode.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_User.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Enumerations\E_User_Level.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Counter\E_CounterReaction.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Counter\ST_CounterControlIn.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Counter\ST_CounterControlOut.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Counter\ST_Counter_Item_String.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Data\ST_Data_Item_String.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Monitoring\ST_GridObject_Name_Value1_Event1_Value2_Event2_Unit.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Monitoring\ST_GridObject_Name_sValue_Unit.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Monitoring\ST_Monitoring_Station.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Monitoring\ST_Monitoring.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Data\ST_Data_Item.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Monitoring\ST_Monitoring_Base.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Monitoring\ST_Monitoring_Module.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Popup\E_PopupSymbol.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Popup\ST_PopUp_FromHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Popup\ST_PopUp_ToHmi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Recipe\ST_HMI_RECIPE_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Recipe\ST_HMI_RECIPE_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Safety\ST_HMI_SAFETY_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Safety\ST_HMI_SAFETY_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Settngs\ST_HMI_CONTROL_SETTING_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Settngs\ST_HMI_CONTROL_SETTING_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Settngs\ST_HMI_CONTROL_SETTING_STATION_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Settngs\ST_HMI_CONTROL_SETTING_MODULE_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\SetupPlant\E_SetupPlantShape.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\SetupPlant\E_SetupPlantStateShape.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\SetupPlant\ST_SetupPlant_Item_String.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Settngs\ST_HMI_CONTROL_SETTING_ITEM_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\Settngs\ST_HMI_CONTROL_SETTING_ITEM_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\ST_HMI.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\ST_HMI_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\ST_HMI_InOut.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\ST_HMI_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\ST_NameValue.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\UserManagment\ST_HMI_USER_MGMT_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\UserManagment\ST_HMI_USER_MGMT_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\UserManagment\ST_User_Management.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Button\ST_HMI_BUTTON_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Button\ST_HMI_BUTTON_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Common\ST_HMI_BASE_CONTROL_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Common\ST_HMI_BASE_CONTROL_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Common\ST_HMI_BASE_SPECIAL_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Common\ST_HMI_GRID_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Common\ST_HMI_NAME_VALUE_STRING.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Common\ST_HMI_TRAFFIC_LIGHT_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Axis\ST_HMI_MANUAL_AXIS_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Axis\ST_HMI_MANUAL_AXIS_ITEM.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Axis\ST_HMI_MANUAL_AXIS_ITEM_STRING.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Axis\ST_HMI_MANUAL_AXIS_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Cylinder\ST_HMI_MANUAL_CYLINDER_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Cylinder\ST_HMI_MANUAL_CYLINDER_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Device\ST_HMI_MANUAL_DEVICE_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Device\ST_HMI_MANUAL_DEVICE_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Drive\ST_HMI_MANUAL_DRIVE_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Drive\ST_HMI_MANUAL_DRIVE_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Module\ST_HMI_BASE_MODULE_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Module\ST_HMI_BASE_MODULE_MANUAL_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Module\ST_HMI_BASE_MODULE_MANUAL_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Module\ST_HMI_BASE_MODULE_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Station\ST_HMI_BASE_STATION_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Station\ST_HMI_BASE_STATION_MANUAL_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Station\ST_HMI_BASE_STATION_MANUAL_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\Station\ST_HMI_BASE_STATION_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\ST_HMI_BASE_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Base\ST_HMI_BASE_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Common\ST_HexColor.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Common\ST_HMI_COLOR_STRING.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Common\ST_Text.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_TextLists\ST_Text_List_Components.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_TextLists\ST_Text_List_Global.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_TextLists\ST_Text_List_Safety.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_TextLists\ST_Text_List_System.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\_Structures\_Common\ST_DefaultHmiToPlc.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HMI\Utilities\FB_HmiBaseControlTrigger.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaCarrier\Enumerations\eTcaCarrierCmd.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaCarrier\Enumerations\eTcaCarrierLayout.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaCarrier\Structures\TcaCarrierConfig.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaCarrier\Structures\TcaCarrierData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaCarrier\Structures\TcaCarrierService.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaCarrier\TcaCarrier.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaTrolley\Structures\TcaTrolleyConfig.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaTrolley\Structures\TcaTrolleyData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaTrolley\Structures\TcaTrolleyService.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaTrolley\TcaTrolley.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaWorkpiece\Enumerations\eTcaWorkpieceShape.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaWorkpiece\Enumerations\eTcaWorkpieceStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaWorkpiece\Structures\TcaWorkpieceData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Items\TcaWorkpiece\TcaWorkpieceControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\MAIN_Fast.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Enumerations\E_Module.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Enumerations\E_PlantSettings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Enumerations\E_ProductionSettings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Enumerations\E_ProductSettings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Enumerations\E_Station.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\_Enumerations\E_M001_Settings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\_Structures\ST_M001_HMI_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\_Structures\ST_M001_Interface.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\_Structures\ST_M001_HMI_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\_Structures\ST_M001_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\_Structures\ST_M001_IO_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\_Structures\ST_M001_IO_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\P_Plant.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Structures\ST_St010_HMI_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Structures\ST_St010_Interface.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Structures\ST_St010_HMI_IN_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Enumerations\E_St020_Settings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\FB_St020_OvenB.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Structures\ST_St020_HMI_IN_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Structures\ST_St020_HMI_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Structures\ST_St020_Interface.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Structures\ST_St020_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Structures\ST_St020_IO_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Structures\ST_St020_IO_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST020_OvenB\_Structures\ST_St020_HMI_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Enumerations\E_St030_Command.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Enumerations\E_St030_EmptySlotChk.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Enumerations\E_St030_Settings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\FB_St030_Handling.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_HMI_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_HMI_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_Interface.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_Command.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_IO_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_IO_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_St030_HMI_IN_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST030_Handling\_Structures\ST_XZ_Point.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Enumerations\E_St040_Settings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\FB_St040_Storage.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Structures\ST_St040_HMI_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Structures\ST_St040_HMI_IN_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Structures\ST_St040_HMI_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Structures\ST_St040_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Structures\ST_St040_IO_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Structures\ST_St040_IO_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST040_Storage\_Structures\ST_St040_Interface.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Enumerations\E_St050_Settings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\FB_St050_Mould.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\ST_St050_Interface.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\ST_St050_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\ST_St050_IO_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\ST_St050_IO_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\TcaEngelCastingCarrierInput.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\TcaEngelCastingCarrierJob.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\TcaEngelCastingCarrierJobStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\TcaEngelCastingCarrierOutput.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST050_Mould\_Structures\TcaEngelCastingCarrierStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Base\Interfaces\IModule.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Base\Interfaces\IStation.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\Components\TcaWorkpiece\TcaWorkpieceControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S01_Workpiece\Enumerations\E_HMI_WP_CMD.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S01_Workpiece\Enumerations\E_ProcessState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S01_Workpiece\Enumerations\E_ProcessStep.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S01_Workpiece\FB_Workpiece.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S01_Workpiece\FB_WorkpieceRef.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S01_Workpiece\Structures\ST_HMI_WP_CMD.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S01_Workpiece\Structures\ST_Workpiece.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S02_Pallet\Enumerations\E_HMI_PL_CMD.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S02_Pallet\FB_Pallet.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S02_Pallet\FB_PalletRef.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S02_Pallet\Structures\ST_HMI_PL_CMD.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S02_Pallet\Structures\ST_Pallet.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S03_Trolley\Enumerations\E_HMI_TR_CMD.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S03_Trolley\FB_Trolley.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S03_Trolley\Structures\ST_HMI_TR_CMD.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Specific\S03_Trolley\Structures\ST_Trolley.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\ControlCabinet\ST_ControlCabinetIn.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\ControlCabinet\ST_ControlCabinetIO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\ControlCabinet\ST_ControlCabinetOut.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\Counter\ST_Counter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\Objects\ST_Objects.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\Objects\ST_Object_Item.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\Settings\ST_ModuleDynSettings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\Settings\ST_Settings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\Settings\ST_StationDynSettings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\ST_DefaultEventClasses.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MBM\FB_Euchner_MBM.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MBM\Structure\ST_Euchner_MBM_HW_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MBM\Structure\ST_Euchner_MBM_HW_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MBM\Structure\ST_Euchner_MBM_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MBM\Structure\ST_Euchner_MBM_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MBM\Structure\ST_MBM_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\FB_SafeDoorMGB2.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MGB2\ST_Euchner_MGB2_HW_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MGB2\ST_Euchner_MGB2_HW_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MGB2\ST_Euchner_MGB2_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MGB2\ST_Euchner_MGB2_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MSM\ST_Euchner_MSM_DA_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MSM\ST_Euchner_MSM_DA_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MSM\ST_Euchner_MSM_HW_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MSM\ST_Euchner_MSM_HW_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MSM\ST_Euchner_MSM_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\MSM\ST_Euchner_MSM_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\Euchner_MGB2\Structure\ST_MGB2_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\SafetyDoor\FB_SafetyDoor.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\SafetyDoor\Structure\ST_SafetyDoor_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\SafetyDoor\Structure\ST_SafetyDoor_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Components\SafetyDoor\Structure\ST_SafetyDoor_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Enumerations\E_EDM_Out.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Enumerations\E_Safety_Actor.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Enumerations\E_EmergencyStop.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Enumerations\E_Door.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\P_Safety.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\Diag\E_HistoryDiagDevices.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\Diag\ST_DiagHistory.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\Diag\ST_DiagMessage.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\Diag\ST_DiagMessageFlags.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\Diag\ST_ELM3xxxPAIInfoData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\Diag\ST_MessageItem.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\Diag\ST_SafetyDiagInfo.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\ST_SafetyIn.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\ST_SafetyIO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\Structures\ST_SafetyOut.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\TwinSAFE_Diagnose\FB_Diagnosis_History.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\TwinSAFE_Diagnose\FB_TwinSAFEDiag_EDM.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\TwinSAFE_Diagnose\FB_TwinSAFEDiag_EmergencyStop.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\TwinSAFE_Diagnose\FB_TwinSAFEDiag_MachineMonitoring.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\TwinSAFE_Diagnose\FB_TwinSAFEDiag_TwoHand.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\M001_Module\FB_M001_Module.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Enumerations\E_St010_Settings.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Structures\ST_St010_HMI_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Base\FB_ModuleBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\FB_St010_OvenA.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Structures\ST_St010_IO_IN.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Structures\ST_St010_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\ST010_OvenA\_Structures\ST_St010_IO_OUT.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Base\FB_StationBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\ST_MODULE_STATIONS_INFO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Plant\_Structures\ST_MODULES_INFO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Safety\TwinSAFE_Diagnose\FB_TwinSAFE_HW_Diag.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\P_SysSrv.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Recipe\FB_RecipeManager.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\Enumerations\Alarmsystem\E_AlarmPriority.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\Enumerations\Alarmsystem\E_AlarmState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\Enumerations\Alarmsystem\E_EventReaction.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\Enumerations\E_EtherCatBox.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\EtherCAT\Enumerations\E_EcDeviceState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\EtherCAT\FB_DiagEtherCAT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckBounds.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckDivDInt.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckDivLInt.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckDivLReal.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckDivReal.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckPointer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckRangeSigned.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\ImplicitChecks\CheckRangeUnsigned.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\P_Supervision.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\Structures\ST_EcMaster_In.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\Structures\ST_GridObject_Register.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Supervision\Structures\ST_SystemVars.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_DegPerSecToDegPerMin.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_DegPerSecToUpm.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_Diagnostic_EcDeviceState.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_Diagnostic_EcLinkState.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_Diagnostic_EcMasterDeviceState.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_EcDeviceTimeStampToTime.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_MeterPerMinToMmPerSec.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_MmPerSecToMmPerMin.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_UpmToDegreePerSec.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_MmPerMinToMmPerSec.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_MmPerSecToMeterPerMin.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Convert\F_DegPerMinToDegPerSec.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Counter\E_Counter.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Counter\E_CounterMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Counter\F_Counter.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Counter\ST_Counter_Item.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\CSV\FB_WriteCSV.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\CSV\Structures\ST_FillOrder.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\FB_JogTrigTon.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\FB_Puls_On_Off.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\FB_RtrigFtrigTof.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\FB_RtrigFtrig.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\FB_StableValue.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\FB_ToggleSwitch.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_ADD_REF_F.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_AND_REF_EX.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Byte_To_DWord.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Byte_To_Word.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_ColorToStringHexColor.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_CutInstancePath.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_FindBackupItem.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_FormatString.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_InitDynDataItem.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_InRange.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Log_Add.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_OR_REF.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_AND_REF.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_OR_REF_EX.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Real_To_Byte.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_RestoreSettingValues.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Settings_Management.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Settings_Row_Delete.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Settings_Row_Insert.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_Trend.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Functions\F_CopyDataItemValues.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Interfaces\I_StringBuilder.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Interfaces\I_WStringBuilder.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Sequencer\FB_SequenceHelper.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Sequencer\FB_SequenceHelperSb.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\FB_StringBuilder.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\FB_WStringBuilder.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\F_Replace.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat10.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat2x.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat3.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat4.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat5.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat6.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat7.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat8.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\String\WConcat9.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Var2File\FB_Var2File.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Var2File\Structures\ST_Var2File_Com.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\System\Utilities\Var2File\Structures\ST_Var2File_Config.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Background" />
+    <Folder Include="Background\UnitTest" />
+    <Folder Include="Background\UnitTest\Enumerations" />
+    <Folder Include="Background\UnitTest\Interfaces" />
+    <Folder Include="Background\UnitTest\TestCases" />
+    <Folder Include="Background\UnitTest\TestCases\Base" />
+    <Folder Include="Background\UnitTest\TestCases\StationTest" />
+    <Folder Include="Background\UnitTest\TestCases\StationTest\Structures" />
+    <Folder Include="DUTs" />
+    <Folder Include="DUTs\Configuration" />
+    <Folder Include="GVLs" />
+    <Folder Include="POUs\Components" />
+    <Folder Include="POUs\Components\AxisDriver" />
+    <Folder Include="POUs\Components\AxisDriver\Enumerations" />
+    <Folder Include="POUs\Components\AxisDriver\Interfaces" />
+    <Folder Include="POUs\Components\AxisDriver\Structures" />
+    <Folder Include="POUs\Components\AxisDriver\Structures\AdditionalAxisIO" />
+    <Folder Include="POUs\Components\AxisDriver\Structures\SoE" />
+    <Folder Include="POUs\Components\AxisDriver\Utilities" />
+    <Folder Include="POUs\Components\CylinderDriver" />
+    <Folder Include="POUs\Components\Device" />
+    <Folder Include="POUs\Components\Device\Structures" />
+    <Folder Include="POUs\Components\DriveFu" />
+    <Folder Include="POUs\Components\FurnaceDriver" />
+    <Folder Include="POUs\Components\FurnaceDriver\Enumeration" />
+    <Folder Include="POUs\Components\FurnaceDriver\Structures" />
+    <Folder Include="POUs\Components\_Structures" />
+    <Folder Include="POUs\Components\_Base" />
+    <Folder Include="POUs\Components\_Base\Interfaces" />
+    <Folder Include="POUs\Components\_Enumerations" />
+    <Folder Include="POUs\HMI" />
+    <Folder Include="POUs\HMI\Provider\HwHmi" />
+    <Folder Include="POUs\HMI\Provider\HwHmi\Structures" />
+    <Folder Include="POUs\HMI\Provider\HwHmi\Structures\+P10A_Pult" />
+    <Folder Include="POUs\HMI\Provider\HwHmi\Structures\+P50A_Haupt" />
+    <Folder Include="POUs\HMI\Provider\HwHmi\Structures\+P51A_EuchnerHandBedien" />
+    <Folder Include="POUs\HMI\Provider\HwHmi\Structures\_Base" />
+    <Folder Include="POUs\HMI\Provider\_Base" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\DataGrid" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Axis" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Cylinder" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Device" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\ManualControl Drive" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\UserControls\SensorActor" />
+    <Folder Include="POUs\HMI\Provider\_Enumerations" />
+    <Folder Include="POUs\HMI\Provider\_Interfaces" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures" />
+    <Folder Include="POUs\HMI\Provider\Tc3Hmi\Structures\Stations" />
+    <Folder Include="POUs\HMI\Utilities\DynTxt" />
+    <Folder Include="POUs\HMI\Utilities\SettingsHandling" />
+    <Folder Include="POUs\HMI\Utilities\Tracking" />
+    <Folder Include="POUs\HMI\Utilities\Validation" />
+    <Folder Include="POUs\HMI\Provider" />
+    <Folder Include="POUs\HMI\Events" />
+    <Folder Include="POUs\HMI\Events\Interfaces" />
+    <Folder Include="POUs\HMI\_Enumerations" />
+    <Folder Include="POUs\HMI\_Structures\Counter" />
+    <Folder Include="POUs\HMI\_Structures\_Base" />
+    <Folder Include="POUs\HMI\_Structures\Recipe" />
+    <Folder Include="POUs\HMI\_Structures\Safety" />
+    <Folder Include="POUs\HMI\_Structures\UserManagment" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Button" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Common" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Manual" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Axis" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Cylinder" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Device" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Manual\ManualControl Drive" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Module" />
+    <Folder Include="POUs\HMI\_Structures\_Base\Station" />
+    <Folder Include="POUs\HMI\_Structures\_TextLists" />
+    <Folder Include="POUs\HMI\_Structures\Popup" />
+    <Folder Include="POUs\HMI\_Structures\SetupPlant" />
+    <Folder Include="POUs\HMI\_Structures\Settngs" />
+    <Folder Include="POUs\HMI\_Structures\Monitoring" />
+    <Folder Include="POUs\HMI\_Structures\Data" />
+    <Folder Include="POUs\HMI\Utilities" />
+    <Folder Include="POUs\HMI\_Structures" />
+    <Folder Include="POUs\HMI\_Structures\_Common" />
+    <Folder Include="POUs\Items" />
+    <Folder Include="POUs\Items\TcaCarrier" />
+    <Folder Include="POUs\Items\TcaCarrier\Enumerations" />
+    <Folder Include="POUs\Items\TcaCarrier\Structures" />
+    <Folder Include="POUs\Items\TcaTrolley" />
+    <Folder Include="POUs\Items\TcaTrolley\Enumerations" />
+    <Folder Include="POUs\Items\TcaTrolley\Structures" />
+    <Folder Include="POUs\Items\TcaWorkpiece" />
+    <Folder Include="POUs\Items\TcaWorkpiece\Enumerations" />
+    <Folder Include="POUs\Items\TcaWorkpiece\Structures" />
+    <Folder Include="POUs\Plant\_Enumerations" />
+    <Folder Include="POUs\Plant\M001_Module" />
+    <Folder Include="POUs\Plant\M001_Module\_Enumerations" />
+    <Folder Include="POUs\Plant\M001_Module\_Structures" />
+    <Folder Include="POUs\Plant\ST050_Mould\_Enumerations" />
+    <Folder Include="POUs\Plant\ST050_Mould\_Structures" />
+    <Folder Include="POUs\Plant\ST050_Mould" />
+    <Folder Include="POUs\Plant\_Base\Interfaces" />
+    <Folder Include="POUs\Plant\_Specific" />
+    <Folder Include="POUs\Plant\ST020_OvenB\_Enumerations" />
+    <Folder Include="POUs\Plant\ST020_OvenB\_Structures" />
+    <Folder Include="POUs\Plant\ST030_Handling\_Enumerations" />
+    <Folder Include="POUs\Plant\ST030_Handling\_Structures" />
+    <Folder Include="POUs\Plant\ST040_Storage\_Enumerations" />
+    <Folder Include="POUs\Plant\ST040_Storage\_Structures" />
+    <Folder Include="POUs\Plant\ST040_Storage" />
+    <Folder Include="POUs\Plant\ST030_Handling" />
+    <Folder Include="POUs\Plant\ST020_OvenB">
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="POUs\Plant\_Specific\Components" />
+    <Folder Include="POUs\Plant\_Specific\Components\TcaWorkpiece" />
+    <Folder Include="POUs\Plant\_Specific\S01_Workpiece">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="POUs\Plant\_Specific\S01_Workpiece\Enumerations" />
+    <Folder Include="POUs\Plant\_Specific\S01_Workpiece\Structures" />
+    <Folder Include="POUs\Plant\_Specific\S02_Pallet">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="POUs\Plant\_Specific\S02_Pallet\Enumerations" />
+    <Folder Include="POUs\Plant\_Specific\S02_Pallet\Structures" />
+    <Folder Include="POUs\Plant\_Specific\S03_Trolley">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="POUs\Plant\_Specific\S03_Trolley\Enumerations" />
+    <Folder Include="POUs\Plant\_Specific\S03_Trolley\Structures" />
+    <Folder Include="POUs\Plant\_Structures\ControlCabinet" />
+    <Folder Include="POUs\Plant\_Structures\Counter" />
+    <Folder Include="POUs\Plant\_Structures\Objects" />
+    <Folder Include="POUs\Plant\_Structures\Settings" />
+    <Folder Include="POUs\Safety\Components" />
+    <Folder Include="POUs\Safety\Components\Euchner_MBM" />
+    <Folder Include="POUs\Safety\Components\Euchner_MBM\Structure" />
+    <Folder Include="POUs\Safety\Components\Euchner_MGB2" />
+    <Folder Include="POUs\Safety\Components\Euchner_MGB2\Structure" />
+    <Folder Include="POUs\Safety\Components\Euchner_MGB2\Structure\MGB2" />
+    <Folder Include="POUs\Safety\Components\Euchner_MGB2\Structure\MSM" />
+    <Folder Include="POUs\Safety\Components\SafetyDoor" />
+    <Folder Include="POUs\Safety\Components\SafetyDoor\Structure" />
+    <Folder Include="POUs\Safety\Structures\Diag" />
+    <Folder Include="POUs\System" />
+    <Folder Include="POUs\Plant\_Structures" />
+    <Folder Include="POUs\System\Recipe" />
+    <Folder Include="POUs\System\Supervision" />
+    <Folder Include="POUs\System\Supervision\Enumerations" />
+    <Folder Include="POUs\System\Supervision\Enumerations\Alarmsystem" />
+    <Folder Include="POUs\System\Supervision\EtherCAT" />
+    <Folder Include="POUs\System\Supervision\EtherCAT\Enumerations" />
+    <Folder Include="POUs\System\Supervision\ImplicitChecks" />
+    <Folder Include="POUs\System\Supervision\Structures" />
+    <Folder Include="POUs\System\Utilities" />
+    <Folder Include="POUs\System\Utilities\Convert" />
+    <Folder Include="POUs\System\Utilities\Counter" />
+    <Folder Include="POUs\System\Utilities\CSV" />
+    <Folder Include="POUs\System\Utilities\CSV\Structures" />
+    <Folder Include="POUs\System\Utilities\Functions" />
+    <Folder Include="POUs\System\Utilities\Interfaces" />
+    <Folder Include="POUs\System\Utilities\Sequencer" />
+    <Folder Include="POUs\System\Utilities\String" />
+    <Folder Include="POUs\Safety\Enumerations" />
+    <Folder Include="POUs\Plant" />
+    <Folder Include="POUs\Safety" />
+    <Folder Include="POUs\Safety\Structures" />
+    <Folder Include="POUs\Safety\TwinSAFE_Diagnose" />
+    <Folder Include="POUs\Plant\ST010_OvenA\_Enumerations" />
+    <Folder Include="POUs\Plant\_Base" />
+    <Folder Include="POUs\Plant\ST010_OvenA" />
+    <Folder Include="POUs\Plant\ST010_OvenA\_Structures" />
+    <Folder Include="POUs" />
+    <Folder Include="POUs\System\Utilities\Var2File" />
+    <Folder Include="POUs\System\Utilities\Var2File\Structures" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="Balluff BVS Sensor">
+      <DefaultResolution>Balluff Sesnor Library TC3, * (Balluff GmbH)</DefaultResolution>
+      <Namespace>Balluff_BVS_Sensor</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Balluff IO-Link Read Condition Monitoring">
+      <DefaultResolution>IO Link Device Read Conditionmonitoring Data, * (Balluff GmbH)</DefaultResolution>
+      <Namespace>Balluff_IO_LinkReadCM</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Balluff_IO-Link_Parametrization">
+      <DefaultResolution>IO Link Device Parametrization , * (Balluff GmbH)</DefaultResolution>
+      <Namespace>Balluff_IO_LinkParam</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="RMTH TC3 Library">
+      <DefaultResolution>RMTH TC3 Library, * (RMTH GmbH)</DefaultResolution>
+      <Namespace>RMTH_TC3_Library</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_ControllerToolbox">
+      <DefaultResolution>Tc2_ControllerToolbox, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_ControllerToolbox</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Drive">
+      <DefaultResolution>Tc2_Drive, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Drive</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_EtherCAT">
+      <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_EtherCAT</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_IoFunctions">
+      <DefaultResolution>Tc2_IoFunctions, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_IoFunctions</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Math">
+      <DefaultResolution>Tc2_Math, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Math</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_MC2">
+      <DefaultResolution>Tc2_MC2, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_MC2</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_MC2_Drive">
+      <DefaultResolution>Tc2_MC2_Drive, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_MC2_Drive</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_TempController">
+      <DefaultResolution>Tc2_TempController, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_TempController</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Utilities">
+      <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Utilities</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_EventLogger">
+      <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_EventLogger</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="VisuDialogs">
+      <DefaultResolution>VisuDialogs, * (System)</DefaultResolution>
+      <Namespace>VisuDialogs</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="VisuUserManagement">
+      <DefaultResolution>VisuUserMgmt, * (System)</DefaultResolution>
+      <Namespace>VisuUserManagement</Namespace>
+      <SystemLibrary>true</SystemLibrary>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <SubObject Include="FB_AxisCoupleSync2.A_Couple" />
+    <SubObject Include="FB_AxisDriver.AmplifierTemp" />
+    <SubObject Include="FB_AxisDriver.AmplifierTemp.Get" />
+    <SubObject Include="FB_AxisDriver.Axis" />
+    <SubObject Include="FB_AxisDriver.Axis.Get" />
+    <SubObject Include="FB_AxisDriver.AxisId" />
+    <SubObject Include="FB_AxisDriver.AxisId.Get" />
+    <SubObject Include="FB_AxisDriver.AxisId.Set" />
+    <SubObject Include="FB_AxisDriver.AxisState" />
+    <SubObject Include="FB_AxisDriver.AxisState.Get" />
+    <SubObject Include="FB_AxisDriver.AxisType" />
+    <SubObject Include="FB_AxisDriver.AxisType.Get" />
+    <SubObject Include="FB_AxisDriver.AxisType.Set" />
+    <SubObject Include="FB_AxisDriver.CheckLatchState" />
+    <SubObject Include="FB_AxisDriver.Coupled" />
+    <SubObject Include="FB_AxisDriver.Coupled.Get" />
+    <SubObject Include="FB_AxisDriver.DefaultParameter" />
+    <SubObject Include="FB_AxisDriver.DefaultParameter.Get" />
+    <SubObject Include="FB_AxisDriver.DefaultParameter.Set" />
+    <SubObject Include="FB_AxisDriver.Enable" />
+    <SubObject Include="FB_AxisDriver.Enable.Get" />
+    <SubObject Include="FB_AxisDriver.Enable.Set" />
+    <SubObject Include="FB_AxisDriver.EnableNeg" />
+    <SubObject Include="FB_AxisDriver.EnableNeg.Get" />
+    <SubObject Include="FB_AxisDriver.EnableNeg.Set" />
+    <SubObject Include="FB_AxisDriver.EnablePos" />
+    <SubObject Include="FB_AxisDriver.EnablePos.Get" />
+    <SubObject Include="FB_AxisDriver.EnablePos.Set" />
+    <SubObject Include="FB_AxisDriver.GearIn" />
+    <SubObject Include="FB_AxisDriver.GearInEx" />
+    <SubObject Include="FB_AxisDriver.GearOut" />
+    <SubObject Include="FB_AxisDriver.GearOutEx" />
+    <SubObject Include="FB_AxisDriver.GearRatio" />
+    <SubObject Include="FB_AxisDriver.GearRatio.Get" />
+    <SubObject Include="FB_AxisDriver.GearRatio.Set" />
+    <SubObject Include="FB_AxisDriver.Halt" />
+    <SubObject Include="FB_AxisDriver.HaltEx" />
+    <SubObject Include="FB_AxisDriver.Home" />
+    <SubObject Include="FB_AxisDriver.HomeEx" />
+    <SubObject Include="FB_AxisDriver.Jog" />
+    <SubObject Include="FB_AxisDriver.JogAcc" />
+    <SubObject Include="FB_AxisDriver.JogAccEx" />
+    <SubObject Include="FB_AxisDriver.JogAccExVel" />
+    <SubObject Include="FB_AxisDriver.JogEx" />
+    <SubObject Include="FB_AxisDriver.JogExVel" />
+    <SubObject Include="FB_AxisDriver.LastMcErrorId" />
+    <SubObject Include="FB_AxisDriver.LastMcErrorId.Get" />
+    <SubObject Include="FB_AxisDriver.LatchObjState" />
+    <SubObject Include="FB_AxisDriver.MasterAxisId" />
+    <SubObject Include="FB_AxisDriver.MasterAxisId.Get" />
+    <SubObject Include="FB_AxisDriver.MotorTemp" />
+    <SubObject Include="FB_AxisDriver.MotorTemp.Get" />
+    <SubObject Include="FB_AxisDriver.MoveAbs" />
+    <SubObject Include="FB_AxisDriver.MoveAbsEx" />
+    <SubObject Include="FB_AxisDriver.MoveAbsExVel" />
+    <SubObject Include="FB_AxisDriver.MoveAdd" />
+    <SubObject Include="FB_AxisDriver.MoveAddEx" />
+    <SubObject Include="FB_AxisDriver.MoveMod" />
+    <SubObject Include="FB_AxisDriver.MoveModEx" />
+    <SubObject Include="FB_AxisDriver.MoveRel" />
+    <SubObject Include="FB_AxisDriver.MoveRelEx" />
+    <SubObject Include="FB_AxisDriver.MoveRelExVel" />
+    <SubObject Include="FB_AxisDriver.MoveVel" />
+    <SubObject Include="FB_AxisDriver.MoveVelEx" />
+    <SubObject Include="FB_AxisDriver.Moving" />
+    <SubObject Include="FB_AxisDriver.Moving.Get" />
+    <SubObject Include="FB_AxisDriver.NotMoving" />
+    <SubObject Include="FB_AxisDriver.NotMoving.Get" />
+    <SubObject Include="FB_AxisDriver.Override" />
+    <SubObject Include="FB_AxisDriver.Override.Get" />
+    <SubObject Include="FB_AxisDriver.Override.Set" />
+    <SubObject Include="FB_AxisDriver.Reset" />
+    <SubObject Include="FB_AxisDriver.ResetMc" />
+    <SubObject Include="FB_AxisDriver.Run" />
+    <SubObject Include="FB_AxisDriver.SetAxisReference" />
+    <SubObject Include="FB_AxisDriver.SetErrorEx" />
+    <SubObject Include="FB_AxisDriver.SetPos" />
+    <SubObject Include="FB_AxisDriver.SetPosEx" />
+    <SubObject Include="FB_AxisDriver.SetPosIndraSoE" />
+    <SubObject Include="FB_AxisDriver.SetWarningEx" />
+    <SubObject Include="FB_AxisDriver.Stop" />
+    <SubObject Include="FB_AxisDriver.StopEx" />
+    <SubObject Include="FB_AxisDriver.Torque" />
+    <SubObject Include="FB_AxisDriver.Torque.Get" />
+    <SubObject Include="FB_AxisDriver.TorqueLimit" />
+    <SubObject Include="FB_AxisDriver.TorqueLimit.Get" />
+    <SubObject Include="FB_AxisDriver.TorqueLimit.Set" />
+    <SubObject Include="FB_AxisDriver.Velocity" />
+    <SubObject Include="FB_AxisDriver.Velocity.Get" />
+    <SubObject Include="FB_AxisDriver.WfDiagnostic" />
+    <SubObject Include="FB_AxisDriver.WfGearIn" />
+    <SubObject Include="FB_AxisDriver.WfGearOut" />
+    <SubObject Include="FB_AxisDriver.WfHalt" />
+    <SubObject Include="FB_AxisDriver.WfHome" />
+    <SubObject Include="FB_AxisDriver.WfJog" />
+    <SubObject Include="FB_AxisDriver.WfJogAcc" />
+    <SubObject Include="FB_AxisDriver.WfMovAbs" />
+    <SubObject Include="FB_AxisDriver.WfMovAdd" />
+    <SubObject Include="FB_AxisDriver.WfMovMod" />
+    <SubObject Include="FB_AxisDriver.WfMovRel" />
+    <SubObject Include="FB_AxisDriver.WfMovVel" />
+    <SubObject Include="FB_AxisDriver.WfPower" />
+    <SubObject Include="FB_AxisDriver.WfReset" />
+    <SubObject Include="FB_AxisDriver.WfSetPos" />
+    <SubObject Include="FB_AxisDriver.WfSoE" />
+    <SubObject Include="FB_AxisDriver.WfStop" />
+    <SubObject Include="FB_Diagnosis_History.M_DecodeDiagMessage" />
+    <SubObject Include="FB_Diagnosis_History.M_GetDiagHistory" />
+    <SubObject Include="FB_Diagnosis_History.M_GetDiagHistoryChanges" />
+    <SubObject Include="FB_Diagnosis_History.M_GetDiagHistoryEx" />
+    <SubObject Include="FB_Diagnosis_History.M_GetPAIInfoData" />
+    <SubObject Include="FB_Diagnosis_History.M_GetPAIInfoDataEx" />
+    <SubObject Include="FB_Diagnosis_History.M_GetSlaveState" />
+    <SubObject Include="FB_Diagnosis_History.M_GetSlaveStateEx" />
+    <SubObject Include="FB_Diagnosis_History.M_Reset" />
+    <SubObject Include="FB_Diagnosis_History.M_ResolveDiagPrmArgs" />
+    <SubObject Include="FB_Diagnosis_History.M_ResolveEL19xxText" />
+    <SubObject Include="FB_Diagnosis_History.M_ResolveEL29xxText" />
+    <SubObject Include="FB_Diagnosis_History.M_StartPolling" />
+    <SubObject Include="FB_Diagnosis_History.M_StopPolling" />
+    <SubObject Include="FB_Diagnosis_History.M_UpdateError" />
+    <SubObject Include="FB_Diagnosis_History.M_WfGetDiagHistory" />
+    <SubObject Include="FB_Diagnosis_History.M_WfGetPAIInfoData" />
+    <SubObject Include="FB_Diagnosis_History.M_WfGetSlaveState" />
+    <SubObject Include="FB_Euchner_MBM.M_Error" />
+    <SubObject Include="FB_Euchner_MBM.M_Mapping" />
+    <SubObject Include="FB_Euchner_MBM.M_Reset" />
+    <SubObject Include="FB_Euchner_MBM.M_Supervision" />
+    <SubObject Include="FB_LimitSwitchRefSim.Reset" />
+    <SubObject Include="FB_SafeDoorMGB2.M_Error" />
+    <SubObject Include="FB_SafeDoorMGB2.M_LockDoor" />
+    <SubObject Include="FB_SafeDoorMGB2.M_Mapping" />
+    <SubObject Include="FB_SafeDoorMGB2.M_Reset" />
+    <SubObject Include="FB_SafeDoorMGB2.M_Supervision" />
+    <SubObject Include="FB_TwinSAFE_HW_Diag.M_DiagnosisAlarm" />
+    <SubObject Include="FB_TwinSAFE_HW_Diag.M_GetSlaveIdentity" />
+    <SubObject Include="FB_TwinSAFE_HW_Diag.M_GetState_ErrorNumber" />
+    <SubObject Include="FB_TwinSAFE_HW_Diag.M_GetState_History" />
+    <SubObject Include="FB_TwinSAFE_HW_Diag.M_Reset" />
+    <SubObject Include="FB_TestStation.M_Homing">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="FB_TestStation.M_Manual" />
+    <SubObject Include="FB_TestStation.M_Sequence">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="FB_TestCase01FileLog.Run" />
+    <SubObject Include="FB_TestCase02SystemInfo.Run" />
+    <SubObject Include="FB_TestCaseBase.Reset" />
+    <SubObject Include="FB_TestCaseBase.Run" />
+    <SubObject Include="FB_TestCaseBase.TestResult" />
+    <SubObject Include="FB_TestCaseBase.TestResult.Get" />
+    <SubObject Include="FB_TestCaseBase.TestState" />
+    <SubObject Include="FB_TestCaseBase.TestState.Get" />
+    <SubObject Include="ITestCase.Reset" />
+    <SubObject Include="ITestCase.Run" />
+    <SubObject Include="ITestCase.TestResult" />
+    <SubObject Include="ITestCase.TestResult.Get" />
+    <SubObject Include="ITestCase.TestState" />
+    <SubObject Include="ITestCase.TestState.Get" />
+    <SubObject Include="P_UnitTest.Initialize" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderResolution Include="Tc2_Standard">
+      <Resolution>Tc2_Standard, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_System">
+      <Resolution>Tc2_System, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PLC.tmc">
+      <SubType>Content</SubType>
+    </None>
+  </ItemGroup>
+  <ProjectExtensions>
+    <PlcProjectOptions>
+      <XmlArchive>
+  <Data>
+    <o xml:space="preserve" t="OptionKey">
+      <v n="Name">"&lt;ProjectRoot&gt;"</v>
+      <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+        <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
+        <o>
+          <v n="Name">"{192FAD59-8248-4824-A8DE-9177C94C195A}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>CurrentUmlCompilerVersion</v>
+            <v>4.0.2.0</v>
+          </d>
+        </o>
+        <v>{246001F4-279D-43AC-B241-948EB31120E1}</v>
+        <o>
+          <v n="Name">"{246001F4-279D-43AC-B241-948EB31120E1}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>GlobalVisuImageFilePath</v>
+            <v>.\</v>
+            <v>SymbolLibraryConfiguration</v>
+            <v>VisuSymbols (System);True
+</v>
+          </d>
+        </o>
+        <v>{29BD8D0C-3586-4548-BB48-497B9A01693F}</v>
+        <o>
+          <v n="Name">"{29BD8D0C-3586-4548-BB48-497B9A01693F}"</v>
+          <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+            <v>NamingConventions</v>
+            <o>
+              <v n="Name">"NamingConventions"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+            <v>Rules</v>
+            <o>
+              <v n="Name">"Rules"</v>
+              <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+                <v>167</v>
+                <o>
+                  <v n="Name">"167"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>27</v>
+                <o>
+                  <v n="Name">"27"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>28</v>
+                <o>
+                  <v n="Name">"28"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>33</v>
+                <o>
+                  <v n="Name">"33"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>4</v>
+                <o>
+                  <v n="Name">"4"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>6</v>
+                <o>
+                  <v n="Name">"6"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+              </d>
+              <d n="Values" t="Hashtable" />
+            </o>
+          </d>
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>PerformStaticAnalyse</v>
+            <v>False</v>
+          </d>
+        </o>
+        <v>{40450F57-0AA3-4216-96F3-5444ECB29763}</v>
+        <o>
+          <v n="Name">"{40450F57-0AA3-4216-96F3-5444ECB29763}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String">
+            <v>ActiveVisuExtensionsLength</v>
+            <v>0</v>
+            <v>ActiveVisuProfile</v>
+            <v>"IR0whWr8bwfyBwAAMxnWswAAAABVAgAADu3eawAAAAABAAAAAAAAAAEaUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwACTHsAZgA5ADUAYgBiADQAMgA2AC0ANQA1ADIANAAtADQAYgA0ADUALQA5ADQAMAAwAC0AZgBiADAAZgAyAGUANwA3AGUANQAxAGIAfQADCE4AYQBtAGUABDJUAHcAaQBuAEMAQQBUACAAMwAuADEAIABCAHUAaQBsAGQAIAA0ADAAMgA2AC4AMQA4AAUWUAByAG8AZgBpAGwAZQBEAGEAdABhAAZMewAxADYAZQA1ADUAYgA2ADAALQA3ADAANAAzAC0ANABhADYAMwAtAGIANgA1AGIALQA2ADEANAA3ADEAMwA4ADcAOABkADQAMgB9AAcSTABpAGIAcgBhAHIAaQBlAHMACEx7ADMAYgBmAGQANQA0ADUAOQAtAGIAMAA3AGYALQA0AGQANgBlAC0AYQBlADEAYQAtAGEAOAAzADMANQA2AGEANQA1ADEANAAyAH0ACUx7ADkAYwA5ADUAOAA5ADYAOAAtADIAYwA4ADUALQA0ADEAYgBiAC0AOAA4ADcAMQAtADgAOQA1AGYAZgAxAGYAZQBkAGUAMQBhAH0ACg5WAGUAcgBzAGkAbwBuAAsGaQBuAHQADApVAHMAYQBnAGUADQpUAGkAdABsAGUADhpWAGkAcwB1AEUAbABlAG0ATQBlAHQAZQByAA8OQwBvAG0AcABhAG4AeQAQDFMAeQBzAHQAZQBtABESVgBpAHMAdQBFAGwAZQBtAHMAEjBWAGkAcwB1AEUAbABlAG0AcwBTAHAAZQBjAGkAYQBsAEMAbwBuAHQAcgBvAGwAcwATKFYAaQBzAHUARQBsAGUAbQBzAFcAaQBuAEMAbwBuAHQAcgBvAGwAcwAUJFYAaQBzAHUARQBsAGUAbQBUAGUAeAB0AEUAZABpAHQAbwByABUiVgBpAHMAdQBOAGEAdABpAHYAZQBDAG8AbgB0AHIAbwBsABYUVgBpAHMAdQBJAG4AcAB1AHQAcwAXGFYAaQBzAHUARQBsAGUAbQBCAGEAcwBlABgmRABlAHYAUABsAGEAYwBlAGgAbwBsAGQAZQByAHMAVQBzAGUAZAAZCGIAbwBvAGwAGiJQAGwAdQBnAGkAbgBDAG8AbgBzAHQAcgBhAGkAbgB0AHMAG0x7ADQAMwBkADUAMgBiAGMAZQAtADkANAAyAGMALQA0ADQAZAA3AC0AOQBlADkANAAtADEAYgBmAGQAZgAzADEAMABlADYAMwBjAH0AHBxBAHQATABlAGEAcwB0AFYAZQByAHMAaQBvAG4AHRRQAGwAdQBnAGkAbgBHAHUAaQBkAB4WUwB5AHMAdABlAG0ALgBHAHUAaQBkAB9IYQBmAGMAZAA1ADQANAA2AC0ANAA5ADEANAAtADQAZgBlADcALQBiAGIANwA4AC0AOQBiAGYAZgBlAGIANwAwAGYAZAAxADcAIBRVAHAAZABhAHQAZQBJAG4AZgBvACFMewBiADAAMwAzADYANgBhADgALQBiADUAYwAwAC0ANABiADkAYQAtAGEAMAAwAGUALQBlAGIAOAA2ADAAMQAxADEAMAA0AGMAMwB9ACIOVQBwAGQAYQB0AGUAcwAjTHsAMQA4ADYAOABmAGYAYwA5AC0AZQA0AGYAYwAtADQANQAzADIALQBhAGMAMAA2AC0AMQBlADMAOQBiAGIANQA1ADcAYgA2ADkAfQAkTHsAYQA1AGIAZAA0ADgAYwAzAC0AMABkADEANwAtADQAMQBiADUALQBiADEANgA0AC0ANQBmAGMANgBhAGQAMgBiADkANgBiADcAfQAlFk8AYgBqAGUAYwB0AHMAVAB5AHAAZQAmVFUAcABkAGEAdABlAEwAYQBuAGcAdQBhAGcAZQBNAG8AZABlAGwARgBvAHIAQwBvAG4AdgBlAHIAdABpAGIAbABlAEwAaQBiAHIAYQByAGkAZQBzACcQTABpAGIAVABpAHQAbABlACgUTABpAGIAQwBvAG0AcABhAG4AeQApHlUAcABkAGEAdABlAFAAcgBvAHYAaQBkAGUAcgBzACo4UwB5AHMAdABlAG0ALgBDAG8AbABsAGUAYwB0AGkAbwBuAHMALgBIAGEAcwBoAHQAYQBiAGwAZQArEnYAaQBzAHUAZQBsAGUAbQBzACwMcwB5AHMAdABlAG0ALUg2AGMAYgAxAGMAZABlADEALQBkADUAZABjAC0ANABhADMAYgAtADkAMAA1ADQALQAyADEAZgBhADcANQA2AGEAMwBmAGEANAAuKEkAbgB0AGUAcgBmAGEAYwBlAFYAZQByAHMAaQBvAG4ASQBuAGYAbwAvTHsAYwA2ADEAMQBlADQAMAAwAC0ANwBmAGIAOQAtADQAYwAzADUALQBiADkAYQBjAC0ANABlADMAMQA0AGIANQA5ADkANgA0ADMAfQAwGE0AYQBqAG8AcgBWAGUAcgBzAGkAbwBuADEYTQBpAG4AbwByAFYAZQByAHMAaQBvAG4AMgxMAGUAZwBhAGMAeQAzMEwAYQBuAGcAdQBhAGcAZQBNAG8AZABlAGwAVgBlAHIAcwBpAG8AbgBJAG4AZgBvADQwTABvAGEAZABMAGkAYgByAGEAcgBpAGUAcwBJAG4AdABvAFAAcgBvAGoAZQBjAHQANRpDAG8AbQBwAGEAdABpAGIAaQBsAGkAdAB5ANAAAhoD0AMBLQTQBQYaB9AHCBoBRQcJCNAACRoERQoLBAQAAAAHAAAAAAAAAAAAAADQDAutAgAAANANAS0O0A8BLRDQAAkaBEUKCwQEAAAACAAAAAAAAAAAAAAA0AwLrQEAAADQDQEtEdAPAS0Q0AAJGgRFCgsEBAAAAAcAAAAAAAAAAAAAANAMC60CAAAA0A0BLRLQDwEtENAACRoERQoLBAQAAAAIAAAAAAAAAAAAAADQDAutAgAAANANAS0T0A8BLRDQAAkaBEUKCwQEAAAACAAAAAAAAAAAAAAA0AwLrQIAAADQDQEtFNAPAS0Q0AAJGgRFCgsEBAAAAAgAAAAAAAAAAAAAANAMC60CAAAA0A0BLRXQDwEtENAACRoERQoLBAQAAAAHAAAAAAAAAAAAAADQDAutAgAAANANAS0W0A8BLRDQAAkaBEUKCwQEAAAACAAAAAAAAAAAAAAA0AwLrQQAAADQDQEtF9APAS0Q0BgZrQFFGhsB0AAbGgJFHAsEBAAAAAIAAAAAAAAAAAAAANAdHi0f0CAhGgJFIiMC0AAkGgVFCgsEAwAAAAMAAAAAAAAACgAAANAlC60AAAAA0AMBLSbQJwEtEdAoAS0Q0AAkGgVFCgsEAwAAAAMAAAAAAAAACgAAANAlC60BAAAA0AMBLSbQJwEtEdAoAS0QmikqAUUAAQLQAAEtK9AAAS0s0AAeLS3QLi8aA9AwC60BAAAA0DELrSQAAADQMhmtANAzLxoD0DALrQIAAADQMQutBgAAANAyGa0A0DQZrQDQNRmtAA=="</v>
+          </d>
+        </o>
+        <v>{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}</v>
+        <o>
+          <v n="Name">"{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>WriteLineIDs</v>
+            <v>True</v>
+          </d>
+        </o>
+        <v>{8F99A816-E488-41E4-9FA3-846536012284}</v>
+        <o>
+          <v n="Name">"{8F99A816-E488-41E4-9FA3-846536012284}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>DisabledWarningIds</v>
+            <v>5410</v>
+          </d>
+        </o>
+        <v>{eeeeeeee-3909-4298-8022-501ac3238667}</v>
+        <o>
+          <v n="Name">"{eeeeeeee-3909-4298-8022-501ac3238667}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{F66C7017-BDD8-4114-926C-81D6D687E35F}</v>
+        <o>
+          <v n="Name">"{F66C7017-BDD8-4114-926C-81D6D687E35F}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+      </d>
+      <d n="Values" t="Hashtable" />
+    </o>
+  </Data>
+  <TypeList>
+    <Type n="Boolean">System.Boolean</Type>
+    <Type n="Hashtable">System.Collections.Hashtable</Type>
+    <Type n="Int32">System.Int32</Type>
+    <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+    <Type n="String">System.String</Type>
+  </TypeList>
+</XmlArchive>
+    </PlcProjectOptions>
+  </ProjectExtensions>
+</Project>

@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="IModule" Id="{b2d8d98d-a020-4848-b53a-a6f3d6a0b211}">
+    <Declaration><![CDATA[INTERFACE IModule EXTENDS ITFComponent
+]]></Declaration>
+    <Folder Name="Properties" Id="{6eaa0b1d-d826-492e-8802-27c9eefaf593}" />
+    <Property Name="EmergencyStopOk" Id="{4c5aa46f-173b-4f11-8710-7c4e31464a13}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC EmergencyStopOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{3e8402a7-027a-4bc6-ad6b-98b1d72ac5d5}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{8803eaad-ee06-47ee-b390-47cb0b7c021c}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Method Name="GetStepChainTest" Id="{8ce9975d-a2fd-4473-afcc-4c06418a0d26}">
+      <Declaration><![CDATA[METHOD PUBLIC GetStepChainTest : ST_Text
+VAR_INPUT
+	Index : INT; // step chain index
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="InHome" Id="{90ef090d-77a8-41da-b31c-e0d7b3759956}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY InHome : BOOL]]></Declaration>
+      <Get Name="Get" Id="{51f0817e-a2d0-4486-9be9-0ff68d1ea512}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="M_Init" Id="{849efeb7-c1d4-4926-be01-8d5155abb2e6}">
+      <Declaration><![CDATA[METHOD Public M_Init : IModule
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_InitEvents" Id="{c524a641-9331-49fe-9958-76ed48db7581}">
+      <Declaration><![CDATA[METHOD PUBLIC M_InitEvents : IModule
+VAR_IN_OUT CONSTANT
+	infoEvent,
+	warnEvent,
+	errorEvent : TcEventEntry;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_InitEx" Id="{a01b8e29-146b-4098-b97c-ec63ed6b6ae5}">
+      <Declaration><![CDATA[METHOD Public M_InitEx : IModule
+VAR_INPUT
+	ILogger			: I_Logger;
+	IEventHandler	: I_EventHandler;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="M_Run" Id="{c6da915e-2c3b-456f-aba7-ef19b58e1cf5}">
+      <Declaration><![CDATA[METHOD PUBLIC M_Run : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Module" Id="{ebe13a5c-6809-42d9-89e8-258e295d84ec}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Module : E_Module]]></Declaration>
+      <Get Name="Get" Id="{5b3dd1f9-77cc-44a2-97d9-28e69aa30d3c}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{ba51ee6e-811e-4752-9a50-3c2008e3bbae}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="OpMode" Id="{40c6e007-08a2-4388-9fa1-33497d09c3ad}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY OpMode : E_OpMode]]></Declaration>
+      <Get Name="Get" Id="{611811d4-6027-4111-b5f6-0be5bfc37a8f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RunCycle" Id="{765b4d5a-e184-4bde-b220-8c2e9922cf8d}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY RunCycle : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f75e4172-a184-4138-922b-1c174e4daed3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="SafetyOk" Id="{10d32370-aab4-46de-8579-017e390c998d}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC SafetyOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f0ec33f6-5d57-4c6a-8482-57170d00a456}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{5fe7d12b-3a28-48e7-9e00-c06fbfc75e85}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="Stopped" Id="{a5593473-06d1-4657-8af3-f8ef6eabce19}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Stopped : BOOL]]></Declaration>
+      <Get Name="Get" Id="{4d3c9287-6c48-444c-bc02-618b444dae42}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TextAuto" Id="{fb743891-b38e-4945-a655-fa3c586df9ef}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY TextAuto : ST_Text]]></Declaration>
+      <Get Name="Get" Id="{64a8c4f8-5768-4159-a649-d12496fa5e48}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TextHome" Id="{d47de407-998c-456e-9948-246714bf6c6c}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY TextHome : ST_Text]]></Declaration>
+      <Get Name="Get" Id="{e64b116b-8875-4267-89a3-c748e31af5b3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

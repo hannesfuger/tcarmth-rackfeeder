@@ -1,0 +1,1374 @@
+{
+  "$schema": "./../../PLC/Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.360/runtimes/native1.12-tchmi/Schema/TchmiConfig.Schema.json",
+  "basePath": "./Beckhoff.TwinCAT.HMI.Framework",
+  "scaleMode": "None",
+  "startupView": "Desktop.view",
+  "loginPage": "/Base_HMI/Base/UserMgmt/LoginPage1.html",
+  "splash": {
+    "versionSource": "Framework"
+  },
+  "projectVersion": "1.0.0.0",
+  "tcHmiServer": {
+    "websocketIntervalTime": 500,
+    "websocketTimeout": 20000,
+    "websocketSystemTimeout": 60000,
+    "websocketSubscriptionMode": null,
+    "disableOptionalSystemSubscriptions": false
+  },
+  "activeTheme": "Base",
+  "themes": {
+    "Base": {
+      "resources": [
+        {
+          "name": "Themes/Base/Base.theme",
+          "description": "",
+          "type": "ThemedValues"
+        },
+        {
+          "name": "Themes/Base/BaseStyle.css",
+          "description": "",
+          "type": "Stylesheet"
+        }
+      ],
+      "replacesThemeForControls": [],
+      "replacesThemeForPackageComponents": []
+    }
+  },
+  "dependencyFiles": [
+    {
+      "name": "Fonts/Fonts.css",
+      "description": "",
+      "type": "Stylesheet"
+    },
+    {
+      "name": "Scripts/F_convert_Time_Anzeige.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_convert_Anzeige_Time.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/ProviderColorDatagridNotification.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "StyleDataGrid.css",
+      "description": "",
+      "type": "Stylesheet"
+    },
+    {
+      "name": "Scripts/babel.min.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/polyfill.min.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_CloseFullScreen.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_ColorBinding.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_TranslateString.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_TranslateText.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_TranslateTextArray.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_TranslateTextDatagrid.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_OpenFullScreen.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/ReadUrlParameter.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_BoolToVisibility.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_EnforceNumberSign.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_CalcSimpleBarChartTop.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_GetSelectionColor.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_NumInputCommit.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_NumInputOpen.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_SwitchGlobalLocalNavVisible.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_SwitchStringByBool.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_ToggleBool.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Scripts/F_BoolToOkNok.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Pages/Stations/_Specific/F_PalletSelect.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Pages/Stations/_Specific/F_PalletStateToColor.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Pages/Stations/_Specific/F_TrolleytStateToColor.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Pages/Stations/_Specific/F_WorkpieceSelect.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "Pages/Stations/_Specific/F_WorkpieceStateToColor.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaCarrier/TcaCarrierDraw.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaCarrier/TcaCarrierEditFunction.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaCarrier/TcaCarrierPopup.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaCarrier/TcaCarrierRefresh.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaTrolley/TcaTrolleyDraw.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaTrolley/TcaTrolleyPopup.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaTrolley/TcaTrolleyRefresh.js",
+      "description": "",
+      "type": "JavaScript"
+    },
+    {
+      "name": "TcaItems/TcaWorkpiecePlace/TcaWorkpieceIconRefresh.js",
+      "description": "",
+      "type": "JavaScript"
+    }
+  ],
+  "userControls": [
+    {
+      "url": "Base_HMI/Base/Functions/ucButton.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucDoor.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucEmergencyStop.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucManualControlAxis.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucManualControlCylinder.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucManualControlDevice.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucManualControlDrive.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucPopup.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Functions/ucSimpleBarChart.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Inputs/ucInputNumeric.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Manual/ucManual.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Module/Module_MainPage.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Module/Module_ManualPage.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Monitoring/ucMonitoring.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Settings/ucSettings.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Station/Station_MainPage.usercontrol"
+    },
+    {
+      "url": "Base_HMI/Base/Station/Station_ManualPage.usercontrol"
+    },
+    {
+      "url": "Pages/Stations/_Specific/UcPalletCmd.usercontrol"
+    },
+    {
+      "url": "Pages/Stations/_Specific/UcTrolleyCmd.usercontrol"
+    },
+    {
+      "url": "Pages/Stations/_Specific/UcWorkpieceCmd.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaCarrier/TcaCarrier.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaCarrier/TcaCarrierConfig.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaCarrier/TcaCarrierService.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaRackFeeder/RackFeeder.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaRackFeeder/StorageDock.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaRackFeeder/TeachTrolleyDock.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaTrolley/TcaTrolley.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaTrolley/TcaTrolleyConfig.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaTrolley/TcaTrolleyService.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaWorkpiecePlace/TcaWorkpieceIcon.usercontrol"
+    },
+    {
+      "url": "TcaItems/TcaWorkpiecePlace/TcaWorkpiecePlace.usercontrol"
+    }
+  ],
+  "controls": [],
+  "content": [
+    {
+      "url": "Base_HMI/Base/Footer/conMainFooter.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Base_HMI/Base/Header/conMainHeader.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Base_HMI/Base/Keyboards/Numpad.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Base_HMI/Base/Keyboards/Tastatur.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Base_HMI/Base/Notification/conNotification.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Base_HMI/Base/UserMgmt/conUserMgmt.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/AxisManager/conAxisManager.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/conEplan.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/conInfo.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/conPlcState.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/conRecipemanagement.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/conSpecial.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Counter/conCounter.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Counter/conCounterState.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Main/conMainTwoRegions.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Main/conPlantControlMain.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Modules/Module001/conModule001_Main.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Modules/Module001/conModule001_Mainview.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Modules/Module001/conModule001_Manual.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Modules/Module001/conModule001_Monitoring.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Modules/Module001/conModule001_Settings.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Modules/Module001/conModule001_Special.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Order/conOrderControl.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Order/conOrderManagement.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Order/conOrderStandardComments.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Order/conOrderState.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/PlantSetup/conPlantSetupState.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Settings/conSettings_Plant.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Settings/conSettings_Product.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Settings/conSettings_Production.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/conStationOverview.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station010/conStation010_Main.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station010/conStation010_Mainview.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station010/conStation010_Manual.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station010/conStation010_Monitoring.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station010/conStation010_Settings.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station010/conStation010_Special.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station020/conStation020_Main.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station020/conStation020_Mainview.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station020/conStation020_MainviewSecondary.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station020/conStation020_Manual.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station020/conStation020_Monitoring.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station020/conStation020_Settings.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station020/conStation020_Special.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station030/conStation030_Main.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station030/conStation030_Mainview.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station030/conStation030_Manual.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station030/conStation030_Monitoring.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station030/conStation030_Settings.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station030/conStation030_Special.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station040/conStation040_Main.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station040/conStation040_Mainview.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station040/conStation040_Manual.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station040/conStation040_Monitoring.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station040/conStation040_Settings.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station050/conStation050_Main.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station050/conStation050_Mainview.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station050/conStation050_Manual.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station050/conStation050_Monitoring.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station050/conStation050_Settings.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Stations/Station050/conStation050_Special.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Pages/Statistics/conStatistics.content",
+      "preload": false,
+      "keepAlive": false,
+      "loadSync": false,
+      "preloadBindings": false
+    }
+  ],
+  "views": [
+    {
+      "url": "Desktop.view",
+      "preload": false,
+      "keepAlive": false,
+      "preloadBindings": false
+    },
+    {
+      "url": "Secondary.view",
+      "preload": false,
+      "keepAlive": false,
+      "preloadBindings": false
+    }
+  ],
+  "userFunctions": [
+    {
+      "url": "Pages/Stations/_Specific/F_PalletSelect.js"
+    },
+    {
+      "url": "Pages/Stations/_Specific/F_PalletStateToColor.js"
+    },
+    {
+      "url": "Pages/Stations/_Specific/F_TrolleytStateToColor.js"
+    },
+    {
+      "url": "Pages/Stations/_Specific/F_WorkpieceSelect.js"
+    },
+    {
+      "url": "Pages/Stations/_Specific/F_WorkpieceStateToColor.js"
+    },
+    {
+      "url": "Scripts/F_BoolToOkNok.js"
+    },
+    {
+      "url": "Scripts/F_BoolToVisibility.js"
+    },
+    {
+      "url": "Scripts/F_CalcSimpleBarChartTop.js"
+    },
+    {
+      "url": "Scripts/F_CloseFullScreen.js"
+    },
+    {
+      "url": "Scripts/F_ColorBinding.js"
+    },
+    {
+      "url": "Scripts/F_convert_Anzeige_Time.js"
+    },
+    {
+      "url": "Scripts/F_convert_Time_Anzeige.js"
+    },
+    {
+      "url": "Scripts/F_EnforceNumberSign.js"
+    },
+    {
+      "url": "Scripts/F_GetSelectionColor.js"
+    },
+    {
+      "url": "Scripts/F_NumInputCommit.js"
+    },
+    {
+      "url": "Scripts/F_NumInputOpen.js"
+    },
+    {
+      "url": "Scripts/F_OpenFullScreen.js"
+    },
+    {
+      "url": "Scripts/F_SwitchGlobalLocalNavVisible.js"
+    },
+    {
+      "url": "Scripts/F_SwitchStringByBool.js"
+    },
+    {
+      "url": "Scripts/F_ToggleBool.js"
+    },
+    {
+      "url": "Scripts/F_TranslateString.js"
+    },
+    {
+      "url": "Scripts/F_TranslateText.js"
+    },
+    {
+      "url": "Scripts/F_TranslateTextArray.js"
+    },
+    {
+      "url": "Scripts/F_TranslateTextDatagrid.js"
+    },
+    {
+      "url": "Scripts/ProviderColorDatagridNotification.js"
+    },
+    {
+      "url": "TcaItems/TcaCarrier/TcaCarrierDraw.js"
+    },
+    {
+      "url": "TcaItems/TcaCarrier/TcaCarrierEditFunction.js"
+    },
+    {
+      "url": "TcaItems/TcaCarrier/TcaCarrierPopup.js"
+    },
+    {
+      "url": "TcaItems/TcaCarrier/TcaCarrierRefresh.js"
+    },
+    {
+      "url": "TcaItems/TcaTrolley/TcaTrolleyDraw.js"
+    },
+    {
+      "url": "TcaItems/TcaTrolley/TcaTrolleyPopup.js"
+    },
+    {
+      "url": "TcaItems/TcaTrolley/TcaTrolleyRefresh.js"
+    },
+    {
+      "url": "TcaItems/TcaWorkpiecePlace/TcaWorkpieceIconRefresh.js"
+    }
+  ],
+  "symbols": {
+    "internal": {
+      "ActualPage": {
+        "type": "tchmi:framework#/definitions/ContentPath",
+        "persist": false,
+        "readonly": false
+      },
+      "PageHistorie": {
+        "value": [
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content",
+          "Pages/Stations/conStationOverview.content"
+        ],
+        "type": "tchmi:project#/definitions/arrPageHistorie",
+        "persist": false,
+        "readonly": false
+      },
+      "sNavLocalVisibility": {
+        "value": "Collapsed",
+        "type": "tchmi:general#/definitions/String",
+        "persist": false,
+        "readonly": false
+      },
+      "NavTargetLocalMonitoring": {
+        "value": "",
+        "type": "tchmi:general#/definitions/String",
+        "persist": false,
+        "readonly": false
+      },
+      "NavTargetLocalSettings": {
+        "value": "",
+        "type": "tchmi:general#/definitions/String",
+        "persist": false,
+        "readonly": false
+      },
+      "NavTargetLocalManual": {
+        "value": "",
+        "type": "tchmi:general#/definitions/String",
+        "persist": false,
+        "readonly": false
+      },
+      "NumericInputEvent": {
+        "type": "tchmi:project#/definitions/NumericInputEventArgs",
+        "persist": false,
+        "readonly": false
+      },
+      "sNavGlobalVisibility": {
+        "value": "Visible",
+        "type": "tchmi:general#/definitions/String",
+        "persist": false,
+        "readonly": false
+      }
+    },
+    "themedResources": {
+      "ASMA_Logo": {
+        "type": "tchmi:framework#/definitions/Path",
+        "description": "",
+        "values": {
+          "Base": "Images/01-asma-Logo-klein-ohne-Schrift.png"
+        }
+      },
+      "TcaWorkpieceStatusColor": {
+        "type": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+        "description": "",
+        "values": {
+          "Base": [
+            {
+              "color": "rgba(236, 236, 236, 1)"
+            },
+            {
+              "color": "rgba(176, 176, 176, 1)"
+            },
+            {
+              "color": "rgba(33, 150, 243, 1)"
+            },
+            {
+              "color": "rgba(255, 152, 0, 1)"
+            },
+            {
+              "color": "rgba(156, 39, 176, 1)"
+            },
+            {
+              "color": "rgba(76, 175, 80, 1)"
+            },
+            {
+              "color": "rgba(244, 67, 54, 1)"
+            }
+          ]
+        }
+      }
+    },
+    "timer": {},
+    "package": {}
+  },
+  "intervals": {},
+  "trigger": [
+    {
+      "event": "onInitialized",
+      "actions": [
+        {
+          "objectType": "JavaScript",
+          "active": true,
+          "sourceLines": [
+            "var nLevel = 0;",
+            "var userGroup = TcHmi.Server.getGroupsOfCurrentUser();",
+            "if(userGroup.length) {",
+            "    console.log('Current user is in groups ' + userGroup.join(', '));",
+            " ",
+            "    if (userGroup.includes(\"__SystemAdministrators\" )) {",
+            "\t    nLevel = 6;",
+            "\t}",
+            "    else if (userGroup.includes(\"__SystemMaintenanceUsers\" ) ) {",
+            "\t    nLevel = 3;",
+            "\t}",
+            "    //TcHmi.Write",
+            "} else {",
+            "    console.log('We have no current user group.');",
+            "}",
+            "",
+            "// write level",
+            "TcHmi.Server.writeSymbolEx('PLC1.HMI.stHmiTc3::stIn::stUserMgmt::iHmiUserLevel', nLevel, { timeout: 2000 }, function(data){",
+            "    if(data.error !== TcHmi.Errors.NONE){",
+            "        console.log('TcHmi.Server class level error:', data.error);",
+            "        return;",
+            "    }",
+            "    var response = data.response;",
+            "    if (!response || response.error !== undefined) {",
+            "        console.log('TwinCAT HMI Server response level error:', response.error);",
+            "        return;",
+            "    }",
+            "    var commands = response.commands;",
+            "    if(commands === undefined){",
+            "        return;",
+            "    }",
+            "    var command = commands[0];",
+            "    if(command === undefined){",
+            "        return;",
+            "    }",
+            "    if(command.error !== undefined){",
+            "        console.log('TwinCAT HMI Server command level error:', command.error);",
+            "        return;",
+            "    }",
+            "    ",
+            "    console.log('User level written.');",
+            "});"
+          ],
+          "asyncWait": true,
+          "waitMode": "Synchronous"
+        }
+      ]
+    }
+  ],
+  "actionTemplates": [
+    {
+      "displayname": "SaveNavHistory",
+      "name": "SaveNavHistory",
+      "description": "Speichert die aufgerufenen Contentpfade",
+      "category": "Action Templates",
+      "actions": [
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[9]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[8]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[8]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[7]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[7]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[6]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[6]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[5]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[5]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[4]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[4]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[3]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[3]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[2]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[2]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[1]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[1]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[0]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[0]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%ActualPage%/i%"
+          },
+          "asyncWait": true
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "displayname": "ReadNavHistory",
+      "name": "ReadNavHistory",
+      "description": "Lest die letzten Werte zurück",
+      "category": "Action Templates",
+      "actions": [
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[0]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[1]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[1]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[2]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[2]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[3]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[3]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[4]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[4]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[5]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[5]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[6]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[6]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[7]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[7]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[8]%/i%"
+          },
+          "asyncWait": true
+        },
+        {
+          "objectType": "WriteToSymbol",
+          "active": true,
+          "symbolExpression": "%i%PageHistorie[8]%/i%",
+          "value": {
+            "objectType": "Symbol",
+            "valueType": "tchmi:general#/definitions/String",
+            "symbolExpression": "%i%PageHistorie[9]%/i%"
+          },
+          "asyncWait": true
+        }
+      ],
+      "parameters": []
+    }
+  ],
+  "languages": {
+    "de-DE": "Localization/de-DE.localization",
+    "en-US": "Localization/en-US.localization"
+  },
+  "languageFallback": "",
+  "disableLoadingOptimization": false,
+  "creatorSettings": {
+    "viewport": {
+      "defaultWidth": 1024,
+      "defaultHeight": 768
+    }
+  },
+  "binding": {
+    "symbolError": "Ignore",
+    "symbolWriteError": "ReadBack"
+  },
+  "packages": [
+    {
+      "name": "FrameworkPrj1",
+      "basePath": "/FrameworkPrj1",
+      "symbols": {
+        "package": {}
+      },
+      "engineering": {
+        "projectReference": true
+      }
+    },
+    {
+      "name": "Beckhoff.TwinCAT.HMI.BaseTemplate",
+      "basePath": "/Beckhoff.TwinCAT.HMI.BaseTemplate",
+      "symbols": {
+        "package": {}
+      }
+    },
+    {
+      "name": "Beckhoff.TwinCAT.HMI.Controls",
+      "basePath": "/Beckhoff.TwinCAT.HMI.Controls",
+      "symbols": {
+        "package": {}
+      }
+    },
+    {
+      "name": "Beckhoff.TwinCAT.HMI.EcDiagnosticsControl",
+      "basePath": "/Beckhoff.TwinCAT.HMI.EcDiagnosticsControl",
+      "symbols": {
+        "package": {}
+      }
+    },
+    {
+      "name": "Beckhoff.TwinCAT.HMI.Framework",
+      "basePath": "/Beckhoff.TwinCAT.HMI.Framework",
+      "symbols": {
+        "package": {}
+      }
+    },
+    {
+      "name": "Beckhoff.TwinCAT.HMI.Functions",
+      "basePath": "/Beckhoff.TwinCAT.HMI.Functions",
+      "symbols": {
+        "package": {}
+      }
+    },
+    {
+      "name": "Beckhoff.TwinCAT.HMI.PDFViewer",
+      "basePath": "/Beckhoff.TwinCAT.HMI.PDFViewer",
+      "symbols": {
+        "package": {}
+      }
+    },
+    {
+      "name": "Beckhoff.TwinCAT.HMI.ResponsiveNavigation",
+      "basePath": "/Beckhoff.TwinCAT.HMI.ResponsiveNavigation",
+      "symbols": {
+        "package": {}
+      }
+    }
+  ],
+  "keyboardLayouts": [
+    {
+      "url": "KeyboardLayouts/German - compact.keyboard.json"
+    },
+    {
+      "url": "KeyboardLayouts/Numpad.keyboard.json"
+    },
+    {
+      "url": "KeyboardLayouts/US - compact.keyboard.json"
+    }
+  ],
+  "systemKeyboard": {
+    "providerName": "",
+    "autoOpen": false,
+    "projectKeyboardMapping": {
+      "de-DE": {
+        "text": "",
+        "decimal": "",
+        "numeric": ""
+      },
+      "en-US": {
+        "text": "",
+        "decimal": "",
+        "numeric": ""
+      }
+    }
+  },
+  "systemPopups": {
+    "providerName": "Beckhoff.TcHmiPopups"
+  }
+}

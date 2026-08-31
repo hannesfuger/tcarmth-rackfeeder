@@ -1,0 +1,1097 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_ModuleBase" Id="{750026b4-7c8f-4465-87ee-327696055617}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ModuleBase EXTENDS FB_ComponentBase IMPLEMENTS IModule
+VAR_INPUT
+	bEmergencyStopOk 	: BOOL;
+	bSafetyOk 			: BOOL;
+	bEnable 			: BOOL;
+	bAutoHome 			: BOOL;		// if its true station will be homed by start button
+	iNumberOfStepChains	: INT := 1;	// count of stepchains per station
+	iStepChainIndex		: INT; 		// index to link text of choosed stepchain to hmi
+END_VAR
+VAR_OUTPUT
+	nStateColor			: DWORD;	// color for state of module
+
+	bBusy				: BOOL;		// module is busy
+	bTransferEnable		: BOOL;		// transfer enable from module
+	stTextAuto			: ST_Text;
+	stTextHome			: ST_Text;
+	
+	/// error-stop status
+	bAutoStop_Error		: BOOL;
+END_VAR
+VAR
+	stHmiToModule		: REFERENCE TO ST_DefaultHmiToPlc;				// default hmi to module
+	stHmiManualIn		: REFERENCE TO ST_HMI_BASE_MODULE_MANUAL_IN;	// hmi manual to module
+	stHmiManualOut		: REFERENCE TO ST_HMI_BASE_MODULE_MANUAL_OUT;	// hmi manual from module
+	stLocalSettings		: REFERENCE TO ST_ModuleDynSettings;			// dyn. module settings
+	stLocalMonitoring	: REFERENCE TO ST_Monitoring_Module;			// dyn. module monitoring
+	
+	stLocalSettingsBackup	: ST_ModuleDynSettings;	// dyn. module settings
+	
+	/// - stations of this module -
+	aIStaton	: ARRAY[0..E_Station.eStation_nMaxIdx] OF IStation;
+	
+	nModuleNb	: INT;
+	eModule		: E_Module;
+	eOpMode		: E_OpMode;
+	bStopped	: BOOL := TRUE;
+	
+	/// enable var's
+	bRunCycle, bRunStep, bRunHoming, bInHome : BOOL;
+
+	/// counter
+	diCycles				: UDINT; // Zykluszähler
+	diLastCycleTime			: UDINT; // letzte Zykluszeit [ms]
+	
+	tonOpModeOff			: TON;
+	fTrigSafetyOk			: F_TRIG;
+	rtrigOpModeChanged		: R_TRIG;
+	
+	rtirgSafetyOpMode_Auto	: R_TRIG;
+	rtirgSafetyOpMode_Hand	: R_TRIG;
+	rtirgSafetyOpMode_Aus	: R_TRIG;
+	
+	bInitSettings	: BOOL;
+	bInitMonitoring	: BOOL;
+	bInitManual		: BOOL;
+	
+	sb				: FB_StringBuilder;
+	sqHome, sqAuto	: FB_SequenceHelperSb;
+	localEvents		: ST_DefaultEventClasses;
+END_VAR
+VAR PERSISTENT
+	diTotalCycles	: UDINT; // Zykluszähler
+	eOpModeOld		: E_OpMode;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="DynSetMonMan" Id="{ba5a1def-fa8e-4d9c-9d56-38fcc39c6851}" />
+    <Folder Name="Events" Id="{472f9937-6151-4602-bbfe-c070b807d141}" />
+    <Folder Name="Internal" Id="{ca1212e7-0416-4e26-9dae-31034da8d985}" />
+    <Folder Name="Properties" Id="{438bd37b-f630-4074-ad1f-7d48aba325aa}" />
+    <Folder Name="Protected" Id="{6857ffa3-b619-4c7a-a57e-4ac4679065e1}" />
+    <Method Name="CycleEnd" Id="{7eb8f801-dc4e-4a84-aaca-a316a42660d2}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PROTECTED CycleEnd
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[diCycles := diCycles + 1;
+diTotalCycles := diTotalCycles + 1;
+diLastCycleTime := TIME_TO_UDINT(sqAuto.SeqTime);
+sqAuto.StopSequence();
+bBusy := FALSE;
+//bStopped := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CycleStart" Id="{d25d1c4b-c9a2-4fe0-ad30-353102c7c756}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PROTECTED CycleStart
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sqAuto.StartSequence();
+bBusy := TRUE;
+bStopped := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="EmergencyStopOk" Id="{d16c344e-1f0f-4fb2-8004-ddaafbd5ea31}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC EmergencyStopOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{9be63e8e-edba-4d1d-8246-39a17f4dcee1}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EmergencyStopOk := bEmergencyStopOk;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{482a9d37-0acd-4ae9-9039-88ea28109039}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bEmergencyStopOk := EmergencyStopOk;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Enable" Id="{c379c254-1955-4809-af60-2f3bc1324938}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC Enable : BOOL]]></Declaration>
+      <Get Name="Get" Id="{4ca5a6a0-36b6-4779-92fc-58d868446c73}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Enable := bEnable;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c18b50e2-a2b8-4393-8ffe-e8a4cb226920}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bEnable := Enable;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="EnableManual" Id="{db6fa8a8-45a9-4479-93b8-7e802eb97f0d}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+//{attribute 'monitoring' := 'variable'}
+PROPERTY PUBLIC EnableManual : BOOL]]></Declaration>
+      <Get Name="Get" Id="{b55b5421-b1a8-4134-80c6-bdda88c59679}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EnableManual := EnableSummary AND (eOpMode = eOpMode_manual);
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="EnableSummary" Id="{5b05b0ad-48a2-4621-814d-75be1c50c9ea}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+//{attribute 'monitoring' := 'variable'}
+PROPERTY INTERNAL EnableSummary : BOOL]]></Declaration>
+      <Get Name="Get" Id="{3687db34-443a-4a84-8bc4-04749c475c00}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EnableSummary := bEnable 
+				AND bSafetyOk 
+				AND (eOpMode = eOpMode_manual) OR (eOpMode = eOpMode_step) OR (eOpMode = eOpMode_auto);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="GetStepChainTest" Id="{c18b19dc-8077-49d2-a762-8c7f9a154fbc}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC GetStepChainTest : ST_Text
+VAR_INPUT
+	Index : INT; // step chain index
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// step chain index is ignored in the default implementation -> if multiple step chains are needed, use derived base and override this method. 
+GetStepChainTest.nNameId := sqAuto.InfoTextId;
+GetStepChainTest.wsName := sqAuto.Info.ToWString();
+GetStepChainTest.wsNameId := sqAuto.InfoTextWsId;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="InHome" Id="{db83cf62-2102-4685-b70f-87a5b4d9fd36}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Station in Home flag
+{attribute 'monitoring':='call'}
+PROPERTY InHome : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{7c33e96f-b3c3-4ce0-8cfa-b84efdedd18b}">
+        <Declaration><![CDATA[VAR
+
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[InHome := TRUE;
+//FOR ii := 0 TO iNumberOfStepChains - 1 DO
+	IF NOT sqHome.InHome THEN
+		InHome := FALSE;
+	END_IF
+//END_FOR
+
+bInHome := InHome;
+IF InHome THEN
+	bRunHoming := FALSE;
+END_IF
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="M_CallObjects" Id="{3b38f9fd-91dd-4fc2-a286-68d1afb5d9ad}" FolderPath="Protected\">
+      <Declaration><![CDATA[METHOD PROTECTED M_CallObjects : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Call objects - to be subclassed]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynMonitoring" Id="{1529ceef-e575-41e9-825f-da256708eb98}" FolderPath="DynSetMonMan\">
+      <Declaration><![CDATA[METHOD PROTECTED M_DynMonitoring : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// station base signals
+stLocalMonitoring.bInHome := bInHome;
+stLocalMonitoring.bAuto := bRunStep;
+stLocalMonitoring.bBusy := bBusy;
+stLocalMonitoring.bError := (eState = E_ComponentState.eComponentState_error);
+stLocalMonitoring.bManual := (eOpMode = E_OpMode.eOpMode_manual);
+stLocalMonitoring.bTransferEnable := bTransferEnable;
+stLocalMonitoring.bWarning := (eState = E_ComponentState.eComponentState_warning);
+
+M_DynMonitoring := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Homing" Id="{1b918dfa-10dd-4141-946c-ce65d83d5e92}" FolderPath="Protected\">
+      <Declaration><![CDATA[METHOD PROTECTED M_Homing
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Homing sequence - to be subclassed]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{12111a4c-2c7a-41dc-8718-0a2a44be41f0}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Init : IModule
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set up defaults
+Active := TRUE;
+Enable := TRUE;
+SUPER^.M_InitComponentBase();
+
+// set up station id and name -> to be subclassed... 
+//Module := E_Module.eModule_none;
+//Name := stTextListGlobal.stText_M000_Name;
+
+sqAuto.SetInfo(Name);
+nStateColor := TO_DWORD(STATICS.stColor.White);
+
+stHmiToModule REF= P_HMI_Controller.aStHmiToModule[eModule];
+stHmiManualIn REF= HMI.stHmi.stIn.arrStModule[eModule].stManual;
+stHmiManualOut REF= HMI.stHmi.stOut.stCommon.arrStModule[eModule].stManual;
+stLocalSettings REF= Services.stSettings.stModuleSettings[eModule];
+stLocalMonitoring REF= HMI.stHmi.stOut.stCommon.stMonitoring.astMonitoringModule[eModule];
+
+//FOR ii := 0 TO CONST.iMaxIdxLocalStepChain DO
+	sqAuto.SetInfo(stTextListGlobal.stText_initialize_station);	// -> to be subclassed, ... 
+//END_FOR
+
+M_Init := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_InitDynManual" Id="{6be7f316-ffd0-4fc9-9a8c-58b08bb54d75}" FolderPath="DynSetMonMan\">
+      <Declaration><![CDATA[METHOD PROTECTED M_InitDynManual : BOOL
+VAR_INPUT
+	nIndex			: INT;
+	stName			: ST_Text;
+	stGroup			: ST_Text;
+	stType			: ST_Text;
+	diObjectIndex	: DINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk
+IF nIndex < 0 OR nIndex > CONST.iMaxIdxObject THEN
+	ModuleError.ArgSbAppendRaise('Dyn. manual index out of range.');
+	RETURN;
+END_IF
+
+stHmiManualOut.stObjects[nIndex].stName := stName;
+stHmiManualOut.stObjects[nIndex].stGroup := stGroup;
+stHmiManualOut.stObjects[nIndex].stType := stType;
+stHmiManualOut.stObjects[nIndex].diObjectIndex := diObjectIndex;
+
+M_InitDynManual := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_InitDynManualUi" Id="{4c3a9304-06be-4330-844b-ab4d111fe81a}" FolderPath="DynSetMonMan\">
+      <Declaration><![CDATA[METHOD PROTECTED M_InitDynManualUi : BOOL
+VAR_IN_OUT
+	fbManualUi	: FB_ManualUiBase;
+END_VAR
+VAR
+	IManualUi	: I_ManualUi;
+	nIx, ix		: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IManualUi := fbManualUi;
+
+// search next free index
+nIx := -1;
+FOR ix := 0 TO CONST.iMaxIdxObject DO
+	IF stHmiManualOut.stObjects[ix].stName.wsName = "" THEN
+		nIx := ix;
+		EXIT;
+	END_IF
+END_FOR
+
+IF nIx < 0 THEN
+	ModuleError.ArgSbAppendRaise('Next free dyn. manual index not found.');
+	RETURN;
+END_IF
+
+IManualUi.ObjectIndex := (ModuleNb * 100) + nIx + 1; // create unique object index
+
+M_InitDynManualUi := M_InitDynManual(nIx,			// index 
+		IManualUi.Name,								// device name
+		Name,										// group -> module name
+		stTextListGlobal.stText_ObjectTypeDrive,	// type
+		IManualUi.ObjectIndex);						// object index
+		
+IManualUi.M_SetStateObject(stHmiManualOut.stObjects[nIx]);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_InitDynMonitoringItem" Id="{0e4d8124-bbc8-4c68-833c-270c558ed0da}" FolderPath="DynSetMonMan\">
+      <Declaration><![CDATA[METHOD PROTECTED M_InitDynMonitoringItem : BOOL
+VAR_INPUT
+	nIndex		: INT;
+	wsName		: WSTRING;
+	stGroup		: ST_Text;
+	eDataType	: E_DataType;
+	stUnit		: ST_Text;			
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk
+IF nIndex < 0 OR nIndex > CONST.iMaxIdxMonitoring THEN
+	ModuleError.ArgSbAppendRaise('Dyn. monitoring index out of range.');
+	RETURN;
+END_IF
+
+stLocalMonitoring.astMonitoring[nIndex].stIndex.nNameId := nIndex;
+stLocalMonitoring.astMonitoring[nIndex].stIndex.wsNameId := wsName;
+stLocalMonitoring.astMonitoring[nIndex].stName := F_CreateDynText(wsName, nIndex);
+stLocalMonitoring.astMonitoring[nIndex].eDataType := eDataType;
+stLocalMonitoring.astMonitoring[nIndex].stGroup := stGroup;
+stLocalMonitoring.astMonitoring[nIndex].stUnit := stUnit;
+
+M_InitDynMonitoringItem := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_InitDynSettingsItem" Id="{1e8f7297-bb82-4f81-a8c3-9add4b30dfed}" FolderPath="DynSetMonMan\">
+      <Declaration><![CDATA[METHOD PROTECTED M_InitDynSettingsItem : BOOL
+VAR_INPUT
+	nIndex					: INT;
+	wsIndex					: WSTRING;
+	stSettGroup				: ST_Text;
+	stSettTitle				: ST_Text;
+	stSettUnit				: ST_Text;	
+	eSettDataType			: E_DataType;	
+	fSettValueMin			: REAL;
+	fSettValueMax			: REAL;
+	// required user level, 0 = none
+	nRequiredUserLevel		: INT := 0;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk
+IF nIndex < 0 OR nIndex > CONST.iMaxIdxLocalSetting THEN
+	ModuleError.ArgSbAppendRaise('Dyn. setting index out of range.');
+	RETURN;
+END_IF
+
+M_InitDynSettingsItem := F_InitDynDataItem(
+							nIndex,
+							wsIndex,
+							stSettGroup,
+							stSettTitle,
+							stSettUnit,
+							eSettDataType,
+							fSettValueMin,
+							fSettValueMax,
+							// required user level, 0 = none
+							nRequiredUserLevel,
+							E_RecipeMode.eRecipeMode_ToFrom,
+							stLocalSettings.stDynStationSettings);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_InitEvents" Id="{a3fe97e4-aa70-4896-9a1e-9701c9dc6d82}" FolderPath="Events\">
+      <Declaration><![CDATA[METHOD PUBLIC M_InitEvents : IModule
+VAR_IN_OUT CONSTANT
+	infoEvent,
+	warnEvent,
+	errorEvent : TcEventEntry;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// create default module alarms
+localEvents.Info := infoEvent;
+localEvents.Warning := warnEvent;
+localEvents.Error := errorEvent;
+IEvent.CreateAlarm(infoEvent, FALSE, TcSourceInfo)
+	  .CreateAlarm(warnEvent, TRUE, TcSourceInfo)
+	  .CreateAlarm(errorEvent, TRUE, TcSourceInfo);
+
+M_InitEvents := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_InitEx" Id="{4fc6f994-71fd-4b1d-bda3-e6b04f23471d}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD Public M_InitEx : IModule
+VAR_INPUT
+	ILogger			: I_Logger;
+	IEventHandler	: I_EventHandler;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// set up logger and event handler
+SUPER^.M_InitComponentBaseEx(ILogger, IEventHandler);
+
+// set up module name -> to be subclassed... 
+stName := stTextListGlobal.stText_M000_Name;
+
+M_InitEx := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Manual" Id="{15678a21-fcfe-44de-ba75-ed6eb6468c92}" FolderPath="Protected\">
+      <Declaration><![CDATA[METHOD PROTECTED M_Manual
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Manual mode - to be subclassed]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_OpModeChanged" Id="{0de467a2-1f6b-4340-a6cd-bdf757ca6c70}" FolderPath="Protected\">
+      <Declaration><![CDATA[METHOD PROTECTED M_OpModeChanged : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// to be subclassed]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Run" Id="{8926414c-8159-4766-90ee-9570f9509af5}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Run : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_Run := TRUE;
+
+// call component run
+SUPER^.Run();
+
+// loop stations of this module
+FOR ii := 0 TO E_Station.eStation_nMaxIdx DO
+	IF aIStaton[ii] = 0 THEN
+		CONTINUE;
+	END_IF
+	
+	aIStaton[ii].EmergencyStopOk := EmergencyStopOk;
+	// specific safety area handled in module -> aIStaton[ii].SafetyOk := SafetyOk;
+	M_Run := M_Run AND aIStaton[ii].M_Run(); // call station run
+END_FOR
+
+// Safety OP-Mode
+rtirgSafetyOpMode_Auto(CLK := stHmiToModule.eSafetyOpMode = E_Opmode.eOpMode_auto);
+rtirgSafetyOpMode_Hand(CLK := stHmiToModule.eSafetyOpMode = E_Opmode.eOpMode_manual);
+rtirgSafetyOpMode_Aus(CLK := stHmiToModule.eSafetyOpMode = E_Opmode.eOpMode_off);
+
+// reset (all or this station)
+IF stHmiToModule.bReset THEN
+	Reset();
+END_IF
+
+// step (all or this station)
+// step -> ist bei Auto über die Property immer TRUE
+bRunStep := stHmiToModule.bStep;
+
+// start (all or this station)
+IF stHmiToModule.bStart OR stHmiToModule.bStep THEN		
+	IF NOT bEnable THEN
+		ModuleWarning.ArgSbAppendRaise('Kein Enable Signal bei Start');
+	ELSIF NOT bSafetyOk THEN
+		ModuleWarning.ArgSbAppendRaise('Safety nicht ok bei Start');
+		
+	// Fehler steht noch an
+	ELSIF bAutoStop_Error THEN
+		ModuleWarning.ArgSbAppendRaise('Station in Fehlerstatus --> Reset');
+		
+	// Safety muss in Auto sein
+	ELSIF stHmiToModule.eSafetyOpMode <> E_Opmode.eOpMode_auto AND Const.bEnSafetyOpMode THEN
+		ModuleWarning.ArgSbAppendRaise('Safety Betriebsart nicht AUTO');
+		
+	// START
+	ELSIF (OpMode = E_Opmode.eOpMode_auto OR OpMode = E_Opmode.eOpMode_step) THEN
+		//bRunStep := FALSE;
+		bRunCycle := TRUE;
+	END_IF
+END_IF
+
+// cycle stop (all or this module)
+IF stHmiToModule.bStop OR P_Supervision.bCycleStop THEN
+	bRunCycle := bRunHoming := FALSE;
+END_IF
+
+// fast stop (all or this module)
+IF stHmiToModule.bFastStop OR P_Supervision.bFastStop THEN 
+	bRunCycle := bRunStep := bRunHoming := FALSE;
+END_IF
+
+// set op mode (all or this module)
+tonOpModeOff(IN := stHmiToModule.bStop OR stHmiToModule.bFastStop, PT := T#10S);
+IF stHmiToModule.bOpModeManual OR stHmiToModule.bOpModeManual OR rtirgSafetyOpMode_Hand.Q THEN
+	bRunStep := FALSE;
+	bRunCycle := FALSE;
+	bRunHoming := FALSE;
+	eOpMode := E_OpMode.eOpMode_manual;
+ELSIF stHmiToModule.bOpModeAuto OR stHmiToModule.bOpModeAuto OR rtirgSafetyOpMode_Auto.Q THEN
+	bRunStep := FALSE;
+	bRunCycle := FALSE;
+	bRunHoming := FALSE;
+	eOpMode := E_OpMode.eOpMode_auto;
+ELSIF stHmiToModule.bOpModeStep THEN
+	bRunStep := FALSE;
+	bRunCycle := FALSE;
+	bRunHoming := FALSE;
+	eOpMode := E_OpMode.eOpMode_step;
+ELSIF tonOpModeOff.Q THEN
+	eOpMode := E_OpMode.eOpMode_off;
+END_IF
+	
+IF NOT bEmergencyStopOk THEN
+	sqHome.InHome := FALSE;
+	sqHome.Step := 0;
+	sqAuto.Step := 0;
+END_IF
+
+// homing (all or this station)
+IF stHmiToModule.bHome OR (stHmiToModule.bStart AND bAutoHome AND NOT sqHome.InHome AND sqHome.Step = 0 AND sqAuto.Step = 0) THEN
+	IF NOT bEnable THEN
+		ModuleWarning.ArgSbAppendRaise('Kein Enable Signal bei Start Grundstellung');
+	ELSIF NOT bSafetyOk THEN
+		ModuleWarning.ArgSbAppendRaise('Safety nicht ok bei Start Grundstellung');
+		
+	// Fehler steht noch an
+	ELSIF bAutoStop_Error THEN
+		ModuleWarning.ArgSbAppendRaise('Station in Fehlerstatus --> Reset');
+	ELSE		
+		sqHome.Step := 0;
+		sqHome.InHome		:= FALSE;
+		bRunCycle			:= FALSE;
+		bRunHoming 			:= TRUE;
+	END_IF
+END_IF
+
+/// Set Module State Color
+IF State = eComponentState_error THEN
+	nStateColor := STATICS.stColor.Red;
+ELSIF bInHome AND (eOpMode = eOpMode_Auto OR eOpMode = eOpMode_Step) THEN	
+	nStateColor := STATICS.stColor.LightBlue;
+ELSIF bStopped AND (eOpMode = eOpMode_Auto OR eOpMode = eOpMode_Step) THEN
+	nStateColor := STATICS.stColor.Blue;									
+ELSIF State = eComponentState_running AND (eOpMode = eOpMode_Auto OR eOpMode = eOpMode_Step) THEN
+	nStateColor := STATICS.stColor.LimeGreen;					
+ELSIF State = eComponentState_running AND eOpMode = eOpMode_manual THEN
+	nStateColor := STATICS.stColor.Orange;		
+ELSE
+	nStateColor := STATICS.stColor.White;
+END_IF
+
+//StepChainTextMapping
+//stTextAuto := arraSTextAuto[iStepChainIndex];
+IF iStepChainIndex >= 0 AND iStepChainIndex <= CONST.iMaxIdxLocalStepChain THEN
+	stTextAuto.nNameId := sqAuto.InfoTextId;
+	stTextAuto.wsName := WConcat3(TO_WSTRING(sqAuto.Step),": ", sqAuto.Info.ToWString());
+	stTextAuto.wsNameId := WConcat3(TO_WSTRING(sqAuto.Step),": ", sqAuto.InfoTextWsId);	
+	
+	//stTextHome := arraSTextHome[iStepChainIndex];
+	stTextHome.nNameId := sqHome.InfoTextId;
+	stTextHome.wsName := WConcat3(TO_WSTRING(sqHome.Step), ": ", sqHome.Info.ToWString());
+	stTextHome.wsNameId := WConcat3(TO_WSTRING(sqHome.Step),": ", sqHome.InfoTextWsId);	
+END_IF
+
+rtrigOpModeChanged(CLK := eOpModeOld <> eOpMode);
+IF rtrigOpModeChanged.Q THEN
+	eOpModeOld := eOpMode;
+	M_OpModeChanged();
+END_IF
+
+//call methodes
+sqHome.EnableStep := RunStep;
+sqHome();
+sqAuto.EnableStep := RunStep;
+sqAuto();
+
+M_CallObjects();
+M_Homing();
+M_Sequence();
+M_Manual();
+M_Supervision();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Sequence" Id="{2f5d7d09-f77c-4f34-916f-bbd66088444c}" FolderPath="Protected\">
+      <Declaration><![CDATA[METHOD PROTECTED M_Sequence
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Automatic sequence - to be subclassed]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Supervision" Id="{f3982356-cab4-4fc7-963c-67bf9917ece4}" FolderPath="Protected\">
+      <Declaration><![CDATA[METHOD PROTECTED M_Supervision : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// to be subclassed]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Module" Id="{0eca259c-89ae-412b-a25e-c8eda71b1414}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Module : E_Module
+]]></Declaration>
+      <Get Name="Get" Id="{88f1737b-b9c7-4044-a3c7-7f983485d00f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Module := eModule;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{084b238b-1251-44b7-8d27-f02f802c3890}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eModule := Module;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ModuleError" Id="{bea6260c-8c4a-4f3d-8baf-2c46cb5fd892}" FolderPath="Events\">
+      <Declaration><![CDATA[PROPERTY PROTECTED ModuleError : I_EventHandler]]></Declaration>
+      <Get Name="Get" Id="{64a7df4a-1bdd-4fe0-b63d-443f231cc49b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[// return the event handler
+//	prepare string builder w. module info
+ModuleError := IEvent.Select(localEvents.Error)
+					 .ArgSbInitWs(stName.wsName)
+					 .ArgSbAppend(' | ');]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ModuleInfo" Id="{9b6205bf-fa63-42a1-b07d-379d7ed95a3b}" FolderPath="Events\">
+      <Declaration><![CDATA[PROPERTY PROTECTED ModuleInfo : I_EventHandler]]></Declaration>
+      <Get Name="Get" Id="{2cd0d0d1-407d-434e-94bc-e9cde7579e1d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[// return the event handler
+//	prepare string builder w. module info
+ModuleInfo := IEvent.Select(localEvents.Info)
+					.ArgSbInitWs(stName.wsName)
+					.ArgSbAppend(' | ');]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ModuleNb" Id="{657079f7-e89d-4b29-a119-7335ebc2bdc3}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY PUBLIC ModuleNb : INT]]></Declaration>
+      <Get Name="Get" Id="{c316fc5e-f4bb-4ad0-8ed4-2a6107f37078}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ModuleNb := nModuleNb;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{9752dd5c-b67c-4d3e-a09f-923a10afb7e9}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[nModuleNb := ModuleNb;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ModuleWarning" Id="{88c19854-ae81-4f40-beba-5d851db00198}" FolderPath="Events\">
+      <Declaration><![CDATA[PROPERTY PROTECTED ModuleWarning : I_EventHandler]]></Declaration>
+      <Get Name="Get" Id="{7a9a326c-47d1-4c29-9db7-2d1c31d3b578}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[// return the event handler
+//	prepare string builder w. module info
+ModuleWarning := IEvent.Select(localEvents.Warning)
+					   .ArgSbInitWs(stName.wsName)
+					   .ArgSbAppend(' | ');]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OpMode" Id="{f78dc18d-9a0b-487a-98f5-17d70b982d36}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Station OP Mode
+{attribute 'monitoring':='call'}
+PROPERTY OpMode : E_OpMode]]></Declaration>
+      <Get Name="Get" Id="{cd0ee36f-7c9d-44c4-b2d2-c74107a8387c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OpMode := eOpMode;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RunCycle" Id="{e77d94b2-6ac9-4f60-bc21-6918f09dacc0}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC RunCycle : BOOL]]></Declaration>
+      <Get Name="Get" Id="{c10a20a9-08b6-445e-a329-c4ca1de9dd3e}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RunCycle := bRunCycle;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{dde8d68c-9f09-45e2-80c8-2436913b27c6}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bRunCycle := RunCycle;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RunStep" Id="{1ce4bda6-3896-4b76-a0b8-82ffd7bcfa89}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='variable'}
+PROPERTY PUBLIC RunStep : BOOL]]></Declaration>
+      <Get Name="Get" Id="{0ef3308d-b9c7-4e84-b7fc-be1062c23ee7}">
+        <Declaration><![CDATA[VAR
+	sMsg : WSTRING(255);
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[// Rückgabe
+RunStep := EnableSummary AND
+			NOT bAutoStop_Error AND
+			((bRunStep AND eOpMode = eOpMode_step) OR
+			(eOpMode = eOpMode_auto));
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SafetyOk" Id="{60f0f753-ade5-4540-b513-8342f9f20681}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC SafetyOk : BOOL]]></Declaration>
+      <Get Name="Get" Id="{25e7d5ed-29ad-4ff8-9830-4ef6d6819568}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SafetyOk := bSafetyOk;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e6f75b6c-d689-4430-babc-b69b6d5e01db}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bSafetyOk := SafetyOk;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Stopped" Id="{9bca4f19-3bb7-4d39-b8d8-0a07311e28b3}" FolderPath="Properties\">
+      <Declaration><![CDATA[/// Station stopped
+{attribute 'monitoring':='call'}
+PROPERTY Stopped : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{9d66c337-866f-44af-8bc8-8a90f23653ef}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Stopped := bStopped;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TextAuto" Id="{97975800-3d08-4b28-a3d5-6b16709b8c57}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY TextAuto : ST_Text]]></Declaration>
+      <Get Name="Get" Id="{cc2346b2-281b-4145-a7fe-a38adb498f12}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TextAuto := stTextAuto;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TextHome" Id="{8800ae8c-6672-4e30-9859-dc3a251f703e}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY TextHome : ST_Text]]></Declaration>
+      <Get Name="Get" Id="{2d395eea-b170-481f-889b-1c9cc34af829}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TextHome := stTextHome;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_ModuleBase">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.CycleEnd">
+      <LineId Id="15" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.CycleStart">
+      <LineId Id="6" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.EmergencyStopOk.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.EmergencyStopOk.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.Enable.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.Enable.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.EnableManual.Get">
+      <LineId Id="2" Count="0" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.EnableSummary.Get">
+      <LineId Id="6" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.GetStepChainTest">
+      <LineId Id="1" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.InHome.Get">
+      <LineId Id="5" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_CallObjects">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_DynMonitoring">
+      <LineId Id="108" Count="8" />
+      <LineId Id="61" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_Homing">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_Init">
+      <LineId Id="279" Count="1" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="302" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="297" Count="1" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="288" Count="1" />
+      <LineId Id="287" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="299" Count="1" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="253" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_InitDynManual">
+      <LineId Id="24" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_InitDynManualUi">
+      <LineId Id="160" Count="1" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="95" Count="2" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="130" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_InitDynMonitoringItem">
+      <LineId Id="76" Count="1" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="68" Count="3" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_InitDynSettingsItem">
+      <LineId Id="120" Count="2" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="95" Count="8" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="104" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_InitEvents">
+      <LineId Id="1" Count="8" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_InitEx">
+      <LineId Id="8" Count="3" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_Manual">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_OpModeChanged">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_Run">
+      <LineId Id="292" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="304" Count="0" />
+      <LineId Id="303" Count="0" />
+      <LineId Id="310" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="286" Count="4" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="312" Count="1" />
+      <LineId Id="518" Count="1" />
+      <LineId Id="311" Count="0" />
+      <LineId Id="317" Count="2" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="521" Count="2" />
+      <LineId Id="520" Count="0" />
+      <LineId Id="323" Count="1" />
+      <LineId Id="331" Count="1" />
+      <LineId Id="529" Count="0" />
+      <LineId Id="336" Count="0" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="530" Count="0" />
+      <LineId Id="340" Count="1" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="347" Count="1" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="532" Count="0" />
+      <LineId Id="352" Count="4" />
+      <LineId Id="322" Count="0" />
+      <LineId Id="358" Count="8" />
+      <LineId Id="357" Count="0" />
+      <LineId Id="368" Count="19" />
+      <LineId Id="398" Count="10" />
+      <LineId Id="411" Count="1" />
+      <LineId Id="415" Count="0" />
+      <LineId Id="534" Count="0" />
+      <LineId Id="416" Count="1" />
+      <LineId Id="421" Count="7" />
+      <LineId Id="454" Count="13" />
+      <LineId Id="453" Count="0" />
+      <LineId Id="469" Count="0" />
+      <LineId Id="493" Count="16" />
+      <LineId Id="470" Count="1" />
+      <LineId Id="510" Count="0" />
+      <LineId Id="525" Count="2" />
+      <LineId Id="524" Count="0" />
+      <LineId Id="528" Count="0" />
+      <LineId Id="511" Count="3" />
+      <LineId Id="491" Count="0" />
+      <LineId Id="468" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_Sequence">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.M_Supervision">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.Module.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.Module.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.ModuleError.Get">
+      <LineId Id="2" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="8" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.ModuleInfo.Get">
+      <LineId Id="2" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.ModuleNb.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.ModuleNb.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.ModuleWarning.Get">
+      <LineId Id="2" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.OpMode.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.RunCycle.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.RunCycle.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.RunStep.Get">
+      <LineId Id="26" Count="1" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.SafetyOk.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.SafetyOk.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.Stopped.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.TextAuto.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ModuleBase.TextHome.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

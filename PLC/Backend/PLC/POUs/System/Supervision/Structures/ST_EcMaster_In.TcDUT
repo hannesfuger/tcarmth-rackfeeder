@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_EcMaster_In" Id="{f03fcbd8-1e9b-411a-a970-b7c7db19a05b}">
+    <Declaration><![CDATA[TYPE ST_EcMaster_In :
+STRUCT
+	/// AmsNetId of EtherCAT device
+	stAmsAdr 						:ST_AmsAddr;
+	/// DeviceId of EtherCAT device
+	nDevId							:UINT;
+	/// Device state of EtherCAT device
+	nDeviceState					:UINT;
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

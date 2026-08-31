@@ -1,0 +1,7 @@
+<div id="conStation030_Special" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+<div id="Station030_Button_Takt" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButton.usercontrol" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="50" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::arrStStation[3]::stButtonNavigation%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::arrStStation[3]::stButtonNavigation%/s%" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-visibility="Collapsed">
+
+</div>
+
+</div>

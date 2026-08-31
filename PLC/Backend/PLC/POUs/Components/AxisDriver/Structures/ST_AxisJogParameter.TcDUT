@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="ST_AxisJogParameter" Id="{7f08c744-850d-4678-b238-814c2dda3e0a}">
+    <Declaration><![CDATA[/// Axis jog parameter strucure
+TYPE ST_AxisJogParameter :
+STRUCT
+	bJogBackwards: BOOL;
+	bJogForward: BOOL;
+	fAcceleration: LREAL;
+	fDeceleration: LREAL;
+	fJerk: LREAL;
+	eMode: E_JogMode;
+	fPosition: LREAL;
+	fVelocity: LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

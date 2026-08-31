@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MAIN_Fast" Id="{59b841e9-8296-4be5-ae67-17d2cafdeea1}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN_Fast
+VAR_INPUT
+END_VAR
+VAR
+END_VAR
+VAR_OUTPUT	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// fast stuff here..
+
+fbModul001.M_Fast();
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN_Fast">
+      <LineId Id="26" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

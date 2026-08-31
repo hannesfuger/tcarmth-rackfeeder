@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_3DPoint" Id="{89574f2f-64ab-43a1-9d34-bb5290099d59}">
+    <Declaration><![CDATA[TYPE ST_3DPoint :
+STRUCT
+	x	: LREAL;
+	y	: LREAL;
+	z	: LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

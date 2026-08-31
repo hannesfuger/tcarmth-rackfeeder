@@ -1,0 +1,225 @@
+<div id="conAxisManager" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="800" data-tchmi-height="640" data-tchmi-creator-viewport-width="1024" data-tchmi-creator-viewport-height="768">
+<div id="TcHmiCombobox_1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCombobox" data-tchmi-auto-focus-out="true" data-tchmi-combobox-text="" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-top="121" data-tchmi-top-unit="px" data-tchmi-width="227" data-tchmi-width-unit="px" data-tchmi-enum-data-symbol="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::eAxis%/s%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextbox_14" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="280" data-tchmi-left-unit="px" data-tchmi-top="121" data-tchmi-top-unit="px" data-tchmi-width="231" data-tchmi-width-unit="px" data-tchmi-text="%f%%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::stName::wsName%/s%%/f%" data-tchmi-is-enabled="false">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextbox_15" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="530" data-tchmi-left-unit="px" data-tchmi-top="121" data-tchmi-top-unit="px" data-tchmi-width="246" data-tchmi-width-unit="px" data-tchmi-text="%f%%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::stBmk::wsName%/s%%/f%" data-tchmi-is-enabled="false">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiButton_9" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="656" data-tchmi-left-unit="px" data-tchmi-text="%l%Reset%/l%" data-tchmi-top="238" data-tchmi-top-unit="px" data-tchmi-width="120" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-state-symbol="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bResetCalibration%/s%" data-tchmi-is-enabled="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bResetCalibrationVisible%/s%">
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": []
+  }
+]</script>
+</div>
+<div id="TcHmiButton_10" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="530" data-tchmi-left-unit="px" data-tchmi-text="%l%Set%/l%" data-tchmi-top="238" data-tchmi-top-unit="px" data-tchmi-width="120" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-state-symbol="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bSetCalibration%/s%" data-tchmi-is-enabled="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bSetCalibrationVisible%/s%">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": []
+  }
+]</script>
+</div>
+<div id="TcHmiRadioButton" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiRadioButton" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="605" data-tchmi-left-unit="px" data-tchmi-text="" data-tchmi-top="202" data-tchmi-top-unit="px" data-tchmi-width="31" data-tchmi-width-unit="px" data-tchmi-state-symbol="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bCalibrated%/s%" data-tchmi-is-enabled="false">
+</div>
+<div id="TcHmiButton_11" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-top="238" data-tchmi-top-unit="px" data-tchmi-width="227" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text="%f%F_SwitchStringByBool(%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bDisable%/s%, %l%Activated%/l%, %l%Deactivated%/l%)%/f%">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bDisable%/s%",
+        "value": {
+          "objectType": "Symbol",
+          "valueType": "tchmi:general#/definitions/String",
+          "symbolExpression": "%f%F_ToggleBool(%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bDisable%/s%)%/f%"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="TcHmiTextbox_16" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="280" data-tchmi-left-unit="px" data-tchmi-top="349" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-text="%f%tchmi_format_string('{0} ', %s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::fSetPos%/s%.toFixed(3))%/f%" data-tchmi-text-horizontal-alignment="Right" data-tchmi-auto-focus-out="true" data-tchmi-auto-select-text="true">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onUserInteractionFinished",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.Pxxx_Name_HMI.F_NumInputCommit",
+        "fnParams": [],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.Pxxx_Name_HMI.F_NumInputOpen",
+        "fnParams": [
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/Number",
+            "value": 1.0
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/Number",
+            "value": 5000.0
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "%ctrl%TcHmiTextbox_16::id%/ctrl%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="TcHmiTextblock_20" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="280" data-tchmi-left-unit="px" data-tchmi-text="%l%setpos%/l%" data-tchmi-top="313" data-tchmi-top-unit="px" data-tchmi-width="105" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiTextbox_17" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-text="%f%GaugeValueFormatter(%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::fActPos%/s%, 3)%/f%" data-tchmi-top="349" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-text-horizontal-alignment="Right" data-tchmi-is-enabled="false">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_21" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-text="%l%actPos%/l%" data-tchmi-top="313" data-tchmi-top-unit="px" data-tchmi-width="105" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiButton_12" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="440" data-tchmi-left-unit="px" data-tchmi-text="%l%Set%/l%" data-tchmi-top="349" data-tchmi-top-unit="px" data-tchmi-width="71" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-is-enabled="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bEnablePosSet%/s%">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bSetPosGo%/s%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:general#/definitions/BOOL",
+          "value": true
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+</div>
+<div id="TcHmiButton_13" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="280" data-tchmi-left-unit="px" data-tchmi-top="238" data-tchmi-top-unit="px" data-tchmi-width="231" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text="%f%F_SwitchStringByBool(
+%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bDisableSoftLimits%/s%, %l%Activated%/l%
+, %l%Deactivated%/l%)%/f%" data-tchmi-text-font-size="12">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bDisableSoftLimits%/s%",
+        "value": {
+          "objectType": "Symbol",
+          "valueType": "tchmi:general#/definitions/String",
+          "symbolExpression": "%f%F_ToggleBool(%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bDisableSoftLimits%/s%)%/f%"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+
+
+</div>
+<div id="TcHmiTextbox_19" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-top="456" data-tchmi-top-unit="px" data-tchmi-width="744" data-tchmi-width-unit="px" data-tchmi-text="%f%%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::stInfo::wsName%/s%%/f%" data-tchmi-is-enabled="false">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_23" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="280" data-tchmi-left-unit="px" data-tchmi-text="%l%softLimits%/l%" data-tchmi-top="202" data-tchmi-top-unit="px" data-tchmi-width="105" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiTextblock_24" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-text="%l%controller%/l%" data-tchmi-top="202" data-tchmi-top-unit="px" data-tchmi-width="90" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiTextbox_20" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="42" data-tchmi-height-unit="px" data-tchmi-left="185" data-tchmi-left-unit="px" data-tchmi-top="349" data-tchmi-top-unit="px" data-tchmi-width="74" data-tchmi-width-unit="px" data-tchmi-text="%f%%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::stUnit::wsName%/s%%/f%" data-tchmi-is-enabled="false">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiRadioButton_1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiRadioButton" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="132" data-tchmi-left-unit="px" data-tchmi-top="202" data-tchmi-top-unit="px" data-tchmi-width="31" data-tchmi-width-unit="px" data-tchmi-state-symbol="%s%PLC1.HMI.stHmiInOut::stHmiAxisManager::stAxisManager::bAxisEnabled%/s%" data-tchmi-is-enabled="false">
+</div>
+<div id="TcHmiTextblock_25" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-text="%l%Axis%/l%" data-tchmi-top="85" data-tchmi-top-unit="px" data-tchmi-width="105" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiTextblock_26" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="280" data-tchmi-left-unit="px" data-tchmi-text="%l%Name%/l%" data-tchmi-top="85" data-tchmi-top-unit="px" data-tchmi-width="105" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiTextblock_27" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="530" data-tchmi-left-unit="px" data-tchmi-text="%l%BMK%/l%" data-tchmi-top="85" data-tchmi-top-unit="px" data-tchmi-width="105" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiTextblock_28" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="530" data-tchmi-left-unit="px" data-tchmi-text="%l%Referenz%/l%" data-tchmi-top="202" data-tchmi-top-unit="px" data-tchmi-width="65" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+<div id="TcHmiTextblock_29" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="32" data-tchmi-left-unit="px" data-tchmi-text="%l%Info%/l%" data-tchmi-top="420" data-tchmi-top-unit="px" data-tchmi-width="105" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-font-size-unit="px" data-tchmi-text-font-size="14">
+</div>
+</div>

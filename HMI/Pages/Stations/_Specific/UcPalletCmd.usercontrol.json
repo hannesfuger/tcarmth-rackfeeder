@@ -1,0 +1,60 @@
+{
+  "parameters": [
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setStCmdPl",
+      "propertyGetterName": "getStCmdPl",
+      "refTo": "",
+      "name": "data-tchmi-stcmdpl",
+      "displayName": "stCmdPl",
+      "visible": true,
+      "type": "tchmi:server#/definitions/ADS-PLC1.ST_HMI_PL_CMD",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "stCmdPl"
+    },
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setStPl",
+      "propertyGetterName": "getStPl",
+      "refTo": "",
+      "name": "data-tchmi-stpl",
+      "displayName": "stPl",
+      "visible": true,
+      "type": "tchmi:server#/definitions/ADS-PLC1.ST_Pallet",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "stPl"
+    },
+    {
+      "allowSymbolExpressionsInObject": false,
+      "defaultValue": "Visible",
+      "defaultValueInternal": "Visible",
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setPalletEditorVisible",
+      "propertyGetterName": "getPalletEditorVisible",
+      "refTo": "",
+      "name": "data-tchmi-palleteditorvisible",
+      "displayName": "PalletEditorVisible",
+      "visible": true,
+      "type": "tchmi:framework#/definitions/Visibility",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "PalletEditorVisible"
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.133/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

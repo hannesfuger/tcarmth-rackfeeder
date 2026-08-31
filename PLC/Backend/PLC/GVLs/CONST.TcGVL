@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="CONST" Id="{7f0743ec-3b3c-4ae1-a80d-627cdcb5c7c1}">
+    <Declaration><![CDATA[/// Global constants
+//{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	sVersion				: STRING := 'Version 0.1';
+
+	/// debug logging source const
+	sSource					: STRING(10) := 'Machine';
+	
+	/// zero based max indexes
+	iMaxIdxEcMaster			: INT := 0;		// max index of EtherCAT master
+	
+	iMaxIdxUnitTest			: INT := 1;		// max index of unit test
+	iMaxIdxSystemInfo		: INT := 30;	// max index of system info
+	iMaxIdxRecipe			: INT := 50;	// max index of recipe
+	
+	iMaxIdxLocalSetting		: INT := 100;	// max index of plant-, module- or station-setting
+	iMaxIdxLocalStepChain	: INT := 1;		// max index of plant-, module- or station-step chain
+	iMaxIdxLocalButton		: INT := 20;	// max index of plant-, module- or station-button (HMI)
+	iMaxIdxObject			: INT := 20;	// max index of plant-, module- or station-object
+	iMaxIdxMonitoring		: INT := 50;	// max index of plant-, module-, station- or object monitoring
+	iMaxIdxCounter			: INT := 1;		// max index of counter (0 = total, 1 = day, 2..n = station)
+	
+	iMaxIdxAlam				: INT := 100;	// max index of alarm item
+	iMaxIdxNoti				: INT := 150;	// max index of notification item
+	iMaxIdxNotiArchiv		: INT := 300;	// max index of notification archiv item
+	
+	iMaxIdxLayout			: INT := 3;		// max index of possible layouts
+	
+	iMaxIdxPalletWorkpieceX	: INT := 6;		// max index of pallet-workpiece X
+	iMaxIdxPalletWorkpieceY	: INT := 8;		// max index of pallet-workpiece Y
+	
+	iMaxIdxTrolleyPalletX	: INT := 1;		// max index of trolley-pallet X
+	iMaxIdxTrolleyPalletY	: INT := 19;	// max index of trolley-pallet Y
+	
+	iMaxIdxStoragePallet	: INT := 1;		// max index of storage-pallet
+	
+	// global text list
+	stTextListGlobal		: ST_Text_List_Global;
+	
+	wsEmpty					: WSTRING := "";
+	stEmptyText				: ST_Text := (nNameId := 0, wsNameId := "", wsName := "");
+	stEmptyDataItem			: ST_Data_Item;
+	
+	chAxisPosTol 			: LREAL := 3;
+	lreal_max 				: LREAL := 1.797E308;  // LREAL max
+	
+	bEnSafetyOpMode			: BOOL := FALSE;
+	sDirSeparator			: STRING(1) := '/'; // for TcBsd: /, for Windown: '\'
+END_VAR
+
+(*	Safety Konstanten	*)
+VAR_GLOBAL CONSTANT
+	{attribute 'const_non_replaced'}
+	stLibVersion_PLC 						: ST_LibVersion := (iMajor := 1, iMinor := 0, iBuild := 0, iRevision := 0, nFlags := 0, sVersion := '1.0');
+	
+	iSafety_Anzahl_EL69xx					: INT := 1;	(*	Anzahl an TwinSAFE Logikklemmen im System	*)
+	iSafety_Anzahl_TwinSafeGruppen			: INT := 1;	(*	Anzahl an Gruppen in einer TwinSAFE Logikklemmen	*)
+	iSafety_Anzahl_Schutzbereiche			: INT := 2;	(*	Anzahl an Schutzbereiche (Einlauf, Bearbeitung, Auslauf, ...)	*)
+
+	(*	Diagnose	*)
+	iSafetyDiag_Anzahl_FbEmergencyStop		: INT := 20;	(*	Anzahl an NotHalt Bausteindiagnosen	*)
+	iSafetyDiag_Anzahl_FbMachineMonitoring	: INT := 20;	(*	Anzahl an Maschine Monitoring Bausteindiagnosen	*)
+	iSafetyDiag_Anzahl_FbTwoHand			: INT := 50;	(*	Anzahl an 2Hand Bausteindiagnosen	*)
+	iSafetyDiag_Anzahl_FbEDM				: INT := 10;	(*	Anzahl an 2Hand Bausteindiagnosen	*)
+END_VAR
+
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

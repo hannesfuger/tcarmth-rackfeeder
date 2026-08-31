@@ -1,0 +1,59 @@
+{
+  "parameters": [
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setStCmdWp",
+      "propertyGetterName": "getStCmdWp",
+      "refTo": "",
+      "name": "data-tchmi-stcmdwp",
+      "displayName": "stCmdWp",
+      "visible": true,
+      "type": "tchmi:server#/definitions/ADS-PLC1.ST_HMI_WP_CMD",
+      "category": "",
+      "description": "Workpiece Command",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "stCmdWp"
+    },
+    {
+      "allowSymbolExpressionsInObject": false,
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setStWp",
+      "propertyGetterName": "getStWp",
+      "refTo": "",
+      "name": "data-tchmi-stwp",
+      "displayName": "stWp",
+      "visible": true,
+      "type": "tchmi:server#/definitions/ADS-PLC1.ST_Workpiece",
+      "category": "",
+      "description": "Workpiece Data",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "stWp"
+    },
+    {
+      "allowSymbolExpressionsInObject": false,
+      "defaultValue": "Teil",
+      "requiredOnCompile": false,
+      "bindable": true,
+      "propertySetterName": "setSInfo",
+      "propertyGetterName": "getSInfo",
+      "refTo": "",
+      "name": "data-tchmi-sinfo",
+      "displayName": "sInfo",
+      "visible": true,
+      "type": "tchmi:general#/definitions/String",
+      "category": "",
+      "description": "",
+      "readOnly": false,
+      "heritable": true,
+      "propertyName": "sInfo"
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "./../../../Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.133/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

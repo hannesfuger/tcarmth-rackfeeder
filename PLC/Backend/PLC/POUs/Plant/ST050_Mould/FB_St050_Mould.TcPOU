@@ -1,0 +1,636 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_St050_Mould" Id="{da882f39-5f48-4795-84a6-644434f1f409}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_St050_Mould EXTENDS FB_StationBase
+VAR_INPUT
+END_VAR
+VAR	
+	// IO ref
+	stIO			: REFERENCE TO ST_St050_IO;
+	
+	stFromEngel 	: TcaEngelCastingCarrierInput;
+	stToEngel 		: TcaEngelCastingCarrierOutput;
+	
+	// station components
+	fbCamAs 		: FB_Device;
+	fbCamBs 		: FB_Device;
+	fbLedAs 		: FB_Device;
+	fbLedBs 		: FB_Device;
+	
+	// actor UIs, access to: iStatus, fPosition, iVisibleState, ..
+	fbCamAsUi 		: FB_Device_Ui;
+	fbCamBsUi 		: FB_Device_Ui;
+	fbLedAsUi 		: FB_Device_Ui;
+	fbLedBsUi 		: FB_Device_Ui;
+	
+	// instance var's
+	bStationDeaktiv	: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[/// 
+/// Station 060 function block 
+/// 
+]]></ST>
+    </Implementation>
+    <Folder Name="DynSetMonObj" Id="{8b2eefdc-470b-4b8f-bf62-cebede77c3e6}" />
+    <Folder Name="Internal" Id="{4362da37-7bab-479c-b278-0f5fc5c9cd58}" />
+    <Method Name="M_CallObjects" Id="{b2be3c0f-79fd-450e-ab23-fed1c3d0a300}">
+      <Declaration><![CDATA[METHOD PROTECTED M_CallObjects : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Cam's + UI
+fbCamAs.Enable := P_Safety.EmergencyStopOk;
+//fbCamAs.Value := stLocalSettings.stDynStationSettings[E_St060_Settings.eSt060_Settings_CamPrgAs].nValue;
+fbCamAs();
+fbCamAsUi(diSelectedObjectIndex := stHmiManualIn.diSelectedObjectIndex,
+	stHMIControlIn := stHmiManualIn.stManualDevice,
+	stHMIControlOut := stHmiManualOut.stManualDevice,
+	fbDevice := fbCamAs,
+	bEnableManual := EnableManual);
+	
+fbCamBs.Enable := P_Safety.EmergencyStopOk;
+//fbCamBs.Value := stLocalSettings.stDynStationSettings[E_St060_Settings.eSt060_Settings_CamPrgBs].nValue;
+fbCamBs();
+fbCamBsUi(diSelectedObjectIndex := stHmiManualIn.diSelectedObjectIndex,
+	stHMIControlIn := stHmiManualIn.stManualDevice,
+	stHMIControlOut := stHmiManualOut.stManualDevice,
+	fbDevice := fbCamBs,
+	bEnableManual := EnableManual);
+	
+// LED's + UI
+fbLedAs.Enable := P_Safety.EmergencyStopOk;
+fbLedAs();
+fbLedAsUi(diSelectedObjectIndex := stHmiManualIn.diSelectedObjectIndex,
+	stHMIControlIn := stHmiManualIn.stManualDevice,
+	stHMIControlOut := stHmiManualOut.stManualDevice,
+	fbDevice := fbLedAs,
+	bEnableManual := EnableManual);
+	
+fbLedBs.Enable := P_Safety.EmergencyStopOk;
+fbLedBs();
+fbLedBsUi(diSelectedObjectIndex := stHmiManualIn.diSelectedObjectIndex,
+	stHMIControlIn := stHmiManualIn.stManualDevice,
+	stHMIControlOut := stHmiManualOut.stManualDevice,
+	fbDevice := fbLedBs,
+	bEnableManual := EnableManual);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynManual" Id="{e4aa71a2-89b3-44ee-a096-7ced5e31c307}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD INTERNAL M_DynManual : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitManual THEN
+	bInitManual := TRUE;
+	MEMSET(ADR(stHmiManualOut.stObjects), 0, SIZEOF(stHmiManualOut.stObjects)); // reset
+	
+	//M_InitDynManualUi(fbObjectUi);
+END_IF
+
+// additional states
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynMonitoring" Id="{a5ab6e4d-2192-4845-8a63-c25d4f7380f9}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD PROTECTED M_DynMonitoring : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[M_DynMonitoring := SUPER^.M_DynMonitoring();
+
+// init
+IF NOT bInitMonitoring THEN
+	bInitMonitoring := TRUE;
+	MEMSET(ADR(stLocalMonitoring), 0, SIZEOF(stLocalMonitoring)); // reset
+	
+	M_InitDynMonitoringItem(0, 								// monitoring index 
+							"Engel SGM CycleMode", 			// name
+							Name, 							// group (station name)
+							E_DataType.eDataType_bool, 		// data type							
+							stTextListGlobal.stText_bool);	// unit	
+    
+	M_InitDynMonitoringItem(1, "Engel SGM SequenceMode", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+	M_InitDynMonitoringItem(2, "Engel SGM ProductionEnd", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+	M_InitDynMonitoringItem(3, "Engel SGM Error", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+	M_InitDynMonitoringItem(4, "Engel SGM ErrorID", Name, E_DataType.eDataType_int, stTextListGlobal.stText_notext);	
+	M_InitDynMonitoringItem(5, "Engel SGM Moving", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+	M_InitDynMonitoringItem(6, "Engel SGM ParkPosition", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+	M_InitDynMonitoringItem(7, "Engel SGM SafetyAreaSafe", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+	M_InitDynMonitoringItem(8, "Engel SGM OutsideStorage_1", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+	M_InitDynMonitoringItem(9, "Engel SGM OutsideStorage_2", Name, E_DataType.eDataType_bool, stTextListGlobal.stText_bool);
+END_IF
+
+// live value mapping 
+stLocalMonitoring.astMonitoring[0].bValue := stFromEngel.AutoMode;
+stLocalMonitoring.astMonitoring[1].bValue := stFromEngel.SemiAutoMode;
+stLocalMonitoring.astMonitoring[2].bValue := stFromEngel.ManualMode;
+stLocalMonitoring.astMonitoring[3].bValue := stFromEngel.Error;
+stLocalMonitoring.astMonitoring[4].nValue := stFromEngel.ErrorID;
+stLocalMonitoring.astMonitoring[5].bValue := stFromEngel.Moving;
+stLocalMonitoring.astMonitoring[6].bValue := stFromEngel.ParkPosition;
+stLocalMonitoring.astMonitoring[7].bValue := stFromEngel.SafetyAreaSafe;
+stLocalMonitoring.astMonitoring[8].bValue := stFromEngel.OutsideStorage_1;
+stLocalMonitoring.astMonitoring[9].bValue := stFromEngel.OutsideStorage_2;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_DynSettings" Id="{38a802bf-0e65-4af0-9300-9726efd6c2ce}" FolderPath="DynSetMonObj\">
+      <Declaration><![CDATA[METHOD INTERNAL M_DynSettings : BOOL
+VAR_INPUT
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// init station settings
+IF NOT bInitSettings THEN
+	bInitSettings := TRUE;
+	stLocalSettingsBackup := stLocalSettings; // backup
+	MEMSET(ADR(stLocalSettings), 0, SIZEOF(stLocalSettings)); // reset
+	
+	M_InitDynSettingsItem(E_St050_Settings.eSt050_Settings_Station_Deaktiv,	// settings index
+		TO_WSTRING(E_St050_Settings.eSt050_Settings_Station_Deaktiv),		// settings wsIndex
+		Name,																// group
+		stTextListGlobal.stText_DeactivateStation,							// name
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,			// unit & data type
+		0, 1, 3);															// min, max & user level
+
+	M_InitDynSettingsItem(E_St050_Settings.eSt050_Settings_Autohome,
+		TO_WSTRING(E_St050_Settings.eSt050_Settings_Autohome),
+		Name,
+		stTextListGlobal.stText_AutoHome,
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,
+		0, 1, 3);
+		
+	(*M_InitDynSettingsItem(E_St060_Settings.eSt060_Settings_CamPrgAs,
+		TO_WSTRING(E_St060_Settings.eSt060_Settings_CamPrgAs),
+		Name,
+		F_CreateDynTextDefault("Kammeraprogamm"),
+		stTextListGlobal.stText_KameraProgramm, E_DataType.eDataType_int,
+		1, 9999, 3);
+	
+	M_InitDynSettingsItem(E_St060_Settings.eSt060_Settings_CamPrgBs,
+		TO_WSTRING(E_St060_Settings.eSt060_Settings_CamPrgBs),
+		Name,
+		F_CreateDynTextDefault("Kammeraprogamm"),
+		stTextListGlobal.stText_KameraProgramm, E_DataType.eDataType_int,
+		1, 9999, 3);
+		
+	M_InitDynSettingsItem(E_St060_Settings.eSt060_Settings_LedAs,
+		TO_WSTRING(E_St060_Settings.eSt060_Settings_LedAs),
+		Name,
+		F_CreateDynTextDefault("LED AS"),
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,
+		0, 1, 3);
+		
+	M_InitDynSettingsItem(E_St060_Settings.eSt060_Settings_LedBs,
+		TO_WSTRING(E_St060_Settings.eSt060_Settings_LedBs),
+		Name,
+		F_CreateDynTextDefault("LED BS"),
+		stTextListGlobal.stText_bool, E_DataType.eDataType_bool,
+		0, 1, 3); *)
+		
+	// restore values
+	F_RestoreSettingValues(stLocalSettings.stDynStationSettings, stLocalSettingsBackup.stDynStationSettings);
+END_IF
+
+// map current settings values
+bAutoHome := stLocalSettings.stDynStationSettings[E_St050_Settings.eSt050_Settings_Autohome].bValue;
+bStationDeaktiv := stLocalSettings.stDynStationSettings[E_St050_Settings.eSt050_Settings_Station_Deaktiv].bValue;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Homing" Id="{a228f21b-a25b-4b7a-ad7e-ba0e848fb5b1}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Homing
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Homing sequence
+CASE sqHome.Step OF
+	
+	0:	
+		sqHome.Info.Set("Warte auf GRST Start");
+		IF RunStep AND NOT sqHome.InHome AND bRunHoming THEN
+			bBusy := TRUE;
+			sqAuto.Step := 0;
+			sqHome.StartSequence()
+				  .Step := 10;
+		END_IF
+
+	10:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv");
+		IF P_Safety.bMachineRequestStop THEN
+			sqHome.Info.Set("Anforderung Stop aktiv");
+		ELSIF NOT P_Safety.EmergencyStopOk THEN
+			sqHome.Info.Set("Sicherheit nicht ok");
+		//ELSIF NOT fbCamAs.bRdy THEN
+		//	sqHome.Info.Set("Kamera AS nicht bereit");
+		//ELSIF fbCamAs.bErr THEN
+		//	sqHome.Info.Set("Kamera AS meldet Fehler");
+		// ...
+
+		ELSIF bRunHoming THEN
+			sqHome.Step := 100;
+		END_IF	
+		
+	100:
+		sqHome.Info.Set("Grundstellungsfahrt aktiv");
+		sqHome.Step := 1000;
+
+	//	homing done			
+	1000:
+		sqHome.Info.Set("Grundstellung erreicht");
+		IF sqHome.StepTime > T#1S THEN
+			bBusy:=FALSE;
+			sqHome.InHome := TRUE;
+			bStopped := TRUE;
+			bRunHoming := FALSE;
+			sqAuto.Step := 0;
+			sqHome.StopSequence()
+				  .Step := 0;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Init" Id="{f6f6e09e-dbc2-43f9-9466-f6eabee60c53}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Init : IStation
+VAR_INPUT
+END_VAR
+VAR
+	Ist : IStation;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set up station
+StationNb := 50;
+Station := E_Station.eStation_ST050_Mould; // ID & name 1st!
+Name := F_CreateDynTextEx(1, "eStation_ST050_Mould", "ST050 Mould");
+
+Ist := SUPER^.M_Init()
+			 .InitEvents(TC_Events.ST050EventClass.InfoEvent,
+	  		       		 TC_Events.ST050EventClass.WarningEvent,
+	  				  	 TC_Events.ST050EventClass.ErrorEvent);
+
+// set up default IO references
+M_SetReferences(IO.St050_Mould_IO);
+
+// init components
+
+// Kameras & LEDs
+fbCamAsUi.stBmk := F_CreateDynTextDefault("BMK=+xyz-");
+fbCamAs.Active := TRUE;
+fbCamAs.Name := F_CreateDynTextEx(1, "MouldKameraAs", "Engel SGM Kamera AS");
+
+fbCamBsUi.stBmk := F_CreateDynTextDefault("BMK=ST52.B01.1BX1-");
+fbCamBs.Active := TRUE;
+fbCamBs.Name := F_CreateDynTextEx(1, "MouldKameraBs", "Engel SGM Kamera BS");
+
+fbLedAsUi.stBmk := F_CreateDynTextDefault("BMK=+xyz-");
+fbLedAs.Active := TRUE;
+fbLedAs.Name := F_CreateDynTextEx(1, "MouldLedAs", "Engel SGM LED AS");
+
+fbLedBsUi.stBmk := F_CreateDynTextDefault("BMK=+xyz-");
+fbLedBs.Active := TRUE;
+fbLedBs.Name := F_CreateDynTextEx(1, "MouldLedBs", "Engel SGM LED BS");
+
+
+// register station in it's module
+eParent := fbModul001.M_RegisterStation(Ist);
+
+bInitSettings	:= FALSE;
+bInitMonitoring := FALSE;
+bInitManual  	:= FALSE;
+
+//aSClearText[EN] := 'Station init done.';
+M_Init := Ist;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Manual" Id="{7894cb9d-ec35-4e25-bcf6-9d6ceafb01c6}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Manual
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// manual mode
+IF (OpMode <> E_OpMode.eOpMode_manual) THEN
+	RETURN;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_MappingIn" Id="{817d7e08-4af0-4dac-b6e3-bf0b3fca0b9d}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PRIVATE M_MappingIn : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMCPY(ADR(stFromEngel.LifeCounter), ADR(stIo.stIn.aFromEngelRaw[0]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.ErrorID), ADR(stIo.stIn.aFromEngelRaw[2]), SIZEOF(UINT));
+RETURN;
+stFromEngel.AutoMode := stIo.stIn.aFromEngelRaw[4].0;
+stFromEngel.SemiAutoMode := stIo.stIn.aFromEngelRaw[4].1;
+stFromEngel.ManualMode := stIo.stIn.aFromEngelRaw[4].2;
+stFromEngel.Error := stIo.stIn.aFromEngelRaw[4].3;
+stFromEngel.Moving := stIo.stIn.aFromEngelRaw[4].4;
+stFromEngel.ParkPosition := stIo.stIn.aFromEngelRaw[4].5;
+stFromEngel.OutsideStorage_1 := stIo.stIn.aFromEngelRaw[4].6;
+stFromEngel.OutsideStorage_2 := stIo.stIn.aFromEngelRaw[4].7;
+
+stFromEngel.SafetyAreaSafe := stIo.stIn.aFromEngelRaw[5].0;
+
+stFromEngel.JobForStorage_1.RequestNoCarrier := stIo.stIn.aFromEngelRaw[5].1;
+stFromEngel.JobForStorage_1.RequestCarrier := stIo.stIn.aFromEngelRaw[5].2;
+stFromEngel.JobForStorage_1.Empty := stIo.stIn.aFromEngelRaw[5].3;
+stFromEngel.JobForStorage_1.Unfinished := stIo.stIn.aFromEngelRaw[5].4;
+
+stFromEngel.JobForStorage_2.RequestNoCarrier := stIo.stIn.aFromEngelRaw[5].5;
+stFromEngel.JobForStorage_2.RequestCarrier := stIo.stIn.aFromEngelRaw[5].6;
+stFromEngel.JobForStorage_2.Empty := stIo.stIn.aFromEngelRaw[5].7;
+
+stFromEngel.JobForStorage_2.Unfinished := stIo.stIn.aFromEngelRaw[6].0;
+
+//stFromEngel.Res. := stIo.stIn.aFromEngelRaw[6].1;
+//...
+//stFromEngel.Res. := stIo.stIn.aFromEngelRaw[6].7;
+
+MEMCPY(ADR(stFromEngel.JobForStorage_1.CarrierId), ADR(stIo.stIn.aFromEngelRaw[7]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.JobForStorage_2.CarrierId), ADR(stIo.stIn.aFromEngelRaw[9]), SIZEOF(UINT));
+
+MEMCPY(ADR(stFromEngel.Storage_1.CarrierId), ADR(stIo.stIn.aFromEngelRaw[11]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_1.CountMax), ADR(stIo.stIn.aFromEngelRaw[13]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_1.CountUnfinished), ADR(stIo.stIn.aFromEngelRaw[15]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_1.CountFinished), ADR(stIo.stIn.aFromEngelRaw[17]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_1.CountEmpty), ADR(stIo.stIn.aFromEngelRaw[19]), SIZEOF(UINT));
+
+MEMCPY(ADR(stFromEngel.Storage_2.CarrierId), ADR(stIo.stIn.aFromEngelRaw[21]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_2.CountMax), ADR(stIo.stIn.aFromEngelRaw[23]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_2.CountUnfinished), ADR(stIo.stIn.aFromEngelRaw[25]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_2.CountFinished), ADR(stIo.stIn.aFromEngelRaw[27]), SIZEOF(UINT));
+MEMCPY(ADR(stFromEngel.Storage_2.CountEmpty), ADR(stIo.stIn.aFromEngelRaw[29]), SIZEOF(UINT));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_MappingOut" Id="{b0bae71e-fc48-4e3e-8f2f-e1c55e993356}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PRIVATE M_MappingOut : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMCPY(ADR(stIo.stOut.aToEngelRaw[0]), ADR(stToEngel.LifeCounter), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[2]), ADR(stToEngel.ErrorID), SIZEOF(UINT));
+
+stIo.stOut.aToEngelRaw[4].0 := stToEngel.Ready;
+stIo.stOut.aToEngelRaw[4].1 := stToEngel.Busy;
+stIo.stOut.aToEngelRaw[4].2 := False;//stToEngel.Error;
+stIo.stOut.aToEngelRaw[4].3 := stToEngel.PermitRoboterHandling;
+stIo.stOut.aToEngelRaw[4].4 := stToEngel.PermitStorage_1;
+stIo.stOut.aToEngelRaw[4].5 := stToEngel.PermitStorage_2;
+stIo.stOut.aToEngelRaw[4].6 := stToEngel.SafetyAreaRequest;
+stIo.stOut.aToEngelRaw[4].7 := stToEngel.SafetyDoorRelease;
+
+stIo.stOut.aToEngelRaw[5].0 := stToEngel.JobStatusForStorage_1.CarrierPresent;
+stIo.stOut.aToEngelRaw[5].1 := stToEngel.JobStatusForStorage_1.Done;
+stIo.stOut.aToEngelRaw[5].2 := stToEngel.JobStatusForStorage_1.Busy;
+stIo.stOut.aToEngelRaw[5].3 := stToEngel.JobStatusForStorage_1.Error;
+stIo.stOut.aToEngelRaw[5].4 := stToEngel.JobStatusForStorage_2.CarrierPresent;
+stIo.stOut.aToEngelRaw[5].5 := stToEngel.JobStatusForStorage_2.Done;
+stIo.stOut.aToEngelRaw[5].6 := stToEngel.JobStatusForStorage_2.Busy;
+stIo.stOut.aToEngelRaw[5].7 := stToEngel.JobStatusForStorage_2.Error;
+
+//stIo.stOut.aToEngelRaw[6].0 := stToEngel.res.;
+
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[7]), ADR(stToEngel.JobStatusForStorage_1.ErrorID), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[9]), ADR(stToEngel.JobStatusForStorage_1.Carrier.CarrierId), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[11]), ADR(stToEngel.JobStatusForStorage_1.Carrier.CountMax), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[13]), ADR(stToEngel.JobStatusForStorage_1.Carrier.CountUnfinished), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[15]), ADR(stToEngel.JobStatusForStorage_1.Carrier.CountFinished), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[17]), ADR(stToEngel.JobStatusForStorage_1.Carrier.CountEmpty), SIZEOF(UINT));
+
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[19]), ADR(stToEngel.JobStatusForStorage_2.ErrorID), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[21]), ADR(stToEngel.JobStatusForStorage_2.Carrier.CarrierId), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[23]), ADR(stToEngel.JobStatusForStorage_2.Carrier.CountMax), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[25]), ADR(stToEngel.JobStatusForStorage_2.Carrier.CountUnfinished), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[27]), ADR(stToEngel.JobStatusForStorage_2.Carrier.CountFinished), SIZEOF(UINT));
+MEMCPY(ADR(stIo.stOut.aToEngelRaw[29]), ADR(stToEngel.JobStatusForStorage_2.Carrier.CountEmpty), SIZEOF(UINT));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_OpModeChanged" Id="{180371b4-ea4f-4a1f-9a1f-633efb168b0e}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PROTECTED M_OpModeChanged : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*bBusy := FALSE;
+
+IF (eOpMode <> eOpMode_step AND eOpMode <> eOpMode_auto) THEN
+	sqAuto.Set(0);
+END_IF
+
+fbCamAs.M_Off();
+fbCamBs.M_Off();
+fbLedAs.M_Off();
+fbLedBs.M_Off();*)
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Run" Id="{f3f1d863-3bb5-4ead-b801-bd7dc528c369}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD PUBLIC M_Run : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check refs valid
+IF NOT __ISVALIDREF(stIO) THEN
+	RETURN;
+END_IF
+
+M_MappingIn();
+M_RUN := SUPER^.M_Run();
+stToEngel.LifeCounter := stFromEngel.LifeCounter;
+M_MappingOut();
+
+M_DynSettings();
+M_DynManual();
+M_DynMonitoring();
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Sequence" Id="{a6dc70c3-1e7d-4585-a7cb-a0a56760a324}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Sequence
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// signal mapping (e.g.: enable)
+// <- FROM ENGEL
+ stSt050IMould.bEnableHG := (NOT (stFromEngel.Moving OR stFromEngel.Error) AND
+							stFromEngel.SafetyAreaSafe AND 
+							stFromEngel.ParkPosition AND
+							stFromEngel.OutsideStorage_1 AND
+							stFromEngel.OutsideStorage_2) OR
+							bStationDeaktiv; //ToDo: check!!!
+							
+stSt050IMould.bReqS1Empty := 	stFromEngel.JobForStorage_1.RequestCarrier AND
+						   		stFromEngel.JobForStorage_1.Empty;
+										 
+stSt050IMould.bReqS2Empty := 	stFromEngel.JobForStorage_2.RequestCarrier AND
+						   		stFromEngel.JobForStorage_2.Empty;
+										 
+stSt050IMould.bReqS1Unfinished :=	stFromEngel.JobForStorage_1.RequestCarrier AND
+						   			stFromEngel.JobForStorage_1.Unfinished;
+										 
+stSt050IMould.bReqS2Unfinished :=	stFromEngel.JobForStorage_2.RequestCarrier AND
+						   			stFromEngel.JobForStorage_2.Unfinished;
+										
+stSt050IMould.bReqS1NoCarrier := stFromEngel.JobForStorage_1.RequestNoCarrier;
+stSt050IMould.bReqS2NoCarrier := stFromEngel.JobForStorage_2.RequestNoCarrier;
+
+// -> TO ENGEL
+stToEngel.PermitRoboterHandling :=
+stToEngel.PermitStorage_1 :=
+stToEngel.PermitStorage_2 := stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_none;
+
+stToEngel.Busy := stSt030IHandling.ActiveCommand.Command <> E_St030_Command.eSt030_Command_none;
+stToEngel.Error := IEvent.ErrorActive;
+//ToDo: stToEngel.ErrorID :=
+
+stToEngel.JobStatusForStorage_1.Busy := stSt030IHandling.ActiveCommand.Position = 1 AND
+												   (stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_Storage_Get OR 
+												   stSt030IHandling.ActiveCommand.Command = E_St030_Command.eSt030_Command_Storage_Put);
+
+											
+												   
+(*ToDo: IF stSt030IHandling.bCarrierDroppedStorage1 THEN
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Carrier.CarrierId := TO_INT(stSt040IStorage.Pallet1.stPallet.ID) ; // ID vom Werkstückträger, Geometrischen Daten werden auf der Engel Steuerung verwaltet
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Carrier.CountMax; // maximale Anzahl an Werkstücken die am Werkstückträger abgelegt werden können
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Carrier.CountUnfinished; // Anzahl der nicht gegossenen Rohlinge am Werkstückträger
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Carrier.CountFinished; // Anzahl der fertigen Werkstücke am Werkstückträger
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Carrier.CountEmpty;
+	stIO.stOut.stToEngel.JobStatusForStorage_1.CarrierPresent := stSt040IStorage.Pallet1.PalletExists;
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Done := TRUE;
+ELSIF NOT stSt050IMould.bReqS1Empty AND NOT stSt050IMould.bReqS1Unfinished AND NOT stSt050IMould.bReqS1NoCarrier THEN
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Carrier := stFromEngel.Storage_1; // status zurück übernehmen
+	stIO.stOut.stToEngel.JobStatusForStorage_1.Done := FALSE;
+END_IF *)
+
+(*ToDo: IF stSt030IHandling.bCarrierDroppedStorage1 THEN ...*)
+
+//ToDo: stIO.stOut.stToEngel.SafetyAreaRequest
+//ToDo: stIO.stOut.stToEngel.SafetyDoorRelease
+
+// automatic sequence
+CASE sqAuto.Step OF
+	
+	0:	sqAuto.Info.Set("Warte auf Auto Start");
+		IF RunCycle AND RunStep THEN
+			//sqAuto.Info.Set("Warte auf GRST");
+			//IF sqHome.InHome AND bInHome THEN
+				sqHome.InHome := FALSE;
+				sqAuto.Step := 5;
+			//ELSE
+			//	StationError.ArgSbAppendWsRaise(stTextlistGlobal.stText_station_not_in_hp);
+			//END_IF
+		END_IF
+		
+	5:	IF bStationDeaktiv THEN
+			sqAuto.Info.Set("Station deaktiv");
+		ELSE
+			sqAuto.Step := 10;
+		END_IF
+		
+	10:	sqAuto.Info.Set("Prüfe Startbedingungen");
+		//IF NOT stFromEngel.CycleMode THEN
+			StationError.ArgSbAppendRaise('Signal Automatikbetrieb Engel fehlt');
+		//ELS
+		IF stFromEngel.Error THEN
+			StationError.ArgSbAppendRaise('Signal Fehler Engel seht an');
+		ELSE
+			CycleStart();
+			bBusy := TRUE;
+			sqAuto.Step := 100;
+		END_IF
+
+	// work
+	100: sqAuto.Info.Set("Automatik");
+		IF NOT RunCycle THEN
+			stToEngel.Ready := FALSE;
+			stToEngel.Busy := FALSE;
+			stToEngel.PermitStorage_1 := FALSE;
+			stToEngel.PermitStorage_2 := FALSE;
+			sqAuto.Step := 900;	
+		END_IF
+		
+	// rdy	
+	900: sqAuto.Info.Set("Zyklus beendet");
+		CycleEnd();
+		sqAuto.Step := 0;
+
+	// error
+	1000: sqAuto.Info.Set("Error");
+		bStopped := TRUE;
+		sqHome.InHome := FALSE;
+		bRunHoming := FALSE;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_SetReferences" Id="{b237b7b9-a5a6-41eb-841b-167aea29b695}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD INTERNAL M_SetReferences : BOOL
+VAR_IN_OUT
+	stIoRef : ST_St050_IO;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stIO REF= stIoRef;
+M_SetReferences := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Supervision" Id="{d319aa2c-3cad-4fa8-ae94-8e30096dc949}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Supervision : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// chk stopped
+IF NOT bRunCycle OR P_Safety.bMachineRequestStop THEN
+	IF sqAuto.StepTime > T#20S THEN
+		bStopped := TRUE;
+	END_IF
+END_IF
+
+// Engel SGM
+IF stFromEngel.Error THEN
+  	ReactToEvent(E_EventReaction.Stop, TcEventSeverity.Error)
+		.ArgSbInit('Engel | Error von SGM | ')
+	  	.ArgSbAppendAnyRaise(stFromEngel.ErrorID);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{f10e1872-3ee8-4d6a-8dbd-1f3dfc3ae20c}" FolderPath="Internal\">
+      <Declaration><![CDATA[/// Reset station logic
+{attribute 'object_name' := 'Reset'}
+METHOD Reset
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// base logic run
+SUPER^.Reset();
+
+// reset objects
+//diContinuesNok := 0;
+
+//IF fbCamAs.bError OR NOT RunCycle THEN
+	fbCamAs.M_Reset();
+	fbCamBs.M_Reset();
+	fbLedAs.M_Reset();
+	fbLedBs.M_Reset();
+//END_IF
+
+//stSt060.bEnable := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

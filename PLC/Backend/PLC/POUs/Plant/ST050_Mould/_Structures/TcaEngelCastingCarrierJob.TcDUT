@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaEngelCastingCarrierJob" Id="{20b1e500-7305-4d11-bca5-75930e7c6fdd}">
+    <Declaration><![CDATA[TYPE TcaEngelCastingCarrierJob :
+STRUCT
+	RequestNoCarrier : BOOL;	// TRUE wenn kein neuer Werkstückträger benötigt wird -> Ablage wird leer gemacht
+	RequestCarrier : BOOL;		// TRUE wenn ein neuer Werkstückträger benötigt wird
+	CarrierId : INT;			// ID vom Werkstückträger, Geometrischen Daten werden auf der Engel Steuerung verwaltet
+	Empty : BOOL;				// TRUE wenn ein Werkstückträger mir leeren Plätzen benötigt wird
+	Unfinished : BOOL;			// TRUE wenn ein Werkstückträger mit unfertigen Werkstücken benötigt wird
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

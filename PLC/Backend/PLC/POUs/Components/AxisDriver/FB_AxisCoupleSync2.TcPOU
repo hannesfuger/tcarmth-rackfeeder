@@ -1,0 +1,348 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_AxisCoupleSync2" Id="{59bfb738-6faf-45f8-a6e0-569a715270a2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AxisCoupleSync2
+VAR_IN_OUT
+	fbAxis_Master			: FB_AxisDriver;
+	stAxisMasterREF			: AXIS_REF;
+	fbAxis_Slave			: FB_AxisDriver;	
+END_VAR
+VAR_INPUT
+	eAxisMaster					:E_Axis;
+	
+	eOpModeStation				:E_OpMode;
+	/// Koppeln
+	bCoupleOn					:BOOL;
+	/// Achsen synchronisieren
+	bSyncOn						:BOOL;
+	/// Tipppen
+	bJog						:BOOL;;
+	/// Sync Geschwindigkeit
+	fVelocity					:REAL := 1;
+	
+	/// Endschalter Master (Oeffner)
+	bRefSwitchMaster			:BOOL;
+	/// Endschalter Slave (Oeffner)
+	bRefSwitchSlave				:BOOL;
+END_VAR
+VAR_OUTPUT
+	bCoupled				:BOOL;
+	bCoupleStateOK			:BOOL;
+	bSyncActiv				:BOOL;
+	bSyncDone				:BOOL;
+	bSyncError				:BOOL;
+END_VAR
+VAR
+	iStepSync	:INT;
+	
+	iStepKoppeln		:INT;
+	negSync			:F_TRIG;
+	tonTimeOutGear	:TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	Baustein um 2 Achsen zu koppeln und 
+	auf Ref. Schalter zu Synchronisieren
+*)
+// Timer, Flanken
+tonTimeOutGear(PT := T#2S);
+
+
+negSync(CLK := bSyncOn);
+IF negSync.Q THEN
+	IF fbAxis_Master.Moving THEN
+		fbAxis_Master.Halt();
+	END_IF
+	IF fbAxis_Slave.Moving THEN
+		fbAxis_Slave.Halt();
+	END_IF
+END_IF
+
+IF NOT bSyncOn OR eOpModeStation <> E_OpMode.eOpMode_Manual THEN
+	iStepSync := 0;
+	bSyncActiv := FALSE;
+	bSyncDone := FALSE;
+	A_Couple();
+	RETURN;
+END_IF
+
+iStepKoppeln := 0;
+bCoupled := FALSE;
+
+
+CASE iStepSync OF
+	
+	0:
+		bSyncError := FALSE;
+		bSyncDone := FALSE;
+		bSyncActiv := TRUE;
+		iStepSync := 10;
+		
+		// Einkoppeln
+	10:
+		fbAxis_Slave.GearIn(1, eAxisMaster, stAxisMasterREF);
+		tonTimeOutGear(IN := FALSE);
+		iStepSync := 20;
+		
+	20:
+		tonTimeOutGear(IN := TRUE);
+		IF fbAxis_Slave.Coupled AND
+		NOT fbAxis_Slave.bError THEN
+			iStepSync := 30;
+		ELSIF fbAxis_Slave.bError THEN
+			iStepSync := 800; // Fehler
+		ELSIF tonTimeOutGear.Q THEN
+			tonTimeOutGear(IN := FALSE);
+			iStepSync := 0;
+		END_IF		
+		
+		
+		// Master negative Richtung tippen bis Endschalter
+	30:
+		iStepSync := 50;
+(*		fbAxis_Master.JogExVel((bJog AND bFreigabe_N AND bRefSwitchMaster AND bRefSwitchSlave), 
+								FALSE, fVelocity, E_JogMode.MC_JOGMODE_CONTINOUS);
+		IF NOT bRefSwitchMaster OR NOT bRefSwitchSlave THEN
+			fbAxis_Master.Halt();
+			iStepSync := 50;
+		ELSIF fbAxis_Master.Error OR fbAxis_Slave.Error THEN
+			iStepSync := 800;
+		END_IF
+*)
+		
+	50:
+		IF NOT fbAxis_Master.Moving THEN
+			iStepSync := 60;			
+		ELSE
+			fbAxis_Master.Halt();
+		END_IF
+		
+		// Auskuppeln
+	60:
+		fbAxis_Slave.GearOut();
+		tonTimeOutGear(IN := FALSE);
+		iStepSync := 65;
+		
+	65:
+		tonTimeOutGear(IN := TRUE);
+		IF NOT fbAxis_Slave.Coupled THEN
+			IF fbAxis_Slave.Moving THEN
+				fbAxis_Slave.Halt();
+			END_IF
+			iStepSync := 100;
+			
+		ELSIF tonTimeOutGear.Q THEN
+			tonTimeOutGear(IN := FALSE);
+			iStepSync := 60;
+		END_IF		
+	
+		
+		// mit Slave auf MasterPos fahren
+	100:
+		IF F_TargetWindowReachedAxisRef(fbAxis_Slave,
+										fbAxis_Master.Position, 0.01) AND
+		NOT fbAxis_Slave.Moving THEN
+			iStepSync := 110;
+			
+		ELSIF bJog THEN
+			IF NOT fbAxis_Slave.Moving THEN
+				fbAxis_Slave.MoveAbsExVel(fbAxis_Master.Position, fVelocity);
+			END_IF
+		
+		ELSIF fbAxis_Slave.Moving THEN
+			fbAxis_Slave.Halt();
+
+		ELSIF fbAxis_Master.bError OR fbAxis_Slave.bError THEN
+			iStepSync := 800;
+		END_IF
+		
+	110:
+		iStepSync := 200;
+		
+		
+		// Einkoppeln
+	200:
+		fbAxis_Slave.GearIn(1, eAxisMaster, stAxisMasterREF);
+		tonTimeOutGear(IN := FALSE);
+		iStepSync := 210;
+		
+	210:
+		tonTimeOutGear(IN := TRUE);
+		IF fbAxis_Slave.Coupled AND
+		NOT fbAxis_Slave.bError THEN
+			iStepSync := 500;
+		ELSIF fbAxis_Slave.bError THEN
+			iStepSync := 800; // Fehler
+		ELSIF tonTimeOutGear.Q THEN
+			tonTimeOutGear(IN := FALSE);
+			iStepSync := 0;
+		END_IF			
+		
+		
+		// FERTIG
+	500:
+		bSyncActiv := FALSE;
+		bSyncDone := TRUE;
+		
+		
+// Fehler
+	800:
+		bSyncError := TRUE;
+		IF fbAxis_Master.Moving THEN
+			fbAxis_Master.Halt();
+		END_IF
+		IF fbAxis_Slave.Moving THEN
+			fbAxis_Slave.Halt();
+		END_IF		
+		iStepSync := 810;	
+	
+	810:
+		bSyncError := TRUE;
+		IF NOT fbAxis_Master.bError AND
+		NOT fbAxis_Slave.bError THEN
+			iStepSync := 0;		
+		END_IF
+		
+END_CASE
+]]></ST>
+    </Implementation>
+    <Action Name="A_Couple" Id="{fabe86af-f7f4-434c-918f-348ccc520c3a}">
+      <Implementation>
+        <ST><![CDATA[// Antriebe Transfer koppeln
+CASE iStepKoppeln OF
+	
+	0:
+		IF bCoupleOn THEN
+			bCoupleStateOK := FALSE;
+			iStepKoppeln := 100; // Gear In
+		ELSE					
+			bCoupleStateOK := FALSE;
+			iStepKoppeln := 500; // Gear Out
+		END_IF
+	
+
+// Koppeln
+
+		// kein Fehler
+	100:
+		IF NOT fbAxis_Master.bError AND
+		fbAxis_Master.Operational AND
+		NOT fbAxis_Slave.bError AND
+		fbAxis_Slave.Operational THEN
+			iStepKoppeln := 110;
+		ELSIF NOT bCoupleOn THEN
+			iStepKoppeln := 0;
+		ELSE
+			iStepKoppeln := 800; // Fehler
+		END_IF
+		
+		// koppeln
+	110:
+		fbAxis_Slave.GearIn(1, eAxisMaster, stAxisMasterREF);
+		tonTimeOutGear(IN := FALSE);
+		iStepKoppeln := 120;
+		
+	120:
+		tonTimeOutGear(IN := TRUE);
+		IF fbAxis_Slave.Coupled AND
+		NOT fbAxis_Slave.bError THEN
+			iStepKoppeln := 130;
+		ELSIF fbAxis_Slave.bError THEN
+			iStepKoppeln := 800; // Fehler
+		ELSIF tonTimeOutGear.Q THEN
+			tonTimeOutGear(IN := FALSE);
+			iStepKoppeln := 0;
+		ELSIF NOT bCoupleOn THEN
+			iStepKoppeln := 0;
+		END_IF
+	
+		// Ueberwache Kopplung
+	130:
+		tonTimeOutGear(IN := FALSE);
+		bCoupleStateOK := TRUE;
+		// Koppeln aus
+		IF NOT bCoupleOn THEN
+			iStepKoppeln := 0;
+		END_IF
+		// Slave Antrieb hat Fehler und Master fährt -> Stopp Master
+		IF fbAxis_Slave.bError AND fbAxis_Master.Moving THEN
+			fbAxis_Master.Halt();
+		END_IF
+		// Master Antrieb hat Fehler -> für Kopplung egal
+		IF fbAxis_Master.bError THEN
+			;
+		END_IF
+		
+		// Slave nicht mehr gekoppelt --> neu koppeln
+		IF NOT fbAxis_Slave.Coupled THEN
+			IF fbAxis_Master.Moving THEN
+				fbAxis_Master.Halt();				
+			END_IF
+			iStepKoppeln := 0;
+		END_IF
+	
+
+// Entkoppeln
+
+		// Stoppen
+	500:
+		IF fbAxis_Master.Moving THEN
+			fbAxis_Master.Halt();				
+		ELSE
+			iStepKoppeln := 510;
+		END_IF
+
+	510:
+		fbAxis_Slave.GearOut();
+		tonTimeOutGear(IN := FALSE);
+		iStepKoppeln := 520;
+		
+	520:
+		tonTimeOutGear(IN := TRUE);
+		IF NOT fbAxis_Slave.Coupled THEN
+			IF fbAxis_Slave.Moving THEN
+				fbAxis_Slave.Halt();
+			END_IF
+			iStepKoppeln := 530;
+		ELSIF tonTimeOutGear.Q THEN
+			tonTimeOutGear(IN := FALSE);
+			iStepKoppeln := 0;
+		END_IF
+
+		// Achse soll wieder koppeln
+	530:
+		bCoupleStateOK := TRUE;
+		IF bCoupleOn THEN
+			iStepKoppeln := 0;
+		END_IF
+		// Status darf sich nicht ändern -> neu einstellen
+		IF fbAxis_Slave.Coupled THEN
+			iStepKoppeln := 0;
+		END_IF
+		
+		
+// Fehler
+	800:
+		bCoupleStateOK := FALSE;
+		IF NOT fbAxis_Master.bError AND
+		NOT fbAxis_Slave.bError THEN
+			iStepKoppeln := 0;		
+		END_IF
+		
+END_CASE
+
+bCoupled := bCoupleStateOK AND fbAxis_Slave.Coupled;
+]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="FB_AxisCoupleSync2">
+      <LineId Id="205" Count="163" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AxisCoupleSync2.A_Couple">
+      <LineId Id="2" Count="123" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

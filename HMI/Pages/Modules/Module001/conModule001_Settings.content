@@ -1,0 +1,17 @@
+<div id="conModule001_Settings" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-left-unit="%" data-tchmi-top-unit="%">
+
+<div id="UcSettings_2" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="94" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Settings/ucSettings.usercontrol" data-tchmi-top="6" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-adataitems="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stSettings::astSettingModules[1]::stSettingView%/s%" data-tchmi-stsettingscontroltohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stSettings::astSettingModules[1]::stControlSetting%/s%" data-tchmi-stsettingscontrolfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stSettings::astControlSetting_Modules[1]%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+
+
+
+</div>
+
+<div id="TcHmiTextblock_Sitename_Settings001" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="6.3" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%l%settings%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center" data-tchmi-creator-locked="True" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150">
+
+</div>
+
+<div id="TcHmiTextblock_Modulename" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="6.3" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="33.0" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-creator-locked="True" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text="%f%F_TranslateText(%s%PLC1.HMI.stHmiTc3::stOut::stCommon::arrStModule[1]::stName%/s%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px">
+
+</div>
+
+</div>

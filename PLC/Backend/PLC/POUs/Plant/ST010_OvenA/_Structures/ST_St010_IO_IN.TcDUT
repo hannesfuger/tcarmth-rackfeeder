@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St010_IO_IN" Id="{076c8679-defe-4c73-a920-c9ab0eb70958}">
+    <Declaration><![CDATA[TYPE ST_St010_IO_IN :
+STRUCT	
+	// inputs
+	bRefpos	: BOOL;	// Sensor | Oven | Referenzposition | BMK: =P260+xyz- | Terminal: .: | Tc3Hmi
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

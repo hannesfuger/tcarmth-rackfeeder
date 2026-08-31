@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_HMI_USER_MGMT_OUT" Id="{041c3e65-bd61-46f2-b064-6312e25c31a9}">
+    <Declaration><![CDATA[TYPE ST_HMI_USER_MGMT_OUT :
+STRUCT
+	sUserState						: STRING;
+	stButton_LogOut					: ST_HMI_BUTTON_OUT;
+	stButton_LogIn					: ST_HMI_BUTTON_OUT;
+	stButton_Submit					: ST_HMI_BUTTON_OUT;
+	stUserLevel						: ARRAY [0..20] OF ST_User_Management;
+	bUserLevel						: ARRAY [0..E_User_Level.eUser_Level_nMaxIdx] OF BOOL;
+	aUserLevelList					: ARRAY[0..E_User_Level.eUser_Level_nMaxIdx] OF ST_Text;
+	bKeyboardInputVisible			: BOOL;
+	bNumpadInputVisible				: BOOL;
+	bUserLevelInputVisible			: BOOL;
+	bPasswordInputVisible			: BOOL;
+	stUserManagementMessage			: ST_Text;
+	
+	stInputDisplayText				: ST_Text;
+
+	bCreateDeleteUserVisible		: BOOL;
+	stInfo							: ST_Text;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

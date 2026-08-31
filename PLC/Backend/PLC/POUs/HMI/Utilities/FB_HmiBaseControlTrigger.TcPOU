@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_HmiBaseControlTrigger" Id="{694e59bb-6e93-43d1-9d14-86df755e3257}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK INTERNAL FB_HmiBaseControlTrigger
+VAR_INPUT
+	stHmiToPlcIn 	: ST_DefaultHmiToPlc;
+END_VAR
+VAR_IN_OUT
+	stHmiToPlcOut 	: ST_DefaultHmiToPlc;
+END_VAR
+VAR
+	fTrigStart	: F_TRIG;
+	fTrigStop	: F_TRIG;
+	fTrigReset	: F_TRIG;
+	fTrigTip	: F_TRIG;
+	
+	tonHome		: TON;
+	rTrigHome	: R_TRIG;
+	
+	fTrigOpModeManual	: F_TRIG;
+	fTrigOpModeAuto		: F_TRIG;
+	fTrigOpModeStep		: F_TRIG;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fTrigStart(CLK := stHmiToPlcIn.bStart, Q => stHmiToPlcOut.bStart);
+stHmiToPlcOut.bStop := stHmiToPlcIn.bStop;
+stHmiToPlcOut.bFastStop := stHmiToPlcIn.bFastStop;
+stHmiToPlcOut.eSafetyOpMode := stHmiToPlcIn.eSafetyOpMode;
+fTrigReset(CLK := stHmiToPlcIn.bReset, Q => stHmiToPlcOut.bReset);
+fTrigTip(CLK := stHmiToPlcIn.bStep, Q => stHmiToPlcOut.bStep);
+
+tonHome(IN := stHmiToPlcIn.bHome, PT := T#1S);
+rTrigHome(CLK := tonHome.Q, Q => stHmiToPlcOut.bHome);
+
+fTrigOpModeManual(CLK := stHmiToPlcIn.bOpModeManual, Q => stHmiToPlcOut.bOpModeManual);
+fTrigOpModeAuto(CLK := stHmiToPlcIn.bOpModeAuto, Q => stHmiToPlcOut.bOpModeAuto);
+fTrigOpModeStep(CLK := stHmiToPlcIn.bOpModeStep, Q => stHmiToPlcOut.bOpModeStep);]]></ST>
+    </Implementation>
+    <LineIds Name="FB_HmiBaseControlTrigger">
+      <LineId Id="69" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="73" Count="7" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

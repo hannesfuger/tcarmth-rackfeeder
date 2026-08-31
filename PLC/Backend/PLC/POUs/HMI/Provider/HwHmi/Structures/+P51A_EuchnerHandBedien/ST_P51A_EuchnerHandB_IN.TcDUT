@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_P51A_EuchnerHandB_IN" Id="{9c324489-8329-488e-96e9-b1f5b3abd471}">
+    <Declaration><![CDATA[TYPE ST_P51A_EuchnerHandB_IN : //EXTENDS ST_PxAB_SxHandAsBs_IN :
+STRUCT
+	bSelect01 : BOOL;
+	bSelect02 : BOOL;
+	bSelect03 : BOOL;
+	bSelect04 : BOOL;
+	bSelect05 : BOOL;
+	bSelect06 : BOOL;
+	
+	bJog : BOOL;
+	bDistance : BOOL;
+	bReset : BOOL;
+	bAlt : BOOL;
+	
+	bUp : BOOL;
+	bDown : BOOL;
+	bLeft : BOOL;
+	bRight : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

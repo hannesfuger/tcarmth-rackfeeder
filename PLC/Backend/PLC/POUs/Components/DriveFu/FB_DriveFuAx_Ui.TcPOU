@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_DriveFuAx_Ui" Id="{eda781c5-8cf7-478b-874e-933ef7dc7235}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC FB_DriveFuAx_Ui EXTENDS FB_ManualUiBase
+VAR_INPUT
+	// velocity
+	fVelocity				: REAL := 1;	
+	// additional enable flag for pos. direction
+	bEnablePos				: BOOL := TRUE;
+	// additional enable flag for neg. direction
+	bEnableNeg				: BOOL := TRUE;	
+	// manual jog neg.
+	bJobN					: BOOL;
+	// manual jog pos.
+	bJogP					: BOOL;
+	// manual stop
+	bStop					: BOOL;
+END_VAR
+VAR_IN_OUT
+	// axis reference
+	fbAxis				: FB_AxisDriver;
+	// hmi control IN
+	stHMIControlIn		: ST_HMI_MANUAL_DRIVE_IN;
+	// hmi control OUT
+	stHMIControlOut		: ST_HMI_MANUAL_DRIVE_OUT;
+END_VAR
+VAR_OUTPUT	
+	diColorSelectedItem: UDINT;
+	/// 0=undefined 
+	/// 1=error
+	/// 2=moving pos. 
+	/// 3=moving neg.
+	/// 4=standstill
+	/// 5=in sync
+	iState			: INT;
+	diColorState	: UDINT;
+	sState			: STRING;
+	stState			: ST_Text;
+END_VAR
+VAR
+	stAxisState		: Tc2_MC2.ST_AxisStatus;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// AX5000 UI like frequency inverter (FU)
+
+stName := fbAxis.Name;
+
+// inactive -> reset & exit
+IF NOT fbAxis.Active THEN
+	stState := CONST.stTextListGlobal.stText_notext;
+	iState := 0;// 0=undefined
+	A_StateMapping();
+	RETURN;
+END_IF
+
+IF (diSelectedObjectIndex = diObjectIndex)AND (diObjectIndex <> 0) AND bEnableManual THEN
+	bManualActive := TRUE;
+	stHMIControlOut.bVisible := TRUE;
+	stHMIControlOut.stObjectName := fbAxis.Name;
+	stHMIControlOut.stButtonJogPos.stName := CONST.stTextListGlobal.stText_Positive;
+	stHMIControlOut.stButtonJogNeg.stName := CONST.stTextListGlobal.stText_Negative;
+	stHMIControlOut.stButtonStop.stName := CONST.stTextListGlobal.stText_Stop;
+	stHMIControlOut.aDriveModeName[0] :=  CONST.stTextListGlobal.stText_Mode_StartStop;
+	stHMIControlOut.aDriveModeName[1] :=  CONST.stTextListGlobal.stText_Mode_Jog;
+	
+	CASE stHMIControlIn.eJogMode OF
+		
+	E_Drive_JogMode.eJogMode_0 :
+			IF stHMIControlIn.stButtonStop.bClick THEN
+				fbAxis.Stop();
+			ELSIF stHMIControlIn.stButtonJogPos.bClick THEN
+				fbAxis.MoveVel(fVelocity, MC_Direction.MC_Positive_Direction);
+			ELSIF stHMIControlIn.stButtonJogNeg.bClick THEN	
+				fbAxis.MoveVel(fVelocity, MC_Direction.MC_Negative_Direction);	
+			END_IF
+	E_Drive_JogMode.eJogMode_1 :
+		fbAxis.JogExVel(((bJobN OR stHMIControlIn.stButtonJogNeg.bClick) AND bEnableNeg),
+						((bJogP OR stHMIControlIn.stButtonJogPos.bClick) AND bEnablePos),
+						fVelocity, E_JogMode.MC_JOGMODE_CONTINOUS);			
+	END_CASE
+	stHMIControlOut.stButtonJogPos.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonJogNeg.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Theme);
+	stHMIControlOut.stButtonStop.stColor.color := F_ColorToStringHexColor(STATICS.stColor.Red);
+	IF iState = 2 THEN // 2 = moving neg
+		stHMIControlOut.stButtonJogPos.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);	
+	END_IF
+	IF iState = 3 THEN // 3 = moving neg
+		stHMIControlOut.stButtonJogNeg.stColor.color := F_ColorToStringHexColor(STATICS.stColor.LimeGreen);	
+	END_IF	
+	
+	stHMIControlOut.stState	:= stState;	
+ELSIF bManualActive THEN
+	bManualActive := FALSE;
+	stHMIControlOut.bVisible := FALSE;
+END_IF
+
+A_StateMapping();]]></ST>
+    </Implementation>
+    <Action Name="A_StateMapping" Id="{7980716a-4876-492c-91f2-7c91730e18b1}">
+      <Implementation>
+        <ST><![CDATA[IF (diObjectIndex = diSelectedObjectIndex) THEN
+	diColorSelectedItem := STATICS.stColor.LimeGreen;
+ELSE
+	diColorSelectedItem := STATICS.stColor.Gray;	
+END_IF
+
+bError := fbAxis.State = E_ComponentState.eComponentState_error;
+IF bError THEN
+	stErrorText := F_CreateDynText(fbAxis.ClearText, 0);
+ELSE
+	stErrorText := CONST.stTextListGlobal.stText_notext;
+END_IF
+
+// Status
+stAxisState := fbAxis.AxisState;
+IF bError THEN
+	iState := 1; // 1=Fehler; 
+	diColorState:= STATICS.stColor.Red;
+	stState.wsNameId := "error";
+	stState.wsName := "error";
+	stState.nNameId :=1;
+ELSIF stAxisState.Moving AND stAxisState.PositiveDirection THEN
+	iState := 2; // 2=Fahrt Positiv; 
+	diColorState:= STATICS.stColor.Green;
+	stState.wsNameId := "movepositive";
+	stState.wsName := "movepositive";
+	stState.nNameId :=2;
+ELSIF stAxisState.Moving AND stAxisState.NegativeDirection THEN
+	iState := 3; // 3=Fahrt Negativ;
+	diColorState:= STATICS.stColor.Green;
+	stState.wsNameId := "movenegative";
+	stState.wsName := "movenegative";
+	stState.nNameId :=3;
+ELSIF stAxisState.Coupled THEN
+	iState := 5; // 5=Synchron
+	diColorState:= STATICS.stColor.LightSkyBlue;
+	stState.wsNameId := "coupled";
+	stState.wsName := "coupled";
+	stState.nNameId :=5;
+ELSIF NOT stAxisState.Moving THEN
+	iState := 4; // 4=Stillstand
+	diColorState:= STATICS.stColor.Gray;
+	stState.wsNameId := "notmoveing";
+	stState.wsName := "notmoveing";
+	stState.nNameId :=4;
+ELSE
+	iState := 0;// 0=Undefiniert
+	diColorState:= STATICS.stColor.Orange;
+	stState.wsNameId := "undifined";
+	stState.wsName := "undifined";
+	stState.nNameId :=0;
+END_IF
+
+IF NOT __ISVALIDREF(stStateObject) THEN
+	RETURN;
+END_IF
+
+// state mapping
+stStateObject.stState := stState;
+stStateObject.nIndexColor := diColorSelectedItem;
+//stStateObject.stValue.wsName := "mov/stp";]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="FB_DriveFuAx_Ui">
+      <LineId Id="897" Count="0" />
+      <LineId Id="1352" Count="0" />
+      <LineId Id="1282" Count="0" />
+      <LineId Id="1353" Count="0" />
+      <LineId Id="1283" Count="5" />
+      <LineId Id="1281" Count="0" />
+      <LineId Id="1027" Count="0" />
+      <LineId Id="899" Count="0" />
+      <LineId Id="1075" Count="0" />
+      <LineId Id="900" Count="18" />
+      <LineId Id="1294" Count="1" />
+      <LineId Id="1292" Count="0" />
+      <LineId Id="926" Count="6" />
+      <LineId Id="1289" Count="0" />
+      <LineId Id="934" Count="3" />
+      <LineId Id="1072" Count="2" />
+      <LineId Id="938" Count="0" />
+      <LineId Id="982" Count="0" />
+      <LineId Id="150" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DriveFuAx_Ui.A_StateMapping">
+      <LineId Id="10" Count="50" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

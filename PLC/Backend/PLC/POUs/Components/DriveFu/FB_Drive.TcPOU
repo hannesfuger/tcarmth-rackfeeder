@@ -1,0 +1,333 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="FB_Drive" Id="{b811c766-f891-4e79-8b19-fc9f1052191b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Drive
+VAR_IN_OUT
+	bInHome: BOOL;
+END_VAR
+VAR_INPUT
+	/// component active flag
+	bActive: BOOL;
+	/// Objekt Name (BMK)
+	stName				:ST_Text;
+	/// Sicherheit = Freigabe von Bewegungen
+	bSafetyOk			:BOOL;
+	/// Motorschutz OK
+	bMotorprotectionOk		:BOOL;
+
+	// Hand
+	///Objekt Index
+	diObjectIndex: DINT;
+	///Ausgewähltes Objekt in der Visu
+	diSelectedObjectIndex	:DINT;
+	/// Gibt den Handbetrieb frei
+	bEnableManual: BOOL;
+	// Handbetrieb nach GRST
+	bManual_Reverse: BOOL;
+	/// Handbetrieb nach AST
+	bManual_Forward: BOOL;
+	///	 Handbetrieb Stop
+	bManual_Stop :BOOL;
+	//	Type Handbetrieb
+	// 1 = Tippen
+	// 2 = Speichern
+	iType : INT;
+	
+	///	Zus. Freigabe für HP Ausgang schalten	
+	bFreigabe_Reverse: BOOL := TRUE;
+	///	Zus. Freigabe für WP Ausgang schalten	
+	bFreigabe_Forward: BOOL := TRUE;
+END_VAR
+VAR_OUTPUT	
+	/// Summenfehler
+	bError		:BOOL;
+	/// Fehlerinformation
+	sErrText	:ST_Text;
+	/// 0=Undefiniert
+	/// 1=Fehler
+	/// 2=Stillstand OK
+	/// 3=Vorwärts
+	///	4=Rückwärts 
+	iStatus: INT;	
+
+	bInit_OK: BOOL;
+	
+	bDrive_Reverse_Out: BOOL;
+	bDrive_Forward_Out: BOOL;
+END_VAR
+VAR
+	iTypeOld : INT;
+	tofForward: TOF;
+	tofReverse: TOF;
+	
+	bDrive_Reverse: BOOL;
+	bDrive_Forward: BOOL;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*FB Drive für Antriebe*)
+(*Erstellt von Stephan Schöchtner RMTH GmbH*)
+(*21.März.2018*)
+
+tofForward();
+tofForward.IN := bManual_Forward;
+
+tofReverse();
+tofReverse.IN := bManual_Reverse;
+
+
+// Initialisierung
+IF NOT bInit_OK THEN
+	M_Init();	
+	bInit_OK :=TRUE;
+END_IF
+
+sERRText := CONST.stTextListGlobal.stText_notext;
+
+//Fehler
+bError := FALSE;
+IF NOT bMotorprotectionOK THEN
+	bError := TRUE;
+	sErrText := F_CreateDynText("Motorschutz", 0);
+END_IF
+
+// Bei Typumschaltung im laufenden Betrieb STOP
+IF iType <> iTypeOld THEN
+	iTypeOld := iType;
+	M_Stop();
+END_IF
+
+IF (diObjectIndex = diSelectedObjectIndex) THEN
+	// Tippen mit Wendeschützumschaltung und Typumschaltung
+	CASE iType OF	//Tippen
+	
+		1:
+			IF bManual_Forward AND NOT bManual_Stop THEN
+				bDrive_Reverse := FALSE;
+				IF NOT tofReverse.Q THEN
+					M_Start_Forward();
+				END_IF
+			ELSIF bManual_Reverse AND NOT bManual_Stop THEN
+				bDrive_Forward := FALSE;
+				IF NOT tofForward.Q THEN
+					M_Start_Reverse();
+				END_IF
+			ELSE
+				M_Stop();
+				//M_Start_Forward := FALSE;
+				//M_Start_Reverse := FALSE;
+			END_IF
+		2:						//Speichern
+			IF bManual_Forward AND NOT bManual_Stop THEN
+				bDrive_Reverse := FALSE;
+				IF NOT tofReverse.Q THEN
+					M_Start_Forward();
+				END_IF
+			ELSIF bManual_Reverse AND NOT bManual_Stop THEN
+				bDrive_Forward := FALSE;
+				IF NOT tofForward.Q THEN
+					M_Start_Reverse();
+				END_IF
+			END_IF
+			IF bManual_Stop THEN
+				M_Stop();
+				//M_Start_Forward := FALSE;
+				//M_Start_Reverse := FALSE;
+			END_IF	
+	ELSE
+		//no type selected
+		bError := TRUE;
+		sErrText := F_CreateDynText("Handbetriebstyp falsch", 0);
+		M_Stop();
+	END_CASE
+END_IF
+
+IF bError THEN
+	istatus := 1;
+ELSIF NOT bDrive_Forward AND NOT bDrive_Reverse THEN
+	iStatus := 2;
+ELSIF bDrive_Forward THEN
+	iStatus := 3;
+ELSIF bDrive_Reverse THEN
+	iStatus := 4;
+END_IF
+
+
+bDrive_Reverse_Out:= bDrive_Reverse AND bFreigabe_Reverse AND bSafetyOk AND bMotorprotectionOk;
+bDrive_Forward_Out:= bDrive_Forward AND bFreigabe_Forward AND bSafetyOk AND bMotorprotectionOk;
+
+IF NOT bSafetyOk THEN
+	bDrive_Reverse:=FALSE;
+	bDrive_Reverse_Out:=FALSE;
+
+	bDrive_Forward:=FALSE;
+	bDrive_Forward_Out:=FALSE;	
+END_IF
+
+
+//Wegfahrsperre
+IF bError THEN
+	M_Stop();
+END_IF
+
+
+]]></ST>
+    </Implementation>
+    <Method Name="M_Init" Id="{f8a224e2-5caa-475f-b0f3-eea92b648e57}">
+      <Declaration><![CDATA[METHOD M_Init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDrive_Forward := FALSE;
+bDrive_Reverse := FALSE;
+tofForward.IN := FALSE;
+tofForward.PT := T#150MS;
+tofReverse.IN := FALSE;
+tofReverse.PT := T#150MS;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{00f9d4a6-42dd-4266-ba47-7d656b00a099}">
+      <Declaration><![CDATA[METHOD M_Reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Start_Forward" Id="{7681f5a2-71df-4d3f-962a-7a1e7dc0fd04}">
+      <Declaration><![CDATA[METHOD M_Start_Forward : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDrive_Reverse := FALSE;
+bDrive_Forward := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Start_Reverse" Id="{ceb8f507-bede-4b18-8437-757cc93c7b40}">
+      <Declaration><![CDATA[METHOD M_Start_Reverse : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDrive_Reverse := TRUE;
+bDrive_Forward := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Stop" Id="{438855a6-7d63-40fe-b81f-77e7427f4a86}">
+      <Declaration><![CDATA[METHOD M_Stop : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	bDrive_Reverse := FALSE;
+	bDrive_Forward := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Drive">
+      <LineId Id="788" Count="1" />
+      <LineId Id="791" Count="0" />
+      <LineId Id="790" Count="0" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="524" Count="1" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="716" Count="0" />
+      <LineId Id="398" Count="0" />
+      <LineId Id="278" Count="1" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="987" Count="1" />
+      <LineId Id="419" Count="0" />
+      <LineId Id="394" Count="0" />
+      <LineId Id="522" Count="0" />
+      <LineId Id="412" Count="0" />
+      <LineId Id="426" Count="0" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="427" Count="0" />
+      <LineId Id="786" Count="0" />
+      <LineId Id="780" Count="0" />
+      <LineId Id="778" Count="0" />
+      <LineId Id="784" Count="1" />
+      <LineId Id="782" Count="0" />
+      <LineId Id="418" Count="0" />
+      <LineId Id="885" Count="0" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="777" Count="0" />
+      <LineId Id="719" Count="0" />
+      <LineId Id="392" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="285" Count="0" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="273" Count="1" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="616" Count="1" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="710" Count="0" />
+      <LineId Id="735" Count="3" />
+      <LineId Id="740" Count="4" />
+      <LineId Id="746" Count="1" />
+      <LineId Id="752" Count="0" />
+      <LineId Id="748" Count="2" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="720" Count="2" />
+      <LineId Id="753" Count="1" />
+      <LineId Id="393" Count="0" />
+      <LineId Id="728" Count="0" />
+      <LineId Id="769" Count="0" />
+      <LineId Id="886" Count="7" />
+      <LineId Id="770" Count="0" />
+      <LineId Id="1086" Count="1" />
+      <LineId Id="1085" Count="0" />
+      <LineId Id="1088" Count="0" />
+      <LineId Id="1186" Count="0" />
+      <LineId Id="1185" Count="0" />
+      <LineId Id="1187" Count="0" />
+      <LineId Id="1189" Count="0" />
+      <LineId Id="1191" Count="1" />
+      <LineId Id="1190" Count="0" />
+      <LineId Id="1188" Count="0" />
+      <LineId Id="771" Count="1" />
+      <LineId Id="423" Count="2" />
+      <LineId Id="421" Count="0" />
+      <LineId Id="521" Count="0" />
+      <LineId Id="520" Count="0" />
+      <LineId Id="420" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive.M_Init">
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive.M_Reset">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive.M_Start_Forward">
+      <LineId Id="13" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive.M_Start_Reverse">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Drive.M_Stop">
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

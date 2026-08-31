@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TwinSAFEDiag_TwoHand" Id="{975920cf-7fcb-4241-b098-4ef856bf3ae1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TwinSAFEDiag_TwoHand
+VAR_INPUT
+	wsFunctionBlockText	: WSTRING;
+	stIn				: ST_SafetyDiagInfo;
+END_VAR
+VAR_OUTPUT
+	bWarning: BOOL;	
+	stWarningText: ST_Text;
+	stWarningTextAdd: ST_Text;
+	
+	bError					: BOOL;
+	stErrorText				: ST_Text;
+	stErrorTextAdd			: ST_Text;
+END_VAR
+VAR
+	{attribute 'hide' := ''}
+	wsTempText: WSTRING(255);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bWarning := FALSE;
+stWarningText := stEmptyText;
+stWarningTextAdd := stEmptyText;
+
+bError := FALSE;
+stErrorText := stEmptyText;
+stErrorTextAdd := stEmptyText;
+
+(*	DIAG:
+	Bit 0: Disc Error (TwoHand1/2)
+	Bit 1: Disc Error (TwoHand3/4)
+	Bit 2: Disc Error (InGroup1/2)
+	Bit 6: TwoHand Error		*)
+IF stIn.uintDiag.0 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "Channel: 1/2"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.1 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "Channel: 3/4"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.2 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Error;
+	wsTempText := (WCONCAT(WCONCAT(wsFunctionBlockText, "; ") , "Group: 1/2"));
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+ELSIF stIn.uintDiag.6 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_Safety.stText_Safety_2Hand_Error;
+	stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+(*	STATE
+	1: State RUN
+	2: State STOP
+	3: State SAFE
+	4: State ERROR
+	5: State RESET
+	11: State 1BUTTON
+	12: State 2BUTTON
+	13: State RELEASE
+	*)
+ELSIF stIn.usintState = 4 THEN
+	bError := TRUE;
+	stErrorText := stTextListGlobal.stText_UnknownError;
+	stErrorTextAdd := F_CreateDynTextDefault(wsFunctionBlockText);
+
+END_IF
+
+(*	Warnung		*)
+IF stIn.usintState = 13 THEN
+	bWarning := TRUE;
+	stWarningText := stTextListGlobal.stText_Safety.stText_Safety_Discrepancy_Warning;
+	stWarningTextAdd := F_CreateDynTextDefault(wsFunctionBlockText);
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_TwinSAFEDiag_TwoHand">
+      <LineId Id="141" Count="58" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

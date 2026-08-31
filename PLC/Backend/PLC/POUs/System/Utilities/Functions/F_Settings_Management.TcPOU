@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Settings_Management" Id="{090ff801-28fc-4fda-ae1d-5d6f246c91af}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Settings_Management : BOOL
+VAR_IN_OUT
+	aSettings	: ARRAY[*] OF ST_Data_Item; /// settings structure
+END_VAR
+VAR
+	nn	: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Check Array Size
+
+FOR nn := LOWER_BOUND(aSettings, 1) TO UPPER_BOUND(aSettings, 1) DO
+	IF (aSettings[nn].fValue > aSettings[nn].fValueMax) THEN
+		aSettings[nn].fValue := aSettings[nn].fValueMax;
+	END_IF	
+	IF (aSettings[nn].fValue < aSettings[nn].fValueMin) THEN
+		aSettings[nn].fValue := aSettings[nn].fValueMin;
+	END_IF
+	IF (aSettings[nn].nValue > aSettings[nn].fValueMax) THEN
+		aSettings[nn].nValue := TO_INT(aSettings[nn].fValueMax);
+	END_IF	
+	IF (aSettings[nn].nValue < aSettings[nn].fValueMin) THEN
+		aSettings[nn].nValue := TO_INT(aSettings[nn].fValueMin);
+	END_IF	
+	IF (aSettings[nn].eDataType = E_DataType.eDataType_time_ms) THEN
+		IF (TO_LREAL(aSettings[nn].tValue) > aSettings[nn].fValueMax) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMax);
+		END_IF	
+		IF (TO_LREAL(aSettings[nn].tValue) < aSettings[nn].fValueMin) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMin);
+		END_IF
+	ELSIF (aSettings[nn].eDataType = E_DataType.eDataType_time_s) THEN
+		IF (TO_LREAL(aSettings[nn].tValue) > (aSettings[nn].fValueMax * 1000)) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMax * 1000);
+		END_IF	
+		IF (TO_LREAL(aSettings[nn].tValue) < (aSettings[nn].fValueMin * 1000)) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMin * 1000);
+		END_IF
+	ELSIF (aSettings[nn].eDataType = E_DataType.eDataType_time_m) THEN
+		IF (TO_LREAL(aSettings[nn].tValue) > (aSettings[nn].fValueMax * 60000)) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMax * 60000);
+		END_IF	
+		IF (TO_LREAL(aSettings[nn].tValue) < (aSettings[nn].fValueMin * 60000)) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMin * 60000);
+		END_IF
+	ELSIF (aSettings[nn].eDataType = E_DataType.eDataType_time_h) THEN
+		IF (TO_LREAL(aSettings[nn].tValue) > (aSettings[nn].fValueMax * 360000)) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMax * 360000);
+		END_IF	
+		IF (TO_LREAL(aSettings[nn].tValue) < (aSettings[nn].fValueMin * 360000)) THEN
+			aSettings[nn].tValue := TO_TIME(aSettings[nn].fValueMin * 360000);
+		END_IF			
+	END_IF
+	IF (aSettings[nn].stName.wsNameId = "" AND aSettings[nn].stName.wsName = "") THEN
+		MEMSET(ADR(aSettings[nn]), 0, SIZEOF(aSettings[nn])); // reset
+	END_IF		
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="F_Settings_Management">
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="24" Count="4" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="31" Count="4" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="36" Count="4" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="56" Count="4" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="69" Count="5" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="76" Count="5" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

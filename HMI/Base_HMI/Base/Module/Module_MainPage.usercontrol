@@ -1,0 +1,342 @@
+<div id="Module_MainPage" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="1024" data-tchmi-creator-viewport-height="768" data-tchmi-zindex="3" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-is-enabled="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+<div id="Container_Operationmodes" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="57" data-tchmi-left-unit="%" data-tchmi-top="85" data-tchmi-top-unit="%" data-tchmi-width="43" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-creator-locked="True">
+
+<div id="UcButtonExtColorlabel_OPM_Manual" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="75" data-tchmi-height-unit="%" data-tchmi-left="2.5" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_OPM_Manual%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_OPM_Manual%/pp%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+
+<div id="UcButtonExtColorlabel_OPM_Auto" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="75" data-tchmi-height-unit="%" data-tchmi-left="35" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_OPM_Auto%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_OPM_Auto%/pp%">
+
+</div>
+
+<div id="UcButtonExtColorlabel_OPM_Step" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="75" data-tchmi-height-unit="%" data-tchmi-left="67.5" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="30" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_OPM_Step%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_OPM_Step%/pp%">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="TcHmi_Controls_Beckhoff_TcHmiTextblock_OPModes" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="20" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%l%mode%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-zindex="3">
+
+</div>
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+<div id="Container_Control" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="85" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="15" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-creator-locked="False">
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="UcButtonExtColorlabel_Step" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="13" data-tchmi-height-unit="%" data-tchmi-left="7.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="52" data-tchmi-top-unit="%" data-tchmi-width="85.8" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_Step%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_Step%/pp%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="UcButtonExtColorlabel_CycleStop" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="13" data-tchmi-height-unit="%" data-tchmi-left="7.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="68" data-tchmi-top-unit="%" data-tchmi-width="85.8" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_CycleStop%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_CycleStop%/pp%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="UcButtonExtColorlabel_Stop" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="13" data-tchmi-height-unit="%" data-tchmi-left="7.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="84" data-tchmi-top-unit="%" data-tchmi-width="85.8" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_Stop%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_Stop%/pp%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+
+
+
+
+
+
+
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+{
+  "color": "rgba(249, 9, 9, 1)"
+}
+</script>
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="UcButtonExtColorlabel_Home" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="13" data-tchmi-height-unit="%" data-tchmi-left="7.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="85.8" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_Home%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_Home%/pp%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="UcButtonExtColorlabel_Reset" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="13" data-tchmi-height-unit="%" data-tchmi-left="7.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="21" data-tchmi-top-unit="%" data-tchmi-width="85.8" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_Reset%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_Reset%/pp%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="UcButtonExtColorlabel_Start" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="13" data-tchmi-height-unit="%" data-tchmi-left="7.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="37" data-tchmi-top-unit="%" data-tchmi-width="85.8" data-tchmi-width-unit="%" data-tchmi-zindex="3" data-tchmi-stbuttontohmi="%pp%stModuleBaseToHmi::stButton_Start%/pp%" data-tchmi-stbuttonfromhmi="%pp%stModuleBaseFromHmi::stButton_Start%/pp%">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="TcHmi_Controls_Beckhoff_TcHmiTextblock_Control" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="3" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%l%control%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="70" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-zindex="3">
+
+</div>
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+<div id="Container_Info" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="85" data-tchmi-top-unit="%" data-tchmi-width="57" data-tchmi-width-unit="%" data-tchmi-creator-locked="True">
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="TcHmiTextblock_conModulenmaininfo" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="25" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%l%info%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-zindex="3">
+
+</div>
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div id="TcHmiTextblock_conModulemaininfo1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="35" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%pp%stModuleBaseToHmi::stInfo1%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="95" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size-unit="%">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+<div id="TcHmiTextblock_conModulemaininfo2" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="35" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%pp%stModuleBaseToHmi::stInfo2%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="55" data-tchmi-top-unit="%" data-tchmi-width="95" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size-unit="%">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+</div>
+
+<div id="TcHmiTextblock_Sitename_Main" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="5" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%l%Module%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center" data-tchmi-creator-locked="True" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150">
+
+</div>
+
+<div id="TcHmiTextblock_Modulename" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="5" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="33.0" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-creator-locked="True" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text="%f%F_TranslateText(%pp%stModuleBaseToHmi::stName%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%">
+
+</div>
+
+<div id="TcHmiContainer_Sequence" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="10" data-tchmi-height-unit="%" data-tchmi-left="0.0" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="85" data-tchmi-width-unit="%">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div id="TcHmiCombobox_SelectSequence" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCombobox" data-tchmi-combobox-text="Select" data-tchmi-height="50" data-tchmi-height-unit="%" data-tchmi-left="80" data-tchmi-left-unit="%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-selected-index="%pp%stModuleBaseFromHmi::iStepchain|BindingMode=TwoWay%/pp%" data-tchmi-src-data="%f%F_TranslateTextArray(%pp%stModuleBaseToHmi::aStepChainName%/pp%, %pp%stModuleBaseToHmi::nStepChainName%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+
+<div id="TcHmiTextblock_conModulemain_nameauto" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="50" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%l%auto%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+<div id="TcHmiTextblock_conModulemain_namehome" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="50" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%l%home%/l%" data-tchmi-top="50" data-tchmi-top-unit="%" data-tchmi-width="20" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+<div id="TcHmiTextblock_conModulemain_auto" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="50" data-tchmi-height-unit="%" data-tchmi-left="20" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%pp%stModuleBaseToHmi::stState_Auto%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="60" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-font-size-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+<div id="TcHmiTextblock_conModulemain_home" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="50" data-tchmi-height-unit="%" data-tchmi-left="20" data-tchmi-left-unit="%" data-tchmi-text="%f%F_TranslateText(%pp%stModuleBaseToHmi::stState_Home%/pp%, %s%PLC1.HMI.stHmiTc3::stIn::eLanguage%/s%)%/f%" data-tchmi-top="50" data-tchmi-top-unit="%" data-tchmi-width="60" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-font-size-unit="%">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+</div>
+</div>

@@ -1,0 +1,41 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-stmanualtohmi",
+      "displayName": "stManualToHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_BASE_STATION_MANUAL_OUT",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stManualToHmi",
+      "propertySetterName": "setStManualToHmi",
+      "propertyGetterName": "getStManualToHmi",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-stmanualfromhmi",
+      "displayName": "stManualFromHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_BASE_STATION_MANUAL_IN",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stManualFromHmi",
+      "propertySetterName": "setStManualFromHmi",
+      "propertyGetterName": "getStManualFromHmi",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "../../../Packages/Beckhoff.TwinCAT.HMI.Framework.12.744.4/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

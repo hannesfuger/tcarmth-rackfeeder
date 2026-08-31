@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_BASE_STATION_OUT" Id="{af8500d2-7175-402e-8741-7470c0fd1447}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_STATION_OUT EXTENDS ST_HMI_BASE_CONTROL_OUT :
+STRUCT
+	stName				: ST_Text;
+	stButtonNavigation	: ST_HMI_BUTTON_OUT;
+	
+	// info
+	stState_Auto,
+	stState_Home,
+	stState_Station		: ST_Text;	
+	nStepChainName		: INT; // count visible rows from array aStepChainName
+	aStepChainName		: ARRAY[0..CONST.iMaxIdxLocalStepChain] OF ST_Text;
+	
+	stManual			: ST_HMI_BASE_STATION_MANUAL_OUT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

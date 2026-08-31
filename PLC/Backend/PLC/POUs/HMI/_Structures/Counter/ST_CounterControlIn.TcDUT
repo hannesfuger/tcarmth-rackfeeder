@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_CounterControlIn" Id="{12e58b4c-19a4-413f-adae-5d4362cdc210}">
+    <Declaration><![CDATA[TYPE ST_CounterControlIn :
+STRUCT
+	stButtonSave		: ST_HMI_BUTTON_IN;
+	stButtonReset		: ST_HMI_BUTTON_IN;	
+	nSelectedRowIndex	: UINT;
+	nSelectedColumIndex	: UINT;
+	nInputBool			: DINT;
+	nInputNumber		: DINT;
+	wsInputString		: WSTRING;
+	eUserLevel			: E_User_Level;	
+	eReaction			: E_CounterReaction;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

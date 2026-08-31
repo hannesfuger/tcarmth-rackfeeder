@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_AxisTorqCtrlParameter" Id="{7795c720-83c0-4284-ad5e-1d2c8319bfa5}">
+    <Declaration><![CDATA[/// Torque control parameter strucure
+TYPE ST_AxisTorqCtrlParameter :
+STRUCT
+	fTorque				: LREAL;	// %
+	fTorqueRamp			: LREAL;
+    fVelocityLimitHigh	: LREAL;
+    fVelocityLimitLow	: LREAL;
+	bContinuousUpdate	: BOOL := TRUE;
+	bRelative			: BOOL;
+    eBufferMode			: MC_BufferMode;
+	stOptions			: ST_TorqueControlOptions;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

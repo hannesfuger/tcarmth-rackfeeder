@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_ChkSettingLimitF" Id="{94eb53f6-26f7-499b-9895-fe8bdaa871b8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ChkSettingLimitF : BOOL
+VAR_IN_OUT
+	fValue		: LREAL;
+	stSetting 	: ST_Data_Item;
+END_VAR
+VAR_OUTPUT
+	stInfo 		: ST_Text;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_ChkSettingLimitF := FALSE;
+
+IF (stSetting.eDataType = E_DataType.eDataType_lreal) AND fValue > stSetting.fValueMax THEN
+	stInfo.wsName := "input to high";
+	stInfo.wsNameId := "inputtohigh";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_lreal) AND fValue < stSetting.fValueMin THEN
+	stInfo.wsName := "input to low";
+	stInfo.wsNameId := "inputtolow";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_s) AND fValue > stSetting.fValueMax THEN
+	stInfo.wsName := "input to high";
+	stInfo.wsNameId := "inputtohigh";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_s) AND fValue < stSetting.fValueMin THEN
+	stInfo.wsName := "input to low";
+	stInfo.wsNameId := "inputtolow";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_m) AND fValue > stSetting.fValueMax THEN
+	stInfo.wsName := "input to high";
+	stInfo.wsNameId := "inputtohigh";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_m) AND fValue < stSetting.fValueMin THEN
+	stInfo.wsName := "input to low";
+	stInfo.wsNameId := "inputtolow";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_h) AND fValue > stSetting.fValueMax THEN
+	stInfo.wsName := "input to high";
+	stInfo.wsNameId := "inputtohigh";
+	RETURN;
+END_IF
+
+IF (stSetting.eDataType = E_DataType.eDataType_time_h) AND fValue < stSetting.fValueMin THEN
+	stInfo.wsName := "input to low";
+	stInfo.wsNameId := "inputtolow";
+	RETURN;
+END_IF
+
+F_ChkSettingLimitF := TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="F_ChkSettingLimitF">
+      <LineId Id="55" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="148" Count="1" />
+      <LineId Id="205" Count="2" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="152" Count="1" />
+      <LineId Id="202" Count="2" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="164" Count="1" />
+      <LineId Id="199" Count="2" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="168" Count="1" />
+      <LineId Id="196" Count="2" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="172" Count="1" />
+      <LineId Id="193" Count="2" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="176" Count="1" />
+      <LineId Id="190" Count="2" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="133" Count="1" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

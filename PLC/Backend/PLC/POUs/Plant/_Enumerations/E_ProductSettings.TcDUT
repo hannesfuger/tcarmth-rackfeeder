@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_ProductSettings" Id="{32355d99-8acf-428a-9fd7-102554d6615a}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+{attribute 'to_string'}
+{attribute 'to_wstring'}
+TYPE E_ProductSettings :
+(
+	//eProduct_Settings_none := 0,
+	eProductSettings_ProductNumber,	// product nb.
+	eProductSettings_ProductName,	// product name
+	eProductSettings_ProductType, 	// product type
+	
+	//eProductSettings_Speed,			// speed [m/min]
+	
+	//eProductSettings_TrolleyDevisionX,	// Teilung des Trolley-Racks in X-Richtung [mm]
+	//eProductSettings_TrolleyFirstPosY, 	// Erte Position im Trolley-Racks in Y-Richtung [mm]
+	//eProductSettings_TrolleyCountY, 	// Letzte Position im Trolley-Racks in Y-Richtung [mm]
+	//eProductSettings_TrolleyDevisionY,	// Teilung des Trolley-Racks in Y-Richtung [mm]
+	//eProductSettings_TrolleyOffsetUpY,	// HG-Offset oberhalb der Trolley-Palette in Y-Richtung [mm]
+	//eProductSettings_TrolleyOffsetDnY,	// HG-Offset unterhalb der Trolley-Palette in Y-Richtung [mm]
+	
+	eProductSettings_TrolleyNumberOfCarriers,
+	eProductSettings_TrolleyRackOriginX,
+	eProductSettings_TrolleyRackOriginY,
+	eProductSettings_TrolleyRackOriginZ,
+	eProductSettings_TrolleyRackDivision,
+	eProductSettings_TrolleyCarrierDistance,
+	
+	eProductSettings_CarrierLayout,	
+	eProductSettings_CarrierDimensionX,
+	eProductSettings_CarrierDimensionY,
+	eProductSettings_CarrierPositionsInRow,			// Numbers of Positions in first Row
+	eProductSettings_CarrierRowDistance,		// Distance from one Row to the other
+	eProductSettings_CarrierPositionsInColumn,			// Numbers of Positions in one Column
+	eProductSettings_CarrierColumnDistance,		// Distance from one Column to the other
+	eProductSettings_CarrierCoordinateFirstWorkpieceX,
+	eProductSettings_CarrierCoordinateFirstWorkpieceY,
+	eProductSettings_CarrierInitialStatus,
+	eProductSettings_CarrierRequestStatus,	
+	
+	
+	eProductSettings_HeatingPlateEnable,
+	eProductSettings_HeatingPlateTemperatur,	
+	
+	/// has to be set to last index for array bounds!
+	eProductSettings_nMaxIdx	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

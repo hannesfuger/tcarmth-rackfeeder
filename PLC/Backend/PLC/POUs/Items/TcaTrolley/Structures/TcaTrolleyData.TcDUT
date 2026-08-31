@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="TcaTrolleyData" Id="{ebcaced8-06e8-4fa3-a118-151208d8871a}">
+    <Declaration><![CDATA[TYPE TcaTrolleyData : 
+STRUCT
+	Exist : BOOL;
+	Id : INT;
+	//Logging : WSTRING;	// Information in csv, xml or json Format
+	Error : BOOL;
+	
+	CarriersEnabled : ARRAY[0..TcaCarrier.MAX_WORKPIECEPLACES] OF BOOL;
+	CarriersData : ARRAY[0..TcaTrolley.MAX_CARRIERPLACES] OF TcaCarrierData;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

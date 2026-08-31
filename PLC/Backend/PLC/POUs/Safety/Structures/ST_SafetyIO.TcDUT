@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_SafetyIO" Id="{bc454dfa-e254-4bd0-8db0-a218dec6ff5a}">
+    <Declaration><![CDATA[TYPE ST_SafetyIO :
+STRUCT
+	stIn	AT%I* : ST_SafetyIn;
+	stOut	AT%Q* : ST_SafetyOut;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

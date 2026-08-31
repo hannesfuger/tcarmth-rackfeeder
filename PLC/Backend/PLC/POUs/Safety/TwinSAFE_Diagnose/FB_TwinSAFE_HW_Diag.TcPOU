@@ -1,0 +1,804 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TwinSAFE_HW_Diag" Id="{6ae009d4-6215-4e0f-aae5-036ced988787}" SpecialFunc="None">
+    <Declaration><![CDATA[/// diagnose from TwinSAFE hardware
+{attribute 'hide_all_locals' := ''}
+FUNCTION_BLOCK FB_TwinSAFE_HW_Diag
+VAR_INPUT
+	/// enable the function block
+	bEnable: BOOL;
+	/// EC master AMS adress
+	stEcMasterAmsAdr: ST_AmsAddr;
+	/// EC master device ID
+	nEcMasterDevId: UINT;
+	/// EC master device state
+	nDeviceState: UINT;
+	/// current system time
+	dtNow: DT;
+END_VAR
+VAR_OUTPUT
+	bError,
+	bWarning			: BOOL;	
+	stWarningText,
+	stWarningTextAdd,
+	
+	stErrorText,
+	stErrorTextAdd		: ST_Text;
+END_VAR
+VAR CONSTANT
+	{attribute 'hide' := ''}
+	nMAX_DiagSlaveSize: INT := 2000;
+	{attribute 'hide' := ''}
+	nMAX_HistoryDevice: INT := 100;
+END_VAR
+VAR
+	/// AmsNetId of the EtherCAT master device 
+	{attribute 'hide' := ''}
+	sEcMasterNetId: T_AmsNetId;
+	{attribute 'hide' := ''}
+	fbEcGetAllSlaveAddr: FB_EcGetAllSlaveAddr;
+	{attribute 'hide' := ''}
+	fbEcGetSlaveIdentity: FB_EcGetSlaveIdentity;
+	///	CoE		
+	{attribute 'hide' := ''}
+	fbEcCoeSdoRead: FB_EcCoESdoRead;
+	/// CoE - Diag History
+	{attribute 'hide' := ''}
+	fbHistoryDiag: FB_Diagnosis_History;
+	{attribute 'hide' := ''}
+	sErrorTextTemp: T_MAXSTRING;
+	///Get slave name
+	{attribute 'hide' := ''}
+	fbGetSlaveName: IOF_GetBoxNameByAddr;
+	{attribute 'hide' := ''}
+	nStep: INT;
+	{attribute 'hide' := ''}
+	tonStartUp: TON;
+	{attribute 'hide' := ''}
+	tonCycle: TON;
+	{attribute 'hide' := ''}
+	tonDelay: TON;
+	{attribute 'hide' := ''}
+	arrSlaves: ARRAY[0..nMAX_DiagSlaveSize] OF UINT;
+	{attribute 'hide' := ''}
+	arrSlaveIdent: ARRAY[0..nMAX_DiagSlaveSize] OF ST_EcSlaveIdentity;
+	{attribute 'hide' := ''}
+	arrSlaveType: ARRAY[0..nMAX_DiagSlaveSize] OF STRING;
+	{attribute 'hide' := ''}
+	aDiagHistoryMirror: ARRAY[0..nMAX_HistoryDevice] OF ST_DiagHistory;
+	{attribute 'hide' := ''}
+	nIdx: INT;
+	{attribute 'hide' := ''}
+	nHistoryDevice: INT;
+	{attribute 'hide' := ''}
+	nCoE_DiagDataA: WORD;
+	{attribute 'hide' := ''}
+	nCoE_DiagDataB: WORD;
+	{attribute 'hide' := ''}
+	nCoE_DiagDataC: WORD;
+	{attribute 'hide' := ''}
+	nCoE_DiagDataD: WORD;
+	{attribute 'hide' := ''}
+	nCoE_DiagDataE: WORD;
+	{attribute 'hide' := ''}
+	sErrorBoxame: STRING;
+	{attribute 'hide' := ''}
+	wsTempText: WSTRING(255);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* Supported Hardware:
+		EL1904
+		EL1918
+		EL2904
+		EL2912
+*)
+
+(*	EtherCAT Master NetId	*)
+sEcMasterNetId := F_CreateAmsNetId(nIds := stEcMasterAmsAdr.netId);
+
+tonStartUp(IN := bEnable AND nDeviceState = 0, PT := T#2S);
+tonDelay(PT := T#100MS);
+tonDelay.IN := FALSE;
+
+CASE nStep OF
+
+	0:
+		IF tonStartUp.Q THEN
+			fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+							pAddrBuf:= ADR(arrSlaves),
+							cbBufLen:= SIZEOF(arrSlaves),
+							bExecute:= FALSE );
+			nIdx := 0;
+			nHistoryDevice := 0;
+			
+			M_Reset();
+			nStep := 10;
+		END_IF
+
+(*	Get all slaves identities	*)
+	10..299:
+		M_GetSlaveIdentity();
+	
+(*	read out status	*)
+	300..399:
+		// EL1904 and EL2904
+		M_GetState_ErrorNumber();
+	
+	400..499:
+		// EL1918 and EL2912
+		M_GetState_History();
+
+
+(*	Detail Diagnose	*)
+	600..699:
+		M_DiagnosisAlarm();
+
+(*	ERROR	*)
+
+		(*	neuer Versuch	*)
+	1000:
+		tonCycle( IN := bEnable , PT := T#30s);
+		IF tonCycle.Q THEN
+			tonCycle( IN := FALSE , PT := T#5s);
+			nStep := 0;
+		END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+    <Method Name="M_DiagnosisAlarm" Id="{583c9004-53c9-4dd6-b774-a1099ff97611}">
+      <Declaration><![CDATA[/// diagnose device and raise alarm 
+METHOD PRIVATE M_DiagnosisAlarm : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE nStep OF
+	600:
+		fbGetSlaveName(NETID		:= '',	(*local*)
+						DEVICEID	:= nEcMasterDevId,
+						BOXADDR		:= arrSlaves[nIdx],
+						START		:= FALSE);
+		IF NOT fbGetSlaveName.Busy THEN
+			nStep := 610;
+		END_IF
+
+	610:
+		fbGetSlaveName(NETID		:= '',	(*local*)
+						DEVICEID	:= nEcMasterDevId,
+						BOXADDR		:= arrSlaves[nIdx],
+						START		:= TRUE);
+		IF fbGetSlaveName.Busy AND NOT fbGetSlaveName.ERR THEN
+			nStep := 612;
+		ELSIF fbGetSlaveName.ERR THEN
+			nStep := 1000;
+		END_IF
+
+	612:
+		fbGetSlaveName(NETID		:= '',	(*local*)
+						DEVICEID	:= nEcMasterDevId,
+						BOXADDR		:= arrSlaves[nIdx],
+						START		:= TRUE);
+		IF NOT fbGetSlaveName.Busy AND NOT fbGetSlaveName.ERR THEN
+			sErrorBoxame := fbGetSlaveName.BOXNAME;
+			nStep := 620;
+		ELSIF fbGetSlaveName.ERR THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcGetSlaveNameErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbGetSlaveName.ERRID));
+			wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+			wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+	620:
+		fbGetSlaveName(NETID		:= '',	(*local*)
+						DEVICEID	:= nEcMasterDevId,
+						BOXADDR		:= arrSlaves[nIdx],
+						START		:= FALSE);
+		IF NOT fbGetSlaveName.Busy THEN
+			nStep := 630;
+		END_IF
+
+	630: // create error message
+		bError := TRUE;
+		stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_Diagnosis;
+		wsTempText := WCONCAT("Slave: ", TO_WSTRING(sErrorBoxame));
+		IF LEFT(arrSlaveType[nIdx] , 6) = 'EL1904' THEN
+			stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_SensortestInput;
+			IF nCoE_DiagDataA.0 THEN				
+				wsTempText := WCONCAT(wsTempText, "; Input: 1");
+			ELSIF nCoE_DiagDataA.1 THEN
+				wsTempText := WCONCAT(wsTempText, "; Input: 2");
+			ELSIF nCoE_DiagDataA.2 THEN
+				wsTempText := WCONCAT(wsTempText, "; Input: 3");
+			ELSIF nCoE_DiagDataA.3 THEN
+				wsTempText := WCONCAT(wsTempText, "; Input: 4");
+
+			ELSIF nCoE_DiagDataB.0 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_FirstInputPair;
+			ELSIF nCoE_DiagDataB.1 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_SecondInputPair;
+			END_IF			
+
+		ELSIF LEFT(arrSlaveType[nIdx] , 6) = 'EL2904' THEN
+			IF nCoE_DiagDataC.0 OR nCoE_DiagDataC.4 THEN
+					wsTempText := WCONCAT(wsTempText, "; Output: 1");
+				IF nCoE_DiagDataC.1 OR nCoE_DiagDataC.5 THEN
+					wsTempText := WCONCAT(wsTempText, "; Output: 2");
+				ELSIF nCoE_DiagDataC.2 OR nCoE_DiagDataC.6 THEN
+					wsTempText := WCONCAT(wsTempText, "; Output: 3");
+				ELSIF nCoE_DiagDataC.3 OR nCoE_DiagDataC.7 THEN
+					wsTempText := WCONCAT(wsTempText, "; Output: 4");
+				END_IF
+			END_IF
+			
+			IF nCoE_DiagDataC.0 OR nCoE_DiagDataC.1 OR nCoE_DiagDataC.2 OR nCoE_DiagDataC.3 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_ExternalSupplyOutput;				
+			ELSIF nCoE_DiagDataC.4 OR nCoE_DiagDataC.5 OR nCoE_DiagDataC.6 OR nCoE_DiagDataC.7 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_OpenLoadOutput;				
+			ELSIF nCoE_DiagDataD.0 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_FieldVoltageToHigh;
+			ELSIF nCoE_DiagDataD.1 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_FieldVoltageToLow;
+			ELSIF nCoE_DiagDataE > 0 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_Temperature;
+			ELSIF nCoE_DiagDataA > 0 OR nCoE_DiagDataB > 0 THEN
+				stErrorText := stTextListGlobal.stText_Safety.stText_Safety_Error_OutputTerminal;
+			END_IF
+			
+		ELSIF LEFT(arrSlaveType[nIdx] , 6) = 'EL1918' OR_ELSE LEFT(arrSlaveType[nIdx] , 6) = 'EL2912' THEN
+			wsTempText := WCONCAT(wsTempText, "; ");
+			wsTempText := WCONCAT(wsTempText, TO_WSTRING(sErrorTextTemp));
+			sErrorTextTemp := '';
+		END_IF
+		
+		stErrorTextAdd := F_CreateDynTextDefault(wsTempText);
+
+		nIdx := 0;
+		nHistoryDevice := 0;
+		nStep := 210;	(*	neuer Durchlauf	*)
+				
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetSlaveIdentity" Id="{6af4f157-8365-416c-b8ed-75d6a8553b03}">
+      <Declaration><![CDATA[/// Get all slaves identities
+METHOD PRIVATE M_GetSlaveIdentity : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE nStep OF
+	10:
+		fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+						pAddrBuf:= ADR(arrSlaves),
+						cbBufLen:= SIZEOF(arrSlaves),
+						bExecute:= TRUE );
+		IF fbEcGetAllSlaveAddr.bBusy THEN
+			nStep := 12;
+		ELSIF fbEcGetAllSlaveAddr.bError THEN
+			nStep := 1000;
+		END_IF
+
+	12:
+		fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+						pAddrBuf:= ADR(arrSlaves),
+						cbBufLen:= SIZEOF(arrSlaves),
+						bExecute:= TRUE );
+		IF NOT fbEcGetAllSlaveAddr.bBusy AND NOT fbEcGetAllSlaveAddr.bError THEN
+			fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+							pAddrBuf:= ADR(arrSlaves),
+							cbBufLen:= SIZEOF(arrSlaves),
+							bExecute:= FALSE );
+			nStep := 100;
+		ELSIF fbEcGetAllSlaveAddr.bError THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcGetAllSlaveAddrErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbEcGetAllSlaveAddr.nErrId));
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+
+(*	Infos auslesen	*)
+
+	100:
+		fbEcGetSlaveIdentity(	sNetId:= sEcMasterNetId,
+							nSlaveAddr:= 0,
+							bExecute:= FALSE );
+		IF NOT fbEcGetSlaveIdentity.bBusy THEN
+			nIdx := 0;
+			nStep := 110;
+		END_IF
+
+	110:
+		(*	check bounds	*)
+		IF nIdx <= nMAX_DiagSlaveSize THEN
+			IF arrSlaves[nIdx] > 0 THEN
+				fbEcGetSlaveIdentity(	sNetId:= sEcMasterNetId,
+									nSlaveAddr:= 0,
+									bExecute:= FALSE );
+				IF NOT fbEcGetSlaveIdentity.bBusy THEN
+					nStep := 120;
+				END_IF
+			ELSE
+				nStep := 200;
+			END_IF
+		ELSE
+			nStep := 200;
+		END_IF
+
+	120:
+		fbEcGetSlaveIdentity(	sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							bExecute:= TRUE );
+		IF fbEcGetSlaveIdentity.bBusy AND NOT fbEcGetSlaveIdentity.bError THEN
+			nStep := 122;
+		ELSIF fbEcGetSlaveIdentity.bError THEN
+			nStep := 1000;
+		END_IF
+
+	122:
+		fbEcGetSlaveIdentity(	sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							bExecute:= TRUE );
+		IF NOT fbEcGetSlaveIdentity.bBusy AND NOT fbEcGetSlaveIdentity.bError THEN
+			arrSlaveIdent[nIdx] := fbEcGetSlaveIdentity.identity;
+			nStep := 124;
+		ELSIF fbEcGetSlaveIdentity.bError THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcGetSlaveIdentityErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbEcGetSlaveIdentity.nErrId));
+			wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+			wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+	124:
+		fbEcGetSlaveIdentity(	sNetId:= sEcMasterNetId,
+							nSlaveAddr:= 0,
+							bExecute:= FALSE );
+		IF NOT fbEcGetSlaveIdentity.bBusy THEN
+			nIdx := nIdx + 1;
+			nStep := 110;
+		END_IF
+
+	200:
+		FOR nIdx := 0 TO nMAX_DiagSlaveSize DO
+			arrSlaveType[nIdx] := F_ConvProductCodeToString(arrSlaveIdent[nIdx]);	(*	Klemmentyp ermitteln	*)
+		END_FOR
+		tonCycle( IN := FALSE , PT := T#5s);
+		nStep := 210;
+	
+	210:
+		nIdx := 0;
+		nHistoryDevice := 0;
+		(*	Lese Zyklus	*)
+		tonCycle( IN := bEnable , PT := T#5s);
+		IF tonCycle.Q THEN
+			tonCycle( IN := FALSE , PT := T#5S);
+			M_Reset();
+			nStep := 220;
+		END_IF
+		
+	220:
+		(*	check bounds	*)
+		IF nIdx <= nMAX_DiagSlaveSize THEN
+			(*	letzter Slave	*)
+			IF arrSlaves[nIdx] > 0 THEN
+				IF LEFT(arrSlaveType[nIdx] , 6) = 'EL1904' OR_ELSE LEFT(arrSlaveType[nIdx] , 6) = 'EL2904' THEN
+					fbEcCoeSdoRead(sNetId		:= sEcMasterNetId,
+									nSlaveAddr	:= arrSlaves[nIdx],
+									nSubIndex	:= 0,
+									nIndex		:= 0 ,
+									pDstBuf		:= ADR(nCoE_DiagDataA) ,
+									cbBufLen	:= SIZEOF(nCoE_DiagDataA) ,
+									bExecute	:= FALSE );
+					IF NOT fbEcCoeSdoRead.bBusy THEN
+						nCoE_DiagDataA := 0;
+						nCoE_DiagDataB := 0;
+						nCoE_DiagDataC := 0;
+						nCoE_DiagDataD := 0;
+						nCoE_DiagDataE := 0;
+						nStep := 300;
+					END_IF
+					
+				ELSIF LEFT(arrSlaveType[nIdx] , 6) = 'EL1918' OR_ELSE LEFT(arrSlaveType[nIdx] , 6) = 'EL2912' THEN
+					nStep := 400;
+					
+				ELSE
+					nIdx := nIdx + 1;
+				END_IF
+
+			ELSE
+				M_Reset();
+				nStep := 210;	(*	kein Fehler -> neuer Durchlauf	*)
+			END_IF
+		ELSE
+			M_Reset();
+			nStep := 210;	(*	kein Fehler -> neuer Durchlauf	*)
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetState_ErrorNumber" Id="{bfda7bbf-fc51-4099-9f0d-b51a5e878947}">
+      <Declaration><![CDATA[/// Get state from EL1904 OR EL2904 item
+METHOD PRIVATE M_GetState_ErrorNumber : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Get state from EL1904 OR EL2904 item
+CASE nStep OF
+
+	(*	Daten 0A	*)
+	300:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0A,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataA) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataA) ,
+						bExecute:= TRUE );
+		IF fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			nStep := 312;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			nStep := 1000;
+		END_IF
+
+
+	312:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0A,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataA) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataA) ,
+						bExecute:= TRUE );
+		IF NOT fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							nSubIndex:= 0,
+							nIndex:= 0 ,
+							pDstBuf:=ADR(nCoE_DiagDataA) ,
+							cbBufLen:=SIZEOF(nCoE_DiagDataA) ,
+							bExecute:= FALSE );
+			nStep := 320;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcCoeSdoReadErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbEcCoeSdoRead.nErrId));
+			wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+			wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+			wsTempText := WCONCAT(wsTempText, "; SubIndex: 0A");
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+	(*	Daten 0B	*)
+	320:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0B,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataB) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataB) ,
+						bExecute:= TRUE );
+		IF fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			nStep := 322;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			nStep := 1000;
+		END_IF
+
+	322:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0B,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataB) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataB) ,
+						bExecute:= TRUE );
+		IF NOT fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							nSubIndex:= 0,
+							nIndex:= 0 ,
+							pDstBuf:=ADR(nCoE_DiagDataB) ,
+							cbBufLen:=SIZEOF(nCoE_DiagDataB) ,
+							bExecute:= FALSE );
+			nStep := 330;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcCoeSdoReadErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbEcCoeSdoRead.nErrId));
+			wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+			wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+			wsTempText := WCONCAT(wsTempText, "; SubIndex: 0B");
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+	(*	Daten 0C	*)
+	330:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0C,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataC) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataC) ,
+						bExecute:= TRUE );
+		IF fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			nStep := 332;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			nStep := 1000;
+		END_IF
+
+	332:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0C,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataC) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataC) ,
+						bExecute:= TRUE );
+		IF NOT fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							nSubIndex:= 0,
+							nIndex:= 0 ,
+							pDstBuf:=ADR(nCoE_DiagDataC) ,
+							cbBufLen:=SIZEOF(nCoE_DiagDataC) ,
+							bExecute:= FALSE );
+			nStep := 340;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcCoeSdoReadErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbEcCoeSdoRead.nErrId));
+			wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+			wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+			wsTempText := WCONCAT(wsTempText, "; SubIndex: 0C");
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+	(*	Daten 0D	*)
+	340:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0D,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataD) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataD) ,
+						bExecute:= TRUE );
+		IF fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			nStep := 342;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			nStep := 1000;
+		END_IF
+
+	342:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0D,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataD) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataD) ,
+						bExecute:= TRUE );
+		IF NOT fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							nSubIndex:= 0,
+							nIndex:= 0 ,
+							pDstBuf:=ADR(nCoE_DiagDataD) ,
+							cbBufLen:=SIZEOF(nCoE_DiagDataD) ,
+							bExecute:= FALSE );
+			nStep := 350;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcCoeSdoReadErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbEcCoeSdoRead.nErrId));
+			wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+			wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+			wsTempText := WCONCAT(wsTempText, "; SubIndex: 0D");
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+	(*	Daten 0E	*)
+	350:
+		IF LEFT(arrSlaveType[nIdx] , 6) = 'EL2904' THEN
+			fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							nSubIndex:= 16#0E,
+							nIndex:= 16#800E,
+							pDstBuf:=ADR(nCoE_DiagDataE) ,
+							cbBufLen:=SIZEOF(nCoE_DiagDataE) ,
+							bExecute:= TRUE );
+			IF fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+				nStep := 352;
+			ELSIF fbEcCoeSdoRead.bError THEN
+				nStep := 1000;
+			END_IF
+
+		ELSE
+			nStep := 360;
+		END_IF
+
+	352:
+		fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+						nSlaveAddr:= arrSlaves[nIdx],
+						nSubIndex:= 16#0E,
+						nIndex:= 16#800E,
+						pDstBuf:=ADR(nCoE_DiagDataE) ,
+						cbBufLen:=SIZEOF(nCoE_DiagDataE) ,
+						bExecute:= TRUE );
+		IF NOT fbEcCoeSdoRead.bBusy AND NOT fbEcCoeSdoRead.bError THEN
+			fbEcCoeSdoRead(sNetId:= sEcMasterNetId,
+							nSlaveAddr:= arrSlaves[nIdx],
+							nSubIndex:= 0,
+							nIndex:= 0 ,
+							pDstBuf:=ADR(nCoE_DiagDataE) ,
+							cbBufLen:=SIZEOF(nCoE_DiagDataE) ,
+							bExecute:= FALSE );
+			nStep := 360;
+		ELSIF fbEcCoeSdoRead.bError THEN
+			bWarning := TRUE;
+			stWarningText := stTextListGlobal.stText_EcCoeSdoReadErr;
+			wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbEcCoeSdoRead.nErrId));
+			wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+			wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+			wsTempText := WCONCAT(wsTempText, "; SubIndex: 0E");
+			stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+			nStep := 1000;
+		END_IF
+
+		(**)
+		(*	Bewerten	*)
+	360:
+		IF LEFT(arrSlaveType[nIdx] , 6) = 'EL1904' THEN
+			IF nCoE_DiagDataA = 0 AND nCoE_DiagDataB = 0 AND
+			nCoE_DiagDataC = 0 AND nCoE_DiagDataD = 0 THEN
+				nIdx := nIdx + 1;
+				nStep := 220;	(*	nächster Teilnehmer	*)
+			ELSE
+				nStep := 600;
+			END_IF
+
+		ELSIF LEFT(arrSlaveType[nIdx] , 6) = 'EL2904' THEN
+			IF nCoE_DiagDataA = 0 AND nCoE_DiagDataB = 0 AND
+			 nCoE_DiagDataC = 0 AND nCoE_DiagDataD = 0 AND
+			nCoE_DiagDataE = 0 THEN
+				nIdx := nIdx + 1;
+				nStep := 220;	(*	nächster Teilnehmer	*)
+			ELSE
+				nStep := 600;
+			END_IF
+
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_GetState_History" Id="{cc2c730c-249e-4290-8662-50ce27c79933}">
+      <Declaration><![CDATA[/// Get state from EL1918 OR EL2912 item
+METHOD PRIVATE M_GetState_History : BOOL
+VAR_INST
+	nn			:INT;
+	dtTimeStamp	:DT := DT#2106-02-06-06:28:15;
+	sTemp		:STRING;
+	stMiEmpty	:ST_MessageItem;
+	eDeviceType :E_HistoryDiagDevices;
+	aMessageItem:ARRAY [1..64] OF ST_MessageItem;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Get state from EL1918 OR EL2912 item
+fbHistoryDiag(stAdsAddr		:= stEcMasterAmsAdr,
+		  nSlaveAddress	:= arrSlaves[nIdx],
+			dtNow		:= dtNow);
+CASE nStep OF
+
+	400: // wait for not busy, read diag		
+		IF NOT fbHistoryDiag.bBusy THEN
+			IF fbHistoryDiag.bError THEN 
+				bWarning := TRUE;
+				stWarningText := stTextListGlobal.stText_EcCoeHistoryDiag;
+				wsTempText := WCONCAT("ErrId: ", UDINT_TO_WSTRING(fbHistoryDiag.nErrorId));
+				wsTempText := WCONCAT(wsTempText, "; SlaveNb: ");
+				wsTempText := WCONCAT(wsTempText, UINT_TO_WSTRING(arrSlaves[nIdx]));
+				stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+				nStep := 1000;
+			ELSIF nHistoryDevice > nMAX_HistoryDevice THEN
+				bError := TRUE;
+				stErrorText := stTextListGlobal.stText_CheckboundError;
+				wsTempText := "nHistoryDevice > nMAX_HistoryDevice";
+				stWarningTextAdd := F_CreateDynTextDefault(wsTempText);
+				nStep := 1000;
+			ELSE
+				fbHistoryDiag.M_GetDiagHistory();
+				nStep := 410;
+			END_IF
+		END_IF
+
+	410: // wait for not busy, extract changes
+		IF NOT fbHistoryDiag.bBusy THEN
+			eDeviceType := SEL(LEFT(arrSlaveType[nIdx] , 6) = 'EL2912', E_HistoryDiagDevices.EL19xx, E_HistoryDiagDevices.EL29xx);
+			fbHistoryDiag.M_GetDiagHistoryChanges(eDeviceType, aDiagHistoryMirror[nHistoryDevice], aMessageItem);
+			FOR nn := 1 TO 64 DO
+				IF MEMCMP(ADR(aMessageItem[nn]), ADR(stMiEmpty), SIZEOF(stMiEmpty)) = 0 THEN // break loop on 1st empty item
+					EXIT;
+				END_IF
+				(* 
+					sErrorTextTemp := DT_TO_STRING(arMi[nn].dtTs);
+					sErrorTextTemp := CONCAT(sErrorTextTemp, SEL(eDeviceType = E_ELM3xxxDiagDevices.eELM3xxxDiagDevices_EL19xx, 'EL29xx ', 'EL19xx '));
+					CASE arMi[nn].nPrio OF
+						0: sErrorTextTemp := CONCAT(sErrorTextTemp, ' INF ');
+						1: sErrorTextTemp := CONCAT(sErrorTextTemp, ' WRN ');
+						2: sErrorTextTemp := CONCAT(sErrorTextTemp, ' ERR ');
+					ELSE
+						sErrorTextTemp := CONCAT(sErrorTextTemp, ' ');
+					END_CASE
+					
+					sErrorTextTemp := CONCAT(sErrorTextTemp, arMi[nn].sMsg); 
+				*)
+				
+				IF aMessageItem[nn].nPriority >= 2 AND dtTimeStamp > aMessageItem[nn].dtTimeStamp THEN // if err, oldest
+					dtTimeStamp := aMessageItem[nn].dtTimeStamp;
+					sErrorTextTemp := aMessageItem[nn].sMessage;
+				END_IF
+			END_FOR
+			
+			nHistoryDevice := nHistoryDevice + 1;
+			nStep := 420;
+		END_IF
+		
+	420:
+		IF sErrorTextTemp <> '' THEN
+			nStep := 600;
+		ELSE
+			nIdx := nIdx + 1;
+			nStep := 220;	(*	nächster Teilnehmer	*)
+		END_IF
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{a884ea47-1186-43b4-a0db-046089f4069f}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wsTempText := "";
+sErrorTextTemp := '';
+
+bWarning := FALSE;
+stWarningText := stEmptyText;
+stWarningTextAdd := stEmptyText;
+	
+bError := FALSE;
+stErrorText := stEmptyText;
+stErrorTextAdd := stEmptyText;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TwinSAFE_HW_Diag">
+      <LineId Id="3" Count="56" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TwinSAFE_HW_Diag.M_DiagnosisAlarm">
+      <LineId Id="3" Count="106" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TwinSAFE_HW_Diag.M_GetSlaveIdentity">
+      <LineId Id="3" Count="151" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TwinSAFE_HW_Diag.M_GetState_ErrorNumber">
+      <LineId Id="3" Count="247" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TwinSAFE_HW_Diag.M_GetState_History">
+      <LineId Id="3" Count="67" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TwinSAFE_HW_Diag.M_Reset">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

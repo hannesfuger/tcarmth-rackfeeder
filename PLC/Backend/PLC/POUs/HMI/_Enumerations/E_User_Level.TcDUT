@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_User_Level" Id="{3bd180e0-adc2-4ee9-8ee9-166073624691}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+{attribute 'to_string'}
+{attribute 'to_wstring'}
+TYPE E_User_Level :
+(
+	eUser_Level_none := 0,			(*user level 0 = none 1= Operator 2 = Plant Manager 3 = maintenance 4 = reserve 5= admin*)
+	eUser_Level_Operator,			(* 1 = Bediener*)
+	eUser_Level_Manager,			(* 2 = Einsteller*)
+	eUser_Level_Maintenance,		(* 3 = Instandhalter*)
+	eUser_Level_Level4,				(* 4 = Reserve*)
+	eUser_Level_Admin,				(* 5 = Administrator *)
+	eUser_Level_Programmer,			(* 6 = Programmer *)
+
+(*Maximum*)
+	eUser_Level_nMaxIdx
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

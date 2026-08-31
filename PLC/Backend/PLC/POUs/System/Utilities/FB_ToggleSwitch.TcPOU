@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ToggleSwitch" Id="{291e4702-7c67-442e-b577-83d8b572f928}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ToggleSwitch
+VAR_INPUT
+	EN		:BOOL;			(*FB enable*)
+	IN		:BOOL;			(*if IN is true then FC_CurrentimputSwitch = true -> if IN is already true then FC_CurrentimputSwitch = false*)
+	RESET	:BOOL;			(* if RESET is  true then FC_CurrentimputSwitch = false*)
+END_VAR
+VAR_OUTPUT
+	ACT		:BOOL;
+	OUT		:BOOL;
+	INVOUT	:BOOL;
+END_VAR
+VAR_IN_OUT
+	INOUT	:BOOL;
+END_VAR
+VAR
+	HM		:BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*	Version history:	FB toggle switch
+
+	DATE	|	Version	|	TwinCAT		|	PLC Control Version	|		Author				|		Comments
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 2011-06-18	|	1.0		|	v2.11.xxx		|	v2.11.0 (Build 1804)	| www.rmth.at/Günther Müllner	| Orig. program for RMTH
+***********************************************************************************************************************************************************************)
+IF EN THEN
+	ACT:=IN;
+	IF IN AND NOT HM THEN
+		INOUT:=TRUE;
+	END_IF
+	IF NOT IN AND INOUT THEN
+		HM:=TRUE;
+	END_IF
+	IF (IN AND INOUT AND HM) OR RESET THEN
+		INOUT:=FALSE;
+	END_IF
+	IF NOT IN AND NOT INOUT THEN
+		HM:=FALSE;
+	END_IF
+	OUT:=INOUT;
+	INVOUT	:= NOT INOUT;
+ELSE
+	INOUT:=FALSE;
+	OUT:=FALSE;
+	INVOUT:=FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ToggleSwitch">
+      <LineId Id="19" Count="25" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

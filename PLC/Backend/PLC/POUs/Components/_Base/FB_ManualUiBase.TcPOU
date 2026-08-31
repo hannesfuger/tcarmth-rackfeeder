@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_ManualUiBase" Id="{196208e1-dc9f-43f2-b660-5fb08a661390}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC ABSTRACT FB_ManualUiBase IMPLEMENTS I_ManualUi
+VAR_INPUT
+	// object name
+	stName 					: ST_Text;
+	// objekts index
+	diObjectIndex			: DINT;
+	// selected object index in hmi 
+	diSelectedObjectIndex	: DINT;
+	/// manual mode enable
+	bEnableManual			: BOOL;
+	/// device BMK
+	stBmk					: ST_Text;
+	// state object
+	stStateObject			: REFERENCE TO ST_Object_Item;
+END_VAR
+VAR_OUTPUT
+	/// Fehler
+	bError				: BOOL;
+	/// Fehlertext
+	stErrorText			: ST_Text;
+	/// Warnung
+	bWarning			: BOOL;
+	/// Warnungstext
+	stWarnText			: ST_Text;
+END_VAR
+VAR
+	bManualActive			: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// to be subclassed..]]></ST>
+    </Implementation>
+    <Method Name="M_SetStateObject" Id="{01d1373c-6efa-494d-985c-1dd29976e8b4}">
+      <Declaration><![CDATA[METHOD M_SetStateObject : BOOL
+VAR_IN_OUT
+	stStateObjectRef	: ST_Object_Item;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stStateObject REF= stStateObjectRef;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Name" Id="{2dfd67b3-41ac-4b63-b2fd-91d143adbd57}">
+      <Declaration><![CDATA[PROPERTY Name : ST_Text
+]]></Declaration>
+      <Get Name="Get" Id="{62876ca2-1ff8-4df3-b2f0-0f80e29201c6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := stName;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ObjectIndex" Id="{4c3b081c-5064-4006-8595-2088de9cdb54}">
+      <Declaration><![CDATA[PROPERTY ObjectIndex : DINT
+]]></Declaration>
+      <Get Name="Get" Id="{d1aafeca-6dd0-41e1-b08c-71e218181210}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ObjectIndex := diObjectIndex;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c17f20d2-7a5e-4c33-aaa7-befb6becf2b1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[diObjectIndex := ObjectIndex;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_ManualUiBase">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManualUiBase.M_SetStateObject">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManualUiBase.Name.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManualUiBase.ObjectIndex.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ManualUiBase.ObjectIndex.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

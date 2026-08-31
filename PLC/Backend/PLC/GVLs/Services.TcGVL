@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="Services" Id="{b0be6550-2810-4ccc-9dc7-dd711b7b0fac}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL
+	b1stShot			: BOOL := TRUE;
+	bPlcInitDone,
+	bSettingsSaved		: BOOL;
+	
+	ILog				: I_Logger;
+	fbEventHandler		: FB_EventHandler;
+	
+	fbRecipeManager		: FB_RecipeManager;
+	fbVar2File			: FB_Var2File;
+	stGlobalModuleInfo	: ST_MODULES_INFO; // global module/staion info
+END_VAR
+VAR_GLOBAL PERSISTENT
+	// current system/machine configuration
+	stConfig 			: ST_Configuration;
+	
+	// settings/recipe            
+	stSettings			: ST_Settings;
+	
+	// PLC app system info
+	stPlcAppSystemInfo	: PlcAppSystemInfo;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

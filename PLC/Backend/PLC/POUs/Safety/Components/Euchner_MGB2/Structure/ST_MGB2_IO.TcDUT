@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MGB2_IO" Id="{69cf38fd-c09d-4f13-bd5f-1ec2aa65b0f7}">
+    <Declaration><![CDATA[TYPE ST_MGB2_IO :
+STRUCT
+	stHwInMgb				AT%I*	: ST_Euchner_MGB2_HW_IN;
+	stHwInMsm				AT%I*	: ST_Euchner_MSM_HW_IN;
+	stHwInMsmConfirm		AT%I*	: ST_Euchner_MSM_HW_IN;
+
+	stHwOutMgb				AT%Q*	: ST_Euchner_MGB2_HW_OUT;
+	stHwOutMsm				AT%Q*	: ST_Euchner_MSM_HW_OUT;
+	stHwOutMsmConfirm		AT%Q*	: ST_Euchner_MSM_HW_OUT;
+
+	/// Door safety ok from Safety plc
+	bSAFE_DoorSafetyOk		AT%I*	: BOOL;	
+	
+	bSAFE_UnlockDoor		AT%Q*	: BOOL;		
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St030_IO_IN" Id="{fb6af331-dcce-441a-934f-e9ce88373de9}">
+    <Declaration><![CDATA[TYPE ST_St030_IO_IN :
+STRUCT
+	// inputs handling
+	bRefposX	: BOOL;	// Sensor | Handling | Referenzposition X | BMK: =P260+xyz- | Terminal: .: | Tc3Hmi
+	bRefposY	: BOOL;	// Sensor | Handling | Referenzposition Y | BMK: =P260+xyz- | Terminal: .: | Tc3Hmi
+	bRefposZ	: BOOL;	// Sensor | Handling | Referenzposition Z | BMK: =P260+xyz- | Terminal: .: | Tc3Hmi
+	
+	fMeasurementA : DINT;	// Sensor | Handling | S1 | BMK: =P260+xyz- | Terminal: .: | Tc3Hmi
+	fMeasurementB : DINT;	// Sensor | Handling | S2 | BMK: =P260+xyz- | Terminal: .: | Tc3Hmi
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

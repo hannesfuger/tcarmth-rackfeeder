@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_StableValue" Id="{b6bc1479-e54d-4bb2-8207-1bfa2cdf7f2b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_StableValue //stabiler wert
+VAR_INPUT
+	fValue		: LREAL;
+	iPrecision	: INT;
+	bRound		: BOOL;
+	tStabileTon	: TIME := T#50MS;
+	tStabileTof	: TIME := T#20MS;
+END_VAR
+VAR_OUTPUT
+	sValue				: STRING;
+	fValueFmt			: LREAL;
+	bStabileValue		: BOOL;
+	bStabileValueTout	: BOOL;
+END_VAR
+VAR
+	fTempValue	: LREAL;
+	tonStabile	: TON;
+	tofStabile	: TOf;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+sValue := LREAL_TO_FMTSTR(fValue,iPrecision,bRound);
+fValueFmt := TO_LREAL(sValue);
+
+IF (fValueFmt <> fTempValue) THEN
+	fTempValue := fValueFmt;
+END_IF
+bStabileValue := (fValueFmt = fTempValue);
+
+tonStabile.IN := bStabileValue;
+tonStabile.PT := tStabileTon;
+tonStabile();
+
+tofStabile.IN := tonStabile.Q;
+tofStabile.PT := tStabileTof;
+tofStabile();
+
+bStabileValueTout := tofStabile.Q;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_StableValue">
+      <LineId Id="23" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="20" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

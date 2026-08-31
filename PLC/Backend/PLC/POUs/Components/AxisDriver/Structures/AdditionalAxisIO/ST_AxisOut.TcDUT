@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+  <DUT Name="ST_AxisOut" Id="{7a1d1c0d-388e-4fd9-80db-df230c36abdf}">
+    <Declaration><![CDATA[TYPE ST_AxisOut :
+STRUCT
+	/// Ext. fan control
+	bExternalFan: BOOL;
+	/// The bipolar torque limit value limits the maximum torque symmetrically in both directions. [1/10 %]
+	iBipolarTorqueLimitValue: INT := 4000;
+	/// During the torque control operation mode of the drive, torque command values are transferred from the control unit to the drive. [1/10 %]
+	iTorqueCommandValue: INT;
+	/// This value is added as an offset to the torque command value. [1/10 %]
+	iAdditiveTorqueCommandValue: INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

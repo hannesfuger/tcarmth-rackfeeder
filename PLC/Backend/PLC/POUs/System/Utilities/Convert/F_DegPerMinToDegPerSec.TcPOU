@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_DegPerMinToDegPerSec" Id="{99ac8d63-0783-4291-a09e-5eb3394a3ceb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_DegPerMinToDegPerSec : LREAL
+VAR_INPUT
+	fValue : LREAL; // °/min value
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[ F_DegPerMinToDegPerSec := fValue/60; // °/min -> °/s]]></ST>
+    </Implementation>
+    <LineIds Name="F_DegPerMinToDegPerSec">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

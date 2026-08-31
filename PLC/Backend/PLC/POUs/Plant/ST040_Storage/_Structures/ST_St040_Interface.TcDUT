@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_St040_Interface" Id="{87093dc8-7b71-4932-969e-a13c3db66f02}">
+    <Declaration><![CDATA[TYPE ST_St040_Interface :
+STRUCT
+	bEnable,				// enable to main module
+	
+	bResponseChkIndex,
+	bResponseEmptyAtIndex,
+	bResponseOpn	: BOOL;	// handshake response open
+	iConfirmPosition 	: INT;	// handshake confirm open @ index
+	
+	Pallet1,
+	Pallet2	: TcaCarrier;
+	
+	Source1,	
+	Source2			: E_Station;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Header" Id="{ab3f12c5-9ded-4405-aac6-cda4e62647f0}">
+    <Declaration><![CDATA[TYPE ST_Header :
+STRUCT
+	stButtonNavUser		: ST_HMI_BUTTON_OUT;
+	stMessageBox1		: ST_Text;
+	stMessageBox1Color	: ST_HMI_COLOR_STRING;
+	stMessageBox2		: ST_Text;
+	stMessageBox2Color	: ST_HMI_COLOR_STRING;
+	stMessageBox3		: ST_Text;
+	stMessageBox3Color	: ST_HMI_COLOR_STRING;
+	stStationName		: ST_Text;
+	sDateAndTime		: STRING;
+	nLanguageList		: INT; //count of laguages
+	aLanguageList		: ARRAY[0..5] OF ST_Text;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_MeterPerMinToMmPerSec" Id="{4a52698c-4a70-4f28-bd47-f81f4692c862}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_MeterPerMinToMmPerSec : LREAL
+VAR_INPUT
+	fValue : LREAL; // m/min value
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[ F_MeterPerMinToMmPerSec := fValue * 100/6; // m/min -> mm/s -> x * 1000/60]]></ST>
+    </Implementation>
+    <LineIds Name="F_MeterPerMinToMmPerSec">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

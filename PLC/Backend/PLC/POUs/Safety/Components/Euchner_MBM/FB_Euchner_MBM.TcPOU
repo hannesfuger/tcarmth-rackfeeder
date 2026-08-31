@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Euchner_MBM" Id="{454bc480-5abf-482e-879d-5005b27308c6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Euchner_MBM
+VAR_INPUT
+	stHwIn: ST_Euchner_MBM_HW_IN;
+	bReset: BOOL;
+END_VAR
+VAR_OUTPUT
+	stHwOut: ST_Euchner_MBM_HW_OUT;
+	bError: BOOL;
+	stErrorText: ST_Text;
+END_VAR
+VAR
+	stIn: ST_Euchner_MBM_IN;
+	stOut: ST_Euchner_MBM_Out;
+	tonReset: ton;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[M_Mapping();
+M_Supervision();
+
+tonReset.IN := bReset;
+tonReset.PT := T#150MS;
+tonReset();
+IF tonReset.Q THEN
+	bReset := FALSE;
+END_IF
+stOut.bBM_ACK_G := bReset;]]></ST>
+    </Implementation>
+    <Method Name="M_Error" Id="{f1921ebe-4704-4a35-a03a-8bf4df5b7517}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Error : BOOL
+VAR_INPUT
+	stError: ST_Text;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bError	:=TRUE;
+stErrorText	:= stError;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Mapping" Id="{d872bef3-b263-479d-a742-1009d3f3c85c}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Mapping : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//mapping in
+stIn.bBM_D_RUN := stHwIn.nByte0.0;
+stIn.bBM_E_ML1 := stHwIn.nByte0.1;
+stIn.bBM_E_ML2 := stHwIn.nByte0.2;
+stIn.bBM_E_SYS := stHwIn.nByte0.3;
+stIn.bBM_E_G := stHwIn.nByte0.4;
+
+//mapping in
+stHwOut.nByte0.0 := stOut.bBM_ACK_G;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{8eaf9f2b-a058-4afe-8a85-01e309ea6655}">
+      <Declaration><![CDATA[METHOD M_Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bReset	:= TRUE;
+bError	:= FALSE;
+MEMSET(ADR(stErrorText), 0, SiZEOF(stErrorText));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Supervision" Id="{a4000f4a-8800-48ba-a97d-98e4ecf8db56}">
+      <Declaration><![CDATA[METHOD PRIVATE M_Supervision : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stIn.bBM_E_ML1 THEN
+	M_Error(F_CreateDynTextDefault("Fehler Modul MBM Starng 1")); 	
+ELSIF stIn.bBM_E_ML1 THEN
+	M_Error(F_CreateDynTextDefault("Fehler Modul MBM Starng 1"));	
+ELSIF stIn.bBM_E_G THEN
+	M_Error(F_CreateDynTextDefault("Modul MBM Allgemein"));	
+ELSIF stIn.bBM_E_SYS THEN
+	M_Error(F_CreateDynTextDefault("Fehler Gesamtsystem"));
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Euchner_MBM">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Euchner_MBM.M_Error">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Euchner_MBM.M_Mapping">
+      <LineId Id="3" Count="7" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Euchner_MBM.M_Reset">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Euchner_MBM.M_Supervision">
+      <LineId Id="3" Count="7" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

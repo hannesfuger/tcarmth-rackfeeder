@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_DiagMessageFlags" Id="{d69dfb1b-fd25-4b9e-a272-0a3598088db5}">
+    <Declaration><![CDATA[TYPE ST_DiagMessageFlags :
+STRUCT
+	bInfo: BIT;
+	bWarning: BIT;
+	bError: BIT;
+	bReserved1: BIT;
+	bIsLocalTimeStampOfSlave: BIT;
+	bReserved2: BIT;
+	bReserved3: BIT;
+	bReserved4: BIT;
+	NumOfParamsInDiagMessage: BYTE;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

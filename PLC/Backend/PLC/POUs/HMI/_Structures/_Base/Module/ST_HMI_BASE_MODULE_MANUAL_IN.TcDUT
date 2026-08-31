@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_BASE_MODULE_MANUAL_IN" Id="{d1844616-29f9-4743-8b6d-b5d348734df7}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_MODULE_MANUAL_IN :
+STRUCT
+	diSelectedObjectIndex	: DINT;
+	stManualCylinder		: ST_HMI_MANUAL_CYLINDER_IN;
+	stManualDrive			: ST_HMI_MANUAL_DRIVE_IN;
+	stManualAxis			: ST_HMI_MANUAL_AXIS_IN;
+	stManualDevice			: ST_HMI_MANUAL_DEVICE_IN;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

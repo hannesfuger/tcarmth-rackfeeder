@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="HMI" Id="{63a8cd95-7582-4dc5-959b-6f1274de4005}">
+    <Declaration><![CDATA[/// HMI var's
+//{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	// current user level
+	eUserLevel				: E_User_Level;
+
+	/// HMI IOs
+	stHmi					: ST_HMI;				// PLC internal HMI usage (HMI summary)
+	stHmiInOut				: ST_HMI_InOut;			// direct HMI IN OUT access
+	
+	stHmiHw					: HMI_PROVIDER_HW_IO;	// HW Pult IOs
+	stHmiTc3				: ST_Hmi_Tc3; 			// TC3 HMI interface
+	
+	/// HMI provider
+	fbHmiHwProvider			: FB_HMI_PROVIDER_HW;
+	fbHmiTc3Provider		: FB_HMI_Provider_TC3;
+END_VAR
+
+VAR_GLOBAL PERSISTENT
+	// actual language
+	eLanguage			: E_Language := E_Language.DE;
+	
+	// counter	            
+	stCounter			: ARRAY[0..CONST.iMaxIdxCounter] OF ST_Counter_Item;
+	stOverallCounter	: ST_Counter;
+	stShiftCounter		: ST_Counter;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

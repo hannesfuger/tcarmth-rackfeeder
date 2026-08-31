@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_SequenceHelper" Id="{ff57f4bf-8abe-4821-bdfd-ba3b55c414cf}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SequenceHelper
+VAR_INPUT
+	InHome		: BOOL; // in home helper status flag
+	Busy		: BOOL; // busy helper status flag
+	EnableStep	: BOOL; // enable step mode
+END_VAR
+VAR_OUTPUT
+	Init,				// step init flag
+	SeqRun		: BOOL; // sequence run flag 
+	StepTime,			// step time
+	SeqTime		: TIME;	// sequence time
+END_VAR
+VAR
+	nStep,
+	nStepMirror	: UINT;
+	tonStep,
+	tonSequence	: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Init := nStepMirror <> Step;
+tonStep(IN := nStepMirror = Step, PT := T#49D17H2M47S295MS);
+StepTime := tonStep.ET;
+tonSequence(IN := SeqRun, PT := T#49D17H2M47S295MS);
+SeqTime := tonSequence.ET;
+nStepMirror := Step;]]></ST>
+    </Implementation>
+    <Method Name="Reset" Id="{71553e8b-85b1-4f76-8283-c6ab25b16daf}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : REFERENCE TO FB_SequenceHelper
+VAR_INPUT
+	value : UINT := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Reset REF= THIS^;
+Step := value;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetStep" Id="{0f5adac3-0315-4816-8dc8-e25505104b69}">
+      <Declaration><![CDATA[METHOD PUBLIC SetStep : REFERENCE TO FB_SequenceHelper
+VAR_INPUT
+	value : UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SetStep REF= THIS^;
+
+IF EnableStep THEN
+	Step := value;	
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StartSequence" Id="{5ddb84e8-825b-4e8e-b146-56fe4081fc8e}">
+      <Declaration><![CDATA[METHOD PUBLIC StartSequence : REFERENCE TO FB_SequenceHelper
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[StartSequence REF= THIS^;
+tonSequence(IN := FALSE);
+SeqRun := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Step" Id="{0a02b69f-40d2-4b8c-9ea0-cdae45986433}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC Step : UINT]]></Declaration>
+      <Get Name="Get" Id="{de97d576-81c8-4f8d-9462-73c28c05342c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Step := nStep;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{90fb912f-9db6-4dec-bd2f-a882a9e3dbe8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[nStep := Step;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="StopSequence" Id="{9e2dbdc3-8d4c-4d6a-9aeb-116371519af7}">
+      <Declaration><![CDATA[METHOD PUBLIC StopSequence : REFERENCE TO FB_SequenceHelper
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[StopSequence REF= THIS^;
+SeqRun := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SequenceHelper">
+      <LineId Id="15" Count="4" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelper.Reset">
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelper.SetStep">
+      <LineId Id="6" Count="1" />
+      <LineId Id="1" Count="4" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelper.StartSequence">
+      <LineId Id="4" Count="0" />
+      <LineId Id="1" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelper.Step.Get">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelper.Step.Set">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SequenceHelper.StopSequence">
+      <LineId Id="2" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

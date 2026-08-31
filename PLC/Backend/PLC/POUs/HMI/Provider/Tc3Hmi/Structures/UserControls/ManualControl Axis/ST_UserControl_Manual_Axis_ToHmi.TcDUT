@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_UserControl_Manual_Axis_ToHmi" Id="{b4cd2ea9-47ff-46c9-b998-e218069ffdf4}">
+    <Declaration><![CDATA[TYPE ST_UserControl_Manual_Axis_ToHmi :
+STRUCT
+	bVisible					: BOOL;
+	bVisibleGear				: BOOL;
+	bVisibleRefReset			: BOOL;
+	bVisibleBrake				: BOOL;
+	bVisibleSetPos				: BOOL;
+	stObjectName,
+	stGearStatus				: ST_Text;
+	sOverride					: STRING;
+	sTargetPosition				: STRING;
+	sActPosition				: STRING;
+	stButtonJogPos,
+	stButtonJogNeg,
+	stButtonGoTo,
+	stButtonGear,				
+	stButtonBrake,
+	stButtonSetPos,
+	stButtonRefReset			: ST_HMI_BUTTON_OUT;	
+	aJogModeName				: ARRAY[0..5] OF ST_Text;
+	stRefStatus					: ST_Text;	
+	stTargetList				: ARRAY[1..10] OF ST_UserControl_Manual_Axis_Item_String; /// product data
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

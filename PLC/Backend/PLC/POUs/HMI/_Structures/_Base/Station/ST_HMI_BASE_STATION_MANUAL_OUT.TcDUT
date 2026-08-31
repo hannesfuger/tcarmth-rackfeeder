@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_BASE_STATION_MANUAL_OUT" Id="{1682f6a7-a1ca-49a6-9a6a-2d502bced78a}">
+    <Declaration><![CDATA[TYPE ST_HMI_BASE_STATION_MANUAL_OUT :
+STRUCT
+	bManualMode			: BOOL;	
+	stManualCylinder	: ST_HMI_MANUAL_CYLINDER_OUT;
+	stManualDrive		: ST_HMI_MANUAL_DRIVE_OUT;
+	stManualAxis		: ST_HMI_MANUAL_AXIS_OUT;
+	stManualDevice		: ST_HMI_MANUAL_DEVICE_OUT;
+	
+	stObjects			: ARRAY[0..iMaxIdxObject] OF ST_Object_Item; // e.g.: fbAxis, ...	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

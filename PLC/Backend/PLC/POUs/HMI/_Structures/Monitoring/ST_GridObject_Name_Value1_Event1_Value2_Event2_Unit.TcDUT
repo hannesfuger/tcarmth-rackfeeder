@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.7">
+  <DUT Name="ST_GridObject_Name_Value1_Event1_Value2_Event2_Unit" Id="{f715d3bc-a02e-4927-9816-9dd9ccf031d1}">
+    <Declaration><![CDATA[TYPE ST_GridObject_Name_Value1_Event1_Value2_Event2_Unit :
+STRUCT
+	sGroup				:STRING;
+	sName				:STRING;
+	fValue1				:LREAL;
+	fValue1Min			:LREAL;
+	fValue1Max			:LREAL;
+	iEvent1				:INT;	//exampe : no reaction=0 reaction 1..x = 1..x
+	fValue2				:LREAL;
+	fValue2Min			:LREAL;
+	fValue2Max			:LREAL;
+	iEvent2				:INT;	//exampe : no reaction=0 reaction 1..x = 1..x
+	bYesNo				:BOOL;
+	sUnit				:STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

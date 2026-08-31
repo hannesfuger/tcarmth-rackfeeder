@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Trend" Id="{cadcebf4-3c09-4d1b-9288-7604522ea0a8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_Trend : BOOL
+VAR_INPUT
+	fCurrentValue	: REAL;
+END_VAR
+VAR_IN_OUT
+	fValueMax		: REAL;
+	fValueMin		: REAL;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (fCurrentValue > fValueMax) THEN
+	fValueMax:=fCurrentValue;
+ELSIF (fCurrentValue < fValueMax) THEN
+	fValueMin:= fCurrentValue;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="F_Trend">
+      <LineId Id="7" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

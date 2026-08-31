@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="F_SettingItemHandlingWs" Id="{c1beea03-d786-4e8f-a6ed-1dceacf26744}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_SettingItemHandlingWs : WSTRING
+VAR_IN_OUT
+	wsValue		: WSTRING;
+	stSetting 	: ST_Data_Item;
+END_VAR
+VAR
+	stInfo 		: ST_Text;
+	sChanges	: T_MaxString;
+	IEvent		: I_EventHandler;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_SettingItemHandlingWs := stSetting.sValue;
+
+IF Services.bSettingsSaved OR NOT Services.bPlcInitDone THEN
+	wsValue := stSetting.sValue;
+	RETURN;
+END_IF
+
+IF wsValue = stSetting.sValue THEN
+	RETURN;
+END_IF
+
+sChanges := sEmpty;
+IEvent := Services.fbEventHandler;
+
+// 1. chk user level
+IF NOT F_ChkSettingUserLevel(HMI.eUserLevel, stSetting, stInfo => stInfo) THEN							  
+	IEvent.Select(TC_Events.SettingsEventClass.WarningEvent)
+		  .ArgAddWString(stInfo.wsName)
+		  .Raise();
+							
+	wsValue := stSetting.sValue;
+	RETURN;
+END_IF
+
+
+// 2. chk min/max value
+//IF NOT F_ChkSettingLimitF(wsValue, stSetting, stInfo => stInfo) THEN
+//	IEvent.Select(TC_Events.SettingsEventClass.WarningEvent)
+//		  .ArgAddWString(stInfo.wsName)
+//		  .Raise();
+//							
+//	wsValue := stSetting.sValue;
+//	RETURN;
+//END_IF
+
+// 3. save changes
+
+IF stSetting.eDataType = E_DataType.eDataType_wstring THEN
+	F_TrackSettingChangesWs(wsValue, stSetting, sChanges);
+END_IF
+
+// 4. track settings changes
+IF sChanges <> sEmpty THEN
+	ILog.AddLog(Concat5('Settings Changed, ', 'EKS level: ', TO_STRING(HMI.eUserLevel), '. Changes: ', sChanges), 
+				'HMI Controller', 
+				E_LogLevel.eLogLevel_info);
+END_IF
+
+wsValue := stSetting.sValue;
+F_SettingItemHandlingWs := stSetting.sValue;]]></ST>
+    </Implementation>
+    <LineIds Name="F_SettingItemHandlingWs">
+      <LineId Id="132" Count="1" />
+      <LineId Id="114" Count="6" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="26" Count="5" />
+      <LineId Id="137" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="38" Count="3" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="58" Count="6" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="134" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

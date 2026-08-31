@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_UserControl_Manual_Axis_Item_String" Id="{576d2e21-d61c-4c44-8b13-ff6e73942069}">
+    <Declaration><![CDATA[TYPE ST_UserControl_Manual_Axis_Item_String :
+STRUCT
+	stName				: ST_Text;
+	stPos				: ST_Text;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

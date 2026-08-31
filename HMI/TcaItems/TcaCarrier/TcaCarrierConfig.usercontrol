@@ -1,0 +1,98 @@
+<div id="TcaCarrierConfig_1" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="500" data-tchmi-creator-viewport-height="500">
+
+<div id="TcaCarrier_2" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="455" data-tchmi-height-unit="px" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-target-user-control="
+     
+     /TcaCarrier/TcaCarrier.usercontrol" data-tchmi-top="0" data-tchmi-top-unit="px" data-tchmi-width="257" data-tchmi-width-unit="px" data-tchmi-config="%pp%config%/pp%">
+</div>
+<div id="TcHmiSpinboxInput_1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-min-value="0" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="53" data-tchmi-top-unit="px" data-tchmi-value="%pp%config::CoordinateFirstWorkpiece::fX|BindingMode=TwoWay|BindingEvent=onValueChanged%/pp%" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-max-value="500">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_65" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-text="erste Werkstück X-Koorinate" data-tchmi-top="27" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="TcHmiSpinboxInput_2" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-max-value="500" data-tchmi-min-value="0" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="115" data-tchmi-top-unit="px" data-tchmi-value="%pp%config::CoordinateFirstWorkpiece::fY|BindingMode=TwoWay|BindingEvent=onValueChanged%/pp%" data-tchmi-width="150" data-tchmi-width-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_66" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-text="erste Werkstück Y-Koorinate" data-tchmi-top="89" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="TcHmiSpinboxInput_3" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-max-value="100" data-tchmi-min-value="0" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="301" data-tchmi-top-unit="px" data-tchmi-value="%pp%config::PositionsInColumn|BindingMode=TwoWay|BindingEvent=onValueChanged%/pp%" data-tchmi-width="150" data-tchmi-width-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_67" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-text="Positionen in X" data-tchmi-top="213" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="TcHmiSpinboxInput_4" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-max-value="100" data-tchmi-min-value="0" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="239" data-tchmi-top-unit="px" data-tchmi-value="%pp%config::PositionsInRow|BindingMode=TwoWay|BindingEvent=onValueChanged%/pp%" data-tchmi-width="150" data-tchmi-width-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_68" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-text="Positionen in Y" data-tchmi-top="275" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="TcHmiTextblock_69" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-text="erste Werkstück Y-Koorinate" data-tchmi-top="151" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="TcHmiCombobox_9" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiCombobox" data-tchmi-auto-focus-out="True" data-tchmi-combobox-text="Select" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-top="177" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-enum-data-symbol="%pp%config::Layout%/pp%">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiSpinboxInput_5" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-max-value="500" data-tchmi-min-value="0" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="425" data-tchmi-top-unit="px" data-tchmi-value="%pp%config::ColumnDistance|BindingMode=TwoWay|BindingEvent=onValueChanged%/pp%" data-tchmi-width="150" data-tchmi-width-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_70" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-text="Abstand in X" data-tchmi-top="337" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+<div id="TcHmiSpinboxInput_6" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiSpinboxInput" data-tchmi-auto-focus-out="True" data-tchmi-decimal-digits="0" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-max-value="500" data-tchmi-min-value="0" data-tchmi-reset-to-last-valid-value="True" data-tchmi-top="363" data-tchmi-top-unit="px" data-tchmi-value="%pp%config::RowDistance|BindingMode=TwoWay|BindingEvent=onValueChanged%/pp%" data-tchmi-width="150" data-tchmi-width-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+{
+  "top": 3,
+  "right": 3,
+  "bottom": 3,
+  "left": 3
+}
+</script>
+
+</div>
+<div id="TcHmiTextblock_71" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="267" data-tchmi-left-unit="px" data-tchmi-text="Abstand in Y" data-tchmi-top="399" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="True">
+</div>
+</div>

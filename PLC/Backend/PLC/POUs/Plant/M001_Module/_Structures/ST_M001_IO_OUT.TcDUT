@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_M001_IO_OUT" Id="{dbf409dd-0212-4396-a59e-0978c91af846}">
+    <Declaration><![CDATA[TYPE ST_M001_IO_OUT :
+STRUCT
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

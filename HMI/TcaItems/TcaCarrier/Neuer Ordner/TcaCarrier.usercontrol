@@ -1,0 +1,209 @@
+<div id="storage_8" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControl" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-creator-viewport-width="400" data-tchmi-creator-viewport-height="600" data-tchmi-zindex="1">
+    <div id="storage_Popup_8" data-tchmi-type="TcHmi.Controls.System.TcHmiPopup" data-tchmi-modal="True" data-tchmi-restore-bounds="False" data-tchmi-movable="False" data-tchmi-left="100" data-tchmi-top="100" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-header-text="Workpiece" data-tchmi-target-file-host-keep-alive="True" data-tchmi-close-on-background="True" data-tchmi-target-file-host-preload="False" data-tchmi-zindex="1">
+
+
+
+
+
+
+
+        <script data-tchmi-target-attribute="data-tchmi-target-file" type="application/json">
+{
+  "path": "TcaLibrary/TcaWorkpiecePlace/TcaWorkpiecePlace.usercontrol",
+  "attributes": {
+    "data-tchmi-data": "%pp%_wpcdata%/pp%"
+  }
+}
+</script>
+
+
+        <script data-tchmi-target-attribute="data-tchmi-buttons" type="application/json">
+[
+  {
+    "height": 30,
+    "name": "apply",
+    "text": "Übernehmen",
+    "width": 60,
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaStoragePopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%storage_Popup%/ctrl%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "write"
+          }
+        ],
+        "asyncWait": true
+      }
+    ],
+    "keepPopupOpen": true
+  },
+  {
+    "height": 30,
+    "name": "ok",
+    "text": "OK",
+    "width": 60,
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaStoragePopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%storage_Popup%/ctrl%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "write"
+          }
+        ],
+        "asyncWait": true
+      },
+      {
+        "objectType": "ControlApiFunction",
+        "active": true,
+        "control": "storage_Popup",
+        "fn": "close",
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "height": 30,
+    "name": "cancel",
+    "text": "Abbrechen",
+    "width": 60,
+    "actions": [
+      {
+        "objectType": "ControlApiFunction",
+        "active": true,
+        "control": "storage_Popup",
+        "fn": "close",
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+    </div>
+<div id="storage_host_8" data-tchmi-type="TcHmi.Controls.System.TcHmiHtmlHost" data-tchmi-zindex="1" data-tchmi-width-unit="px" data-tchmi-width="%f%%ctrl%storage_8::RenderedWidth%/ctrl%%/f%" data-tchmi-height="%f%%ctrl%storage_8::RenderedWidth%/ctrl%/4*6%/f%" data-tchmi-height-unit="px" data-tchmi-tooltip="%tr%TcaWorkpieceStatusColor[0]%/tr%">
+
+    <script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">
+[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onAttached",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaStorageDraw",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%storage_host%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:server#/definitions/ADS-PLC.TcaCarrierData",
+            "symbolExpression": "%pp%data%/pp%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%pp%data::WorkpiecesCoordinate%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaStorageDraw",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%storage_host%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:server#/definitions/ADS-PLC.TcaCarrierData",
+            "symbolExpression": "%pp%data%/pp%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onMouseClick",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaStoragePopup",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmi.Controls.System.TcHmiPopup",
+            "symbolExpression": "%ctrl%storage_Popup%/ctrl%"
+          },
+          {
+            "objectType": "StaticValue",
+            "valueType": "tchmi:general#/definitions/String",
+            "value": "open"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  },
+  {
+    "event": "%pp%data::WorkpiecesData%/pp%",
+    "actions": [
+      {
+        "objectType": "Function",
+        "active": true,
+        "fn": "TcHmi.Functions.TcHmiProject2.TcaStorageRefresh",
+        "fnParams": [
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:framework#/definitions/TcHmiContainer",
+            "symbolExpression": "%ctrl%storage_host%/ctrl%"
+          },
+          {
+            "objectType": "Symbol",
+            "valueType": "tchmi:project#/definitions/TcaWorkpieceStatusColor",
+            "symbolExpression": "%tr%TcaWorkpieceStatusColor%/tr%"
+          }
+        ],
+        "asyncWait": true
+      }
+    ]
+  }
+]
+</script>
+
+
+</div>
+
+
+
+
+<div id="TcHmiImage_3" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-height="%f%%ctrl%storage_8::RenderedWidth%/ctrl%/4*6%/f%" data-tchmi-height-unit="px" data-tchmi-width="%f%%ctrl%storage_8::RenderedWidth%/ctrl%%/f%" data-tchmi-width-unit="px" data-tchmi-src="Images/TcaCarrier.svg" data-tchmi-height-mode="Value">
+
+
+</div>
+</div>

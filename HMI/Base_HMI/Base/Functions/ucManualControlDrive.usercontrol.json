@@ -1,0 +1,41 @@
+{
+  "parameters": [
+    {
+      "name": "data-tchmi-stmanualcontroldrivetohmi",
+      "displayName": "stManualControlDriveToHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_MANUAL_DRIVE_OUT",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stManualControlDriveToHmi",
+      "propertySetterName": "setStManualControlDriveToHmi",
+      "propertyGetterName": "getStManualControlDriveToHmi",
+      "refTo": ""
+    },
+    {
+      "name": "data-tchmi-stmanualcontroldrivefromhmi",
+      "displayName": "stManualControlDriveFromHmi",
+      "allowSymbolExpressionsInObject": false,
+      "visible": true,
+      "type": "tchmi:server#/definitions/PLC1.ST_HMI_MANUAL_DRIVE_IN",
+      "category": "",
+      "description": "",
+      "requiredOnCompile": false,
+      "readOnly": false,
+      "bindable": true,
+      "heritable": true,
+      "propertyName": "stManualControlDriveFromHmi",
+      "propertySetterName": "setStManualControlDriveFromHmi",
+      "propertyGetterName": "getStManualControlDriveFromHmi",
+      "refTo": ""
+    }
+  ],
+  "virtualRights": [],
+  "$schema": "../../../../TC3/Packages/Beckhoff.TwinCAT.HMI.Framework.12.742.5/runtimes/native1.12-tchmi/Schema/UserControlConfig.Schema.json",
+  "description": ""
+}

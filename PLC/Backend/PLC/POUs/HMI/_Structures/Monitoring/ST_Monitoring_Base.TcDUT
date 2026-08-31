@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Monitoring_Base" Id="{ce30dd07-ed14-40e8-ba65-ed81cf41e0ac}">
+    <Declaration><![CDATA[TYPE ST_Monitoring_Base :
+STRUCT
+	sGroup				: STRING;
+	stName				: ST_Text;
+	bManual				: BOOL;
+	bInHome				: BOOL;
+	bAuto				: BOOL;;
+	bBusy				: BOOL;
+	bWarning			: BOOL;
+	bError				: BOOL;
+	bTransferEnable		: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

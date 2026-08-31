@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_TestStation" Id="{dec268e0-9c5f-4ace-9502-8049615d9bd1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TestStation EXTENDS FB_StationBase
+VAR_INPUT
+	// IO ref
+	stIO	: REFERENCE TO ST_TestStation_IO;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// components
+	fbAxis 		: FB_AxisDriver;
+	fbCylinder 	: FB_Cylinder;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[/// 
+/// Station 01 function block 
+/// TW/www.rmth.at/09.2016
+/// ]]></ST>
+    </Implementation>
+    <Action Name="DEMO" Id="{52985a2a-a849-49fb-a343-2694691b5ec7}">
+      <Implementation>
+        <ST><![CDATA[(*
+IF fbStepAuto.FirstShotSequence THEN
+	; //Diese Aktion wird erstmals aufgerufen. Beispiel: zum Initilisieren der Aktion...
+END_IF
+*)
+///		---------------------------------------------	PROCESS   ---------------------------------------------		
+(*
+CASE iStepAuto OF
+	
+	0:	aSClearText[EN] := 'PROCESS: wait for enable';
+		aSClearText[DE] := 'PROCESS: warte auf Freigabe';
+		IF bStepTrigger THEN
+			; //Dieser Schritt wird erstmals aufgerufen. Beispiel: zum Initilisieren des akt. Schritts
+		END_IF
+
+		IF tonStep.ET > T#1S THEN // Beispiel Schrittverzögerung (1 Sekunde)
+			iStepAuto := 10;
+		END_IF
+		
+	10:	aSClearText[EN] := 'PROCESS: demo move';
+		aSClearText[DE] := 'PROCESS: Demo move';
+		CycleStart();
+		IF RunStep THEN // RunStep immer vor Bewegungen (Zylinder, Servo, Robot,..) abfragen!!!
+			// fbServo.MoveTo(1200);
+			iStepAuto := 20;
+		END_IF
+	
+	20:	aSClearText[EN] := 'PROCESS: demo condition, message';
+		aSClearText[DE] := 'PROCESS: Demo Abfrage, Meldung';
+		//IF fbServo.TargetReached THEN
+			iStepAuto := 30;
+		//ELSIF fbSequence.tonStep.ET > T#10S THEN
+			SetError('Servo Zielposition wurde nicht erreicht.');	//SetInfo(... SetWarning(...
+			//UpdateInfo(... UpdateWarning(... UpdateError(...  
+		//END_IF
+		
+	30:	aSClearText[EN] := 'PROCESS: demo logging system';
+		aSClearText[DE] := 'PROCESS: Demo Logging-System';
+		//IF bDebugLog THEN			
+			AddLogInf(Concat2x('Servo Amplifier Temp: ', '75')); //LREAL_TO_STRING(fbAxisDriver.AmplifierTemp)));	
+			//AddLogWrn(..
+			//AddLogErr(..
+		//END_IF
+		iStepAuto := 40;
+		
+	40:	aSClearText[EN] := 'PROCESS: demo statics/system info';
+		aSClearText[DE] := 'PROCESS: Demo STATICS/SystemInfos';
+		// aktuelle Zeit: dtTime := Statics.dtNow; // aktuelle Zeit als String: Statics.sTimeString
+		// Farben: nstateColor := Statics.stColor.Green;
+		// Impulse: Statics.stPulse.bImpulse500ms; Statics.stPulse.bImpulse300ms; ...
+		// ToggleBits: bLed := Statics.stPulse.bToggle500ms;
+		
+		// Systeminformationen: Statics.stPlcSystemInfo.fCycleTime;
+								//Statics.stPlcSystemInfo.fLastExecTime;
+								//Statics.stPlcSystemInfo.stPlcAppSystemInfo.AdsPort;  Statics.stPlcSystemInfo.stPlcAppSystemInfo.OnlineChangeCnt; ...
+								//Statics.stPlcSystemInfo.stPlcTaskSystemInfo.FirstCycle
+		iStepAuto := 50;
+		
+	50: aSClearText[EN] := 'PROCESS: counter and timer!';
+		aSClearText[DE] := 'PROCESS: Zaehler und Timer!';
+		AddLogInf(Concat2x('Stationszyklen (Tag): ', UDINT_TO_STRING(diCycles)));
+		AddLogInf(Concat2x('Stationszyklen (Ges): ', UDINT_TO_STRING(diTotalCycles)));
+		AddLogInf(Concat2x('Zykluszeit Station [ms]: ', UDINT_TO_STRING(diLastCycleTime)));
+		CycleEnd();
+		iStepAuto := 10;
+
+		
+END_CASE
+*)]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="M_Homing" Id="{83317262-ee07-42eb-9506-9035985d2f3d}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Homing
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Homing sequence
+IF NOT bRunHoming THEN
+	RETURN;
+END_IF
+
+// Homingablauf
+CASE arriStepHome[0] OF
+	
+	0:	aSClearText := "HOMING: signal reset";
+		arriStepHome[0] := 10;
+		
+	10:	aSClearText := "HOMING: wait for enable";
+		IF RunStep THEN
+			arriStepHome[0] := 20;
+		END_IF
+		
+	20:	aSClearText := "HOMING: home position reached";
+		IF arrtonStep[0].ET > T#1S THEN
+			bRunHoming := FALSE;
+			arriStepHome[0] := 0;	
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Manual" Id="{45de6be7-f838-46a9-8d9b-be2e8ed4d5db}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Manual
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// manual mode
+IF NOT (eOpMode = eOpMode_manual) THEN
+	RETURN;
+END_IF
+
+(*
+CASE stManualCmd.iCommand OF
+	// no command
+	eStation01ManualCommand_none: RETURN;
+	
+	// cylinder HP/WP
+	eStation01ManualCommand_cyl01Hp:
+		aSClearText[EN] := 'last manual cmd: Cyl.01 HP';
+		
+	// cylinder HP/WP
+	eStation01ManualCommand_cyl01Wp:
+		aSClearText[EN] := 'last manual cmd: Cyl.01 WP';
+	
+		
+END_CASE
+
+/// delect command
+MEMSET(ADR(stManualCmd), 0 , SIZEOF(stManualCmd)); *)]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Sequence" Id="{7177a246-bd04-47f4-98cb-91285e05d7e3}">
+      <Declaration><![CDATA[METHOD PROTECTED M_Sequence
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*
+IF fbStepAuto.FirstShotSequence THEN
+	; //Diese Aktion wird erstmals aufgerufen. Beispiel: zum Initilisieren der Aktion...
+END_IF
+*)
+///		---------------------------------------------	PROCESS   ---------------------------------------------		
+CASE arriStepAuto[0] OF
+	
+	0:	aSClearText := "PROCESS: wait for enable";
+		IF bStepTrigger THEN
+			; //Dieser Schritt wird erstmals aufgerufen. Beispiel: zum Initilisieren des akt. Schritts
+		END_IF
+
+		IF arrtonStep0].ET > T#1S THEN // Beispiel Schrittverzögerung (1 Sekunde)
+			arriStepAuto[0] := 10;
+		END_IF
+		
+	10:	aSClearText := "PROCESS: demo move";
+		CycleStart();
+		IF RunStep THEN // RunStep immer vor Bewegungen (Zylinder, Servo, Robot,..) abfragen!!!
+			// fbServo.MoveTo(1200);
+			arriStepAuto[0] := 20;
+		END_IF
+	
+	20:	aSClearText := "PROCESS: demo condition, message";
+		//IF fbServo.TargetReached THEN
+			arriStepAuto[0] := 30;
+		//ELSIF fbSequence.tonStep.ET > T#10S THEN
+			SetError("Servo Zielposition wurde nicht erreicht.");	//SetInfo(... SetWarning(...
+			//UpdateInfo(... UpdateWarning(... UpdateError(...  
+		//END_IF
+		
+	30:	aSClearText := "PROCESS: demo logging system";
+		//IF bDebugLog THEN			
+			AddLogInf(Concat2x('Servo Amplifier Temp: ', '75')); //LREAL_TO_STRING(fbAxisDriver.AmplifierTemp)));	
+			//AddLogWrn(..
+			//AddLogErr(..
+		//END_IF
+		arriStepAuto[0] :=  40;
+		
+	40:	aSClearText := "PROCESS: demo statics/system info";
+		// aktuelle Zeit: dtTime := Statics.dtNow; // aktuelle Zeit als String: Statics.sTimeString
+		// Farben: nstateColor := Statics.stColor.Green;
+		// Impulse: Statics.stPulse.bImpulse500ms; Statics.stPulse.bImpulse300ms; ...
+		// ToggleBits: bLed := Statics.stPulse.bToggle500ms;
+		
+		// Systeminformationen: Statics.stPlcSystemInfo.fCycleTime;
+								//Statics.stPlcSystemInfo.fLastExecTime;
+								//Statics.stPlcSystemInfo.stPlcAppSystemInfo.AdsPort;  Statics.stPlcSystemInfo.stPlcAppSystemInfo.OnlineChangeCnt; ...
+								//Statics.stPlcSystemInfo.stPlcTaskSystemInfo.FirstCycle
+		arriStepAuto[0] :=  50;
+		
+	50: aSClearText := "PROCESS: counter and timer!";
+		AddLogInf(Concat2x('Stationszyklen (Tag): ', UDINT_TO_STRING(diCycles)));
+		AddLogInf(Concat2x('Stationszyklen (Ges): ', UDINT_TO_STRING(diTotalCycles)));
+		AddLogInf(Concat2x('Zykluszeit Station [ms]: ', UDINT_TO_STRING(diLastCycleTime)));
+		CycleEnd();
+		arriStepAuto[0] :=  10;
+
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TestStation">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestStation.DEMO">
+      <LineId Id="2" Count="5" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="10" Count="8" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="5" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="27" Count="7" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="35" Count="7" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="43" Count="11" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="55" Count="5" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="74" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestStation.M_Homing">
+      <LineId Id="36" Count="7" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="48" Count="3" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="53" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestStation.M_Manual">
+      <LineId Id="3" Count="3" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="7" Count="2" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="18" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TestStation.M_Sequence">
+      <LineId Id="213" Count="59" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

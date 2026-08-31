@@ -1,0 +1,533 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_DiagEtherCAT" Id="{55f2b2ae-663d-494c-86e1-ccb5cb9949fd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DiagEtherCAT
+VAR_OUTPUT
+	/// EtherCAT bus state ok
+	bBusStatus_EtherCatOk	: BOOL := TRUE;
+	stTextDeviceState		: ST_Text;
+	stTextLinkState			: ST_Text;
+	stTextBmk				: ST_Text;
+END_VAR
+VAR
+	/// EtherCAT Master inputs
+	aEcMasters AT%I*		: ARRAY[0..Const.iMaxIdxEcMaster] OF ST_EcMaster_In;
+	
+	/// event handler reference
+	IEvent : I_EventHandler;
+	
+	// EtherCat bus with an error
+	nSelectedMaster				: INT;
+	// Slave number with an error
+	nError_EcSlaveNr			: INT;
+	//AmsNetId of the EtherCAT master device
+	sEcMasterNetId				: T_AmsNetId;
+	// Get all slave address
+	fbEcGetAllSlaveAddr			: FB_EcGetAllSlaveAddr;
+	// Get all slave states
+	fbEcGetAllSlaveStates		: FB_EcGetAllSlaveStates;
+
+	// Get slave name
+	fbGetSlaveName 				: IOF_GetBoxNameByAddr;
+	
+	arrSlaves					: ARRAY[0..iMaxIdxDiagSlave] OF UINT;
+	arrSlaveState				: ARRAY[0..iMaxIdxDiagSlave] OF ST_EcSlaveState;
+	nIdx						: INT;
+	
+	nStep				: INT;
+	tonCycle			: TON;
+	tonDelay_NewCycle	: TON;
+	nSearchErrCount		: INT;
+	ii					: INT;
+	
+	bErrorFound			: BOOL;
+	sb					: FB_StringBuilder;
+END_VAR
+VAR CONSTANT
+	iMaxIdxDiagSlave	: INT := 2000;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// chk reference
+IF iEvent = 0 THEN
+	RETURN;
+END_IF
+
+// chk EtherCAT master linked (device state, device ID, Ams addres)
+IF NOT M_CheckEcHwLinked() THEN
+	RETURN;
+END_IF
+
+// call timer
+tonCycle(PT := T#1S);
+tonCycle.IN := FALSE;
+
+tonDelay_NewCycle(PT := T#10S);
+tonDelay_NewCycle.IN := FALSE;
+
+// chk EtherCAT bus error
+IF nStep = 0 AND bBusStatus_EtherCatOk THEN
+	FOR ii := 0 TO Const.iMaxIdxEcMaster DO
+		IF aEcMasters[ii].nDeviceState <> 0 THEN
+			nSelectedMaster := ii;
+			bBusStatus_EtherCatOk := FALSE;
+			stTextDeviceState := M_ConvertEcMasterStateToText(aEcMasters[ii].nDeviceState);
+			IEvent.Select(TC_Events.EtherCatEventClass.ErrorEvent)
+		  		  .ArgSetSbRaise(sb.SetWs(stTextDeviceState.wsName).Append('Master ID: ').AppendAny(aEcMasters[ii].nDevId));
+			EXIT;
+		END_IF
+	END_FOR
+END_IF
+
+// select master
+nSelectedMaster := LIMIT(0, nSelectedMaster, Const.iMaxIdxEcMaster);
+
+// get masters NetId
+sEcMasterNetId := F_CreateAmsNetId(nIds := aEcMasters[nSelectedMaster].stAmsAdr.netId);
+
+// Diagnose the bus participants
+CASE nStep OF
+	0:
+		// wait cycle
+		tonCycle.IN := TRUE;
+		IF tonCycle.Q THEN
+			// no error
+			//IF refMasIn.stSystem.aEcMasters[nSelectedMaster].nDeviceState = 0 THEN
+				//bBusStatus_EtherCatOk := TRUE;
+			// reset diagnose
+			//ELSIF NOT bBusStatus_EtherCatOk THEN
+				fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+									pAddrBuf:= ADR(arrSlaves),
+									cbBufLen:= SIZEOF(arrSlaves),
+									bExecute:= FALSE );
+				nError_EcSlaveNr := 0;//-1;
+				nIdx := 0;
+				nSearchErrCount := 0;
+				nStep := 20;
+			//END_IF
+		END_IF
+
+	20:
+		// read out slave addresses
+		fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+							pAddrBuf:= ADR(arrSlaves),
+							cbBufLen:= SIZEOF(arrSlaves),
+							bExecute:= TRUE );
+		IF fbEcGetAllSlaveAddr.bBusy THEN
+			nStep := 30;
+		ELSIF fbEcGetAllSlaveAddr.bError THEN
+			nStep := 1000;
+		END_IF
+
+	30:
+		// wait until reading is finished
+		fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+							pAddrBuf:= ADR(arrSlaves),
+							cbBufLen:= SIZEOF(arrSlaves),
+							bExecute:= TRUE );
+		IF NOT fbEcGetAllSlaveAddr.bBusy AND NOT fbEcGetAllSlaveAddr.bError THEN
+			fbEcGetAllSlaveAddr(sNetId:= sEcMasterNetId ,
+								pAddrBuf:= ADR(arrSlaves),
+								cbBufLen:= SIZEOF(arrSlaves),
+								bExecute:= FALSE );
+			nStep := 100;
+		ELSIF fbEcGetAllSlaveAddr.bError THEN
+			nStep := 1000;
+		END_IF
+
+(*	Get all slave states	*) 
+	100:
+		fbEcGetAllSlaveStates(	sNetId:= sEcMasterNetId,
+								pStateBuf := ADR(arrSlaveState),
+								cbBufLen  := SIZEOF(arrSlaveState),
+								bExecute:= FALSE );
+		IF NOT fbEcGetAllSlaveStates.bBusy THEN
+			nIdx := 0;
+			nStep := 110;
+		END_IF
+
+	110:
+		// read out slave states
+		fbEcGetAllSlaveStates(	sNetId:= sEcMasterNetId,
+								pStateBuf := ADR(arrSlaveState),
+								cbBufLen  := SIZEOF(arrSlaveState),
+								bExecute:= TRUE );
+		IF fbEcGetAllSlaveStates.bBusy THEN
+			nStep := 120;
+		ELSIF fbEcGetAllSlaveStates.bError THEN
+			nStep := 1000;
+		END_IF
+		
+	120:
+		// wait until reading is finished
+		fbEcGetAllSlaveStates(	sNetId:= sEcMasterNetId,
+								pStateBuf := ADR(arrSlaveState),
+								cbBufLen  := SIZEOF(arrSlaveState),
+								bExecute:= TRUE );
+		IF NOT fbEcGetAllSlaveStates.bBusy AND NOT fbEcGetAllSlaveStates.bError THEN
+			fbEcGetAllSlaveStates(	sNetId:= sEcMasterNetId,
+									pStateBuf := ADR(arrSlaveState),
+									cbBufLen  := SIZEOF(arrSlaveState),
+									bExecute:= FALSE );
+			nStep := 200;
+		ELSIF fbEcGetAllSlaveStates.bError THEN
+			nStep := 1000;
+		END_IF
+		
+(*	Evaluate	*)
+	200:
+		// search slaves for faulty status
+		bErrorFound := FALSE;
+		FOR ii := 0 TO iMaxIdxDiagSlave DO
+			IF arrSlaves[ii] = 0 THEN
+				EXIT;
+			ELSIF arrSlaveState[ii].deviceState <> EC_DEVICE_STATE_OP OR arrSlaveState[ii].linkState <> EC_LINK_STATE_OK THEN
+				nError_EcSlaveNr := ii;
+				stTextDeviceState := M_ConvertEcDeviceStateToText(arrSlaveState[ii].deviceState);
+				stTextLinkState := M_ConvertEcLinkStateToText(arrSlaveState[ii].linkState);
+				bErrorFound := TRUE;
+				EXIT;
+			END_IF
+		END_FOR
+		
+		// Error found -> read out boxname
+		IF bErrorFound THEN
+			bBusStatus_EtherCatOk := FALSE;
+			nStep := 300;
+		ELSE
+			bBusStatus_EtherCatOk := TRUE;
+			nStep := 0;
+		END_IF
+		
+		
+		(*
+		// Error found -> read out boxname
+		IF bErrorFound THEN
+			bBusStatus_EtherCatOk := FALSE;
+			nStep := 300;
+		// Error not found after repeated searches -> wait a while
+		ELSIF nSearchErrCount > 3 THEN
+			nStep := 1000;
+		// read out the status again
+		ELSE
+			nSearchErrCount := nSearchErrCount + 1;
+			nStep := 100;
+		END_IF
+		*)
+		
+	
+(*	Detail Diagnose	*)
+	300:
+		fbGetSlaveName(	NETID		:= '',	(*local*)
+						DEVICEID	:= aEcMasters[nSelectedMaster].nDevId,
+						BOXADDR		:= arrSlaves[nError_EcSlaveNr],
+						START		:= FALSE);
+		IF NOT fbGetSlaveName.Busy THEN
+			nStep := 310;
+		END_IF
+
+	310:
+		// read out term
+		fbGetSlaveName(NETID		:= '',	(*local*)
+						DEVICEID	:= aEcMasters[nSelectedMaster].nDevId,
+						BOXADDR		:= arrSlaves[nError_EcSlaveNr],          
+						START		:= TRUE);
+		IF fbGetSlaveName.Busy AND NOT fbGetSlaveName.ERR THEN
+			nStep := 320;
+		ELSIF fbGetSlaveName.ERR THEN
+			nStep := 1000;
+		END_IF
+
+	320:
+		// wait until reading is finished
+		fbGetSlaveName(NETID		:= '',	(*local*)
+						DEVICEID	:= aEcMasters[nSelectedMaster].nDevId,
+						BOXADDR		:= arrSlaves[nError_EcSlaveNr],
+						START		:= TRUE);
+		IF NOT fbGetSlaveName.Busy AND NOT fbGetSlaveName.ERR THEN
+			stTextBmk := F_CreateDynTextDefault(WCONCAT("BMK: ", STRING_TO_WSTRING(fbGetSlaveName.BOXNAME)));
+			fbGetSlaveName(	NETID		:= '',	(*local*)
+							DEVICEID	:= aEcMasters[nSelectedMaster].nDevId,
+							BOXADDR		:= arrSlaves[nError_EcSlaveNr],
+							START		:= FALSE);
+			nStep := 350;
+		ELSIF fbGetSlaveName.ERR THEN
+			nStep := 1000;
+		END_IF
+
+(*	Create and output error text	*)
+	350:
+		
+		IEvent.Select(TC_Events.EtherCatEventClass.ErrorEvent)
+		  	  .ArgSetSbRaise(sb.SetWs(stTextListGlobal.stText_System.stText_EC_CommonError.wsName).AppendWs(stTextBmk.wsName));
+//		IEvent.Select(TC_Events.EcDevicStateError, E_Priority.ePriority_fault, stTextDeviceState, stTextBmk).Raise();
+//		IEvent.Select(TC_Events.EcLinkStateError, E_Priority.ePriority_fault, stTextLinkState, stTextBmk).Raise();
+
+		// wait a few seconds before next search
+		nStep := 1000;
+
+
+(*	ERROR	*)
+	1000:
+		// new trial
+		tonDelay_NewCycle.IN := TRUE;
+		IF tonDelay_NewCycle.Q THEN
+			nStep := 0;
+		END_IF
+
+END_CASE
+
+
+
+
+]]></ST>
+    </Implementation>
+    <Method Name="M_CheckEcHwLinked" Id="{f65c7b5e-3abf-43aa-b5d3-659e54eb42c9}">
+      <Declaration><![CDATA[METHOD PRIVATE M_CheckEcHwLinked : BOOL
+VAR_INST
+	bChkEcHwLinked : BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bChkEcHwLinked THEN
+	M_CheckEcHwLinked := TRUE;
+	RETURN;
+END_IF
+
+// chk EtherCAT master linked (device state, device ID, Ams addres)
+bChkEcHwLinked := TRUE;
+FOR ii := 0 TO Const.iMaxIdxEcMaster DO
+	IF aEcMasters[ii].nDevId = 0 THEN
+		IEvent.Select(TC_Events.EtherCatEventClass.ErrorEvent)
+		  	  .ArgSetSbRaise(sb.Set('Not linked EtherCAT master: ').AppendAny(ii));
+		bChkEcHwLinked := FALSE;
+		EXIT;
+	END_IF
+END_FOR
+
+M_CheckEcHwLinked := bChkEcHwLinked;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ConvertEcDeviceStateToText" Id="{7948cc34-3757-412d-a4c9-ff5a32f48215}">
+      <Declaration><![CDATA[/// Function convert EtherCAT device state from a slave to ST_Text
+METHOD PUBLIC M_ConvertEcDeviceStateToText : ST_Text
+VAR_INPUT
+	nDeviceState	: BYTE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// switch EtherCAT device state
+CASE nDeviceState OF
+	/// init
+	EC_DEVICE_STATE_INIT :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_Init;
+		
+	/// preop
+	EC_DEVICE_STATE_PREOP :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_Preop;
+	
+	/// bootstrap
+	EC_DEVICE_STATE_BOOTSTRAP :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_Bootstrap;
+	
+	/// safeop
+	EC_DEVICE_STATE_SAFEOP :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_Safeop;
+	
+	/// op
+	EC_DEVICE_STATE_OP :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_Op;
+	
+	/// error
+	EC_DEVICE_STATE_ERROR :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_Error;
+	
+	/// invalid vprs
+	EC_DEVICE_STATE_INVALID_VPRS :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_InvalidVprs;
+	
+	/// init cmd error
+	EC_DEVICE_STATE_INITCMD_ERROR :
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_InitCmdError;
+
+	ELSE // default
+		M_ConvertEcDeviceStateToText := stTextListGlobal.stText_System.stText_EC_DeviceState_Undefined;
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ConvertEcLinkStateToText" Id="{4b1a4e8e-ba68-4a58-9f27-577602e61e30}">
+      <Declaration><![CDATA[/// Function convert EtherCAT link state from a slave to ST_Text
+METHOD PUBLIC M_ConvertEcLinkStateToText : ST_Text
+VAR_INPUT
+	nLinkState : BYTE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// switch EtherCAT link state
+CASE nLinkState OF
+	/// ok
+	EC_LINK_STATE_OK :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_Ok;
+		
+	/// not present
+	EC_LINK_STATE_NOT_PRESENT :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_NotPresent;
+	
+	/// without com
+	EC_LINK_STATE_LINK_WITHOUT_COMM :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_WithoutCom;
+	
+	/// missing link
+	EC_LINK_STATE_MISSING_LINK :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_MissingLink;
+	
+	/// additional link
+	EC_LINK_STATE_ADDITIONAL_LINK :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_AdditionalLink;
+	
+	/// state port a
+	EC_LINK_STATE_PORT_A :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_PortA;
+	
+	/// state port b
+	EC_LINK_STATE_PORT_B :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_PortB;
+	
+	/// state port c
+	EC_LINK_STATE_PORT_C :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_PortC;
+	
+	/// state port d
+	EC_LINK_STATE_PORT_D :
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_PortD;
+
+	ELSE // default
+		M_ConvertEcLinkStateToText := stTextListGlobal.stText_System.stText_EC_LinkState_Undefined;
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ConvertEcMasterStateToText" Id="{80f733a5-39c1-40dd-9e9a-12d1bff7adff}">
+      <Declaration><![CDATA[METHOD PUBLIC M_ConvertEcMasterStateToText : ST_Text
+VAR_INPUT
+	eEcState : E_EcDeviceState;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// switch EtherCAT master device state
+CASE eEcState OF
+	/// Link error
+	eEtherCATState_LinkError :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_LinkError;
+		
+	/// I/O locked after link error (I/O reset required)
+	eEtherCATState_IoLockedAfterLinkErr :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_IoLockedAfterLinkErr;
+	
+	/// Link error (redundancy adapter)
+	eEtherCATState_LinkErrRedAdapter :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_LinkErrRedAdapter;
+	
+	/// Missing one frame (redundancy mode)
+	eEtherCATState_MissingFrame :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_MissingFrame;
+	
+	/// Out of send resources (I/O reset required)
+	eEtherCATState_OutOfSendResources :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_OutOfSendResources;
+	
+	/// Watchdog triggered
+	eEtherCATState_WatchdogTriggered :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_WatchdogTriggered;
+	
+	/// Ethernet driver (miniport) not found
+	eEtherCATState_EthernetDrvNotFound :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_EthernetDrvNotFound;
+	
+	/// I/O reset active
+	eEtherCATState_IO_resetActive :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_IO_resetActive;
+	
+	/// At least one device in 'INIT' state
+	eEtherCATState_AtLeastOneDeviceInit :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_AtLeastOneDeviceInit;
+	
+	///  At least one device in 'PRE-OP' state
+	eEtherCATState_AtLeastOneDevicePreOp :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_AtLeastOneDevicePreOp;
+	
+	/// At least one device in 'SAFE-OP' state
+	eEtherCATState_AtLeastOneDeviceSafeOp :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_AtLeastOneDeviceSafeOp;
+	
+	/// At least one device indicates an error state
+	eEtherCATState_AtLeastOneDeviceError :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_AtLeastOneDeviceError;
+	
+	/// DC not in sync
+	eEtherCATState_DC_notInSync :
+		M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_DC_notInSync;
+
+	ELSE // default
+		IF eEcState <> 0 THEN
+			M_ConvertEcMasterStateToText := stTextListGlobal.stText_System.stText_EC_CommonError;
+		ELSE
+			M_ConvertEcMasterStateToText := stEmptyText;
+		END_IF
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetReferences" Id="{87c0e814-fac0-455c-a362-eecf97c34742}">
+      <Declaration><![CDATA[/// Dependency injection method.
+{attribute 'object_name' := 'SetReferences'}
+METHOD INTERNAL SetReferences
+VAR_INPUT
+	/// event access provider
+	IEventHandler : I_EventHandler;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[/// set up references
+IEvent := IEventHandler;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_DiagEtherCAT">
+      <LineId Id="677" Count="2" />
+      <LineId Id="959" Count="0" />
+      <LineId Id="686" Count="18" />
+      <LineId Id="1010" Count="0" />
+      <LineId Id="1008" Count="0" />
+      <LineId Id="709" Count="183" />
+      <LineId Id="894" Count="0" />
+      <LineId Id="1012" Count="1" />
+      <LineId Id="895" Count="1" />
+      <LineId Id="1004" Count="0" />
+      <LineId Id="898" Count="16" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DiagEtherCAT.M_CheckEcHwLinked">
+      <LineId Id="3" Count="8" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="15" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DiagEtherCAT.M_ConvertEcDeviceStateToText">
+      <LineId Id="3" Count="36" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DiagEtherCAT.M_ConvertEcLinkStateToText">
+      <LineId Id="3" Count="40" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DiagEtherCAT.M_ConvertEcMasterStateToText">
+      <LineId Id="3" Count="60" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DiagEtherCAT.SetReferences">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

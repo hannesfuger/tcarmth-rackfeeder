@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_CreateDynText" Id="{0838a504-6744-476d-bcb9-033faff7e366}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_CreateDynText : ST_Text
+VAR_INPUT
+	wsName		: WSTRING;	//standard name
+	nNameId		: INT;		//example simatic hmi
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_CreateDynText.wsName := wsName;
+F_CreateDynText.wsNameId := wsName;
+F_CreateDynText.nNameId := nNameId;]]></ST>
+    </Implementation>
+    <LineIds Name="F_CreateDynText">
+      <LineId Id="12" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

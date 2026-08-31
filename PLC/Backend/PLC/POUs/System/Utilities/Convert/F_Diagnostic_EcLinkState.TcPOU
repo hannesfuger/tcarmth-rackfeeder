@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="F_Diagnostic_EcLinkState" Id="{d5c23d02-63c1-4a49-b206-cad1e56229d1}" SpecialFunc="None">
+    <Declaration><![CDATA[/// Function convert EtherCat link state from a slave into an text
+FUNCTION F_Diagnostic_EcLinkState : WSTRING(80)
+VAR_INPUT
+	/// Function input
+	nLinkState				:BYTE;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE nLinkState OF
+	EC_LINK_STATE_OK:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: OK";
+		
+	EC_LINK_STATE_NOT_PRESENT:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: No EtherCat communication with EtherCat slave";
+		
+	EC_LINK_STATE_LINK_WITHOUT_COMM:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Error on port X. Port has a link, but no communication";
+		
+	EC_LINK_STATE_MISSING_LINK:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Missing link on port X";
+		
+	EC_LINK_STATE_ADDITIONAL_LINK:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Additional link on port X";
+		
+	EC_LINK_STATE_PORT_A:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Error communication port A";
+		
+	EC_LINK_STATE_PORT_B:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Error communication port B";
+		
+	EC_LINK_STATE_PORT_C:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Error communication port C";
+		
+	EC_LINK_STATE_PORT_D:
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Error communication port D";
+		
+	ELSE 
+		F_Diagnostic_EcLinkState := "EtherCat Link State: Undefined";
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="F_Diagnostic_EcLinkState">
+      <LineId Id="8" Count="23" />
+      <LineId Id="38" Count="2" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

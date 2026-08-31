@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="GVL" Id="{f8176bf4-c77d-430d-b42e-51ee16e1ac45}">
+    <Declaration><![CDATA[/// Project specific global var's
+//{attribute 'qualified_only'}
+VAR_GLOBAL
+	// ToDo: comissioning
+	iIBN : INT := 1;
+	bTest : BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

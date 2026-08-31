@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_ManualUi" Id="{001e1cb9-18f1-4c1b-87c0-1def144f453a}">
+    <Declaration><![CDATA[INTERFACE I_ManualUi
+]]></Declaration>
+    <Method Name="M_SetStateObject" Id="{533965c2-f4bd-45d2-bd03-a27d7af9f40e}">
+      <Declaration><![CDATA[METHOD PUBLIC M_SetStateObject : BOOL
+VAR_IN_OUT
+	stStateObjectRef : ST_Object_Item;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Name" Id="{8fb561b9-b27e-446a-baba-602476846166}">
+      <Declaration><![CDATA[PROPERTY Name : ST_Text
+]]></Declaration>
+      <Get Name="Get" Id="{634b333d-76ac-43d2-a313-972a9501081b}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="ObjectIndex" Id="{3d080eaa-5ac0-4d9f-815c-2d67188a0217}">
+      <Declaration><![CDATA[PROPERTY ObjectIndex : DINT]]></Declaration>
+      <Get Name="Get" Id="{2cc7e4b1-b74a-4e2f-99a6-fc2f40eec5eb}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{e893e6b9-fc8b-40db-9c99-58664512ce60}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

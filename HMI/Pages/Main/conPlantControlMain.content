@@ -1,0 +1,224 @@
+<div id="conPlantControlMain" data-tchmi-type="TcHmi.Controls.System.TcHmiContent" data-tchmi-top="0" data-tchmi-left="0" data-tchmi-width="100" data-tchmi-height="100" data-tchmi-width-unit="%" data-tchmi-height-unit="%" data-tchmi-left-unit="%" data-tchmi-top-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+<div id="PlantControl_ControlMain" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="84.9" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="14.75" data-tchmi-width-unit="%" data-tchmi-creator-locked="False" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+<div id="sPlantControlMainControl" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="3" data-tchmi-height-unit="%" data-tchmi-left="2" data-tchmi-left-unit="%" data-tchmi-text="%l%control%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="70" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+
+</div>
+<div id="ucPlantControl_MainHome" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="10" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="4" data-tchmi-top-unit="%" data-tchmi-width="80" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_Home%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_Home%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+
+</script>
+
+</div>
+
+<div id="ucPlantControlMainStep" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="10" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="24" data-tchmi-top-unit="%" data-tchmi-width="80" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_Step%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_Step%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+
+</script>
+
+</div>
+
+<div id="ucPlantControlMainCyclestop" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="10" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="44" data-tchmi-top-unit="%" data-tchmi-width="80" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_CycleStop%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_CycleStop%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+
+</script>
+
+</div>
+
+<div id="ucPlantControlMainStart" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="10" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="64" data-tchmi-top-unit="%" data-tchmi-width="80" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_Start%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_Start%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+
+</script>
+
+</div>
+
+<div id="ucPlantControlMainStop" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="10" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="84" data-tchmi-top-unit="%" data-tchmi-width="80" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_Stop%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_Stop%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+{
+  "color": "rgba(249, 9, 9, 1)"
+}
+</script>
+
+</div>
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+</div>
+
+<div id="ucPlantControlMainSitename" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="5" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-text="%l%mainpage%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="100" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-creator-locked="True">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="PlantControlMainOpm" data-tchmi-type="TcHmi.Controls.System.TcHmiContainer" data-tchmi-height="15" data-tchmi-height-unit="%" data-tchmi-left="57" data-tchmi-left-unit="%" data-tchmi-top="85" data-tchmi-top-unit="%" data-tchmi-width="43" data-tchmi-width-unit="%" data-tchmi-zindex="1" data-tchmi-creator-locked="False" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+
+<script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+{
+  "left": 1,
+  "right": 1,
+  "top": 1,
+  "bottom": 1,
+  "leftUnit": "px",
+  "rightUnit": "px",
+  "topUnit": "px",
+  "bottomUnit": "px"
+}
+</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+{
+  "left": "Solid",
+  "right": "Solid",
+  "top": "Solid",
+  "bottom": "Solid"
+}
+</script>
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="ucPlantControlMainOpmManual" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="70" data-tchmi-height-unit="%" data-tchmi-left="4.1" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="20" data-tchmi-top-unit="%" data-tchmi-width="26.4" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_OPM_Manual%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_OPM_Manual%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+
+</script>
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="TcHmiTextblock_Main_OPM_65" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="24.3" data-tchmi-height-unit="%" data-tchmi-left="1" data-tchmi-left-unit="%" data-tchmi-text="%l%mode%/l%" data-tchmi-top="0" data-tchmi-top-unit="%" data-tchmi-width="30.9" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="120" data-tchmi-background-image-horizontal-alignment="Left" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="ucPlantControlMainOpmAuto" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="70" data-tchmi-height-unit="%" data-tchmi-left="36.9" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="20.3" data-tchmi-top-unit="%" data-tchmi-width="26.4" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_OPM_Auto%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_OPM_Auto%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+
+</script>
+
+</div>
+
+<div data-tchmi-grid-row-index="0" data-tchmi-grid-column-index="0" id="ucPlantControlMainOpmStep" data-tchmi-type="TcHmi.Controls.System.TcHmiUserControlHost" data-tchmi-height="70" data-tchmi-height-unit="%" data-tchmi-left="69.6" data-tchmi-left-unit="%" data-tchmi-target-user-control="Base_HMI/Base/Functions/ucButtonExtColorlabel.usercontrol" data-tchmi-top="20.3" data-tchmi-top-unit="%" data-tchmi-width="26.4" data-tchmi-width-unit="%" data-tchmi-stbuttontohmi="%s%PLC1.HMI.stHmiTc3::stOut::stCommon::stMain::stButton_OPM_Step%/s%" data-tchmi-stbuttonfromhmi="%s%PLC1.HMI.stHmiTc3::stIn::stMain::stButton_OPM_Step%/s%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-ccolor" type="application/json">
+
+</script>
+
+</div>
+
+</div>
+<div id="PlantControlMainRegion" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="80" data-tchmi-height-unit="%" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="5" data-tchmi-top-unit="%" data-tchmi-width="85" data-tchmi-width-unit="%" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-target-content="Pages/Stations/conStationOverview.content" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+</div>
+<div id="TcHmiButton_nav_start_14" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="9.4" data-tchmi-height-unit="%" data-tchmi-left="1.0" data-tchmi-left-unit="%" data-tchmi-text="%f%%l%plant%/l%%/f%" data-tchmi-top="88.2" data-tchmi-top-unit="%" data-tchmi-width="14.4" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%PlantControlMainRegion::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Settings/conSettings_Plant.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-radius" type="application/json">
+{
+  "topLeft": 5.0,
+  "topRight": 5.0,
+  "bottomLeft": 5.0,
+  "bottomRight": 5.0,
+  "topLeftUnit": "px",
+  "topRightUnit": "px",
+  "bottomLeftUnit": "px",
+  "bottomRightUnit": "px"
+}
+</script>
+</div>
+<div id="TcHmiButton_nav_start_15" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="9.4" data-tchmi-height-unit="%" data-tchmi-left="19.9" data-tchmi-left-unit="%" data-tchmi-text="%l%produce%/l%" data-tchmi-top="88.2" data-tchmi-top-unit="%" data-tchmi-width="14.4" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%PlantControlMainRegion::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Settings/conSettings_Product.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-radius" type="application/json">
+{
+  "topLeft": 5.0,
+  "topRight": 5.0,
+  "bottomLeft": 5.0,
+  "bottomRight": 5.0,
+  "topLeftUnit": "px",
+  "topRightUnit": "px",
+  "bottomLeftUnit": "px",
+  "bottomRightUnit": "px"
+}
+</script>
+</div>
+<div id="TcHmiButton_nav_start_16" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiButton" data-tchmi-height="9.4" data-tchmi-height-unit="%" data-tchmi-left="38.4" data-tchmi-left-unit="%" data-tchmi-text="%l%production%/l%" data-tchmi-top="88.2" data-tchmi-top-unit="%" data-tchmi-width="14.4" data-tchmi-width-unit="%" data-tchmi-word-wrap="True" data-tchmi-right-unit="px" data-tchmi-bottom-unit="px" data-tchmi-text-font-size-unit="px" data-tchmi-opacity="1" data-tchmi-grid-column-index="0" data-tchmi-grid-row-index="0" data-tchmi-max-width-unit="px" data-tchmi-max-height-unit="px" data-tchmi-min-width-unit="px" data-tchmi-min-height-unit="px" data-tchmi-background-image-width-unit="px" data-tchmi-background-image-height-unit="px">
+<script data-tchmi-target-attribute="data-tchmi-trigger" type="application/json">[
+  {
+    "event": "%ctx%owner::Id|EventRegistrationMode=Resolve%/ctx%.onPressed",
+    "actions": [
+      {
+        "objectType": "WriteToSymbol",
+        "active": true,
+        "symbolExpression": "%ctrl%PlantControlMainRegion::TargetContent%/ctrl%",
+        "value": {
+          "objectType": "StaticValue",
+          "valueType": "tchmi:framework#/definitions/ContentPath",
+          "value": "Pages/Settings/conSettings_Production.content"
+        },
+        "asyncWait": true
+      }
+    ]
+  }
+]</script>
+
+<script data-tchmi-target-attribute="data-tchmi-border-radius" type="application/json">
+{
+  "topLeft": 5.0,
+  "topRight": 5.0,
+  "bottomLeft": 5.0,
+  "bottomRight": 5.0,
+  "topLeftUnit": "px",
+  "topRightUnit": "px",
+  "bottomLeftUnit": "px",
+  "bottomRightUnit": "px"
+}
+</script>
+</div>
+</div>

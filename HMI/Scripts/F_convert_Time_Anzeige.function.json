@@ -1,0 +1,30 @@
+{
+  "function": {
+    "name": "F_convert_Time_Anzeige",
+    "namespace": "TcHmi.Functions.TcHmiProject1",
+    "displayName": "F_convert_Time_Anzeige",
+    "description": "",
+    "waitMode": "Synchronous",
+    "category": "Time",
+    "returnValue": {
+      "type": "tchmi:general#/definitions/Object"
+    },
+    "visible": true,
+    "injectContextObject": false,
+    "arguments": [
+      {
+        "name": "Time",
+        "displayName": "Time",
+        "type": "tchmi:general#/definitions/TIME",
+        "description": "Time",
+        "defaultValue": "",
+        "required": true,
+        "bindable": true,
+        "restParameter": false,
+        "asReference": false,
+        "allowControlAttributeBindingOptions": false
+      }
+    ]
+  },
+  "$schema": "../.hmiframework/Schema/FunctionDescription.Schema.json"
+}
