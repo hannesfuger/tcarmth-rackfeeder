@@ -3973,7 +3973,7 @@ user definged variables]]></Comment>
 			<Licenses>
 				<Target>
 					<ManualSelect>{796D380F-D49E-4C0C-A05F-500052FAC883}</ManualSelect>
-					<LicenseDevice DongleHardwareId="2" DongleDevice="#x0302005d" DongleSystemId="{9C615297-D029-E591-B060-C19CEBFEDA9C}" DongleSerialNumber="000bu3xr" DongleCacheLicense="true"/>
+					<LicenseDevice DongleHardwareId="2" DongleDevice="#x0302005d" DongleLevel="70" DongleSystemId="{9C615297-D029-E591-B060-C19CEBFEDA9C}" DongleSerialNumber="000bu3xr" DongleCacheLicense="true"/>
 				</Target>
 			</Licenses>
 			<Tasks>
@@ -5681,7 +5681,7 @@ user definged variables]]></Comment>
 		</Motion>
 		<Plc>
 			<Project GUID="{A53FF323-4ED4-416F-9490-E483152B42BB}" Name="PLC" PrjFilePath="PLC\PLC.plcproj" TmcFilePath="PLC\PLC.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{AA13E311-782B-05F1-BD31-1654CBD09CA3}" TmcPath="PLC\PLC.tmc">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{7DE8C7CB-2AED-522F-E11C-A95532DD16BD}" TmcPath="PLC\PLC.tmc">
 					<Name>PLC Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="2" ContextId="1" AreaNo="17">

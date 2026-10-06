@@ -2,7 +2,7 @@
   "$schema": "./../../PLC/Packages/Beckhoff.TwinCAT.HMI.Framework.14.3.360/runtimes/native1.12-tchmi/Schema/TchmiConfig.Schema.json",
   "basePath": "./Beckhoff.TwinCAT.HMI.Framework",
   "scaleMode": "None",
-  "startupView": "Desktop.view",
+  "startupView": "View1.view",
   "loginPage": "/Base_HMI/Base/UserMgmt/LoginPage1.html",
   "splash": {
     "versionSource": "Framework"
@@ -773,6 +773,12 @@
       "preload": false,
       "keepAlive": false,
       "preloadBindings": false
+    },
+    {
+      "url": "View1.view",
+      "preload": false,
+      "keepAlive": false,
+      "preloadBindings": false
     }
   ],
   "userFunctions": [
@@ -1281,16 +1287,6 @@
     "symbolWriteError": "ReadBack"
   },
   "packages": [
-    {
-      "name": "FrameworkPrj1",
-      "basePath": "/FrameworkPrj1",
-      "symbols": {
-        "package": {}
-      },
-      "engineering": {
-        "projectReference": true
-      }
-    },
     {
       "name": "Beckhoff.TwinCAT.HMI.BaseTemplate",
       "basePath": "/Beckhoff.TwinCAT.HMI.BaseTemplate",

@@ -125,6 +125,9 @@
   <Target Name="ReBuild" DependsOnTargets="Clean; Build" />
   <Target Name="Clean" DependsOnTargets="$(CleanDependsOn)" />
   <ItemGroup>
+    <Content Include="View1.view">
+      <SubType>Content</SubType>
+    </Content>
     <Folder Include="Base_HMI\Base" />
     <Folder Include="Base_HMI\Base\Functions" />
     <Folder Include="Base_HMI\Base\Header" />
@@ -1125,12 +1128,6 @@
       <Visible>True</Visible>
     </Content>
     <Folder Include="Themes\Base\Images\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\plygrd-vbhIII\FrameworkPrj1\FrameworkPrj1\FrameworkPrj1.hmiextproj">
-      <Name>FrameworkPrj1</Name>
-      <Project>{b29c1aa5-7d8d-46b7-a8a3-3dc3a866be7b}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

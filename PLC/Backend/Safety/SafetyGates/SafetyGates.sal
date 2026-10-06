@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<safetyApplication Crc="881311239" xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" dslVersion="1.5.0.0" Id="2b6281e5-1ce5-4794-b616-230f2e3b8e54" name="" mapState="false" mapDiag="false" groupOrderId="1" passificationAllowed="false" temporaryDeactivationAllowed="false" permamentDeactivationAllowed="false" xmlid="0" analogFBOutputReplacementValues="Zero" verifyAnalogFBInputsIfStart="false" userFbId="00000000-0000-0000-0000-000000000000" xmlns="http://schemas.microsoft.com/dsltools/SafetyApplicationLanguage">
+<safetyApplication Crc="3936136255" xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" dslVersion="1.5.0.0" Id="2b6281e5-1ce5-4794-b616-230f2e3b8e54" name="" mapState="false" mapDiag="false" groupOrderId="1" passificationAllowed="false" temporaryDeactivationAllowed="false" permamentDeactivationAllowed="false" xmlid="0" analogFBOutputReplacementValues="Zero" verifyAnalogFBInputsIfStart="false" userFbId="00000000-0000-0000-0000-000000000000" xmlns="http://schemas.microsoft.com/dsltools/SafetyApplicationLanguage">
   <networks>
     <safetyApplicationHasNetworks Id="124ac21b-5f61-48e7-9997-375501401828">
       <Network Id="a45b84a2-c9a6-4ffb-ac87-a6d6976c2722" name="Network1" networkName="SafetyGates" intId="1" networkOrderId="0">
@@ -54,7 +54,7 @@
               </outPorts>
               <parameterPorts>
                 <functionBlockHasParamPorts Id="ac6357e2-3548-4d26-b178-13e4199aefb4">
-                  <parameterPort Id="528381f5-1c03-4227-b63e-cd87014237d0" name="Delay Time (ms)" portName="Delay Time (ms)" portNum="8" objectIndex="0" varId="0" filter="0" portDataType="0" timing="100" userFbPortName="Delay Time (ms)" useInUserFb="false" />
+                  <parameterPort Id="528381f5-1c03-4227-b63e-cd87014237d0" name="Delay Time (ms)" portName="Delay Time (ms)" portNum="8" objectIndex="0" varId="0" filter="0" portDataType="0" timing="300" userFbPortName="Delay Time (ms)" useInUserFb="false" />
                 </functionBlockHasParamPorts>
               </parameterPorts>
             </fBMon>
@@ -109,7 +109,7 @@
               </outPorts>
               <parameterPorts>
                 <functionBlockHasParamPorts Id="5ad5a096-7df9-4d53-9c2e-3b1fede7decb">
-                  <parameterPort Id="4b2c7f19-c4e5-45d4-9571-2a58803a2c77" name="Delay Time (ms)" portName="Delay Time (ms)" portNum="8" objectIndex="0" varId="0" filter="0" portDataType="0" timing="100" userFbPortName="Delay Time (ms)" useInUserFb="false" />
+                  <parameterPort Id="4b2c7f19-c4e5-45d4-9571-2a58803a2c77" name="Delay Time (ms)" portName="Delay Time (ms)" portNum="8" objectIndex="0" varId="0" filter="0" portDataType="0" timing="300" userFbPortName="Delay Time (ms)" useInUserFb="false" />
                 </functionBlockHasParamPorts>
               </parameterPorts>
             </fBMon>
@@ -410,7 +410,7 @@
               </outPorts>
               <parameterPorts>
                 <functionBlockHasParamPorts Id="50e55e63-2ec7-4bb9-8e61-18900f5ac0bc">
-                  <parameterPort Id="f9c3cbda-0e52-49d5-bd28-d4cb1840d88b" name="Delay Time (ms)" portName="Delay Time (ms)" portNum="8" objectIndex="0" varId="0" filter="0" portDataType="0" timing="100" userFbPortName="Delay Time (ms)" useInUserFb="false" />
+                  <parameterPort Id="f9c3cbda-0e52-49d5-bd28-d4cb1840d88b" name="Delay Time (ms)" portName="Delay Time (ms)" portNum="8" objectIndex="0" varId="0" filter="0" portDataType="0" timing="300" userFbPortName="Delay Time (ms)" useInUserFb="false" />
                 </functionBlockHasParamPorts>
               </parameterPorts>
             </fBMon>

@@ -27503,7 +27503,7 @@
         "/Beckhoff.TwinCAT.HMI.Functions": "..\\..\\PLC\\Packages\\Beckhoff.TwinCAT.HMI.Functions.14.3.340\\runtimes\\native1.12-tchmi",
         "/Beckhoff.TwinCAT.HMI.PDFViewer": "..\\..\\PLC\\Packages\\Beckhoff.TwinCAT.HMI.PDFViewer.14.3.133\\runtimes\\native1.12-tchmi",
         "/Beckhoff.TwinCAT.HMI.ResponsiveNavigation": "..\\..\\PLC\\Packages\\Beckhoff.TwinCAT.HMI.ResponsiveNavigation.14.3.133\\runtimes\\native1.12-tchmi",
-        "/FrameworkPrj1": "..\\..\\plygrd-vbhIII\\FrameworkPrj1\\FrameworkPrj1",
+        "/TcaHmiControls": "..\\..\\..\\plygrd-vbhIII\\frameworkcontrol\\TcaHmiControls",
         "/bin": "..\\..\\HMI\\bin\\"
     }
 }

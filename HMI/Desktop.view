@@ -1381,6 +1381,6 @@
 </script>
 
 </div>
-<div id="FrameworkPrj1Control_1" data-tchmi-type="TcHmi.Controls.FrameworkPrj1.FrameworkPrj1Control" cellheight="40" cellwidth="40" cols="5" data-tchmi-height="318" data-tchmi-height-unit="px" data-tchmi-left="1195" data-tchmi-left-unit="px" data-tchmi-top="150" data-tchmi-top-unit="px" data-tchmi-width="370" data-tchmi-width-unit="px" rows="5" spacingx="10" spacingy="10">
+<div id="TcaWorkpiece_1" data-tchmi-type="TcHmi.Controls.TcaItems.TcaWorkpiece" data-tchmi-height="140" data-tchmi-height-unit="px" data-tchmi-left="1350" data-tchmi-left-unit="px" data-tchmi-top="316" data-tchmi-top-unit="px" data-tchmi-width="120" data-tchmi-width-unit="px" data-tchmi-data="%s%ADS.PLC1.Plant.stSt010IOvenA.Trolley._data::CarriersData[4]::WorkpiecesData[4]%/s%">
 </div>
 </div>
